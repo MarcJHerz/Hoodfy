@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "457055892109",
+    "project_id": "hoodfy-a43f4",
+    "storage_bucket": "hoodfy-a43f4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:457055892109:android:5a30730c44d8593c3268c4",
+        "android_client_info": {
+          "package_name": "com.hoodfy.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5h59rnfm0wUOV3TU9-UkRzY7A-mxFtAM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+} 
