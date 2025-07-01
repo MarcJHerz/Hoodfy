@@ -1,0 +1,64 @@
+﻿# Hoodfy - Plataforma Social
+# .gitignore para proyecto full-stack
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+.env*.local
+*.pem
+*.key
+
+# Firebase
+firebase-adminsdk-*.json
+serviceAccountKey.json
+.firebase/
+firebase-debug.log
+
+# Backend uploads - archivos de usuarios (MUY PESADOS)
+backend/uploads/
+uploads/
+backend/logs/
+logs/
+*.log
+
+# Next.js
+.next/
+out/
+build/
+dist/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# Expo / React Native
+.expo/
+web-build/
+expo-env.d.ts
+.metro-health-check*
+*.orig.*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-*
+
+# Temporales
+*.tmp
+*.temp
+*.swp
+*.bak
