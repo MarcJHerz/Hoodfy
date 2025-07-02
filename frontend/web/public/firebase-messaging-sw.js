@@ -17,10 +17,12 @@ self.addEventListener('message', (event) => {
 });
 
 // Configuración de respaldo (si no se recibe del cliente)
+// IMPORTANTE: La configuración real debe enviarse desde el cliente
+// Este es solo un fallback con valores de desarrollo
 if (!firebaseApp) {
   try {
     firebaseApp = firebase.initializeApp({
-      apiKey: "AIzaSyCeols8aAPbytRbaR1VjfzG1RqgD1Uogo4",
+      apiKey: "YOUR_FIREBASE_API_KEY_HERE", // Esta clave debe enviarse desde el cliente
       authDomain: "hoodfy-a43f4.firebaseapp.com", 
       projectId: "hoodfy-a43f4",
       storageBucket: "hoodfy-a43f4.firebasestorage.app",

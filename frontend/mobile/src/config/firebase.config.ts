@@ -3,7 +3,7 @@ import auth from '@react-native-firebase/auth';
 
 // Configuración de Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyD5h59rnfm0wUOV3TU9-UkRzY7A-mxFtAM",
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || "YOUR_API_KEY_HERE",
   projectId: "hoodfy-a43f4",
   storageBucket: "hoodfy-a43f4.firebasestorage.app",
   messagingSenderId: "457055892109",
