@@ -29,11 +29,12 @@ if (!admin.apps.length) {
       console.log('✅ Base64 decodificado. Nuevos primeros 50 chars:', privateKey.substring(0, 50));
     } else {
       console.log('⚠️ No se detectó Base64. Usando private key directamente.');
+      // Solo procesar saltos de línea si NO es Base64 (para evitar doble procesamiento)
+      privateKey = privateKey.replace(/\\n/g, '\n');
     }
     
-    // Procesar saltos de línea
-    privateKey = privateKey.replace(/\\n/g, '\n');
-    console.log('🔧 Procesando saltos de línea. Resultado (primeros 50 chars):', privateKey.substring(0, 50));
+    console.log('🔧 Private key final (primeros 100 chars):', privateKey.substring(0, 100));
+    console.log('🔧 Private key final (últimos 50 chars):', privateKey.substring(privateKey.length - 50));
     
     // Verificar formato PEM
     if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
