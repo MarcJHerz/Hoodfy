@@ -4,9 +4,7 @@ const nextConfig = {
     buildActivity: true,
     buildActivityPosition: 'bottom-right',
   },
-  experimental: {
-    allowedDevOrigins: ['192.168.1.87']
-  },
+  output: 'standalone',
   images: {
     domains: [
       'localhost',
