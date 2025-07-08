@@ -134,7 +134,7 @@ const firestoreChatRoomToChatRoom = (doc: any, currentUserId?: string): ChatRoom
     type: data.type,
     name: data.name,
     participants: data.participantIds || [],
-    lastMessage: lastMsg ?? null,
+    lastMessage: lastMsg ?? undefined,
     unreadCount: currentUserId ? (data.unreadCount?.[currentUserId] || 0) : 0,
     createdAt: timestampToDate(data.createdAt),
     updatedAt: timestampToDate(data.updatedAt),

@@ -58,8 +58,11 @@ export const useChatNotifications = ({
           
           if (notification) {
             // Mostrar notificación toast
-            toast.success(notification.title || 'Nuevo mensaje', {
-              description: notification.body,
+            const message = notification.body 
+              ? `${notification.title || 'Nuevo mensaje'}: ${notification.body}`
+              : notification.title || 'Nuevo mensaje';
+            
+            toast.success(message, {
               duration: 5000,
             });
           }

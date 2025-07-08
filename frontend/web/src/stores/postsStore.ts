@@ -150,7 +150,7 @@ export const usePostsStore = create<PostsState>()(
       deletePost: async (postId: string) => {
         set({ isLoading: true, error: null });
         try {
-          await posts.deletePost(postId);
+          await posts.delete(postId);
           // Remover post de todos los arrays
           const { feedPosts, communityPosts, userPosts } = get();
           set({
@@ -185,7 +185,7 @@ export const usePostsStore = create<PostsState>()(
           const updatedPost: Post = {
             _id: postId,
             content: '',
-            author: { _id: '', name: '', username: '' },
+            author: { _id: '', name: '', username: '', email: '', createdAt: '', updatedAt: '' },
             likes: [userId],
             commentsCount: 0,
             postType: 'general',
@@ -206,7 +206,7 @@ export const usePostsStore = create<PostsState>()(
           const updatedPost: Post = {
             _id: postId,
             content: '',
-            author: { _id: '', name: '', username: '' },
+            author: { _id: '', name: '', username: '', email: '', createdAt: '', updatedAt: '' },
             likes: [],
             commentsCount: 0,
             postType: 'general',
@@ -227,7 +227,7 @@ export const usePostsStore = create<PostsState>()(
           const updatedPost: Post = {
             _id: postId,
             content: '',
-            author: { _id: '', name: '', username: '' },
+            author: { _id: '', name: '', username: '', email: '', createdAt: '', updatedAt: '' },
             likes: [],
             commentsCount: 0,
             postType: 'general',
@@ -248,7 +248,7 @@ export const usePostsStore = create<PostsState>()(
           const updatedPost: Post = {
             _id: postId,
             content: '',
-            author: { _id: '', name: '', username: '' },
+            author: { _id: '', name: '', username: '', email: '', createdAt: '', updatedAt: '' },
             likes: [],
             commentsCount: 0,
             postType: 'general',

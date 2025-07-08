@@ -39,7 +39,49 @@ import PostCard from '@/components/PostCard';
 import type { UserProfile, Community } from '@/types';
 import { Post } from '@/types/post';
 import { User } from '@/types/user';
-import { Ally } from '@/types/user';
+
+// Componentes para manejar imágenes individualmente
+const PostMediaImage = ({ mediaUrl, alt, className }: { mediaUrl: string; alt: string; className?: string }) => {
+  const { url: imageUrl } = useImageUrl(mediaUrl);
+  
+  return (
+    <Image
+      src={imageUrl}
+      alt={alt}
+      fill
+      className={className}
+      unoptimized
+    />
+  );
+};
+
+const CommunityImage = ({ coverImage, name, className }: { coverImage?: string; name: string; className?: string }) => {
+  const { url: communityImageUrl } = useImageUrl(coverImage);
+  
+  return (
+    <Image
+      src={communityImageUrl}
+      alt={name}
+      fill
+      className={className}
+      unoptimized
+    />
+  );
+};
+
+const AllyImage = ({ profilePicture, name, className }: { profilePicture?: string; name: string; className?: string }) => {
+  const { url: allyImageUrl } = useImageUrl(profilePicture);
+  
+  return (
+    <Image
+      src={allyImageUrl}
+      alt={name}
+      fill
+      className={className}
+      unoptimized
+    />
+  );
+};
 
 export default function ProfilePage() {
   const { id } = useParams();
@@ -350,12 +392,10 @@ export default function ProfilePage() {
                         <div key={post._id} className="group cursor-pointer">
                           <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative group-hover:shadow-lg transition-all duration-300">
                             {post.media && post.media.length > 0 ? (
-                              <Image
-                                src={useImageUrl(post.media[0].url)}
+                              <PostMediaImage
+                                mediaUrl={post.media[0].url}
                                 alt="Post"
-                                fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                unoptimized
                               />
                             ) : (
                               <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50 dark:bg-gray-800 p-2">
@@ -432,12 +472,10 @@ export default function ProfilePage() {
                             {/* Banner de la comunidad */}
                             <div className="relative h-32 overflow-hidden">
                               {community.coverImage ? (
-                                <Image
-                                  src={useImageUrl(community.coverImage)}
-                                  alt={community.name}
-                                  fill
+                                <CommunityImage
+                                  coverImage={community.coverImage}
+                                  name={community.name}
                                   className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                  unoptimized
                                 />
                               ) : (
                                 <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
@@ -513,12 +551,10 @@ export default function ProfilePage() {
                             <div className="relative w-16 h-16 mx-auto mb-4">
                               <div className="w-full h-full rounded-full overflow-hidden ring-2 ring-gray-200 dark:ring-gray-700 group-hover:ring-blue-200 dark:group-hover:ring-blue-800 transition-all">
                                 {ally.profilePicture ? (
-                          <Image
-                            src={useImageUrl(ally.profilePicture)}
-                            alt={ally.name}
-                            fill
+                          <AllyImage
+                            profilePicture={ally.profilePicture}
+                            name={ally.name}
                                     className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                    unoptimized
                                   />
                                 ) : (
                                   <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">

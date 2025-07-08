@@ -25,7 +25,7 @@ export const clearAuthData = () => {
   if ('indexedDB' in window) {
     indexedDB.databases().then(databases => {
       databases.forEach(db => {
-        if (db.name && db.name.includes('auth') || db.name.includes('storage')) {
+        if (db.name && (db.name.includes('auth') || db.name.includes('storage'))) {
           indexedDB.deleteDatabase(db.name);
         }
       });
