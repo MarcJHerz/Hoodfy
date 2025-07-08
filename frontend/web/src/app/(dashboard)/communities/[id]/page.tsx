@@ -306,7 +306,7 @@ export default function CommunityPage() {
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-        </div>
+      </div>
 
         {/* Floating Action Buttons */}
         <div className="absolute top-6 right-6 flex space-x-3">
