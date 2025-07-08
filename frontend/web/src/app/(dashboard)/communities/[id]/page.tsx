@@ -26,8 +26,32 @@ import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import SubscriptionModal from '@/components/SubscriptionModal';
 import { formatImageUrl } from '@/utils/imageUtils';
+import { useImageUrl } from '@/utils/useImageUrl';
 import { useAuthStore } from '@/stores/authStore';
 import CommunityChatModal from '@/components/chat/CommunityChatModal';
+
+// Componente para manejar imágenes de miembros individualmente
+const MemberImage = ({ profilePicture, name, isCreator }: { profilePicture?: string; name: string; isCreator: boolean }) => {
+  const { url: memberImageUrl } = useImageUrl(profilePicture);
+  
+  return (
+    <div className="relative">
+      <Image
+        src={memberImageUrl}
+        alt={name}
+        width={48}
+        height={48}
+        className="rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all"
+        unoptimized
+      />
+      {isCreator && (
+        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full flex items-center justify-center">
+          <StarIcon className="w-2.5 h-2.5 text-white" />
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface Community {
   _id: string;
@@ -65,6 +89,24 @@ export default function CommunityPage() {
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [viewCount, setViewCount] = useState(0);
+  
+  // Hook para manejar la cover image de la comunidad - asegurar consistencia
+  const coverImageKey = community?.coverImage || '';
+  const { url: communityCoverImageUrl } = useImageUrl(coverImageKey);
+  
+  // Hook para manejar la imagen del perfil del creador - asegurar consistencia
+  const creatorProfilePictureKey = community?.creator?.profilePicture || '';
+  const { url: creatorProfileImageUrl } = useImageUrl(creatorProfilePictureKey);
+
+  // Debug logs
+  useEffect(() => {
+    console.log('🖼️ Cover Image Debug:', {
+      coverImageKey,
+      communityCoverImageUrl,
+      community: community?.name,
+      hasCoverImage: !!community?.coverImage
+    });
+  }, [coverImageKey, communityCoverImageUrl, community?.name, community?.coverImage]);
 
   useEffect(() => {
     const initializeData = async () => {
@@ -249,16 +291,22 @@ export default function CommunityPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Hero Banner */}
       <div className="relative">
-        <div className="h-80 w-full overflow-hidden">
+        <div className="relative h-80 w-full overflow-hidden">
           <Image
-            src={formatImageUrl(community.coverImage)}
+            src={communityCoverImageUrl || '/images/defaults/default-community.png'}
             alt={community.name}
             fill
             className="object-cover"
             priority
+            unoptimized
+            onError={(e) => {
+              console.log('❌ Error loading cover image:', e);
+              console.log('🔍 Original URL:', communityCoverImageUrl);
+              e.currentTarget.src = '/images/defaults/default-community.png';
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-      </div>
+        </div>
 
         {/* Floating Action Buttons */}
         <div className="absolute top-6 right-6 flex space-x-3">
@@ -410,11 +458,12 @@ export default function CommunityPage() {
                 >
                   <div className="relative">
                     <Image
-                      src={formatImageUrl(community.creator.profilePicture)}
+                      src={creatorProfileImageUrl}
                       alt={community.creator.name}
                       width={48}
                       height={48}
                       className="rounded-full object-cover ring-2 ring-primary-200 dark:ring-primary-700 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all"
+                      unoptimized
                     />
                     <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full flex items-center justify-center">
                       <StarIcon className="w-2.5 h-2.5 text-white" />
@@ -578,11 +627,12 @@ export default function CommunityPage() {
                     >
                       <div className="relative">
                         <Image
-                          src={formatImageUrl(community.creator.profilePicture)}
+                          src={creatorProfileImageUrl}
                           alt={community.creator.name}
                           width={64}
                           height={64}
                           className="rounded-xl object-cover ring-2 ring-primary-200 dark:ring-primary-700 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all"
+                          unoptimized
                         />
                         <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full flex items-center justify-center">
                           <StarIcon className="w-3 h-3 text-white" />
@@ -623,20 +673,11 @@ export default function CommunityPage() {
                         href={`/profile/${member._id}`} 
                         className="flex items-center space-x-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover-lift group border border-gray-200 dark:border-gray-600"
                       >
-                        <div className="relative">
-                        <Image
-                          src={formatImageUrl(member.profilePicture)}
-                          alt={member.name}
-                            width={48}
-                            height={48}
-                            className="rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all"
+                        <MemberImage 
+                          profilePicture={member.profilePicture}
+                          name={member.name}
+                          isCreator={member._id === community.creator?._id}
                         />
-                          {member._id === community.creator?._id && (
-                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full flex items-center justify-center">
-                              <StarIcon className="w-2.5 h-2.5 text-white" />
-                            </div>
-                          )}
-                      </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
                             {member.name}

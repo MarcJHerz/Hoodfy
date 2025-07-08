@@ -6,6 +6,7 @@ const User = require('../models/User');
 const fs = require('fs');
 const { verifyToken } = require('../middleware/authMiddleware');
 const Community = require('../models/Community');
+const { uploadFileToS3 } = require('../utils/s3');
 
 // 📌 Asegurar que las carpetas de imágenes existen
 const profilePicturesPath = 'uploads/profile_pictures/';
@@ -14,37 +15,26 @@ if (!fs.existsSync(profilePicturesPath)) {
   fs.mkdirSync(profilePicturesPath, { recursive: true });
 }
 
-// 📌 Configurar `multer` para imágenes de perfil
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    let folder = profilePicturesPath;
-    if (req.url.includes('/profile/upload-image')) {
-      const uploadFolder = 'uploads/profile_content';
-      if (!fs.existsSync(uploadFolder)) {
-        fs.mkdirSync(uploadFolder, { recursive: true });
-      }
-      folder = uploadFolder;
-    }
-    cb(null, folder);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
+// 📌 Configurar `multer` para memoria (para S3)
+const upload = multer({ storage: multer.memoryStorage() });
 
-const upload = multer({ storage });
-
-// ✅ Ruta para subir imagen de perfil
+// ✅ Ruta para subir imagen de perfil a S3
 router.put('/profile/photo', verifyToken, upload.single('profilePicture'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No se subió ninguna imagen.' });
 
-    const profilePicturePath = `uploads/profile_pictures/${req.file.filename}`;
-    const user = await User.findByIdAndUpdate(req.userId, { profilePicture: profilePicturePath }, { new: true });
+    // Subir imagen a S3
+    const key = await uploadFileToS3(req.file.buffer, req.file.originalname, req.file.mimetype);
+    
+    // Actualizar usuario con el key de S3
+    const user = await User.findByIdAndUpdate(req.userId, { profilePicture: key }, { new: true });
 
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-    res.json({ message: 'Foto de perfil actualizada', profilePicture: `${process.env.BASE_URL || 'http://192.168.1.87:5000'}/${profilePicturePath}` });
+    res.json({ 
+      message: 'Foto de perfil actualizada', 
+      profilePicture: key 
+    });
   } catch (error) {
     console.error('❌ Error al actualizar la foto de perfil:', error);
     res.status(500).json({ error: 'Error al actualizar la foto de perfil' });
@@ -68,13 +58,8 @@ router.get('/profile', verifyToken, async (req, res) => {
     if (isFounder) mainBadgeIcon = 'founder';
     else if (isMember) mainBadgeIcon = 'trophy';
 
-    // Construir la URL base para las imágenes
-    const baseUrl = process.env.BASE_URL || 'http://192.168.1.87:5000';
-
-    // Procesar las URLs de las imágenes
-    const profilePicture = user.profilePicture?.startsWith('http') 
-      ? user.profilePicture 
-      : `${baseUrl}/${user.profilePicture}`;
+    // Para S3, el profilePicture ya es el key, no necesitamos construir URL
+    const profilePicture = user.profilePicture;
 
     res.json({
       _id: user._id,
@@ -120,17 +105,13 @@ router.get('/profile/:userId', verifyToken, async (req, res) => {
     if (isFounder) mainBadgeIcon = 'founder';
     else if (isMember) mainBadgeIcon = 'trophy';
 
-    const baseUrl = process.env.BASE_URL || 'http://192.168.1.87:5000';
+    // Para S3, el profilePicture ya es el key, no necesitamos construir URL
+    const profilePicture = user.profilePicture;
 
-    // Asegurar que la URL de la imagen de perfil sea absoluta
-    const profilePicture = user.profilePicture?.startsWith('http') 
-      ? user.profilePicture 
-      : `${baseUrl}/${user.profilePicture}`;
-
-    // Asegurar que la URL del banner sea absoluta
+    // Asegurar que la URL del banner sea absoluta (si existe)
     const bannerImage = user.bannerImage?.startsWith('http')
       ? user.bannerImage
-      : user.bannerImage ? `${baseUrl}/${user.bannerImage}` : null;
+      : user.bannerImage ? `${process.env.BASE_URL || 'http://192.168.1.87:5000'}/${user.bannerImage}` : null;
 
     res.json({
       _id: user._id,
@@ -176,13 +157,8 @@ router.put('/profile/update', verifyToken, upload.none(), async (req, res) => {
 
     await user.save();
     
-    // Construir la URL base para las imágenes
-    const baseUrl = process.env.BASE_URL || 'http://192.168.1.87:5000';
-
-    // Procesar las URLs de las imágenes
-    const profilePicture = user.profilePicture?.startsWith('http') 
-      ? user.profilePicture 
-      : `${baseUrl}/${user.profilePicture}`;
+    // Para S3, el profilePicture ya es el key, no necesitamos construir URL
+    const profilePicture = user.profilePicture;
 
     res.json({ 
       message: 'Perfil actualizado con éxito', 

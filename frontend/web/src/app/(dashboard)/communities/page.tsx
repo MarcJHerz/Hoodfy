@@ -20,6 +20,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useCommunitiesStore } from '@/stores/communitiesStore';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useImageUrl } from '@/utils/useImageUrl';
 
 interface Community {
   _id: string;
@@ -34,6 +35,91 @@ interface Community {
   createdAt?: string;
   updatedAt?: string;
 }
+
+// Componente CommunityCard que usa useImageUrl
+const CommunityCard = ({ community, type }: { community: Community; type: 'created' | 'subscribed' | 'available' }) => {
+  const { url: coverImageUrl } = useImageUrl(community.coverImage);
+  
+  return (
+    <Link
+      href={`/communities/${community._id}`}
+      className="group block"
+    >
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover-lift border border-gray-200 dark:border-gray-700">
+        <div className="relative h-48 overflow-hidden">
+          <Image
+            src={coverImageUrl || '/images/defaults/default-community.png'}
+            alt={community.name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="absolute top-4 right-4">
+            {type === 'created' && (
+              <span className="bg-gradient-to-r from-primary-600 to-accent-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+                Creador
+              </span>
+            )}
+            {type === 'subscribed' && (
+              <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center">
+                <StarIcon className="w-3 h-3 mr-1" />
+                Suscrito
+              </span>
+            )}
+            {type === 'available' && (
+              <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+                Disponible
+              </span>
+            )}
+          </div>
+          <div className="absolute bottom-4 left-4 right-4">
+            <h3 className="text-xl font-bold text-white mb-1 line-clamp-1">
+              {community.name}
+            </h3>
+            {type === 'available' && community.creator && (
+              <p className="text-white/80 text-sm">
+                por {community.creator.name}
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="p-6">
+          <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 mb-4">
+            {community.description || 'Sin descripción'}
+          </p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center">
+                <UserGroupIcon className="h-4 w-4 mr-1" />
+                {community.members?.length || 0} miembros
+              </div>
+              {community.createdAt && type === 'created' && (
+                <div className="flex items-center">
+                  <span className="text-xs">
+                    {formatDistanceToNow(new Date(community.createdAt), { 
+                      addSuffix: true, 
+                      locale: es 
+                    })}
+                  </span>
+                </div>
+              )}
+            </div>
+            {type === 'subscribed' && (
+              <div className="text-primary-600 dark:text-primary-400 text-sm font-medium">
+                Acceso completo
+              </div>
+            )}
+            {type === 'available' && (
+              <div className="text-blue-600 dark:text-blue-400 text-sm font-medium">
+                Ver detalles
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+};
 
 export default function CommunitiesPage() {
   const [activeTab, setActiveTab] = useState(0);
@@ -96,13 +182,6 @@ export default function CommunitiesPage() {
     } else {
       await loadAllCommunities();
     }
-  };
-
-  const formatImageUrl = (url?: string) => {
-    if (!url) return '/images/defaults/default-community.png';
-    if (url.startsWith('http')) return url;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.87:5000';
-    return `${apiUrl}/${url.replace(/^\//, '')}`;
   };
 
   const sortCommunities = (communities: Community[]) => {
@@ -331,59 +410,10 @@ export default function CommunitiesPage() {
             {userCommunities.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {sortCommunities(filterCommunities(userCommunities)).map((community) => (
-                  <Link
-                    key={community._id}
-                    href={`/communities/${community._id}`}
-                      className="group block"
-                  >
-                      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover-lift border border-gray-200 dark:border-gray-700">
-                        <div className="relative h-48 overflow-hidden">
-                        <Image
-                          src={formatImageUrl(community.coverImage)}
-                          alt={community.name}
-                          fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                          <div className="absolute top-4 right-4">
-                            <span className="bg-gradient-to-r from-primary-600 to-accent-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-                              Creador
-                            </span>
-                      </div>
-                          <div className="absolute bottom-4 left-4 right-4">
-                            <h3 className="text-xl font-bold text-white mb-1 line-clamp-1">
-                          {community.name}
-                        </h3>
-                          </div>
-                        </div>
-                        <div className="p-6">
-                          <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 mb-4">
-                          {community.description || 'Sin descripción'}
-                        </p>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
-                              <div className="flex items-center">
-                                <UserGroupIcon className="h-4 w-4 mr-1" />
-                            {community.members?.length || 0} miembros
-                          </div>
-                              {community.createdAt && (
-                                <div className="flex items-center">
-                                  <span className="text-xs">
-                                    {formatDistanceToNow(new Date(community.createdAt), { 
-                                      addSuffix: true, 
-                                      locale: es 
-                                    })}
-                            </span>
-                                </div>
-                          )}
-                            </div>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
+                    <CommunityCard key={community._id} community={community} type="created" />
+                  ))}
+                </div>
+              ) : (
                 <div className="text-center py-16">
                   <div className="w-24 h-24 bg-gradient-to-br from-primary-100 to-accent-100 dark:from-primary-900/20 dark:to-accent-900/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                     <UserGroupIcon className="w-12 h-12 text-primary-600 dark:text-primary-400" />
@@ -410,50 +440,7 @@ export default function CommunitiesPage() {
               {subscribedCommunities.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {sortCommunities(filterCommunities(subscribedCommunities)).map((community) => (
-                    <Link
-                      key={community._id}
-                      href={`/communities/${community._id}`}
-                      className="group block"
-                    >
-                      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover-lift border border-gray-200 dark:border-gray-700">
-                        <div className="relative h-48 overflow-hidden">
-                          <Image
-                            src={formatImageUrl(community.coverImage)}
-                            alt={community.name}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                          <div className="absolute top-4 right-4">
-                            <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center">
-                              <StarIcon className="w-3 h-3 mr-1" />
-                              Suscrito
-                            </span>
-                          </div>
-                          <div className="absolute bottom-4 left-4 right-4">
-                            <h3 className="text-xl font-bold text-white mb-1 line-clamp-1">
-                              {community.name}
-                            </h3>
-                          </div>
-                        </div>
-                        <div className="p-6">
-                          <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 mb-4">
-                            {community.description || 'Sin descripción'}
-                          </p>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
-                              <div className="flex items-center">
-                                <UserGroupIcon className="h-4 w-4 mr-1" />
-                            {community.members?.length || 0} miembros
-                              </div>
-                            </div>
-                            <div className="text-primary-600 dark:text-primary-400 text-sm font-medium">
-                              Acceso completo
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
+                    <CommunityCard key={community._id} community={community} type="subscribed" />
                   ))}
                 </div>
               ) : (
@@ -488,55 +475,9 @@ export default function CommunitiesPage() {
                       !subscribedCommunities.some(sc => sc._id === community._id)
                     )
                     .map((community) => (
-                            <Link
-                      key={community._id}
-                              href={`/communities/${community._id}`}
-                      className="group block"
-                    >
-                      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover-lift border border-gray-200 dark:border-gray-700">
-                        <div className="relative h-48 overflow-hidden">
-                          <Image
-                            src={formatImageUrl(community.coverImage)}
-                            alt={community.name}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                          <div className="absolute top-4 right-4">
-                            <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-                              Disponible
-                            </span>
-                          </div>
-                          <div className="absolute bottom-4 left-4 right-4">
-                            <h3 className="text-xl font-bold text-white mb-1 line-clamp-1">
-                              {community.name}
-                            </h3>
-                            {community.creator && (
-                              <p className="text-white/80 text-sm">
-                                por {community.creator.name}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="p-6">
-                          <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 mb-4">
-                            {community.description || 'Sin descripción'}
-                          </p>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
-                              <div className="flex items-center">
-                                <UserGroupIcon className="h-4 w-4 mr-1" />
-                                {community.members?.length || 0} miembros
-                              </div>
-                            </div>
-                            <div className="text-blue-600 dark:text-blue-400 text-sm font-medium">
-                              Ver detalles
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                      <CommunityCard key={community._id} community={community} type="available" />
+                    ))
+                  }
                 </div>
               ) : (
                 <div className="text-center py-16">
@@ -551,7 +492,7 @@ export default function CommunitiesPage() {
                   </p>
                 </div>
               )}
-          </Tab.Panel>
+            </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>
       </div>

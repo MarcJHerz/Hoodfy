@@ -2,7 +2,7 @@ const Post = require('../models/Post');
 const Community = require('../models/Community');
 const User = require('../models/User');
 // const { uploadToFirebase } = require('../utils/firebaseStorage'); // Eliminado para usar solo almacenamiento local
-const { validatePost } = require('../validators/postValidator');
+const { validatePostData } = require('../validators/postValidator');
 
 // Función auxiliar para asegurar URLs absolutas
 const ensureAbsoluteUrl = (url) => {
@@ -15,17 +15,45 @@ const ensureAbsoluteUrl = (url) => {
 // Crear un nuevo post
 exports.createPost = async (req, res) => {
   try {
-    const { content, communityId, tags, visibility, media } = req.body;
-    const userId = req.user._id;
+    console.log('Body recibido en backend:', req.body);
+    const { content, communityId, tags, visibility } = req.body;
+    let { media } = req.body;
+    // Parsear media si viene como string
+    if (typeof media === 'string') {
+      try {
+        media = JSON.parse(media);
+        console.log('Media parseada en backend:', media);
+      } catch (e) {
+        console.error('Error al parsear media:', e, 'media:', media);
+        media = [];
+      }
+    } else {
+      console.log('Media recibida como array:', media);
+    }
+    console.log('Usuario autenticado:', req.user, req.userId);
+    const userId = (req.user && req.user._id) ? req.user._id : req.userId;
 
-    // Validar el post
-    const validationError = validatePost(req.body);
+    // Validar el post de forma síncrona
+    const validationError = validatePostData({
+      content,
+      postType: req.body.postType,
+      communityId,
+      tags,
+      visibility,
+      media
+    });
     if (validationError) {
       return res.status(400).json({ error: validationError });
     }
 
-    // Verificar que la comunidad existe y el usuario es miembro
-    const community = await Community.findById(communityId);
+    // Verificar que la comunidad existe y el usuario es miembro (solo para posts de comunidad)
+    let community = null;
+    if (req.body.postType === 'community') {
+      if (!communityId) {
+        return res.status(400).json({ error: 'El ID de la comunidad es requerido para posts de comunidad' });
+      }
+      
+      community = await Community.findById(communityId);
     if (!community) {
       return res.status(404).json({ error: 'Comunidad no encontrada' });
     }
@@ -33,6 +61,7 @@ exports.createPost = async (req, res) => {
     const isMember = community.members.includes(userId);
     if (!isMember && !community.creator.equals(userId)) {
       return res.status(403).json({ error: 'No eres miembro de esta comunidad' });
+      }
     }
 
     // Procesar archivos multimedia si existen
@@ -41,8 +70,13 @@ exports.createPost = async (req, res) => {
       processedMedia = await Promise.all(
         media.map(async (item) => {
           const { url, type, metadata } = item;
+          // Si la URL es una key de S3 (no contiene http/https), mantenerla como key
+          // Si es una URL completa, mantenerla tal como está
+          const processedUrl = url.startsWith('http://') || url.startsWith('https://') 
+            ? url 
+            : url; // Mantener la key de S3 tal como está
           return {
-            url: ensureAbsoluteUrl(url),
+            url: processedUrl,
             type,
             metadata: metadata || {}
           };
@@ -51,21 +85,26 @@ exports.createPost = async (req, res) => {
     }
 
     // Crear el post
-    const post = new Post({
+    const postData = {
       content,
       author: userId,
-      community: communityId,
       media: processedMedia,
       tags: tags || [],
-      visibility: visibility || 'members'
-    });
-
+      visibility: visibility || 'members',
+      postType: req.body.postType
+    };
+    if (req.body.postType === 'community') {
+      postData.community = communityId;
+    }
+    const post = new Post(postData);
     await post.save();
 
-    // Actualizar estadísticas de la comunidad
-    await Community.findByIdAndUpdate(communityId, {
-      $inc: { postCount: 1 }
-    });
+    // Actualizar estadísticas de la comunidad solo si es post de comunidad
+    if (req.body.postType === 'community' && community) {
+      await Community.findByIdAndUpdate(communityId, {
+        $inc: { postCount: 1 }
+      });
+    }
 
     // Poblar los datos del autor
     await post.populate('author', 'name username profilePicture');
@@ -75,10 +114,11 @@ exports.createPost = async (req, res) => {
       post
     });
   } catch (error) {
-    console.error('Error al crear post:', error);
+    console.error('Error al crear post (detalle):', error);
     res.status(500).json({
       error: 'Error al crear el post',
-      details: error.message
+      details: error.message,
+      stack: error.stack
     });
   }
 };
@@ -120,7 +160,8 @@ exports.getCommunityPosts = async (req, res) => {
         sortOption = { 'comments.length': -1 };
         break;
       default: // 'recent'
-        sortOption = { createdAt: -1 };
+        // Ordenar por destacados primero, luego por fecha de creación
+        sortOption = { isPinned: -1, createdAt: -1 };
     }
 
     // Ejecutar la consulta
@@ -131,13 +172,16 @@ exports.getCommunityPosts = async (req, res) => {
       .populate('author', 'name username profilePicture')
       .populate('comments.author', 'name username profilePicture');
 
-    // Asegurar URLs absolutas en los medios
+    // Procesar URLs de medios - mantener keys de S3 como están
     posts.forEach(post => {
       if (post.media && post.media.length > 0) {
         post.media = post.media.map(item => ({
           ...item.toObject(),
-          url: ensureAbsoluteUrl(item.url),
-          thumbnail: item.thumbnail ? ensureAbsoluteUrl(item.thumbnail) : null
+          // DEVOLVER SIEMPRE EL KEY DE S3, NUNCA UNA URL LOCAL
+          url: item.url && item.url.includes('amazonaws.com') ? item.url.split('/').pop() : item.url,
+          thumbnail: item.thumbnail 
+            ? (item.thumbnail.startsWith('http') ? item.thumbnail : item.thumbnail)
+            : null
         }));
       }
     });
@@ -266,12 +310,16 @@ exports.getPostById = async (req, res) => {
       }
     }
 
-    // Asegurar URLs absolutas en los medios
+    // Procesar URLs de medios - mantener keys de S3 como están
     if (post.media && post.media.length > 0) {
       post.media = post.media.map(item => ({
         ...item.toObject(),
-        url: ensureAbsoluteUrl(item.url),
-        thumbnail: item.thumbnail ? ensureAbsoluteUrl(item.thumbnail) : null
+        // Si es una key de S3 (no contiene http), mantenerla como key
+        // Si es una URL completa, mantenerla tal como está
+        url: item.url.startsWith('http') ? item.url : item.url,
+        thumbnail: item.thumbnail 
+          ? (item.thumbnail.startsWith('http') ? item.thumbnail : item.thumbnail)
+          : null
       }));
     }
 
@@ -306,13 +354,17 @@ exports.getUserPosts = async (req, res) => {
       .populate('community', 'name image')
       .populate('comments.author', 'name username profilePicture');
 
-    // Asegurar URLs absolutas en los medios
+    // Procesar URLs de medios - mantener keys de S3 como están
     posts.forEach(post => {
       if (post.media && post.media.length > 0) {
         post.media = post.media.map(item => ({
           ...item.toObject(),
-          url: ensureAbsoluteUrl(item.url),
-          thumbnail: item.thumbnail ? ensureAbsoluteUrl(item.thumbnail) : null
+          // Si es una key de S3 (no contiene http), mantenerla como key
+          // Si es una URL completa, mantenerla tal como está
+          url: item.url.startsWith('http') ? item.url : item.url,
+          thumbnail: item.thumbnail 
+            ? (item.thumbnail.startsWith('http') ? item.thumbnail : item.thumbnail)
+            : null
         }));
       }
     });

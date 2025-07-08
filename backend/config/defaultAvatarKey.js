@@ -1,0 +1,1 @@
+module.exports = '79f202fa-9462-4944-af31-d349d8e85bad.png';

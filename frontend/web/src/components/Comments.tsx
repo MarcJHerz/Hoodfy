@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useAuthStore } from '@/stores/authStore';
 import { comments } from '@/services/api';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { formatImageUrl } from '@/utils/imageUtils';
+import { useImageUrl } from '@/utils/useImageUrl';
+import { toast } from 'react-hot-toast';
 
 interface Comment {
   _id: string;
@@ -116,6 +117,7 @@ export default function Comments({ postId, postType, communityId }: CommentsProp
     const isLiked = comment.likes?.includes(user?._id || '') || false;
     const isAuthor = comment.user?._id === user?._id;
     const isReply = level > 0;
+    const { url: userImageUrl } = useImageUrl(comment.user?.profilePicture);
 
     return (
       <div className="relative mt-4">
@@ -128,7 +130,7 @@ export default function Comments({ postId, postType, communityId }: CommentsProp
         <div className={`flex items-start space-x-3 ${isReply ? 'pl-6' : ''} w-full`}>
           <div className="flex-shrink-0">
             <Image
-              src={formatImageUrl(comment.user?.profilePicture)}
+              src={userImageUrl || '/images/defaults/default-avatar.png'}
               alt={comment.user?.name || 'Usuario'}
               width={40}
               height={40}

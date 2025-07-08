@@ -25,7 +25,7 @@ export function useImageUrlResolved(keyOrUrl?: string) {
       
       console.log('useImageUrlResolved debug:', {
         keyOrUrl,
-        isS3Key: keyOrUrl ? /^[a-zA-Z0-9\-]+\.(jpg|jpeg|png|webp|gif|mp4|mov|avi)$/i.test(keyOrUrl) : false
+        isS3Key: keyOrUrl ? /^[a-zA-Z0-9\-]+\.(jpg|jpeg|png|webp|gif|jfif|mp4|mov|avi)$/i.test(keyOrUrl) : false
       });
       
       // Si no hay keyOrUrl, usar imagen por defecto
@@ -47,7 +47,7 @@ export function useImageUrlResolved(keyOrUrl?: string) {
       }
       
       // Si parece un key de S3 (no contiene "/" o contiene extensión de imagen)
-      const isS3Key = /^[a-zA-Z0-9\-]+\.(jpg|jpeg|png|webp|gif|mp4|mov|avi)$/i.test(keyOrUrl);
+      const isS3Key = /^[a-zA-Z0-9\-]+\.(jpg|jpeg|png|webp|gif|jfif|mp4|mov|avi)$/i.test(keyOrUrl);
       if (isS3Key) {
         try {
           console.log('Obteniendo URL firmada para:', keyOrUrl);

@@ -27,6 +27,8 @@ const postRoutes = require('./routes/postsRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const allyRoutes = require('./routes/allyRoutes');
 const communityStatsRoutes = require('./routes/communityStatsRoutes');
+const stripeRoutes = require('./routes/stripeRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 
 // ✅ Rutas
 app.use('/api/users', userRoutes);
@@ -38,9 +40,21 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/allies', allyRoutes);
 app.use('/api/community-stats', communityStatsRoutes);
 app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/stripe', stripeRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // ✅ Servir archivos estáticos
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  setHeaders: (res, path) => {
+    // Configurar CORS para archivos estáticos
+    res.set('Access-Control-Allow-Origin', '*');
+    // Configurar cache-control para optimizar el rendimiento
+    res.set('Cache-Control', 'public, max-age=31536000');
+  }
+}));
+
+// ✅ Servir imágenes por defecto del frontend
+app.use('/images', express.static(path.join(__dirname, '../frontend/web/public/images'), {
   setHeaders: (res, path) => {
     // Configurar CORS para archivos estáticos
     res.set('Access-Control-Allow-Origin', '*');

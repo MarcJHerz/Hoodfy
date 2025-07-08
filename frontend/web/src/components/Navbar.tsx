@@ -20,7 +20,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import Image from 'next/image';
 import { useChatStore } from '@/stores/chatStore';
 import { useTheme } from 'next-themes';
-import { formatImageUrl } from '@/utils/imageUtils';
+import { useImageUrl } from '@/utils/useImageUrl';
 
 const SearchModal = dynamic(() => import('./SearchModal'), { ssr: false });
 
@@ -34,6 +34,7 @@ export default function Navbar() {
 
   // Usar stores de Zustand
   const { user, logout, isLoading } = useAuthStore();
+  const { url: profileImageUrl } = useImageUrl(user?.profilePicture);
   const { 
     isSearchModalOpen, 
     profileMenuOpen, 
@@ -231,7 +232,7 @@ export default function Navbar() {
                 >
                   <div className="relative">
                   <img
-                    src={formatImageUrl(user.profilePicture)}
+                    src={profileImageUrl}
                     alt="Avatar"
                       className="h-9 w-9 rounded-full border-2 border-transparent group-hover:border-primary-200 dark:group-hover:border-primary-700 object-cover shadow-md group-hover:shadow-lg transition-all duration-200"
                   />
@@ -255,7 +256,7 @@ export default function Navbar() {
                     <div className="flex flex-col items-center gap-3 mb-4 px-4">
                       <div className="relative">
                       <img
-                        src={formatImageUrl(user.profilePicture)}
+                        src={profileImageUrl}
                         alt="Avatar"
                           className="h-16 w-16 rounded-full border-3 border-primary-200 dark:border-primary-700 object-cover shadow-md"
                         />
@@ -394,7 +395,7 @@ export default function Navbar() {
                   title="Perfil"
                 >
                   <img
-                    src={formatImageUrl(user.profilePicture)}
+                    src={profileImageUrl}
                       alt="Avatar"
                     className="h-7 w-7 rounded-full border-2 border-primary-200 dark:border-primary-700 object-cover"
                     />
@@ -415,7 +416,7 @@ export default function Navbar() {
                     {/* Header del perfil */}
                     <div className="flex flex-col items-center gap-3 mb-4 px-4">
                       <img
-                        src={formatImageUrl(user.profilePicture)}
+                        src={profileImageUrl}
                           alt="Avatar"
                         className="h-12 w-12 rounded-full border-2 border-primary-200 dark:border-primary-700 object-cover"
                         />

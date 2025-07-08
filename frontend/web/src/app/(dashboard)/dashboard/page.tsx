@@ -17,9 +17,18 @@ import { PhotoIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
 import { formatImageUrl } from '@/utils/imageUtils';
 import PostCard from '@/components/PostCard';
 import LoadingScreen, { PostSkeleton } from '@/components/LoadingScreen';
+import { useImageUrl } from '@/utils/useImageUrl';
+import { 
+  PlusIcon, 
+  UsersIcon, 
+  ChatBubbleLeftIcon,
+  HeartIcon,
+  EyeIcon
+} from '@heroicons/react/24/outline';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
+  const { url: userImageUrl } = useImageUrl(user?.profilePicture);
   const [feedPosts, setFeedPosts] = useState<PostType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -136,7 +145,7 @@ export default function DashboardPage() {
         <div className="flex items-center space-x-4">
           <div className="flex-shrink-0">
             <img
-              src={formatImageUrl(user?.profilePicture)}
+              src={userImageUrl}
               alt="Tu avatar"
               className="w-10 h-10 rounded-full border-2 border-primary-200 dark:border-primary-700"
             />

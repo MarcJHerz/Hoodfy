@@ -37,8 +37,90 @@ import { users, posts, communities } from '@/services/api';
 import api from '@/services/api';
 import CommentsModal from '@/components/CommentsModal';
 import PostCard from '@/components/PostCard';
-import { formatImageUrl } from '@/utils/imageUtils';
+import { useImageUrl } from '@/utils/useImageUrl';
 import PrivateChatModal from '@/components/chat/PrivateChatModal';
+
+// Componente para manejar imágenes de comunidades individualmente
+const CommunityImage = ({ coverImage, name }: { coverImage?: string; name: string }) => {
+  const { url: communityImageUrl } = useImageUrl(coverImage || '');
+  
+  return (
+    <div className="relative h-32 overflow-hidden">
+      {coverImage ? (
+        <Image
+          src={communityImageUrl}
+          alt={name}
+          fill
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
+          unoptimized
+        />
+      ) : (
+        <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+          <span className="text-white font-bold text-3xl">
+            {name?.charAt(0)?.toUpperCase()}
+          </span>
+        </div>
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+    </div>
+  );
+};
+
+// Componente para manejar imágenes de aliados individualmente
+const AllyImage = ({ profilePicture, name }: { profilePicture?: string; name: string }) => {
+  const { url: allyImageUrl } = useImageUrl(profilePicture || '');
+  
+  return (
+    <div className="relative w-16 h-16 mx-auto mb-4">
+      <div className="w-full h-full rounded-full overflow-hidden ring-2 ring-gray-200 dark:ring-gray-700 group-hover:ring-blue-200 dark:group-hover:ring-blue-800 transition-all">
+        {profilePicture ? (
+          <Image
+            src={allyImageUrl}
+            alt={name}
+            width={64}
+            height={64}
+            className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
+            unoptimized
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center rounded-full">
+            <span className="text-white font-bold text-lg">
+              {name?.charAt(0)?.toUpperCase()}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Componente para manejar imágenes de posts
+const PostMediaImage = ({ src, alt, className }: { src?: string; alt: string; className?: string }) => {
+  const { url: mediaUrl } = useImageUrl(src || '');
+  
+  return (
+    <Image
+      src={mediaUrl}
+      alt={alt}
+      fill
+      className={className}
+      unoptimized
+    />
+  );
+};
+
+// Componente para manejar videos de posts
+const PostMediaVideo = ({ src, className }: { src?: string; className?: string }) => {
+  const { url: mediaUrl } = useImageUrl(src || '');
+  
+  return (
+    <video
+      src={mediaUrl}
+      className={className}
+      preload="metadata"
+    />
+  );
+};
 
 console.log('Cargando archivo: frontend/web/src/app/(dashboard)/profile/[id]/page.tsx');
 
@@ -47,6 +129,10 @@ export default function ProfilePage() {
   const router = useRouter();
   const { user: authUser } = useAuthStore();
   const [user, setUser] = useState<UserProfile | null>(null);
+  
+  // Asegurar que siempre pasemos un valor consistente al hook
+  const profilePictureKey = user?.profilePicture || '';
+  const { url: userImageUrl } = useImageUrl(profilePictureKey);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userPosts, setUserPosts] = useState<Post[]>([]);
@@ -281,7 +367,7 @@ export default function ProfilePage() {
                 <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden ring-4 ring-white dark:ring-gray-700 shadow-xl group-hover:shadow-2xl transition-all duration-300">
                 {user?.profilePicture ? (
                   <Image
-                    src={formatImageUrl(user.profilePicture)}
+                    src={userImageUrl}
                     alt={`${user.name}'s profile`}
                       width={160}
                       height={160}
@@ -562,12 +648,10 @@ export default function ProfilePage() {
                                   {/* Mostrar video thumbnail, imagen, o placeholder */}
                                   {isVideo && videoThumbnail ? (
                                     <div className="relative w-full h-full">
-                                      <Image
-                                        src={formatImageUrl(videoThumbnail)}
+                                      <PostMediaImage
+                                        src={videoThumbnail}
                                         alt="Video thumbnail"
-                                        fill
                                         className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                        unoptimized
                                       />
                                       {/* Indicador de video */}
                                       <div className="absolute inset-0 flex items-center justify-center">
@@ -580,10 +664,9 @@ export default function ProfilePage() {
                                     </div>
                                   ) : isVideo && !videoThumbnail ? (
                                     <div className="relative w-full h-full">
-                                      <video
-                                        src={formatImageUrl(firstMedia.url)}
+                                      <PostMediaVideo
+                                        src={firstMedia.url}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                        preload="metadata"
                                       />
                                       {/* Indicador de video */}
                                       <div className="absolute inset-0 flex items-center justify-center">
@@ -595,12 +678,10 @@ export default function ProfilePage() {
                                       </div>
                                     </div>
                                   ) : isImage ? (
-                                    <Image
-                                      src={formatImageUrl(firstMedia.url)}
+                                    <PostMediaImage
+                                      src={firstMedia.url}
                                       alt="Post"
-                                      fill
                                       className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                      unoptimized
                                     />
                                   ) : (
                                     <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50 dark:bg-gray-800 p-2">
@@ -695,31 +776,17 @@ export default function ProfilePage() {
                         >
                           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 transition-all duration-200 hover-lift overflow-hidden">
                             {/* Banner de la comunidad */}
-                            <div className="relative h-32 overflow-hidden">
-                              {community.coverImage ? (
-                                <Image
-                                  src={formatImageUrl(community.coverImage)}
-                                  alt={community.name}
-                                  fill
-                                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                  unoptimized
-                                />
-                              ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                                  <span className="text-white font-bold text-3xl">
-                                    {community.name?.charAt(0)?.toUpperCase()}
-                                  </span>
-                                </div>
-                              )}
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                              {createdCommunities.includes(community) && (
-                                <div className="absolute top-3 right-3">
-                                  <span className="bg-gradient-to-r from-primary-600 to-accent-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg">
-                                    Creador
-                                  </span>
-                                </div>
-                              )}
-                  </div>
+                            <CommunityImage 
+                              coverImage={community.coverImage}
+                              name={community.name}
+                            />
+                            {createdCommunities.includes(community) && (
+                              <div className="absolute top-3 right-3">
+                                <span className="bg-gradient-to-r from-primary-600 to-accent-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg">
+                                  Creador
+                                </span>
+                              </div>
+                            )}
                             
                             {/* Contenido */}
                             <div className="p-4">
@@ -778,26 +845,10 @@ export default function ProfilePage() {
                           className="group"
                         >
                           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 transition-all duration-200 hover-lift text-center">
-                            <div className="relative w-16 h-16 mx-auto mb-4">
-                              <div className="w-full h-full rounded-full overflow-hidden ring-2 ring-gray-200 dark:ring-gray-700 group-hover:ring-blue-200 dark:group-hover:ring-blue-800 transition-all">
-                                {ally.profilePicture ? (
-                                <Image
-                                  src={formatImageUrl(ally.profilePicture)}
-                                  alt={ally.name}
-                                    width={64}
-                                    height={64}
-                                    className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
-                                  unoptimized
-                                />
-                                ) : (
-                                  <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center rounded-full">
-                                    <span className="text-white font-bold text-lg">
-                                      {ally.name?.charAt(0)?.toUpperCase()}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                              </div>
+                            <AllyImage 
+                              profilePicture={ally.profilePicture}
+                              name={ally.name}
+                            />
                             <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
                               {ally.name}
                             </h3>

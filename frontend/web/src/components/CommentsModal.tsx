@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { Post } from '@/types/post';
@@ -9,7 +9,7 @@ import Comments from './Comments';
 import Image from 'next/image';
 import { comments } from '@/services/api';
 import { toast } from 'react-hot-toast';
-import { formatImageUrl } from '@/utils/imageUtils';
+import { useImageUrl } from '@/utils/useImageUrl';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 interface CommentsModalProps {
@@ -20,15 +20,18 @@ interface CommentsModalProps {
   onPostUpdate: (updatedPost: Post) => void;
 }
 
-const CommentsModal: React.FC<CommentsModalProps> = ({
+export default function CommentsModal({ 
   isOpen,
   onClose,
   post,
   currentUser,
-  onPostUpdate,
-}) => {
+  onPostUpdate 
+}: CommentsModalProps) {
   const [newComment, setNewComment] = useState('');
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const [showComments, setShowComments] = useState(true);
+  const { url: currentMediaUrl } = useImageUrl(post?.media?.[currentMediaIndex]?.url);
+  const { url: thumbnailUrl } = useImageUrl(post?.media?.[currentMediaIndex]?.thumbnail);
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,7 +135,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
                         <div className="flex justify-center">
                           {post.media[currentMediaIndex].type === 'image' ? (
                           <Image
-                              src={formatImageUrl(post.media[currentMediaIndex].url)}
+                              src={currentMediaUrl}
                             alt="Post content"
                               width={600}
                               height={400}
@@ -142,10 +145,10 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
                           />
                         ) : (
                           <video
-                              src={formatImageUrl(post.media[currentMediaIndex].url)}
+                              src={currentMediaUrl}
                             controls
                               className="rounded-lg max-h-[50vh] w-auto max-w-full"
-                              poster={post.media[currentMediaIndex].thumbnail ? formatImageUrl(post.media[currentMediaIndex].thumbnail) : undefined}
+                              poster={thumbnailUrl ? thumbnailUrl : undefined}
                             preload="metadata"
                               style={{ width: 'auto', height: 'auto', maxHeight: '50vh' }}
                             />
@@ -233,6 +236,4 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
       </Dialog>
     </Transition.Root>
   );
-};
-
-export default CommentsModal; 
+} 

@@ -1,22 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { Post } from '@/types/post';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
-  HeartIcon,
+  HeartIcon as HeartOutline,
   ChatBubbleLeftIcon,
   ShareIcon,
-  BookmarkIcon,
+  BookmarkIcon as BookmarkOutline,
   EllipsisHorizontalIcon,
   MapPinIcon,
   StarIcon,
 } from '@heroicons/react/24/outline';
 import {
-  HeartIcon as HeartIconSolid,
-  BookmarkIcon as BookmarkIconSolid,
+  HeartIcon as HeartSolid,
+  BookmarkIcon as BookmarkSolid,
   MapPinIcon as MapPinIconSolid,
 } from '@heroicons/react/24/solid';
 import { posts } from '@/services/api';
@@ -24,23 +24,27 @@ import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import CommentsModal from '../CommentsModal';
 import { useAuthStore } from '@/stores/authStore';
-import { formatImageUrl } from '@/utils/imageUtils';
+import { useImageUrl } from '@/utils/useImageUrl';
 import { MediaGallery } from '../MediaGallery';
+import Link from 'next/link';
 
 interface PostCardProps {
   post: Post;
   onPostUpdated: () => void;
   isCreator?: boolean;
   showPinOption?: boolean;
+  showCommunity?: boolean;
+  compact?: boolean;
 }
 
-export default function PostCard({ post, onPostUpdated, isCreator = false, showPinOption = false }: PostCardProps) {
-  const { user: currentUser } = useAuthStore();
-  const [isLiked, setIsLiked] = useState(post.isLiked || false);
+export default function PostCard({ post, onPostUpdated, isCreator = false, showPinOption = false, showCommunity = false, compact = false }: PostCardProps) {
+  const { user } = useAuthStore();
+  const { url: authorImageUrl } = useImageUrl(post.author.profilePicture);
+  const [isLiked, setIsLiked] = useState(post.likes?.includes(user?._id || '') || false);
   const [isSaved, setIsSaved] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [comment, setComment] = useState('');
-  const [likesCount, setLikesCount] = useState(post.likes.length);
+  const [likesCount, setLikesCount] = useState(post.likes?.length || 0);
   const [isLoading, setIsLoading] = useState(false);
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
@@ -132,12 +136,12 @@ export default function PostCard({ post, onPostUpdated, isCreator = false, showP
             className="relative h-10 w-10 rounded-full overflow-hidden cursor-pointer ring-2 ring-gray-200 dark:ring-gray-600"
           onClick={() => router.push(`/profile/${post.author._id}`)}
         >
-          <Image
-            src={formatImageUrl(post.author.profilePicture)}
-            alt={post.author.name}
-            fill
-            className="object-cover"
-          />
+            <Image
+            src={authorImageUrl}
+              alt={post.author.name}
+              fill
+              className="object-cover"
+            />
         </div>
         <div className="cursor-pointer" onClick={() => router.push(`/profile/${post.author._id}`)}>
             <div className="flex items-center space-x-2">
@@ -199,10 +203,10 @@ export default function PostCard({ post, onPostUpdated, isCreator = false, showP
         {/* Media */}
         {post.media && post.media.length > 0 && (
           <div className="mt-4">
-            <MediaGallery
-              images={post.media.map(media => formatImageUrl(media.url))}
-              onImageClick={handleImageClick}
-            />
+              <MediaGallery
+                media={post.media}
+                onImageClick={handleImageClick}
+              />
           </div>
         )}
       </div>
@@ -217,9 +221,9 @@ export default function PostCard({ post, onPostUpdated, isCreator = false, showP
               className="flex items-center space-x-2 text-gray-500 dark:text-gray-400 hover:text-red-500 disabled:opacity-50 transition-colors"
             >
               {isLiked ? (
-                <HeartIconSolid className="h-6 w-6 text-red-500" />
+                <HeartSolid className="h-6 w-6 text-red-500" />
               ) : (
-                <HeartIcon className="h-6 w-6" />
+                <HeartOutline className="h-6 w-6" />
               )}
               <span className="font-medium">{likesCount}</span>
             </button>
@@ -239,21 +243,21 @@ export default function PostCard({ post, onPostUpdated, isCreator = false, showP
             className="text-gray-500 dark:text-gray-400 hover:text-yellow-500 transition-colors"
           >
             {isSaved ? (
-              <BookmarkIconSolid className="h-6 w-6 text-yellow-500" />
+              <BookmarkSolid className="h-6 w-6 text-yellow-500" />
             ) : (
-              <BookmarkIcon className="h-6 w-6" />
+              <BookmarkOutline className="h-6 w-6" />
             )}
           </button>
         </div>
       </div>
 
       {/* Modal de comentarios */}
-      {currentUser && (
+      {user && (
         <CommentsModal
           isOpen={isCommentsModalOpen}
           onClose={() => setIsCommentsModalOpen(false)}
           post={post}
-          currentUser={currentUser}
+          currentUser={user}
           onPostUpdate={onPostUpdated}
         />
       )}

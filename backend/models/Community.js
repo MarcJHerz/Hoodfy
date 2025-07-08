@@ -17,6 +17,22 @@ const CommunitySchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  stripeProductId: {
+    type: String,
+    default: ''
+  },
+  stripePriceId: {
+    type: String,
+    default: ''
+  },
+  price: {
+    type: Number,
+    default: 0
+  },
+  isFree: {
+    type: Boolean,
+    default: false
+  },
   creator: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

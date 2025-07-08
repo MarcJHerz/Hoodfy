@@ -8,7 +8,7 @@ const User = require('../models/User');
 exports.createStripeProductAndPrice = async (req, res) => {
   try {
     if (!stripe) {
-      return res.status(500).json({ error: 'Stripe no está configurado' });
+      return res.status(503).json({ error: 'Stripe no está configurado' });
     }
 
     const { communityName, price } = req.body;
@@ -37,7 +37,7 @@ exports.createStripeProductAndPrice = async (req, res) => {
 exports.createCheckoutSession = async (req, res) => {
   try {
     if (!stripe) {
-      return res.status(500).json({ error: 'Stripe no está configurado' });
+      return res.status(503).json({ error: 'Stripe no está configurado' });
     }
 
     const { priceId, communityId } = req.body;
@@ -67,44 +67,49 @@ exports.createCheckoutSession = async (req, res) => {
 
 // Webhook de Stripe
 exports.stripeWebhook = async (req, res) => {
-  if (!stripe) {
-    return res.status(500).json({ error: 'Stripe no está configurado' });
-  }
-
-  const sig = req.headers['stripe-signature'];
-  let event;
   try {
-    event = stripe.webhooks.constructEvent(req.rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
-  } catch (err) {
-    console.error('Webhook signature error:', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-  // Manejar evento de suscripción completada
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    const { userId, communityId } = session.metadata;
-    // Registrar suscripción activa
-    try {
-      const existing = await Subscription.findOne({ user: userId, community: communityId, status: 'active' });
-      if (!existing) {
-        await Subscription.create({
-          user: userId,
-          community: communityId,
-          status: 'active',
-          startDate: new Date(),
-          paymentMethod: 'stripe',
-          amount: session.amount_total ? session.amount_total / 100 : 0,
-        });
-        // Agregar usuario como miembro
-        const community = await Community.findById(communityId);
-        if (community && !community.members.includes(userId)) {
-          community.members.push(userId);
-          await community.save();
-        }
-      }
-    } catch (err) {
-      console.error('Error registrando suscripción:', err);
+    if (!stripe) {
+      return res.status(503).json({ error: 'Stripe no está configurado' });
     }
+
+    const sig = req.headers['stripe-signature'];
+    let event;
+    try {
+      event = stripe.webhooks.constructEvent(req.rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    } catch (err) {
+      console.error('Webhook signature error:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+    // Manejar evento de suscripción completada
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object;
+      const { userId, communityId } = session.metadata;
+      // Registrar suscripción activa
+      try {
+        const existing = await Subscription.findOne({ user: userId, community: communityId, status: 'active' });
+        if (!existing) {
+          await Subscription.create({
+            user: userId,
+            community: communityId,
+            status: 'active',
+            startDate: new Date(),
+            paymentMethod: 'stripe',
+            amount: session.amount_total ? session.amount_total / 100 : 0,
+          });
+          // Agregar usuario como miembro
+          const community = await Community.findById(communityId);
+          if (community && !community.members.includes(userId)) {
+            community.members.push(userId);
+            await community.save();
+          }
+        }
+      } catch (err) {
+        console.error('Error registrando suscripción:', err);
+      }
+    }
+    res.json({ received: true });
+  } catch (error) {
+    console.error('Error en webhook de Stripe:', error);
+    res.status(500).json({ error: 'Error procesando webhook' });
   }
-  res.json({ received: true });
 }; 

@@ -17,7 +17,7 @@ import {
   BookmarkIcon as BookmarkSolid
 } from '@heroicons/react/24/solid';
 import { Post } from '@/types/post';
-import { formatImageUrl } from '@/utils/imageUtils';
+import { useImageUrl } from '@/utils/useImageUrl';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'react-hot-toast';
 import { posts } from '@/services/api';
@@ -39,6 +39,7 @@ export default function PostCard({
   compact = false 
 }: PostCardProps) {
   const { user } = useAuthStore();
+  const { url: authorImageUrl } = useImageUrl(post.author.profilePicture);
   const [isLoading, setIsLoading] = useState(false);
   const [isLiked, setIsLiked] = useState(post.likes?.includes(user?._id || '') || false);
   const [likesCount, setLikesCount] = useState(post.likes?.length || 0);
@@ -116,7 +117,7 @@ export default function PostCard({
             className="flex-shrink-0 group-hover:scale-105 transition-transform duration-200"
           >
         <Image
-          src={formatImageUrl(post.author.profilePicture)}
+          src={authorImageUrl}
           alt={post.author.name}
               width={compact ? 32 : 40}
               height={compact ? 32 : 40}

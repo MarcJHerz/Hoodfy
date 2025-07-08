@@ -2,7 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import { platform } from '../config/platform';
 import { theme } from '../theme';
-import { formatImageUrl } from '@/utils/imageUtils';
+import { useImageUrl } from '@/utils/useImageUrl';
 
 interface UserAvatarProps {
   size: number;
@@ -11,6 +11,8 @@ interface UserAvatarProps {
 }
 
 export const UserAvatar: React.FC<UserAvatarProps> = ({ size, source, name }) => {
+  const { url, loading } = useImageUrl(source);
+  
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -30,9 +32,9 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({ size, source, name }) =>
         position: 'relative'
       }}
     >
-      {source ? (
+      {source && !loading ? (
         <Image
-          src={source.startsWith('http') ? source : formatImageUrl(source)}
+          src={url}
           alt={name}
           fill
           className="object-cover"

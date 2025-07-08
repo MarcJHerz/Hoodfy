@@ -62,116 +62,8 @@ const upload = multer({
 // Middleware de autenticación para todas las rutas
 router.use(verifyToken);
 
-// Crear un nuevo post
-router.post('/', 
-  rateLimiter,
-  upload.array('media', 4), // Permitir hasta 4 archivos (imágenes o videos)
-  async (req, res) => {
-    try {
-      console.log('Recibiendo petición para crear post');
-      console.log('Body:', req.body);
-      console.log('Files:', req.files);
-      console.log('User:', req.user);
-      console.log('UserId:', req.userId);
-
-      const { content, postType, communityId } = req.body;
-      const userId = req.userId;
-
-      if (!content && (!req.files || req.files.length === 0)) {
-        console.log('Error: Post sin contenido ni medios');
-        return res.status(400).json({ error: 'El post debe tener contenido o al menos un medio (imagen o video)' });
-      }
-
-      // Si es un post de comunidad, verificar que la comunidad existe y el usuario es miembro
-      if (postType === 'community') {
-        if (!communityId) {
-          console.log('Error: Post de comunidad sin ID de comunidad');
-          return res.status(400).json({ error: 'El ID de la comunidad es requerido para posts de comunidad' });
-        }
-
-        const community = await Community.findById(communityId);
-        if (!community) {
-          console.log('Error: Comunidad no encontrada');
-          return res.status(404).json({ error: 'Comunidad no encontrada' });
-        }
-
-        const isCreator = community.creator.toString() === userId.toString();
-        const isMember = community.members.some(member => member.toString() === userId.toString());
-
-        if (!isCreator && !isMember) {
-          console.log('Error: Usuario no es miembro de la comunidad');
-          return res.status(403).json({ error: 'No eres miembro de esta comunidad' });
-        }
-      }
-
-      // Procesar archivos multimedia si existen
-      let media = [];
-      if (req.files && req.files.length > 0) {
-        console.log('Procesando archivos multimedia:', req.files.length);
-        // Procesar archivos de forma asíncrona para videos
-        media = await Promise.all(req.files.map(async file => {
-          const isVideo = file.mimetype.startsWith('video/');
-          const baseUrl = process.env.BASE_URL || 'http://192.168.1.87:5000';
-          let thumbnail = null;
-          if (isVideo) {
-            // Generar miniatura real para el video
-            thumbnail = await generateVideoThumbnail(file.filename, baseUrl);
-          }
-          return {
-            type: isVideo ? 'video' : 'image',
-            url: `${baseUrl}/uploads/posts/${file.filename}`,
-            thumbnail: thumbnail
-          };
-        }));
-      }
-
-      // Crear el post
-      console.log('Creando post con datos:', {
-        content,
-        author: userId,
-        community: communityId || null,
-        postType: postType || 'general',
-        media
-      });
-
-      const post = new Post({
-        content: content || '',
-        author: userId,
-        community: communityId || null,
-        postType: postType || 'general',
-        media
-      });
-
-      await post.save();
-      console.log('Post guardado exitosamente');
-
-      // Si es un post de comunidad, actualizar estadísticas
-      if (postType === 'community' && communityId) {
-        await Community.findByIdAndUpdate(communityId, {
-          $inc: { postCount: 1 }
-        });
-      }
-
-      // Poblar los datos del autor
-      await post.populate('author', 'name username profilePicture');
-      console.log('Post poblado con datos del autor');
-
-      // No necesitamos procesar las URLs nuevamente ya que ya incluyen la URL base
-      const processedPost = post.toObject();
-
-      res.status(201).json({
-        message: 'Post creado exitosamente',
-        post: processedPost
-      });
-    } catch (error) {
-      console.error('Error al crear post:', error);
-      res.status(500).json({
-        error: 'Error al crear el post',
-        details: error.message
-      });
-    }
-  }
-);
+// Crear un nuevo post SOLO usando el controlador moderno (S3)
+router.post('/', rateLimiter, upload.none(), postController.createPost);
 
 // Obtener posts de una comunidad
 router.get('/community/:communityId', rateLimiter, async (req, res) => {
@@ -381,27 +273,29 @@ router.get('/home/:userId', async (req, res) => {
       
       // Procesar imagen de perfil del usuario
       if (processedPost.author && processedPost.author.profilePicture) {
-        processedPost.author.profilePicture = processedPost.author.profilePicture.startsWith('http')
-          ? processedPost.author.profilePicture
-          : `${baseUrl}/${processedPost.author.profilePicture}`;
+        // Mantener la key de S3 tal como está, no convertir a URL local
+        // El frontend se encargará de obtener la URL firmada
+        processedPost.author.profilePicture = processedPost.author.profilePicture;
       }
       
       // Procesar imágenes del post
       if (processedPost.media && processedPost.media.length > 0) {
         processedPost.media = processedPost.media.map(media => ({
           ...media,
-          url: media.url.startsWith('http') ? media.url : `${baseUrl}/${media.url}`,
+          // Si es una key de S3 (no contiene http), mantenerla como key
+          // El frontend se encargará de obtener la URL firmada
+          url: media.url.startsWith('http') ? media.url : media.url,
           thumbnail: media.thumbnail 
-            ? (media.thumbnail.startsWith('http') ? media.thumbnail : `${baseUrl}/${media.thumbnail}`)
+            ? (media.thumbnail.startsWith('http') ? media.thumbnail : media.thumbnail)
             : null
         }));
       }
       
       // Procesar imagen de portada de la comunidad si existe
       if (processedPost.community && processedPost.community.coverImage) {
-        processedPost.community.coverImage = processedPost.community.coverImage.startsWith('http')
-          ? processedPost.community.coverImage
-          : `${baseUrl}/${processedPost.community.coverImage}`;
+        // Mantener la key de S3 tal como está, no convertir a URL local
+        // El frontend se encargará de obtener la URL firmada
+        processedPost.community.coverImage = processedPost.community.coverImage;
       }
       
       return processedPost;
@@ -526,21 +420,31 @@ router.get('/:postId/comments', rateLimiter, async (req, res) => {
 router.post('/create', upload.array('media', 10), async (req, res) => {
   try {
     const { content, userId, communityId, postType } = req.body;
-    const baseUrl = process.env.BASE_URL || 'http://192.168.1.87:5000';
     
-    // Procesar archivos subidos
+    // Procesar archivos subidos - MIGRAR A S3
     const mediaFiles = [];
     if (req.files && req.files.length > 0) {
+      try {
+        const { uploadFileToS3 } = require('../utils/s3');
+        
       for (const file of req.files) {
         const isVideo = file.mimetype.startsWith('video/');
+          
+          // Subir a S3
+          const { buffer, originalname, mimetype } = file;
+          const s3Key = await uploadFileToS3(buffer, originalname, mimetype);
         
         mediaFiles.push({
           type: isVideo ? 'video' : 'image',
-          url: `${baseUrl}/uploads/posts/${file.filename}`,
+            url: s3Key, // Guardar la key de S3
           // Para videos, usamos el mismo archivo como miniatura
-          // El navegador mostrará automáticamente el primer frame
-          thumbnail: isVideo ? `${baseUrl}/uploads/posts/${file.filename}#t=0.1` : null
+            // El frontend se encargará de obtener la URL firmada
+            thumbnail: isVideo ? s3Key : null
         });
+        }
+      } catch (error) {
+        console.error('Error al subir archivos a S3:', error);
+        return res.status(500).json({ error: 'Error al subir los archivos' });
       }
     }
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
+import { usePostsStore } from '@/stores/postsStore';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { FaUsers } from 'react-icons/fa';
@@ -18,7 +19,11 @@ import {
   BookmarkIcon,
   Squares2X2Icon,
   ViewColumnsIcon,
-  TagIcon
+  TagIcon,
+  PlusIcon,
+  EyeIcon,
+  PencilIcon,
+  CameraIcon
 } from '@heroicons/react/24/outline';
 import { 
   HeartIcon as HeartSolidIcon,
@@ -29,16 +34,18 @@ import { users, posts, communities } from '@/services/api';
 import { Tab } from '@headlessui/react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { formatImageUrl } from '@/utils/imageUtils';
+import { useImageUrl } from '@/utils/useImageUrl';
 import PostCard from '@/components/PostCard';
 import type { UserProfile, Community } from '@/types';
 import { Post } from '@/types/post';
 import { User } from '@/types/user';
+import { Ally } from '@/types/user';
 
 export default function ProfilePage() {
   const { id } = useParams();
   const router = useRouter();
   const { user: authUser } = useAuthStore();
+  const { url: userImageUrl } = useImageUrl(authUser?.profilePicture);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -185,7 +192,7 @@ export default function ProfilePage() {
                 <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden ring-4 ring-white dark:ring-gray-700 shadow-xl group-hover:shadow-2xl transition-all duration-300">
                   {user?.profilePicture ? (
             <Image
-              src={formatImageUrl(user.profilePicture)}
+              src={userImageUrl}
                       alt={`${user.name}'s profile`}
                       width={160}
                       height={160}
@@ -344,7 +351,7 @@ export default function ProfilePage() {
                           <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative group-hover:shadow-lg transition-all duration-300">
                             {post.media && post.media.length > 0 ? (
                               <Image
-                                src={formatImageUrl(post.media[0].url)}
+                                src={useImageUrl(post.media[0].url)}
                                 alt="Post"
                                 fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -426,7 +433,7 @@ export default function ProfilePage() {
                             <div className="relative h-32 overflow-hidden">
                               {community.coverImage ? (
                                 <Image
-                                  src={formatImageUrl(community.coverImage)}
+                                  src={useImageUrl(community.coverImage)}
                                   alt={community.name}
                                   fill
                                   className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -507,7 +514,7 @@ export default function ProfilePage() {
                               <div className="w-full h-full rounded-full overflow-hidden ring-2 ring-gray-200 dark:ring-gray-700 group-hover:ring-blue-200 dark:group-hover:ring-blue-800 transition-all">
                                 {ally.profilePicture ? (
                           <Image
-                            src={formatImageUrl(ally.profilePicture)}
+                            src={useImageUrl(ally.profilePicture)}
                             alt={ally.name}
                             fill
                                     className="object-cover group-hover:scale-105 transition-transform duration-300"

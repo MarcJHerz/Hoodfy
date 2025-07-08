@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { DEFAULT_AVATAR_KEY } = require('../config/defaultAvatarKey');
 
 const userSchema = new mongoose.Schema({
   name: { 
@@ -32,7 +33,7 @@ const userSchema = new mongoose.Schema({
   },
   profilePicture: {
     type: String,
-    default: '/images/defaults/default-avatar.png'
+    default: DEFAULT_AVATAR_KEY
   },
   bio: { 
     type: String, 

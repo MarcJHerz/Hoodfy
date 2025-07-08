@@ -6,6 +6,7 @@ const { verifyToken } = require('../middleware/authMiddleware');
 const { validateRegistration, validateLogin, validateResult } = require('../middleware/validators');
 const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
+const { DEFAULT_AVATAR_KEY } = require('../config/defaultAvatarKey');
 
 // Configuración de rate limiting
 const authLimiter = rateLimit({
@@ -105,7 +106,7 @@ router.post('/login', async (req, res) => {
         firebaseUid: uid,
         email,
         name: name || email.split('@')[0],
-        profilePicture: picture || '',
+        profilePicture: picture || DEFAULT_AVATAR_KEY,
       });
       await user.save();
     }

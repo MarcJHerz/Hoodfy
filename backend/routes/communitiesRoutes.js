@@ -12,19 +12,8 @@ const ensureDir = (dir) => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 };
 
-// 📷 Configuración de multer para imágenes de portada
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const folder = 'uploads/banners';
-    ensureDir(folder);
-    cb(null, folder);
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname) || '.jpg';
-    const uniqueName = Date.now() + '-' + file.originalname.replace(/\s+/g, '_');
-    cb(null, uniqueName.endsWith(ext) ? uniqueName : uniqueName + ext);
-  }
-});
+// 📷 Configuración de multer para imágenes de portada - MIGRADO A S3
+const storage = multer.memoryStorage();
 
 const upload = multer({ storage });
 
@@ -87,8 +76,8 @@ router.get('/search', async (req, res) => {
 // ✅ Crear una nueva comunidad
 router.post('/create', verifyToken, upload.single('coverImage'), async (req, res) => {
   try {
-    const { name, description } = req.body;
-    const userId = req.user._id;
+    const { name, description, priceType, price, customPriceData } = req.body;
+    const userId = req.userId;
 
     // Verificar si ya existe una comunidad con el mismo nombre
     const existingCommunity = await Community.findOne({ name });
@@ -96,10 +85,56 @@ router.post('/create', verifyToken, upload.single('coverImage'), async (req, res
       return res.status(400).json({ error: 'Ya existe una comunidad con este nombre' });
     }
 
-    // Procesar la imagen si existe
+    // Procesar la imagen si existe - MIGRAR A S3
     let coverImage = '';
     if (req.file) {
-      coverImage = req.file.path;
+      try {
+        console.log('Archivo recibido:', {
+          originalname: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          hasBuffer: !!req.file.buffer
+        });
+        
+        const { uploadFileToS3 } = require('../utils/s3');
+        const { buffer, originalname, mimetype } = req.file;
+        coverImage = await uploadFileToS3(buffer, originalname, mimetype);
+        
+        console.log('Imagen subida a S3 con key:', coverImage);
+      } catch (error) {
+        console.error('Error al subir imagen a S3:', error);
+        return res.status(500).json({ error: 'Error al subir la imagen de portada' });
+      }
+    } else {
+      console.log('No se recibió archivo en la petición');
+    }
+
+    let stripeProductId = '';
+    let stripePriceId = '';
+    let finalPrice = 0;
+    let isFree = false;
+
+    if (priceType === 'predefined') {
+      // Precio preestablecido
+      const stripePrices = require('../config/stripePrices');
+      stripePriceId = stripePrices[price];
+      finalPrice = price;
+      if (!stripePriceId) {
+        return res.status(400).json({ error: 'Precio preestablecido inválido.' });
+      }
+    } else if (priceType === 'custom') {
+      // Precio personalizado
+      if (!customPriceData || !customPriceData.stripeProductId || !customPriceData.stripePriceId || !price) {
+        return res.status(400).json({ error: 'Datos de precio personalizado incompletos.' });
+      }
+      stripeProductId = customPriceData.stripeProductId;
+      stripePriceId = customPriceData.stripePriceId;
+      finalPrice = price;
+    } else if (priceType === 'free') {
+      isFree = true;
+      finalPrice = 0;
+    } else {
+      return res.status(400).json({ error: 'Tipo de precio inválido.' });
     }
 
     // Crear la nueva comunidad
@@ -108,7 +143,11 @@ router.post('/create', verifyToken, upload.single('coverImage'), async (req, res
       description,
       coverImage,
       creator: userId,
-      members: [userId]
+      members: [userId],
+      stripeProductId,
+      stripePriceId,
+      price: finalPrice,
+      isFree
     });
 
     await community.save();
@@ -196,13 +235,13 @@ router.post('/:id/join', verifyToken, async (req, res) => {
       return res.status(404).json({ error: 'Comunidad no encontrada' });
     }
 
-    if (community.members.includes(req.user._id)) {
+    if (community.members.includes(req.userId)) {
       return res.status(400).json({ error: 'Ya eres miembro de esta comunidad' });
     }
 
-    await community.addMember(req.user._id);
+    await community.addMember(req.userId);
     // Crear aliados automáticamente
-    await makeAllies(req.user._id, community._id);
+    await makeAllies(req.userId, community._id);
     res.json({ message: 'Te has unido a la comunidad exitosamente' });
   } catch (error) {
     console.error('Error al unirse a la comunidad:', error);
@@ -218,32 +257,32 @@ router.post('/:id/leave', verifyToken, async (req, res) => {
       return res.status(404).json({ error: 'Comunidad no encontrada' });
     }
 
-    if (community.creator.toString() === req.user._id.toString()) {
+    if (community.creator.toString() === req.userId.toString()) {
       return res.status(403).json({ error: 'El creador no puede salir de la comunidad' });
     }
 
-    if (!community.members.includes(req.user._id)) {
+    if (!community.members.includes(req.userId)) {
       return res.status(400).json({ error: 'No eres miembro de esta comunidad' });
     }
 
     // Guardar los miembros actuales antes de salir
-    const miembrosAntes = community.members.filter(id => id.toString() !== req.user._id.toString());
+    const miembrosAntes = community.members.filter(id => id.toString() !== req.userId.toString());
 
-    await community.removeMember(req.user._id);
+    await community.removeMember(req.userId);
 
     // Lógica avanzada: eliminar aliados si ya no comparten ninguna comunidad
     for (const miembroId of miembrosAntes) {
       // Buscar si ambos usuarios comparten alguna otra comunidad
       const compartenOtra = await Community.exists({
-        members: { $all: [req.user._id, miembroId] },
+        members: { $all: [req.userId, miembroId] },
         _id: { $ne: community._id }
       });
       if (!compartenOtra) {
         // Eliminar la relación Ally en cualquier dirección
         await Ally.findOneAndDelete({
           $or: [
-            { user1: req.user._id, user2: miembroId },
-            { user1: miembroId, user2: req.user._id }
+            { user1: req.userId, user2: miembroId },
+            { user1: miembroId, user2: req.userId }
           ]
         });
       }
@@ -292,7 +331,18 @@ router.put('/:id/update', verifyToken, upload.single('coverImage'), async (req, 
     // Actualizar campos
     if (name) community.name = name;
     if (description) community.description = description;
-    if (req.file) community.coverImage = req.file.path;
+    
+    // Procesar nueva imagen de portada - MIGRAR A S3
+    if (req.file) {
+      try {
+        const { uploadFileToS3 } = require('../utils/s3');
+        const { buffer, originalname, mimetype } = req.file;
+        community.coverImage = await uploadFileToS3(buffer, originalname, mimetype);
+      } catch (error) {
+        console.error('Error al subir imagen a S3:', error);
+        return res.status(500).json({ error: 'Error al subir la imagen de portada' });
+      }
+    }
 
     await community.save();
 
@@ -355,6 +405,27 @@ router.get('/joined-by/:userId', async (req, res) => {
   } catch (error) {
     console.error('❌ Error al obtener comunidades unidas:', error);
     res.status(500).json({ error: 'Error al obtener comunidades unidas' });
+  }
+});
+
+// Unirse a comunidad gratuita
+router.post('/:id/join-free', verifyToken, async (req, res) => {
+  try {
+    const community = await Community.findById(req.params.id);
+    if (!community) {
+      return res.status(404).json({ error: 'Comunidad no encontrada' });
+    }
+    if (!community.isFree) {
+      return res.status(400).json({ error: 'Esta comunidad no es gratuita.' });
+    }
+    if (community.members.includes(req.userId)) {
+      return res.status(400).json({ error: 'Ya eres miembro de esta comunidad' });
+    }
+    await community.addMember(req.userId);
+    res.json({ message: 'Te has unido a la comunidad gratuita exitosamente' });
+  } catch (error) {
+    console.error('Error al unirse a comunidad gratuita:', error);
+    res.status(500).json({ error: 'Error al unirse a la comunidad gratuita' });
   }
 });
 

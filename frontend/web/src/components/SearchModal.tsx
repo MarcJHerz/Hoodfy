@@ -18,6 +18,8 @@ import { communities, users } from '@/services/api';
 import { useRouter } from 'next/navigation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { User } from '@/types/user'; // Importar el tipo User global
+import Image from 'next/image';
+import { useImageUrl } from '@/utils/useImageUrl';
 
 interface Community {
   _id: string;
@@ -28,17 +30,43 @@ interface Community {
   members?: any[];
 }
 
-// Hook useDebounce importado desde @/hooks/useDebounce
+// Componente para manejar imágenes de usuario individualmente
+const UserImage = ({ profilePicture, name, className }: { profilePicture?: string; name: string; className?: string }) => {
+  const { url: userImageUrl } = useImageUrl(profilePicture);
+  
+  return (
+    <Image
+      src={userImageUrl}
+      alt={name}
+      width={48}
+      height={48}
+      className={className}
+      unoptimized
+    />
+  );
+};
 
-const formatImageUrl = (url?: string, type: 'user' | 'community' = 'user') => {
-  if (!url) {
-    return type === 'user' 
-      ? '/images/defaults/default-avatar.png' 
-      : '/images/defaults/default-community.png';
-  }
-  if (url.startsWith('http')) return url;
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.87:5000';
-  return `${baseUrl}/${url.replace(/^\//, '')}`;
+// Componente para manejar imágenes de comunidad individualmente
+const CommunityImage = ({ coverImage, image, name, className, width = 64, height = 48 }: { 
+  coverImage?: string; 
+  image?: string; 
+  name: string; 
+  className?: string;
+  width?: number;
+  height?: number;
+}) => {
+  const { url: communityImageUrl } = useImageUrl(coverImage || image);
+  
+  return (
+    <Image
+      src={communityImageUrl}
+      alt={name}
+      width={width}
+      height={height}
+      className={className}
+      unoptimized
+    />
+  );
 };
 
 // Componente de tarjeta de usuario
@@ -48,9 +76,9 @@ const UserCard = ({ user, onClick }: { user: User; onClick: () => void }) => (
     className="group flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 cursor-pointer border border-transparent hover:border-primary-200 dark:hover:border-primary-800 hover-lift"
   >
     <div className="relative">
-      <img
-        src={formatImageUrl(user.profilePicture, 'user')}
-        alt={user.name}
+      <UserImage
+        profilePicture={user.profilePicture}
+        name={user.name}
         className="w-12 h-12 rounded-full object-cover ring-2 ring-white dark:ring-gray-900 group-hover:ring-primary-200 dark:group-hover:ring-primary-800 transition-all duration-200 flex-shrink-0"
       />
       <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse opacity-80"></div>
@@ -327,9 +355,12 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
                           onClick={() => handleCommunityClick(community)}
                           className="group flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 cursor-pointer border border-transparent hover:border-primary-200 dark:hover:border-primary-800 hover-lift min-h-[80px] w-full max-w-full overflow-hidden"
                         >
-                          <img
-                            src={formatImageUrl(community.coverImage || community.image, 'community')}
-                            alt={community.name}
+                          <CommunityImage
+                            coverImage={community.coverImage}
+                            image={community.image}
+                            name={community.name}
+                            width={56}
+                            height={40}
                             className="w-14 h-10 rounded-lg object-cover ring-2 ring-white dark:ring-gray-900 group-hover:ring-primary-200 dark:group-hover:ring-primary-800 transition-all duration-200 flex-shrink-0"
                           />
                           <div className="flex-1 min-w-0 overflow-hidden">
@@ -444,9 +475,12 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
                             onClick={() => handleCommunityClick(community)}
                             className="group flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 cursor-pointer border border-transparent hover:border-primary-200 dark:hover:border-primary-800 hover-lift"
                           >
-                            <img
-                              src={formatImageUrl(community.coverImage || community.image, 'community')}
-                              alt={community.name}
+                            <CommunityImage
+                              coverImage={community.coverImage}
+                              image={community.image}
+                              name={community.name}
+                              width={64}
+                              height={48}
                               className="w-16 h-12 rounded-xl object-cover ring-2 ring-white dark:ring-gray-900 group-hover:ring-primary-200 dark:group-hover:ring-primary-800 transition-all duration-200 flex-shrink-0"
                             />
                             <div className="flex-1 min-w-0">
