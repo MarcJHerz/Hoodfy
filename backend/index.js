@@ -8,15 +8,47 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ Middlewares
+// ✅ Middlewares - Configuración CORS mejorada para móviles
 app.use(cors({
-  origin: true, // Permite todas las origenes en desarrollo
+  origin: [
+    'https://qahood.com',
+    'https://www.qahood.com',
+    'http://localhost:3000',
+    'http://localhost:19006',
+    'exp://192.168.1.100:8081', // Para Expo en desarrollo
+    /^https:\/\/.*\.qahood\.com$/ // Cualquier subdominio de qahood.com
+  ],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+    'User-Agent',
+    'Cache-Control'
+  ],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// Configurar límites de tamaño para archivos grandes (hasta 500MB)
+app.use(express.json({ limit: '500mb' }));
+app.use(express.urlencoded({ extended: true, limit: '500mb' }));
+
+// Middleware adicional para manejar preflight OPTIONS en móviles
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, User-Agent, Cache-Control');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.status(204).send();
+  } else {
+    next();
+  }
+});
 
 // ✅ Importar rutas
 const userRoutes = require('./routes/userRoutes');

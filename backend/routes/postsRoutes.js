@@ -18,20 +18,8 @@ const ensureDir = (dir) => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 };
 
-// Configurar almacenamiento para imágenes y videos
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, '../uploads/posts');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// 📷 Configuración de multer para imágenes y videos - MIGRADO A S3
+const storage = multer.memoryStorage();
 
 // Filtrar archivos por tipo
 const fileFilter = (req, file, cb) => {
@@ -43,18 +31,20 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Configurar multer
+// Configurar multer con límites más generosos
 const upload = multer({ 
   storage: storage,
   limits: {
-    fileSize: 100 * 1024 * 1024, // 100MB límite
+    fileSize: 500 * 1024 * 1024, // 500MB límite para videos grandes
+    files: 10, // Máximo 10 archivos por request
+    fieldSize: 50 * 1024 * 1024 // 50MB por campo
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/quicktime'];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/quicktime', 'video/webm'];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Tipo de archivo no soportado. Solo se permiten imágenes (JPEG, PNG, GIF) y videos (MP4, MOV)'));
+      cb(new Error('Tipo de archivo no soportado. Solo se permiten imágenes (JPEG, PNG, GIF, WebP) y videos (MP4, MOV, WebM)'));
     }
   }
 });
