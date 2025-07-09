@@ -58,6 +58,8 @@ interface Community {
   name: string;
   description?: string;
   coverImage?: string;
+  price?: number;
+  isFree?: boolean;
   members?: any[];
   creator?: {
     _id: string;
@@ -128,6 +130,7 @@ export default function CommunityPage() {
       setLoading(true);
       const response = await communities.getById(id as string);
       console.log('Respuesta de getById:', response.data);
+      console.log('💰 Precio de la comunidad:', response.data.price);
       setCommunity(response.data);
       
       // Simular conteo de vistas
@@ -715,7 +718,7 @@ export default function CommunityPage() {
         isOpen={isSubscriptionModalOpen}
         onClose={handleCloseModal}
         communityName={community.name}
-        price={0}
+        price={community.price || 0}
         benefits={['Acceso a contenido exclusivo', 'Participación en el chat grupal', 'Conexión con otros miembros']}
         rules={['Respetar a los miembros', 'No spam', 'Mantener conversaciones constructivas']}
         communityId={community._id}

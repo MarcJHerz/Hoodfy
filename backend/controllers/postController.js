@@ -178,16 +178,14 @@ exports.getCommunityPosts = async (req, res) => {
       .populate('author', 'name username profilePicture')
       .populate('comments.author', 'name username profilePicture');
 
-    // Procesar URLs de medios - mantener keys de S3 como están
+    // Procesar URLs de medios - mantener keys de S3 como están sin procesamiento adicional
     posts.forEach(post => {
       if (post.media && post.media.length > 0) {
         post.media = post.media.map(item => ({
           ...item.toObject(),
-          // DEVOLVER SIEMPRE EL KEY DE S3, NUNCA UNA URL LOCAL
-          url: item.url && item.url.includes('amazonaws.com') ? item.url.split('/').pop() : item.url,
-          thumbnail: item.thumbnail 
-            ? (item.thumbnail.startsWith('http') ? item.thumbnail : item.thumbnail)
-            : null
+          // Mantener la URL tal como está almacenada (key de S3)
+          url: item.url,
+          thumbnail: item.thumbnail || null
         }));
       }
     });
@@ -316,16 +314,13 @@ exports.getPostById = async (req, res) => {
       }
     }
 
-    // Procesar URLs de medios - mantener keys de S3 como están
+    // Procesar URLs de medios - mantener keys de S3 como están sin procesamiento adicional
     if (post.media && post.media.length > 0) {
       post.media = post.media.map(item => ({
         ...item.toObject(),
-        // Si es una key de S3 (no contiene http), mantenerla como key
-        // Si es una URL completa, mantenerla tal como está
-        url: item.url.startsWith('http') ? item.url : item.url,
-        thumbnail: item.thumbnail 
-          ? (item.thumbnail.startsWith('http') ? item.thumbnail : item.thumbnail)
-          : null
+        // Mantener la URL tal como está almacenada (key de S3)
+        url: item.url,
+        thumbnail: item.thumbnail || null
       }));
     }
 

@@ -16,7 +16,12 @@ app.use(cors({
     'http://localhost:3000',
     'http://localhost:19006',
     'exp://192.168.1.100:8081', // Para Expo en desarrollo
-    /^https:\/\/.*\.qahood\.com$/ // Cualquier subdominio de qahood.com
+    /^https:\/\/.*\.qahood\.com$/, // Cualquier subdominio de qahood.com
+    /^https:\/\/.*\.amplifyapp\.com$/, // Para Amplify previews
+    /^https:\/\/.*\.vercel\.app$/, // Para Vercel deployments
+    /^http:\/\/localhost:\d+$/, // Para desarrollo local con cualquier puerto
+    /^https:\/\/.*\.ngrok\.io$/, // Para túneles ngrok
+    '*' // Temporal para debugging móvil - QUITAR EN PRODUCCIÓN
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
@@ -27,7 +32,9 @@ app.use(cors({
     'Accept',
     'Origin',
     'User-Agent',
-    'Cache-Control'
+    'Cache-Control',
+    'Accept-Language',
+    'Accept-Encoding'
   ],
   preflightContinue: false,
   optionsSuccessStatus: 204
@@ -42,12 +49,32 @@ app.use((req, res, next) => {
   if (req.method === 'OPTIONS') {
     res.header('Access-Control-Allow-Origin', req.headers.origin);
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, User-Agent, Cache-Control');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, User-Agent, Cache-Control, Accept-Language, Accept-Encoding');
     res.header('Access-Control-Allow-Credentials', 'true');
     res.status(204).send();
   } else {
     next();
   }
+});
+
+// Middleware para debugging de requests desde móviles
+app.use((req, res, next) => {
+  // Log específico para requests POST desde móviles
+  if (req.method === 'POST' && req.path.includes('/api/posts')) {
+    console.log('📱 POST Request desde móvil:', {
+      method: req.method,
+      url: req.url,
+      headers: {
+        'user-agent': req.headers['user-agent'],
+        'content-type': req.headers['content-type'],
+        'content-length': req.headers['content-length'],
+        'origin': req.headers.origin
+      },
+      body: req.body ? 'Body present' : 'No body',
+      files: req.files ? `${req.files.length} files` : 'No files yet'
+    });
+  }
+  next();
 });
 
 // ✅ Importar rutas
