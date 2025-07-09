@@ -69,7 +69,7 @@ export function useImageUrlResolved(keyOrUrl?: string) {
       }
       
       // Si es una ruta relativa local
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.87:5000';
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
       if (isMounted) {
         setUrl(`${baseUrl}/${keyOrUrl.replace(/^\//, '')}`);
         setLoading(false);

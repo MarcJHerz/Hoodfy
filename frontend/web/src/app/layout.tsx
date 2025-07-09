@@ -18,7 +18,7 @@ const NotificationInitializer = dynamic(() => import("@/components/NotificationI
 });
 
 export const metadata: Metadata = {
-  title: "Hoodfy - Tu red social privada",
+  title: "Qahood - Tu red social privada",
   description: "La red social privada para tu comunidad",
 };
 

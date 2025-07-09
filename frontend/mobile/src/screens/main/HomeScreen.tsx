@@ -14,7 +14,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Bienvenido a HOODFY</Text>
+              <Text style={styles.title}>Bienvenido a QAHOOD</Text>
       <TouchableOpacity 
         style={styles.button}
         onPress={() => navigation.navigate('Profile')}

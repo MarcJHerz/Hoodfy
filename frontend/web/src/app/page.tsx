@@ -98,7 +98,7 @@ export default function Home() {
     {
       name: "María González",
       role: "Miembro de 'Expats en Madrid'",
-      content: "Gracias a Hoodfy encontré mi grupo de amigos en Madrid. En 2 semanas ya tenía planes todos los fines de semana.",
+      content: "Gracias a Qahood encontré mi grupo de amigos en Madrid. En 2 semanas ya tenía planes todos los fines de semana.",
       rating: 5
     },
     {
@@ -146,7 +146,7 @@ export default function Home() {
               </div>
               <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white mb-6">
                 <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Hoodfy
+                  Qahood
                 </span>
         </h1>
             </div>
@@ -211,7 +211,7 @@ export default function Home() {
               ¿Por qué unirte a una comunidad?
             </h3>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Descubre todo lo que puedes obtener al formar parte de una comunidad en Hoodfy
+              Descubre todo lo que puedes obtener al formar parte de una comunidad en Qahood
             </p>
           </div>
 
@@ -398,7 +398,7 @@ export default function Home() {
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                   <span className="text-white font-bold text-sm">H</span>
                 </div>
-                <span className="text-xl font-bold">Hoodfy</span>
+                <span className="text-xl font-bold">Qahood</span>
               </div>
               <p className="text-gray-300 text-sm">
                 Conectando comunidades, creando vínculos reales.
@@ -434,7 +434,7 @@ export default function Home() {
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-            <p>&copy; {new Date().getFullYear()} Hoodfy. Todos los derechos reservados.</p>
+            <p>&copy; {new Date().getFullYear()} Qahood. Todos los derechos reservados.</p>
         </div>
       </div>
       </footer>

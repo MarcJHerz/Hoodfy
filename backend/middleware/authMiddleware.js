@@ -38,7 +38,6 @@ const verifyToken = async (req, res, next) => {
       });
     }
 
-    console.log('🔐 Usuario autenticado:', userId);
     req.userId = userId;
     next();
   } catch (error) {

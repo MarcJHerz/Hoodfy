@@ -10,7 +10,7 @@ export default function Providers({ children }: { children: ReactNode }) {
       defaultTheme="system"
       enableSystem={true}
       disableTransitionOnChange={false}
-      storageKey="hoodfy-theme"
+              storageKey="qahood-theme"
       themes={['light', 'dark', 'system']}
       forcedTheme={undefined}
       enableColorScheme={true}

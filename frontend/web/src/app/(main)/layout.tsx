@@ -14,7 +14,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <Link href="/dashboard" className="text-2xl font-bold text-gray-900">
-              Hoodfy
+              Qahood
             </Link>
             <div className="flex space-x-4">
               <Link

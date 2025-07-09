@@ -81,7 +81,7 @@ export default function LoadingScreen({
 
           {/* Título */}
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-gradient">Hoodfy</h1>
+            <h1 className="text-3xl font-bold text-gradient">Qahood</h1>
             <p className="text-gray-600 dark:text-gray-400 font-medium">
               {message}{dots}
             </p>

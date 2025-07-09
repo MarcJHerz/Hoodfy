@@ -269,7 +269,7 @@ router.get('/home/:userId', async (req, res) => {
     // 4. Procesar los posts para incluir URLs completas
     const processedPosts = posts.map(post => {
       const processedPost = post.toObject();
-      const baseUrl = process.env.BASE_URL || 'http://192.168.1.87:5000';
+      const baseUrl = process.env.BASE_URL || 'https://api.qahood.com';
       
       // Procesar imagen de perfil del usuario
       if (processedPost.author && processedPost.author.profilePicture) {

@@ -12,7 +12,7 @@ export const formatImageUrl = (url?: string): string => {
   }
   
   // Si es una ruta relativa, construir la URL completa
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.87:5000';
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
   return `${baseUrl}/${url.replace(/^\//, '')}`;
 };
 

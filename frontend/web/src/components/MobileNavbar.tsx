@@ -22,11 +22,12 @@ import Image from 'next/image';
 
 const SearchModal = dynamic(() => import('./SearchModal'), { ssr: false });
 
-// Función para formatear la URL de la imagen de perfil
+// Formatear URL de imagen
 const formatImageUrl = (url?: string) => {
   if (!url) return '/images/defaults/default-avatar.png';
   if (url.startsWith('http')) return url;
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.87:5000';
+  
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
   return `${baseUrl}/${url.replace(/^\//, '')}`;
 };
 
@@ -118,7 +119,7 @@ export default function MobileNavbar() {
               <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-sm">H</span>
             </div>
-              <span className="font-bold text-lg text-gray-900 dark:text-gray-100">Hoodfy</span>
+              <span className="font-bold text-lg text-gray-900 dark:text-gray-100">Qahood</span>
           </Link>
         </div>
         

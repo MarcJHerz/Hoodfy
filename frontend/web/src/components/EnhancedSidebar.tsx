@@ -201,7 +201,7 @@ export default function EnhancedSidebar() {
               <div className="absolute inset-0 bg-primary-400 rounded-xl animate-ping opacity-20 group-hover:opacity-30"></div>
             </div>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">Hoodfy</h1>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">Qahood</h1>
               <p className="text-xs text-gray-500 dark:text-gray-400 -mt-1">Tu red social privada</p>
             </div>
           </Link>

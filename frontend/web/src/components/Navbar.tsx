@@ -21,6 +21,7 @@ import Image from 'next/image';
 import { useChatStore } from '@/stores/chatStore';
 import { useTheme } from 'next-themes';
 import { useImageUrl } from '@/utils/useImageUrl';
+import { UserAvatar } from './UserAvatar';
 
 const SearchModal = dynamic(() => import('./SearchModal'), { ssr: false });
 
@@ -157,7 +158,7 @@ export default function Navbar() {
                 <div className="absolute inset-0 bg-primary-200 dark:bg-primary-800 rounded-full animate-ping opacity-20 group-hover:opacity-30"></div>
               </div>
               <span className="hidden sm:block font-bold text-xl text-gradient hover:scale-105 transition-transform duration-200">
-                Hoodfy
+                Qahood
               </span>
             </Link>
           </div>
@@ -231,11 +232,11 @@ export default function Navbar() {
                   aria-label="Abrir menú de perfil"
                 >
                   <div className="relative">
-                  <img
-                    src={profileImageUrl}
-                    alt="Avatar"
-                      className="h-9 w-9 rounded-full border-2 border-transparent group-hover:border-primary-200 dark:group-hover:border-primary-700 object-cover shadow-md group-hover:shadow-lg transition-all duration-200"
-                  />
+                    <UserAvatar
+                      size={32}
+                      source={user.profilePicture}
+                      name={user.name || 'Usuario'}
+                    />
                     <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary-500/0 to-accent-500/0 group-hover:from-primary-500/10 group-hover:to-accent-500/10 transition-all duration-200"></div>
                   </div>
                 </button>
@@ -255,10 +256,10 @@ export default function Navbar() {
                     {/* Header del perfil */}
                     <div className="flex flex-col items-center gap-3 mb-4 px-4">
                       <div className="relative">
-                      <img
-                        src={profileImageUrl}
-                        alt="Avatar"
-                          className="h-16 w-16 rounded-full border-3 border-primary-200 dark:border-primary-700 object-cover shadow-md"
+                        <UserAvatar
+                          size={64}
+                          source={user.profilePicture}
+                          name={user.name || 'Usuario'}
                         />
                         <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-success-500 border-2 border-white dark:border-gray-800 rounded-full"></div>
                       </div>
@@ -374,7 +375,7 @@ export default function Navbar() {
             <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center shadow-md">
               <span className="text-white font-bold text-sm">H</span>
             </div>
-            <span className="font-bold text-lg bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">Hoodfy</span>
+            <span className="font-bold text-lg bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">Qahood</span>
           </Link>
             
           {/* Mobile navigation right */}
@@ -394,11 +395,11 @@ export default function Navbar() {
                   className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
                   title="Perfil"
                 >
-                  <img
-                    src={profileImageUrl}
-                      alt="Avatar"
-                    className="h-7 w-7 rounded-full border-2 border-primary-200 dark:border-primary-700 object-cover"
-                    />
+                  <UserAvatar
+                    size={28}
+                    source={user.profilePicture}
+                    name={user.name || 'Usuario'}
+                  />
                 </button>
                 
                 {/* Mobile profile dropdown */}

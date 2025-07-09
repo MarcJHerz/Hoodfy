@@ -1,8 +1,8 @@
-# Sistema de Chat - Hoodfy
+# Sistema de Chat - Qahood
 
 ## Descripción
 
-El sistema de chat de Hoodfy permite a los usuarios comunicarse en tiempo real dentro de las comunidades y con otros aliados. El sistema está construido con Firebase Firestore para la sincronización en tiempo real y Zustand para el manejo de estado.
+El sistema de chat de Qahood permite a los usuarios comunicarse en tiempo real dentro de las comunidades y con otros aliados. El sistema está construido con Firebase Firestore para la sincronización en tiempo real y Zustand para el manejo de estado.
 
 ## Características
 

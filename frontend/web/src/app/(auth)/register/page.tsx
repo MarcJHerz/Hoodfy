@@ -231,7 +231,7 @@ export default function RegisterPage() {
           </div>
 
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            ¡Únete a Hoodfy!
+            ¡Únete a Qahood!
           </h2>
           <p className="text-gray-600 dark:text-gray-300 text-lg mb-4">
             Crea tu cuenta y encuentra tu comunidad perfecta
@@ -509,7 +509,7 @@ export default function RegisterPage() {
               <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl animate-fade-in">
                 <CheckCircleIcon className="h-5 w-5 text-green-500 flex-shrink-0" />
                 <p className="text-green-700 dark:text-green-300 text-sm font-medium">
-                  ¡Cuenta creada exitosamente! Bienvenido a Hoodfy...
+                  ¡Cuenta creada exitosamente! Bienvenido a Qahood...
                 </p>
               </div>
             )}
@@ -570,7 +570,7 @@ export default function RegisterPage() {
             🔒 Tus datos están protegidos con encriptación de extremo a extremo
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            ✨ Más de 10,000 personas ya se han unido a Hoodfy
+            ✨ Más de 10,000 personas ya se han unido a Qahood
           </p>
           </div>
       </div>

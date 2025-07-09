@@ -1,8 +1,8 @@
-# 🏘️ Hoodfy - Plataforma Social Exclusiva
+# 🏘️ Qahood - Plataforma Social Exclusiva
 
 > **Plataforma social donde usuarios pagan para acceder a comunidades exclusivas**
 
-Hoodfy es una plataforma social innovadora que conecta personas a través de comunidades premium. Los usuarios pueden descubrir, unirse y participar en comunidades exclusivas mediante suscripciones pagadas, creando un ecosistema de valor agregado.
+Qahood es una plataforma social innovadora que conecta personas a través de comunidades premium. Los usuarios pueden descubrir, unirse y participar en comunidades exclusivas mediante suscripciones pagadas, creando un ecosistema de valor agregado.
 
 ## ✨ Características Principales
 
@@ -67,8 +67,8 @@ Hoodfy es una plataforma social innovadora que conecta personas a través de com
 
 ### **1. Clonar el repositorio**
 ```bash
-git clone https://github.com/marcherz/hoodfy.git
-cd hoodfy
+git clone https://github.com/marcherz/qahood.git
+cd qahood
 ```
 
 ### **2. Configurar Backend**
@@ -80,7 +80,7 @@ npm install
 **Crear archivo `.env`:**
 ```env
 # MongoDB
-MONGODB_URI=mongodb://localhost:27017/hoodfy
+MONGODB_URI=mongodb://localhost:27017/qahood
 
 # Firebase
 FIREBASE_PROJECT_ID=tu-proyecto-firebase
@@ -141,7 +141,7 @@ npx expo start
 ## 📁 Estructura del Proyecto
 
 ```
-hoodfy/
+qahood/
 ├── backend/                 # API Backend (Node.js + Express)
 │   ├── controllers/         # Controladores de rutas
 │   ├── models/             # Modelos de MongoDB

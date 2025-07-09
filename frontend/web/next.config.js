@@ -9,7 +9,8 @@ const nextConfig = {
     domains: [
       'localhost',
       '127.0.0.1',
-      '192.168.1.87',
+      'qahood.com',
+      'api.qahood.com',
       'cdn.venngage.com',
       'miro.medium.com'
     ],
@@ -19,9 +20,8 @@ const nextConfig = {
         hostname: 'cdn.venngage.com',
       },
       {
-        protocol: 'http',
-        hostname: '192.168.1.87',
-        port: '5000',
+        protocol: 'https',
+        hostname: 'api.qahood.com',
       },
       {
         protocol: 'https',

@@ -59,11 +59,6 @@ router.post('/send', verifyToken, async (req, res) => {
 
     const response = await messaging.sendMulticast(message);
     
-    console.log('Notificación enviada:', {
-      successCount: response.successCount,
-      failureCount: response.failureCount,
-    });
-
     res.json({ success: true, response });
   } catch (error) {
     console.error('Error enviando notificación:', error);

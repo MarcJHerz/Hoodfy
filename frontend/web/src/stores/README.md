@@ -1,6 +1,6 @@
-# Stores de Zustand - Hoodfy
+# Stores de Zustand - Qahood
 
-Esta carpeta contiene todos los stores de Zustand para la gestión centralizada del estado en Hoodfy.
+Esta carpeta contiene todos los stores de Zustand para la gestión centralizada del estado en Qahood.
 
 ## 📁 Estructura
 

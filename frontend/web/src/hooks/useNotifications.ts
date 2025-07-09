@@ -98,7 +98,7 @@ export const useNotifications = () => {
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.87:5000'}/api/users/fcm-token`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com'}/api/users/fcm-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

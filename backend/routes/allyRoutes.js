@@ -8,7 +8,7 @@ const { verifyToken } = require('../middleware/authMiddleware');
 const ensureAbsoluteUrl = (url) => {
   if (!url) return null;
   if (url.startsWith('http')) return url;
-  const baseUrl = process.env.BASE_URL || 'http://192.168.1.87:5000';
+  const baseUrl = process.env.BASE_URL || 'https://api.qahood.com';
   return `${baseUrl}/${url}`;
 };
 

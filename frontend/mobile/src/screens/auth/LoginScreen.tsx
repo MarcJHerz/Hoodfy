@@ -159,7 +159,7 @@ export default function LoginScreen() {
             { transform: [{ translateX: shakeAnimation }] }
           ]}
         >
-          <Text style={styles.title}>Bienvenido a Hoodfy</Text>
+          <Text style={styles.title}>Bienvenido a Qahood</Text>
           <Text style={styles.subtitle}>
             Conecta con tu comunidad y comparte tus experiencias
           </Text>

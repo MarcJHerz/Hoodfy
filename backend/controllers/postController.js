@@ -8,29 +8,24 @@ const { validatePostData } = require('../validators/postValidator');
 const ensureAbsoluteUrl = (url) => {
   if (!url) return url;
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  const baseUrl = process.env.BASE_URL || 'http://192.168.1.87:5000';
+  const baseUrl = process.env.BASE_URL || 'https://api.qahood.com';
   return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
 // Crear un nuevo post
 exports.createPost = async (req, res) => {
   try {
-    console.log('Body recibido en backend:', req.body);
     const { content, communityId, tags, visibility } = req.body;
     let { media } = req.body;
     // Parsear media si viene como string
     if (typeof media === 'string') {
       try {
         media = JSON.parse(media);
-        console.log('Media parseada en backend:', media);
       } catch (e) {
         console.error('Error al parsear media:', e, 'media:', media);
         media = [];
       }
-    } else {
-      console.log('Media recibida como array:', media);
     }
-    console.log('Usuario autenticado:', req.user, req.userId);
     const userId = (req.user && req.user._id) ? req.user._id : req.userId;
 
     // Validar el post de forma síncrona
@@ -589,19 +584,11 @@ exports.getCommunityPostsFiltered = async (req, res) => {
     const { page = 1, limit = 10, filter = 'creator' } = req.query; // 'creator' | 'community'
     const userId = req.userId;
 
-    console.log('🔍 Obteniendo posts filtrados:', { communityId, filter, userId });
-
     // Verificar que la comunidad existe
     const community = await Community.findById(communityId);
     if (!community) {
       return res.status(404).json({ error: 'Comunidad no encontrada' });
     }
-
-    console.log('🏘️ Comunidad encontrada:', { 
-      name: community.name, 
-      creator: community.creator,
-      hasCreator: !!community.creator 
-    });
 
     // Verificar que la comunidad tiene un creador
     if (!community.creator) {
@@ -616,14 +603,10 @@ exports.getCommunityPostsFiltered = async (req, res) => {
     // Filtrar por tipo de post
     if (filter === 'creator') {
       query.author = community.creator;
-      console.log('🎯 Filtrando posts del creador:', community.creator);
     } else if (filter === 'community') {
       // Posts de cualquier miembro que no sea el creador
       query.author = { $ne: community.creator };
-      console.log('👥 Filtrando posts de la comunidad (no creador)');
     }
-
-    console.log('🔍 Query construido:', query);
 
     // Ajustar visibilidad según el rol del usuario (solo si la comunidad es privada)
     const isMember = community.members && community.members.includes(userId);
@@ -650,8 +633,6 @@ exports.getCommunityPostsFiltered = async (req, res) => {
       sortOption = { createdAt: -1 };
     }
 
-    console.log('📊 Opciones de ordenamiento:', sortOption);
-
     // Ejecutar la consulta
     const posts = await Post.find(query)
       .sort(sortOption)
@@ -659,8 +640,6 @@ exports.getCommunityPostsFiltered = async (req, res) => {
       .limit(parseInt(limit))
       .populate('author', 'name username profilePicture')
       .populate('comments.author', 'name username profilePicture');
-
-    console.log('📝 Posts encontrados:', posts.length);
 
     // Asegurar URLs absolutas en los medios
     posts.forEach(post => {
@@ -675,8 +654,6 @@ exports.getCommunityPostsFiltered = async (req, res) => {
 
     // Obtener el total de posts para la paginación
     const total = await Post.countDocuments(query);
-
-    console.log('✅ Respuesta exitosa:', { total, filter, postsCount: posts.length });
 
     res.json({
       posts,

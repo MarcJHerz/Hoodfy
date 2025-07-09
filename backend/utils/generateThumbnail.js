@@ -30,7 +30,6 @@ const generateThumbnail = (videoPath, outputPath, time = 1) => {
         size: '320x240' // Tamaño de la miniatura
       })
       .on('end', () => {
-        console.log(`Miniatura generada: ${outputPath}`);
         resolve(outputPath);
       })
       .on('error', (err) => {

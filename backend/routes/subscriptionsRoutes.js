@@ -106,8 +106,6 @@ router.post('/cancel', verifyToken, async (req, res) => {
 // 📌 Obtener suscripciones del usuario (todas, activas e inactivas)
 router.get('/my-subscriptions', verifyToken, async (req, res) => {
   try {
-    console.log('🔍 Obteniendo suscripciones para usuario:', req.userId);
-    
     // Verificar que el usuario existe
     const user = await User.findById(req.userId);
     if (!user) {
@@ -115,31 +113,14 @@ router.get('/my-subscriptions', verifyToken, async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
     
-    console.log('✅ Usuario encontrado:', user.name, user.email);
-    
     const subscriptions = await Subscription.find({ 
       user: req.userId,
       status: 'active' // Solo suscripciones activas
     }).populate('community', 'name description coverImage members creator');
 
-    console.log(`📊 Encontradas ${subscriptions.length} suscripciones activas`);
-
     // Filtramos suscripciones sin comunidad (por si acaso alguna está corrupta)
     const filtered = subscriptions.filter(sub => sub.community !== null);
     
-    console.log(`✅ Retornando ${filtered.length} suscripciones válidas`);
-    
-    // Log detallado de cada suscripción
-    filtered.forEach((sub, index) => {
-      console.log(`📋 Suscripción ${index + 1}:`, {
-        id: sub._id,
-        userId: sub.user,
-        communityId: sub.community._id,
-        communityName: sub.community.name,
-        status: sub.status
-      });
-    });
-
     res.json(filtered);
   } catch (err) {
     console.error('❌ Error al obtener suscripciones:', err);
@@ -155,8 +136,6 @@ router.get('/by-user', verifyToken, async (req, res) => {
       user: req.userId,
       status: 'active'
     });
-
-    console.log(`🔍 Encontradas ${subscriptions.length} suscripciones activas para el usuario ${req.userId}`);
     
     // Extraer solo los IDs de comunidades
     const communityIds = subscriptions
@@ -164,7 +143,6 @@ router.get('/by-user', verifyToken, async (req, res) => {
       .map(sub => sub.community.toString());
     
     if (communityIds.length === 0) {
-      console.log('ℹ️ No hay comunidades suscritas activas');
       return res.json([]);
     }
     
@@ -172,8 +150,6 @@ router.get('/by-user', verifyToken, async (req, res) => {
     const communities = await Community.find({
       _id: { $in: communityIds }
     });
-    
-    console.log(`✅ Retornando ${communities.length} comunidades activas`);
     
     // Formatear respuesta
     const formattedCommunities = communities.map(community => {
@@ -196,9 +172,6 @@ router.post('/:id/join', verifyToken, async (req, res) => {
   try {
     const communityId = req.params.id;
     const userId = req.userId;
-    
-    console.log('📩 Solicitud de suscripción recibida para comunidad:', communityId);
-    console.log('👤 Usuario autenticado:', userId);
     
     // Verificar si la comunidad existe
     const community = await Community.findById(communityId);
@@ -343,8 +316,6 @@ router.get('/community/:communityId/subscribers', async (req, res) => {
 // 📌 Endpoint de diagnóstico para verificar suscripciones
 router.get('/diagnostic', verifyToken, async (req, res) => {
   try {
-    console.log('🔍 Diagnóstico de suscripciones para usuario:', req.userId);
-    
     // Obtener todas las suscripciones del usuario
     const allSubscriptions = await Subscription.find({ user: req.userId });
     const activeSubscriptions = await Subscription.find({ 
@@ -373,7 +344,6 @@ router.get('/diagnostic', verifyToken, async (req, res) => {
       }))
     };
     
-    console.log('📊 Diagnóstico:', diagnostic);
     res.json(diagnostic);
   } catch (error) {
     console.error('❌ Error en diagnóstico:', error);

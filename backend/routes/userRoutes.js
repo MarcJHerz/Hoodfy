@@ -111,7 +111,7 @@ router.get('/profile/:userId', verifyToken, async (req, res) => {
     // Asegurar que la URL del banner sea absoluta (si existe)
     const bannerImage = user.bannerImage?.startsWith('http')
       ? user.bannerImage
-      : user.bannerImage ? `${process.env.BASE_URL || 'http://192.168.1.87:5000'}/${user.bannerImage}` : null;
+      : user.bannerImage ? `${process.env.BASE_URL || 'https://api.qahood.com'}/${user.bannerImage}` : null;
 
     res.json({
       _id: user._id,
@@ -234,21 +234,15 @@ router.put('/profile/blocks', verifyToken, async (req, res) => {
 // Guardar token FCM del usuario
 router.post('/fcm-token', verifyToken, async (req, res) => {
   try {
-    const { token } = req.body;
+    const { fcmToken } = req.body;
     const userId = req.userId;
-
-    if (!token) {
-      return res.status(400).json({ error: 'Token FCM requerido' });
-    }
-
-    // Actualizar el token FCM en la base de datos
+    
+    // Actualizar el usuario con el token FCM
     await User.findByIdAndUpdate(userId, {
-      fcmToken: token,
-      updatedAt: new Date()
+      fcmToken: fcmToken
     });
-
-    console.log(`Token FCM guardado para usuario: ${userId}`);
-    res.json({ success: true });
+    
+    res.json({ message: 'Token FCM guardado exitosamente' });
   } catch (error) {
     console.error('Error guardando token FCM:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -265,17 +259,14 @@ router.post('/fcm-tokens', verifyToken, async (req, res) => {
     }
 
     // Obtener usuarios con sus tokens FCM
-    const users = await User.find(
-      { _id: { $in: userIds } },
-      'fcmToken'
-    );
-
-    // Extraer tokens válidos
+    const users = await User.find({
+      _id: { $in: userIds }
+    }).select('fcmToken');
+    
     const tokens = users
-      .map(user => user.fcmToken)
-      .filter(token => token && token.trim() !== '');
-
-    console.log(`Tokens FCM obtenidos: ${tokens.length} de ${userIds.length} usuarios`);
+      .filter(user => user.fcmToken)
+      .map(user => user.fcmToken);
+    
     res.json({ tokens });
   } catch (error) {
     console.error('Error obteniendo tokens FCM:', error);
@@ -340,11 +331,6 @@ router.post('/notifications/send', verifyToken, async (req, res) => {
 
     const response = await messaging.sendMulticast(message);
     
-    console.log('Notificación enviada:', {
-      successCount: response.successCount,
-      failureCount: response.failureCount,
-    });
-
     res.json({ success: true, response });
   } catch (error) {
     console.error('Error enviando notificación:', error);

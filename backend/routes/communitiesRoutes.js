@@ -41,7 +41,6 @@ const makeAllies = async (userId, communityId) => {
             user1: userId,
             user2: memberId
           }).save();
-          console.log(`✅ Relación de aliados creada entre ${userId} y ${memberId}`);
         }
       }
     }
@@ -89,24 +88,13 @@ router.post('/create', verifyToken, upload.single('coverImage'), async (req, res
     let coverImage = '';
     if (req.file) {
       try {
-        console.log('Archivo recibido:', {
-          originalname: req.file.originalname,
-          mimetype: req.file.mimetype,
-          size: req.file.size,
-          hasBuffer: !!req.file.buffer
-        });
-        
         const { uploadFileToS3 } = require('../utils/s3');
         const { buffer, originalname, mimetype } = req.file;
         coverImage = await uploadFileToS3(buffer, originalname, mimetype);
-        
-        console.log('Imagen subida a S3 con key:', coverImage);
       } catch (error) {
         console.error('Error al subir imagen a S3:', error);
         return res.status(500).json({ error: 'Error al subir la imagen de portada' });
       }
-    } else {
-      console.log('No se recibió archivo en la petición');
     }
 
     let stripeProductId = '';
@@ -211,16 +199,7 @@ router.get('/created-by/:userId', async (req, res) => {
       .populate('creator', 'name profilePicture')
       .populate('members', 'name profilePicture');
 
-    // Formatear las URLs de las imágenes
-    const formattedCommunities = communities.map(community => {
-      const formattedCommunity = community.toObject();
-      if (formattedCommunity.coverImage && !formattedCommunity.coverImage.startsWith('http')) {
-        formattedCommunity.coverImage = `${process.env.BASE_URL || 'http://192.168.1.87:5000'}/${formattedCommunity.coverImage.replace(/^\//, '')}`;
-      }
-      return formattedCommunity;
-    });
-
-    res.json(formattedCommunities);
+    res.json(communities);
   } catch (error) {
     console.error('❌ Error al obtener comunidades creadas:', error);
     res.status(500).json({ error: 'Error al obtener comunidades creadas' });
@@ -366,16 +345,7 @@ router.get('/joined-by/me', verifyToken, async (req, res) => {
     .populate('creator', 'name profilePicture')
     .populate('members', 'name profilePicture');
 
-    // Formatear las URLs de las imágenes
-    const formattedCommunities = communities.map(community => {
-      const formattedCommunity = community.toObject();
-      if (formattedCommunity.coverImage && !formattedCommunity.coverImage.startsWith('http')) {
-        formattedCommunity.coverImage = `${process.env.BASE_URL || 'http://192.168.1.87:5000'}/${formattedCommunity.coverImage.replace(/^\//, '')}`;
-      }
-      return formattedCommunity;
-    });
-    
-    res.json(formattedCommunities);
+    res.json(communities);
   } catch (error) {
     console.error('❌ Error al obtener comunidades unidas:', error);
     res.status(500).json({ error: 'Error al obtener comunidades unidas' });
@@ -396,7 +366,7 @@ router.get('/joined-by/:userId', async (req, res) => {
     const formattedCommunities = communities.map(community => {
       const formattedCommunity = community.toObject();
       if (formattedCommunity.coverImage && !formattedCommunity.coverImage.startsWith('http')) {
-        formattedCommunity.coverImage = `${process.env.BASE_URL || 'http://192.168.1.87:5000'}/${formattedCommunity.coverImage.replace(/^\//, '')}`;
+        formattedCommunity.coverImage = `${process.env.BASE_URL || 'https://api.qahood.com'}/${formattedCommunity.coverImage.replace(/^\//, '')}`;
       }
       return formattedCommunity;
     });

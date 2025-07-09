@@ -9,11 +9,11 @@ export default function Home() {
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center text-center">
         <img
           src="/logo.svg"
-          alt="Hoodfy Logo"
+                      alt="Qahood Logo"
           className="w-24 h-24 mb-4 mx-auto"
         />
         <h1 className="text-4xl md:text-5xl font-extrabold text-indigo-700 mb-4">
-          ¡Bienvenido a Hoodfy!
+          ¡Bienvenido a Qahood!
         </h1>
         <p className="text-lg md:text-xl text-gray-600 mb-6">
           La red social privada para tu comunidad, donde puedes compartir, informarte y conectar con tus vecinos de forma segura.
@@ -39,7 +39,7 @@ export default function Home() {
         </div>
       </div>
       <footer className="mt-10 text-gray-400 text-xs text-center">
-        &copy; {new Date().getFullYear()} Hoodfy. Todos los derechos reservados.
+        &copy; {new Date().getFullYear()} Qahood. Todos los derechos reservados.
       </footer>
     </main>
   );

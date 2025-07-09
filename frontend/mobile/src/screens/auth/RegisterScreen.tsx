@@ -62,7 +62,7 @@ export const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
-          <Text style={styles.title}>HOODFY</Text>
+          <Text style={styles.title}>QAHOOD</Text>
           <Text style={styles.subtitle}>Crea tu cuenta</Text>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}

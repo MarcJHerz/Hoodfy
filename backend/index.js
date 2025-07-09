@@ -72,5 +72,5 @@ mongoose
 // ✅ Iniciar el servidor
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
-  console.log(`🌐 Accesible desde: http://192.168.1.87:${PORT}`);
+  console.log(`🌐 Accesible desde: https://api.qahood.com`);
 }); 

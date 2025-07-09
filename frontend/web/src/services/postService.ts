@@ -5,7 +5,7 @@ class PostService {
 
   constructor() {
     this.api = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.87:5000/api',
+      baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com/api',
       headers: {
         'Content-Type': 'application/json',
       },
