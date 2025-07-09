@@ -61,20 +61,31 @@ exports.createPost = async (req, res) => {
 
     // Procesar archivos multimedia si existen
     let processedMedia = [];
-    if (media && media.length > 0) {
+    if (req.files && req.files.length > 0) {
+      console.log(`📁 Procesando ${req.files.length} archivos para subir a S3`);
+      
       processedMedia = await Promise.all(
-        media.map(async (item) => {
-          const { url, type, metadata } = item;
-          // Si la URL es una key de S3 (no contiene http/https), mantenerla como key
-          // Si es una URL completa, mantenerla tal como está
-          const processedUrl = url.startsWith('http://') || url.startsWith('https://') 
-            ? url 
-            : url; // Mantener la key de S3 tal como está
-          return {
-            url: processedUrl,
-            type,
-            metadata: metadata || {}
-          };
+        req.files.map(async (file) => {
+          try {
+            const { uploadFileToS3 } = require('../utils/s3');
+            const { buffer, originalname, mimetype } = file;
+            
+            console.log(`⬆️ Subiendo archivo: ${originalname}`);
+            const s3Key = await uploadFileToS3(buffer, originalname, mimetype);
+            console.log(`✅ Archivo subido con key: ${s3Key}`);
+            
+            return {
+              url: s3Key, // Guardar solo la key de S3
+              type: mimetype.startsWith('image/') ? 'image' : 'video',
+              metadata: {
+                originalName: originalname,
+                size: file.size
+              }
+            };
+          } catch (error) {
+            console.error(`❌ Error subiendo archivo ${file.originalname}:`, error);
+            throw new Error(`Error al subir archivo: ${file.originalname}`);
+          }
         })
       );
     }
