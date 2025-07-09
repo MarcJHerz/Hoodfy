@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import api from '@/services/api';
-import { PhotoIcon, XMarkIcon, SparklesIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { PhotoIcon, XMarkIcon, SparklesIcon, UserGroupIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 
 export default function CreateCommunityPage() {
@@ -13,16 +13,21 @@ export default function CreateCommunityPage() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    priceType: 'free', // Agregar campo de tipo de precio
+    price: 0, // Agregar campo de precio
   });
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  // Precios predefinidos
+  const predefinedPrices = [1, 3, 5, 7, 10, 15, 20, 25, 50, 100];
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: name === 'price' ? Number(value) : value
     }));
   };
 
@@ -82,14 +87,29 @@ export default function CreateCommunityPage() {
       return;
     }
 
+    // Validar precio si no es gratis
+    if (formData.priceType === 'predefined' && !predefinedPrices.includes(formData.price)) {
+      toast.error('Por favor, selecciona un precio válido');
+      return;
+    }
+
+    if (formData.priceType === 'custom' && (formData.price <= 0 || formData.price > 1000)) {
+      toast.error('El precio personalizado debe estar entre $1 y $1000');
+      return;
+    }
+
     try {
       setLoading(true);
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
       formDataToSend.append('description', formData.description);
+      formDataToSend.append('priceType', formData.priceType);
+      formDataToSend.append('price', formData.price.toString());
+      
       if (coverImage) {
         formDataToSend.append('coverImage', coverImage);
       }
+      
       await api.post('/api/communities/create', formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -99,7 +119,7 @@ export default function CreateCommunityPage() {
       router.push('/communities');
     } catch (error: any) {
       console.error('Error al crear comunidad:', error);
-      toast.error(error.response?.data?.message || 'Error al crear la comunidad');
+      toast.error(error.response?.data?.error || 'Error al crear la comunidad');
     } finally {
       setLoading(false);
     }
@@ -199,14 +219,14 @@ export default function CreateCommunityPage() {
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  rows={5}
-                  className="w-full px-4 py-4 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-2xl resize-none focus:ring-2 focus:ring-accent-500 dark:focus:ring-accent-400 focus:border-accent-500 dark:focus:border-accent-400 transition-all duration-200"
-                  placeholder="Cuéntanos de qué trata tu comunidad. ¿Qué tipo de contenido compartirán? ¿Cuáles son los objetivos? ¿Qué hace especial a tu comunidad?"
+                  rows={4}
+                  className="w-full px-4 py-4 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-2xl focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 dark:focus:border-primary-400 transition-all duration-200 text-lg resize-none"
+                  placeholder="Describe de qué trata tu comunidad, qué tipo de contenido compartirán, quién puede unirse..."
                   maxLength={500}
                 />
                 <div className="absolute bottom-4 right-4 pointer-events-none">
                   <span className={`text-sm font-medium ${
-                    formData.description.length > 450 
+                    formData.description.length > 400 
                       ? 'text-amber-500 dark:text-amber-400' 
                       : formData.description.length > 300 
                         ? 'text-blue-500 dark:text-blue-400' 
@@ -216,9 +236,139 @@ export default function CreateCommunityPage() {
                   </span>
                 </div>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Una buena descripción ayuda a las personas a entender el propósito de tu comunidad
+              <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                <SparklesIcon className="w-4 h-4 mr-1" />
+                Una buena descripción ayuda a las personas a entender el valor de tu comunidad
               </p>
+            </div>
+
+            {/* Configuración de Precio */}
+            <div className="space-y-6">
+              <label className="flex items-center text-base font-semibold text-gray-900 dark:text-gray-100">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                <CurrencyDollarIcon className="w-5 h-5 mr-2" />
+                Configuración de Precio
+              </label>
+              
+              {/* Tipo de precio */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <label className={`relative flex cursor-pointer rounded-xl border-2 p-4 transition-all ${
+                    formData.priceType === 'free' 
+                      ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
+                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="priceType"
+                      value="free"
+                      checked={formData.priceType === 'free'}
+                      onChange={handleInputChange}
+                      className="sr-only"
+                    />
+                    <div className="flex flex-col">
+                      <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">Gratuita</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Cualquiera puede unirse</div>
+                    </div>
+                  </label>
+
+                  <label className={`relative flex cursor-pointer rounded-xl border-2 p-4 transition-all ${
+                    formData.priceType === 'predefined' 
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="priceType"
+                      value="predefined"
+                      checked={formData.priceType === 'predefined'}
+                      onChange={handleInputChange}
+                      className="sr-only"
+                    />
+                    <div className="flex flex-col">
+                      <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">Precio Fijo</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Selecciona un precio estándar</div>
+                    </div>
+                  </label>
+
+                  <label className={`relative flex cursor-pointer rounded-xl border-2 p-4 transition-all ${
+                    formData.priceType === 'custom' 
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' 
+                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="priceType"
+                      value="custom"
+                      checked={formData.priceType === 'custom'}
+                      onChange={handleInputChange}
+                      className="sr-only"
+                    />
+                    <div className="flex flex-col">
+                      <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">Personalizado</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Define tu propio precio</div>
+                    </div>
+                  </label>
+                </div>
+
+                {/* Selector de precio predefinido */}
+                {formData.priceType === 'predefined' && (
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Selecciona el precio mensual
+                    </label>
+                    <div className="grid grid-cols-5 gap-3">
+                      {predefinedPrices.map((priceOption) => (
+                        <label
+                          key={priceOption}
+                          className={`flex cursor-pointer items-center justify-center rounded-lg border-2 p-3 text-center transition-all ${
+                            formData.price === priceOption
+                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                              : 'border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="price"
+                            value={priceOption}
+                            checked={formData.price === priceOption}
+                            onChange={handleInputChange}
+                            className="sr-only"
+                          />
+                          <span className="font-semibold">${priceOption}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Campo de precio personalizado */}
+                {formData.priceType === 'custom' && (
+                  <div className="space-y-3">
+                    <label htmlFor="customPrice" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Precio mensual personalizado (USD)
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <span className="text-gray-500 dark:text-gray-400 text-lg">$</span>
+                      </div>
+                      <input
+                        type="number"
+                        name="price"
+                        value={formData.price || ''}
+                        onChange={handleInputChange}
+                        min="1"
+                        max="1000"
+                        className="w-full pl-8 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-purple-500 dark:focus:border-purple-400 transition-all duration-200"
+                        placeholder="0"
+                      />
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Mínimo: $1 USD • Máximo: $1000 USD
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Imagen de portada */}

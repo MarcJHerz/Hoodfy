@@ -63,7 +63,7 @@ const upload = multer({
 router.use(verifyToken);
 
 // Crear un nuevo post SOLO usando el controlador moderno (S3)
-router.post('/', rateLimiter, upload.none(), postController.createPost);
+router.post('/', rateLimiter, upload.any(), postController.createPost);
 
 // Obtener posts de una comunidad
 router.get('/community/:communityId', rateLimiter, async (req, res) => {
