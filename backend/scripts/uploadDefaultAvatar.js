@@ -12,7 +12,7 @@ const uploadDefaultAvatar = async () => {
       console.log('❌ No se encontró la imagen por defecto del avatar');
       return;
     }
-
+    
     const fileBuffer = fs.readFileSync(defaultAvatarPath);
     const fileName = 'default-avatar.png';
     
@@ -23,11 +23,11 @@ const uploadDefaultAvatar = async () => {
     if (key) {
       console.log('✅ Avatar por defecto subido exitosamente a S3');
       console.log('🔑 Key:', key);
-      
+    
       // Guardar el key en el archivo de configuración
-      const configPath = path.join(__dirname, '../config/defaultAvatarKey.js');
+    const configPath = path.join(__dirname, '../config/defaultAvatarKey.js');
       const configContent = `module.exports = '${key}';`;
-      fs.writeFileSync(configPath, configContent);
+    fs.writeFileSync(configPath, configContent);
       console.log('📝 Key guardado en config/defaultAvatarKey.js');
     } else {
       console.log('❌ Error al subir el avatar por defecto');
