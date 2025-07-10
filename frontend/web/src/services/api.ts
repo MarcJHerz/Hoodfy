@@ -108,9 +108,6 @@ export const posts = {
     // Para FormData, NO establecer Content-Type manualmente
     // El navegador lo hace automáticamente con boundary
     const config = {
-      headers: {
-        // Eliminar Content-Type para que el navegador lo configure automáticamente
-      },
       timeout: 120000, // 2 minutos para archivos grandes
       maxContentLength: Infinity,
       maxBodyLength: Infinity

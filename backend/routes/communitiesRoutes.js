@@ -22,7 +22,13 @@ const makeAllies = async (userId, communityId) => {
   try {
     // Obtener todos los miembros de la comunidad
     const community = await Community.findById(communityId).populate('members', '_id');
+    if (!community) {
+      console.error('❌ Comunidad no encontrada para makeAllies:', communityId);
+      return;
+    }
+    
     const members = community.members.map(m => m._id);
+    let alliesCreated = 0;
 
     // Crear relaciones de aliados con cada miembro
     for (const memberId of members) {
@@ -41,11 +47,16 @@ const makeAllies = async (userId, communityId) => {
             user1: userId,
             user2: memberId
           }).save();
+          
+          alliesCreated++;
         }
       }
     }
+    
+    console.log(`🤝 makeAllies completado: ${alliesCreated} aliados creados`);
   } catch (error) {
-    console.error('Error al crear aliados automáticamente:', error);
+    console.error('❌ Error al crear aliados automáticamente:', error);
+    throw error; // Re-lanzar el error para que se capture en el webhook
   }
 };
 

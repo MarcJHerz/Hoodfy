@@ -137,6 +137,12 @@ exports.stripeWebhook = async (req, res) => {
         paymentStatus: session.payment_status
       });
       
+      // Verificar que tenemos los datos necesarios
+      if (!userId || !communityId) {
+        console.error('❌ Faltan datos en metadata:', { userId, communityId });
+        return res.json({ received: true, error: 'Metadata incompleta' });
+      }
+      
       // Registrar suscripción activa
       try {
         // Validar que los IDs sean válidos
@@ -181,8 +187,12 @@ exports.stripeWebhook = async (req, res) => {
             console.log('✅ Usuario agregado como miembro de la comunidad');
             
             // Crear relaciones de aliados - IMPORTANTE!
-            await makeAllies(userId, communityId);
-            console.log('✅ Relaciones de aliados creadas');
+            try {
+              await makeAllies(userId, communityId);
+              console.log('✅ Relaciones de aliados creadas');
+            } catch (allyError) {
+              console.error('❌ Error creando aliados:', allyError);
+            }
           } else {
             console.log('ℹ️ Usuario ya era miembro de la comunidad');
           }
