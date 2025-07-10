@@ -9,7 +9,7 @@ import { chatService } from '@/services/chatService';
 import { Message } from '@/types/chat';
 import { XMarkIcon, UserGroupIcon, UserIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import { formatImageUrl } from '@/utils/imageUtils';
+import { UserAvatar } from '@/components/UserAvatar';
 
 interface ChatRoomProps {
   chatId: string;
@@ -106,12 +106,10 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
             {/* Avatar/Icono mejorado */}
             {chatType === 'private' && otherUserProfilePicture ? (
               <div className="relative">
-                <Image
-                  src={formatImageUrl(otherUserProfilePicture)}
-                  alt={chatName}
-                  width={40}
-                  height={40}
-                  className="rounded-full object-cover ring-2 ring-primary-200 dark:ring-primary-700 hover-lift"
+                <UserAvatar
+                  source={otherUserProfilePicture}
+                  name={chatName}
+                  size={40}
                 />
                 <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full"></div>
               </div>

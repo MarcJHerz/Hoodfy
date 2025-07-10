@@ -140,7 +140,7 @@ export default function PostCard({ post, onPostUpdated, isCreator = false, showP
             src={authorImageUrl}
               alt={post.author.name}
               fill
-              className="object-cover"
+              className="object-cover rounded-full"
             />
         </div>
         <div className="cursor-pointer" onClick={() => router.push(`/profile/${post.author._id}`)}>

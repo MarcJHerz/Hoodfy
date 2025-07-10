@@ -7,7 +7,7 @@ import { chatService } from '@/services/chatService';
 import { ChatRoom } from '@/types/chat';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { formatImageUrl } from '@/utils/imageUtils';
+import { UserAvatar } from '@/components/UserAvatar';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChatBubbleLeftIcon, UserGroupIcon, UserIcon, ExclamationTriangleIcon, SparklesIcon } from '@heroicons/react/24/outline';
@@ -124,7 +124,7 @@ export default function MessagesPage() {
     if (!privateChat.otherUserProfilePicture || privateChat.otherUserId === user?._id) {
       return '/images/defaults/default-avatar.png';
     }
-    return formatImageUrl(privateChat.otherUserProfilePicture);
+    return privateChat.otherUserProfilePicture;
   };
 
   if (!user) {
@@ -285,12 +285,10 @@ export default function MessagesPage() {
                   <div className="flex-shrink-0 relative">
                     <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all duration-200">
                       {chat.type === 'private' ? (
-                        <Image
-                          src={getChatImage(chat)}
-                          alt={getChatName(chat)}
-                          width={56}
-                          height={56}
-                          className="object-cover group-hover:scale-105 transition-transform duration-200"
+                        <UserAvatar
+                          source={getChatImage(chat)}
+                          name={getChatName(chat)}
+                          size={56}
                         />
                       ) : (
                         <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center">

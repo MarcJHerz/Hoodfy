@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon, PaperClipIcon, PhotoIcon, DocumentIcon } from '@heroicons/react/24/outline';
 import { useAuthStore } from '@/stores/authStore';
+import heic2any from 'heic2any';
 
 interface MessageInputProps {
   onSendMessage: (content: string, type: 'text' | 'image' | 'video' | 'file', file?: File) => void;
@@ -24,6 +25,43 @@ const MessageInput: React.FC<MessageInputProps> = ({
   const imageInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { user } = useAuthStore();
+
+  // Función para convertir HEIC a JPEG
+  const convertHeicToJpeg = async (file: File): Promise<File> => {
+    try {
+      // Verificar si es HEIC/HEIF
+      if (file.type === 'image/heic' || file.type === 'image/heif' || 
+          file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
+        
+        console.log('🔄 Convirtiendo HEIC a JPEG en chat:', file.name);
+        
+        const convertedBlob = await heic2any({
+          blob: file,
+          toType: 'image/jpeg',
+          quality: 0.8
+        });
+        
+        // Crear nuevo archivo con nombre .jpg
+        const newFileName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
+        const convertedFile = new File([convertedBlob as Blob], newFileName, {
+          type: 'image/jpeg',
+          lastModified: file.lastModified
+        });
+        
+        console.log('✅ HEIC convertido exitosamente en chat:', {
+          original: file.name,
+          converted: newFileName
+        });
+        
+        return convertedFile;
+      }
+      
+      return file; // Retornar archivo original si no es HEIC
+    } catch (error) {
+      console.error('❌ Error convirtiendo HEIC en chat:', error);
+      return file;
+    }
+  };
 
   // Auto-resize textarea
   useEffect(() => {
@@ -50,11 +88,14 @@ const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const fileType = file.type;
+    // Convertir HEIC si es necesario
+    const convertedFile = await convertHeicToJpeg(file);
+
+    const fileType = convertedFile.type;
     let messageType: 'image' | 'video' | 'file' = 'file';
 
     if (fileType.startsWith('image/')) {
@@ -63,9 +104,9 @@ const MessageInput: React.FC<MessageInputProps> = ({
       messageType = 'video';
     }
 
-    // Crear un mensaje con el archivo
-    const fileName = file.name;
-    onSendMessage(fileName, messageType, file);
+    // Crear un mensaje con el archivo convertido
+    const fileName = convertedFile.name;
+    onSendMessage(fileName, messageType, convertedFile);
     
     // Limpiar el input
     if (fileInputRef.current) {
@@ -74,11 +115,14 @@ const MessageInput: React.FC<MessageInputProps> = ({
     setShowFileMenu(false);
   };
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    onSendMessage(file.name, 'image', file);
+    // Convertir HEIC si es necesario
+    const convertedFile = await convertHeicToJpeg(file);
+
+    onSendMessage(convertedFile.name, 'image', convertedFile);
     
     if (imageInputRef.current) {
       imageInputRef.current.value = '';
@@ -199,7 +243,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         ref={imageInputRef}
         type="file"
         onChange={handleImageSelect}
-        accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm"
+        accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm,.heic,.heif"
         className="hidden"
       />
 

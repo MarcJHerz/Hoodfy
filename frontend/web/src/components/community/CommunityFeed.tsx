@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { posts } from '@/services/api';
 import { Post } from '@/types/post';
-import PostCard from '../PostCard';
+import PostCard from './PostCard';
 import { FunnelIcon, ChevronDownIcon, UserIcon, UserGroupIcon, MapPinIcon } from '@heroicons/react/24/outline';
 
 type FilterType = 'creator' | 'community';
@@ -190,9 +190,7 @@ export default function CommunityFeed({ communityId, isCreator = false }: Commun
             <PostCard 
               key={post._id} 
               post={post} 
-              onCommentClick={() => {}} // Placeholder for now
-              onPostUpdate={loadPosts}
-              showCommunity={false}
+              onPostUpdated={loadPosts}
               isCreator={isCreator}
               showPinOption={true}
             />

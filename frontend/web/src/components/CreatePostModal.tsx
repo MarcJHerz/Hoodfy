@@ -6,6 +6,7 @@ import { XMarkIcon, PhotoIcon, VideoCameraIcon, XCircleIcon } from '@heroicons/r
 import { toast } from 'react-hot-toast';
 import { posts } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
+import heic2any from 'heic2any';
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -39,6 +40,46 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
     }
   }, [isOpen, initialFiles]);
 
+  // Función para convertir HEIC a JPEG
+  const convertHeicToJpeg = async (file: File): Promise<File> => {
+    try {
+      // Verificar si es HEIC/HEIF
+      if (file.type === 'image/heic' || file.type === 'image/heif' || 
+          file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
+        
+        console.log('🔄 Convirtiendo HEIC a JPEG:', file.name);
+        
+        const convertedBlob = await heic2any({
+          blob: file,
+          toType: 'image/jpeg',
+          quality: 0.8
+        });
+        
+        // Crear nuevo archivo con nombre .jpg
+        const newFileName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
+        const convertedFile = new File([convertedBlob as Blob], newFileName, {
+          type: 'image/jpeg',
+          lastModified: file.lastModified
+        });
+        
+        console.log('✅ HEIC convertido exitosamente:', {
+          original: file.name,
+          converted: newFileName,
+          originalSize: file.size,
+          convertedSize: convertedFile.size
+        });
+        
+        return convertedFile;
+      }
+      
+      return file; // Retornar archivo original si no es HEIC
+    } catch (error) {
+      console.error('❌ Error convirtiendo HEIC:', error);
+      toast.error(`Error convirtiendo ${file.name}. Se usará el archivo original.`);
+      return file;
+    }
+  };
+
   const createPreviews = (files: File[]) => {
     const newPreviews: { url: string; type: 'image' | 'video'; file: File }[] = [];
     
@@ -63,11 +104,14 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
     });
   };
 
-  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMediaChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
+      
+      // Validar archivos
       const validFiles = newFiles.filter(file => {
-        const isValid = file.type.startsWith('image/') || file.type.startsWith('video/');
+        const isValid = file.type.startsWith('image/') || file.type.startsWith('video/') ||
+                       file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif');
         if (!isValid) {
           toast.error(`El archivo ${file.name} no es una imagen o video válido`);
         }
@@ -79,10 +123,17 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
         return;
       }
 
-      setMedia(prev => [...prev, ...validFiles]);
+      // Convertir HEIC a JPEG si es necesario
+      const convertedFiles: File[] = [];
+      for (const file of validFiles) {
+        const convertedFile = await convertHeicToJpeg(file);
+        convertedFiles.push(convertedFile);
+      }
+
+      setMedia(prev => [...prev, ...convertedFiles]);
 
       // Crear previsualizaciones
-      validFiles.forEach(file => {
+      convertedFiles.forEach(file => {
         const reader = new FileReader();
         reader.onload = (e) => {
           const target = e.target as FileReader;

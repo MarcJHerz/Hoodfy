@@ -4,9 +4,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Message } from '@/types/chat';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { formatImageUrl } from '@/utils/imageUtils';
+import { useImageUrl } from '@/utils/useImageUrl';
 import Image from 'next/image';
 import { DocumentIcon, PhotoIcon, VideoCameraIcon, UserIcon, ChatBubbleLeftIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { UserAvatar } from '@/components/UserAvatar';
 import Link from 'next/link';
 import PrivateChatModal from './PrivateChatModal';
 import { User } from '@/types/user';
@@ -297,12 +298,10 @@ const MessageList: React.FC<MessageListProps> = ({
                       className="w-8 h-8 rounded-full overflow-hidden hover:ring-2 hover:ring-primary-300 dark:hover:ring-primary-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400"
                       title={`Ver perfil de ${message.senderName}`}
                   >
-                    <Image
-                      src={formatImageUrl(message.senderProfilePicture)}
-                      alt={message.senderName}
-                      width={32}
-                      height={32}
-                      className="object-cover"
+                    <UserAvatar
+                      source={message.senderProfilePicture}
+                      name={message.senderName}
+                      size={32}
                     />
                   </button>
                 </div>
