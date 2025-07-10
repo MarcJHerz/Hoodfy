@@ -6,7 +6,13 @@ import { XMarkIcon, PhotoIcon, VideoCameraIcon, XCircleIcon } from '@heroicons/r
 import { toast } from 'react-hot-toast';
 import { posts } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
-import heic2any from 'heic2any';
+// Importación dinámica para evitar errores de SSR
+let heic2any: any = null;
+if (typeof window !== 'undefined') {
+  import('heic2any').then(module => {
+    heic2any = module.default;
+  });
+}
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -48,6 +54,12 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
           file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
         
         console.log('🔄 Convirtiendo HEIC a JPEG:', file.name);
+        
+        // Importar heic2any dinámicamente si no está disponible
+        if (!heic2any) {
+          const module = await import('heic2any');
+          heic2any = module.default;
+        }
         
         const convertedBlob = await heic2any({
           blob: file,
