@@ -32,47 +32,10 @@ const MessageInput: React.FC<MessageInputProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { user } = useAuthStore();
 
-  // Función para convertir HEIC a JPEG
+  // Función para convertir HEIC a JPEG (deshabilitada temporalmente)
   const convertHeicToJpeg = async (file: File): Promise<File> => {
-    try {
-      // Verificar si es HEIC/HEIF
-      if (file.type === 'image/heic' || file.type === 'image/heif' || 
-          file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
-        
-        console.log('🔄 Convirtiendo HEIC a JPEG en chat:', file.name);
-        
-        // Importar heic2any dinámicamente si no está disponible
-        if (!heic2any) {
-          const module = await import('heic2any');
-          heic2any = module.default;
-        }
-        
-        const convertedBlob = await heic2any({
-          blob: file,
-          toType: 'image/jpeg',
-          quality: 0.8
-        });
-        
-        // Crear nuevo archivo con nombre .jpg
-        const newFileName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
-        const convertedFile = new File([convertedBlob as Blob], newFileName, {
-          type: 'image/jpeg',
-          lastModified: file.lastModified
-        });
-        
-        console.log('✅ HEIC convertido exitosamente en chat:', {
-          original: file.name,
-          converted: newFileName
-        });
-        
-        return convertedFile;
-      }
-      
-      return file; // Retornar archivo original si no es HEIC
-    } catch (error) {
-      console.error('❌ Error convirtiendo HEIC en chat:', error);
-      return file;
-    }
+    // Por ahora, permitir HEIC/HEIF sin conversión
+    return file;
   };
 
   // Auto-resize textarea

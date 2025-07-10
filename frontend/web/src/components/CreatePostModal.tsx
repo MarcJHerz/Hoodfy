@@ -46,50 +46,10 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
     }
   }, [isOpen, initialFiles]);
 
-  // Función para convertir HEIC a JPEG
+  // Función para convertir HEIC a JPEG (deshabilitada temporalmente)
   const convertHeicToJpeg = async (file: File): Promise<File> => {
-    try {
-      // Verificar si es HEIC/HEIF
-      if (file.type === 'image/heic' || file.type === 'image/heif' || 
-          file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
-        
-        console.log('🔄 Convirtiendo HEIC a JPEG:', file.name);
-        
-        // Importar heic2any dinámicamente si no está disponible
-        if (!heic2any) {
-          const module = await import('heic2any');
-          heic2any = module.default;
-        }
-        
-        const convertedBlob = await heic2any({
-          blob: file,
-          toType: 'image/jpeg',
-          quality: 0.8
-        });
-        
-        // Crear nuevo archivo con nombre .jpg
-        const newFileName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
-        const convertedFile = new File([convertedBlob as Blob], newFileName, {
-          type: 'image/jpeg',
-          lastModified: file.lastModified
-        });
-        
-        console.log('✅ HEIC convertido exitosamente:', {
-          original: file.name,
-          converted: newFileName,
-          originalSize: file.size,
-          convertedSize: convertedFile.size
-        });
-        
-        return convertedFile;
-      }
-      
-      return file; // Retornar archivo original si no es HEIC
-    } catch (error) {
-      console.error('❌ Error convirtiendo HEIC:', error);
-      toast.error(`Error convirtiendo ${file.name}. Se usará el archivo original.`);
-      return file;
-    }
+    // Por ahora, permitir HEIC/HEIF sin conversión
+    return file;
   };
 
   const createPreviews = (files: File[]) => {
@@ -394,7 +354,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
               type="file"
               ref={fileInputRef}
               onChange={handleMediaChange}
-              accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm"
+              accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm,.heic,.heif"
               multiple
               className="hidden"
               disabled={isLoading}
