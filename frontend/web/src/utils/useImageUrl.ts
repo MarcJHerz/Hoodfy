@@ -23,16 +23,8 @@ export function useImageUrlResolved(keyOrUrl?: string) {
       setLoading(true);
       setError(null);
       
-      console.log('🔍 useImageUrl Processing:', {
-        keyOrUrl,
-        isS3Key: keyOrUrl ? /^[a-zA-Z0-9\-]+\.(jpg|jpeg|png|webp|gif|jfif|mp4|mov|avi)$/i.test(keyOrUrl) : false,
-        isHttpUrl: keyOrUrl ? (keyOrUrl.startsWith('http://') || keyOrUrl.startsWith('https://')) : false,
-        timestamp: new Date().toISOString()
-      });
-      
       // Si no hay keyOrUrl, usar imagen por defecto
       if (!keyOrUrl) {
-        console.log('🔍 No keyOrUrl provided, using default avatar');
         if (isMounted) {
           setUrl('/images/defaults/default-avatar.png');
           setLoading(false);
@@ -42,7 +34,6 @@ export function useImageUrlResolved(keyOrUrl?: string) {
       
       // Si ya es una URL completa, usarla directamente
       if (keyOrUrl.startsWith('http://') || keyOrUrl.startsWith('https://')) {
-        console.log('🔍 Using existing HTTP URL:', keyOrUrl);
         if (isMounted) {
           setUrl(keyOrUrl);
           setLoading(false);
@@ -54,15 +45,13 @@ export function useImageUrlResolved(keyOrUrl?: string) {
       const isS3Key = /^[a-zA-Z0-9\-]+\.(jpg|jpeg|png|webp|gif|jfif|mp4|mov|avi)$/i.test(keyOrUrl);
       if (isS3Key) {
         try {
-          console.log('🔍 Getting signed URL for S3 key:', keyOrUrl);
           const signedUrl = await getSignedS3Url(keyOrUrl);
-          console.log('🔍 Signed URL obtained:', signedUrl);
           if (isMounted) {
             setUrl(signedUrl);
             setLoading(false);
           }
         } catch (err) {
-          console.error('🔍 Error getting signed URL:', err);
+          console.error('Error getting signed URL:', err);
           if (isMounted) {
             setError('No se pudo obtener la URL firmada');
             setUrl('/images/defaults/default-avatar.png');
@@ -75,7 +64,6 @@ export function useImageUrlResolved(keyOrUrl?: string) {
       // Si es una ruta relativa local
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
       const finalUrl = `${baseUrl}/${keyOrUrl.replace(/^\//, '')}`;
-      console.log('🔍 Using relative path, final URL:', finalUrl);
       if (isMounted) {
         setUrl(finalUrl);
         setLoading(false);

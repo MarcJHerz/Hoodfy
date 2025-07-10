@@ -17,7 +17,8 @@ exports.createPost = async (req, res) => {
   try {
     const { content, communityId, tags, visibility } = req.body;
     let { media } = req.body;
-    // Parsear media si viene como string
+    
+    // Asegurar que media siempre sea un array
     if (typeof media === 'string') {
       try {
         media = JSON.parse(media);
@@ -26,7 +27,26 @@ exports.createPost = async (req, res) => {
         media = [];
       }
     }
+    
+    // Si media es undefined, null, o un objeto vacío, establecerlo como array vacío
+    if (!media || !Array.isArray(media)) {
+      media = [];
+    }
+    
+    console.log('📊 Media procesada:', { originalMedia: req.body.media, processedMedia: media, isArray: Array.isArray(media) });
+    
     const userId = (req.user && req.user._id) ? req.user._id : req.userId;
+
+    // Logging para debugging
+    console.log('🔍 Datos antes de validación:', {
+      content: content ? 'presente' : 'ausente',
+      postType: req.body.postType,
+      communityId: communityId || 'no especificado',
+      media: media,
+      mediaType: typeof media,
+      isArray: Array.isArray(media),
+      mediaLength: media ? media.length : 0
+    });
 
     // Validar el post de forma síncrona
     const validationError = validatePostData({
@@ -37,7 +57,9 @@ exports.createPost = async (req, res) => {
       visibility,
       media
     });
+    
     if (validationError) {
+      console.log('❌ Error de validación:', validationError);
       return res.status(400).json({ error: validationError });
     }
 

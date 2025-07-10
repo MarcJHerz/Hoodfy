@@ -107,14 +107,6 @@ export default function PostCard({
     }
   };
 
-  // Debug logging para media
-  console.log('🏠 Dashboard PostCard - Media data:', {
-    postId: post._id,
-    hasMedia: !!post.media,
-    mediaLength: post.media?.length,
-    media: post.media
-  });
-
   return (
     <article className={`card-hover group ${compact ? 'p-4' : 'p-6'} animate-slide-up`}>
       {/* Header del post */}

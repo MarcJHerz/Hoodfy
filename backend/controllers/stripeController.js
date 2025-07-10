@@ -3,6 +3,7 @@ const stripePrices = require('../config/stripePrices');
 const Community = require('../models/Community');
 const Subscription = require('../models/Subscription');
 const User = require('../models/User');
+const { makeAllies } = require('../routes/communitiesRoutes');
 
 // Crear Price y Product en Stripe para precio personalizado
 exports.createStripeProductAndPrice = async (req, res) => {
@@ -103,7 +104,10 @@ exports.createCheckoutSession = async (req, res) => {
 // Webhook de Stripe
 exports.stripeWebhook = async (req, res) => {
   try {
+    console.log('📨 Webhook recibido de Stripe');
+    
     if (!stripe) {
+      console.error('❌ Stripe no está configurado en webhook');
       return res.status(503).json({ error: 'Stripe no está configurado' });
     }
 
@@ -111,19 +115,55 @@ exports.stripeWebhook = async (req, res) => {
     let event;
     try {
       event = stripe.webhooks.constructEvent(req.rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
+      console.log('✅ Webhook verificado exitosamente');
     } catch (err) {
-      console.error('Webhook signature error:', err.message);
+      console.error('❌ Error de verificación de webhook:', err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
+    
+    console.log('🔍 Tipo de evento:', event.type);
+    console.log('📋 Datos del evento:', event.data.object);
+    
     // Manejar evento de suscripción completada
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
       const { userId, communityId } = session.metadata;
+      
+      console.log('💳 Checkout completado:', {
+        sessionId: session.id,
+        userId,
+        communityId,
+        amountTotal: session.amount_total,
+        paymentStatus: session.payment_status
+      });
+      
       // Registrar suscripción activa
       try {
-        const existing = await Subscription.findOne({ user: userId, community: communityId, status: 'active' });
+        // Validar que los IDs sean válidos
+        const mongoose = require('mongoose');
+        if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(communityId)) {
+          console.error('❌ IDs inválidos:', { userId, communityId });
+          return;
+        }
+        
+        // Verificar que la comunidad existe
+        const community = await Community.findById(communityId);
+        if (!community) {
+          console.error('❌ Comunidad no encontrada:', communityId);
+          return;
+        }
+        
+        // Verificar que no exista una suscripción duplicada
+        const existing = await Subscription.findOne({ 
+          user: userId, 
+          community: communityId, 
+          status: 'active' 
+        });
+        
         if (!existing) {
-          await Subscription.create({
+          console.log('🆕 Creando nueva suscripción...');
+          
+          const newSubscription = await Subscription.create({
             user: userId,
             community: communityId,
             status: 'active',
@@ -131,20 +171,34 @@ exports.stripeWebhook = async (req, res) => {
             paymentMethod: 'stripe',
             amount: session.amount_total ? session.amount_total / 100 : 0,
           });
-          // Agregar usuario como miembro
-          const community = await Community.findById(communityId);
-          if (community && !community.members.includes(userId)) {
+          
+          console.log('✅ Suscripción creada:', newSubscription._id);
+          
+          // Agregar usuario como miembro si no lo es ya
+          if (!community.members.includes(userId)) {
             community.members.push(userId);
             await community.save();
+            console.log('✅ Usuario agregado como miembro de la comunidad');
+            
+            // Crear relaciones de aliados - IMPORTANTE!
+            await makeAllies(userId, communityId);
+            console.log('✅ Relaciones de aliados creadas');
+          } else {
+            console.log('ℹ️ Usuario ya era miembro de la comunidad');
           }
+        } else {
+          console.log('ℹ️ Suscripción ya existe:', existing._id);
         }
       } catch (err) {
-        console.error('Error registrando suscripción:', err);
+        console.error('❌ Error registrando suscripción:', err);
       }
+    } else {
+      console.log('ℹ️ Evento no es checkout.session.completed, ignorando');
     }
+    
     res.json({ received: true });
   } catch (error) {
-    console.error('Error en webhook de Stripe:', error);
+    console.error('❌ Error en webhook de Stripe:', error);
     res.status(500).json({ error: 'Error procesando webhook' });
   }
 }; 

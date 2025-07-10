@@ -36,7 +36,7 @@ export default function SuccessPage() {
   }, [searchParams, user, loadSubscribedCommunities]);
 
   const handleViewCommunities = () => {
-    router.push('/dashboard/communities');
+    router.push('/communities');
   };
 
   const handleGoHome = () => {

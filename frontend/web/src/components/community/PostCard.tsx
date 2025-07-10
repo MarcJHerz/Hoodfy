@@ -86,14 +86,6 @@ export default function PostCard({ post, onPostUpdated, isCreator = false, showP
     setIsCommentsModalOpen(true);
   };
 
-  // Debug logging para media
-  console.log('🏘️ Community PostCard - Media data:', {
-    postId: post._id,
-    hasMedia: !!post.media,
-    mediaLength: post.media?.length,
-    media: post.media
-  });
-
   const handleComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!comment.trim()) return;
