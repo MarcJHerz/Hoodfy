@@ -136,6 +136,23 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
       });
 
       console.log('🚀 Enviando FormData a createPost...');
+      
+      // Debugging específico para iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+      
+      if (isIOS && isSafari) {
+        console.log('📱 iOS Safari detectado - Debugging especial activado');
+        console.log('📊 FormData details:', {
+          entries: Array.from(formData.entries()).map(([key, value]) => ({
+            key,
+            type: value instanceof File ? 'File' : 'string',
+            size: value instanceof File ? value.size : 'N/A',
+            name: value instanceof File ? value.name : 'N/A'
+          }))
+        });
+      }
+      
       const response = await posts.createPost(formData);
       console.log('✅ Post creado exitosamente:', response.data);
       
@@ -166,6 +183,22 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
       let errorMessage = 'Error al crear el post';
       
       if (error.code === 'ERR_NETWORK') {
+        // Debugging específico para iOS Safari
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+        
+        if (isIOS && isSafari) {
+          console.log('🚨 iOS Safari ERR_NETWORK detectado');
+          console.log('🔍 Error details:', {
+            message: error.message,
+            code: error.code,
+            name: error.name,
+            config: error.config,
+            request: error.request ? 'Present' : 'Missing',
+            response: error.response ? 'Present' : 'Missing'
+          });
+        }
+        
         errorMessage = 'Error de red. Verifica tu conexión a internet.';
       } else if (error.response?.status === 413) {
         errorMessage = 'El archivo es demasiado grande. Intenta con archivos más pequeños.';

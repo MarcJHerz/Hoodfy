@@ -111,12 +111,20 @@ export const posts = {
     return api.get(`/api/posts/community/${communityId}/filtered`, { params });
   },
   createPost: async (formData: FormData) => {
+    // Debugging específico para iOS Safari
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    
+    if (isIOS && isSafari) {
+      console.log('📱 iOS Safari - Configurando axios especial para FormData');
+    }
+    
     // Crear una instancia específica de axios para FormData
     // sin el Content-Type global que interfiere
     const instance = axios.create({
       baseURL: API_URL,
       withCredentials: true,
-      timeout: 120000,
+      timeout: isIOS && isSafari ? 180000 : 120000, // Timeout más largo para iOS Safari
       maxContentLength: Infinity,
       maxBodyLength: Infinity
     });
@@ -130,6 +138,47 @@ export const posts = {
     const headers: any = {};
     if (token) {
       headers.Authorization = `Bearer ${token}`;
+    }
+    
+    // Configuración específica para iOS Safari
+    if (isIOS && isSafari) {
+      console.log('📱 iOS Safari - Headers configurados:', headers);
+      console.log('📱 iOS Safari - FormData entries:', Array.from(formData.entries()).length);
+    }
+    
+    // Agregar interceptor específico para iOS Safari debugging
+    if (isIOS && isSafari) {
+      instance.interceptors.request.use(
+        (config) => {
+          console.log('📱 iOS Safari - Request config:', {
+            url: config.url,
+            method: config.method,
+            headers: config.headers,
+            timeout: config.timeout
+          });
+          return config;
+        },
+        (error) => {
+          console.log('📱 iOS Safari - Request error:', error);
+          return Promise.reject(error);
+        }
+      );
+      
+      instance.interceptors.response.use(
+        (response) => {
+          console.log('📱 iOS Safari - Response success:', response.status);
+          return response;
+        },
+        (error) => {
+          console.log('📱 iOS Safari - Response error:', {
+            message: error.message,
+            code: error.code,
+            status: error.response?.status,
+            statusText: error.response?.statusText
+          });
+          return Promise.reject(error);
+        }
+      );
     }
     
     return instance.post('/api/posts', formData, { headers });
