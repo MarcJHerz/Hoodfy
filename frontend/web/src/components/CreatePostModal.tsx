@@ -113,6 +113,16 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
     setIsLoading(true);
     try {
+      console.log('📱 Iniciando creación de post desde dispositivo:', {
+        userAgent: navigator.userAgent,
+        isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+        contentLength: content.length,
+        mediaCount: media.length,
+        mediaFiles: media.map(f => ({ name: f.name, size: f.size, type: f.type })),
+        postType,
+        communityId
+      });
+
       const formData = new FormData();
       formData.append('content', content);
       formData.append('postType', postType);
@@ -120,11 +130,14 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
         formData.append('communityId', communityId);
       }
       
-      media.forEach(file => {
+      media.forEach((file, index) => {
+        console.log(`📎 Agregando archivo ${index + 1}:`, { name: file.name, size: file.size, type: file.type });
         formData.append('media', file);
       });
 
-      await posts.createPost(formData);
+      console.log('🚀 Enviando FormData a createPost...');
+      const response = await posts.createPost(formData);
+      console.log('✅ Post creado exitosamente:', response.data);
       
       // Limpiar formulario
       setContent('');
@@ -135,8 +148,34 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
       onClose();
       toast.success('Post creado exitosamente');
     } catch (error: any) {
-      console.error('Error al crear el post:', error);
-      toast.error(error.response?.data?.error || 'Error al crear el post');
+      console.error('❌ Error detallado al crear el post:', {
+        message: error.message,
+        code: error.code,
+        name: error.name,
+        config: error.config,
+        request: error.request ? 'Request object present' : 'No request object',
+        response: error.response ? {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data,
+          headers: error.response.headers
+        } : 'No response object',
+        stack: error.stack
+      });
+      
+      let errorMessage = 'Error al crear el post';
+      
+      if (error.code === 'ERR_NETWORK') {
+        errorMessage = 'Error de red. Verifica tu conexión a internet.';
+      } else if (error.response?.status === 413) {
+        errorMessage = 'El archivo es demasiado grande. Intenta con archivos más pequeños.';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Sesión expirada. Por favor, inicia sesión nuevamente.';
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -36,32 +36,67 @@ exports.createStripeProductAndPrice = async (req, res) => {
 // Crear sesión de Checkout
 exports.createCheckoutSession = async (req, res) => {
   try {
+    console.log('🛒 Iniciando createCheckoutSession...');
+    console.log('📋 Body recibido:', req.body);
+    console.log('👤 Usuario ID:', req.userId);
+    
     if (!stripe) {
+      console.error('❌ Stripe no está configurado');
       return res.status(503).json({ error: 'Stripe no está configurado' });
     }
 
     const { priceId, communityId } = req.body;
     const userId = req.userId;
+    
+    console.log('🔍 Validando datos:', { priceId, communityId, userId });
+    
     if (!priceId || !communityId) {
+      console.error('❌ Faltan datos:', { priceId, communityId });
       return res.status(400).json({ error: 'Faltan datos para crear la sesión.' });
     }
+    
+    console.log('🏘️ Buscando comunidad:', communityId);
     const community = await Community.findById(communityId);
-    if (!community) return res.status(404).json({ error: 'Comunidad no encontrada.' });
+    if (!community) {
+      console.error('❌ Comunidad no encontrada:', communityId);
+      return res.status(404).json({ error: 'Comunidad no encontrada.' });
+    }
+    
+    console.log('👤 Buscando usuario:', userId);
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ error: 'Usuario no encontrado.' });
+    if (!user) {
+      console.error('❌ Usuario no encontrado:', userId);
+      return res.status(404).json({ error: 'Usuario no encontrado.' });
+    }
+    
+    console.log('✅ Datos validados, creando sesión con Stripe...');
+    console.log('💰 PriceId:', priceId);
+    console.log('📧 Email del usuario:', user.email);
+    console.log('🌐 Frontend URL:', process.env.FRONTEND_URL);
+    
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'subscription',
       customer_email: user.email,
       line_items: [{ price: priceId, quantity: 1 }],
-      metadata: { userId, communityId },
-      success_url: process.env.FRONTEND_URL + '/success?session_id={CHECKOUT_SESSION_ID}',
-      cancel_url: process.env.FRONTEND_URL + '/cancel',
+      metadata: { userId: userId.toString(), communityId: communityId.toString() },
+      success_url: (process.env.FRONTEND_URL || 'https://www.qahood.com') + '/success?session_id={CHECKOUT_SESSION_ID}',
+      cancel_url: (process.env.FRONTEND_URL || 'https://www.qahood.com') + '/cancel',
     });
+    
+    console.log('✅ Sesión creada exitosamente:', session.url);
     res.json({ url: session.url });
   } catch (error) {
-    console.error('Error creando sesión de checkout:', error);
-    res.status(500).json({ error: 'Error creando sesión de checkout' });
+    console.error('❌ Error detallado creando sesión de checkout:', {
+      message: error.message,
+      stack: error.stack,
+      type: error.type,
+      code: error.code
+    });
+    res.status(500).json({ 
+      error: 'Error creando sesión de checkout', 
+      details: error.message 
+    });
   }
 };
 

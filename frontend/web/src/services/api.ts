@@ -105,10 +105,15 @@ export const posts = {
     return api.get(`/api/posts/community/${communityId}/filtered`, { params });
   },
   createPost: async (formData: FormData) => {
+    // Para FormData, NO establecer Content-Type manualmente
+    // El navegador lo hace automáticamente con boundary
     const config = {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        // Eliminar Content-Type para que el navegador lo configure automáticamente
       },
+      timeout: 120000, // 2 minutos para archivos grandes
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity
     };
     return api.post('/api/posts', formData, config);
   },

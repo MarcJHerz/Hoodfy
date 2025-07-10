@@ -26,6 +26,14 @@ const MediaItem: React.FC<{ item: MediaItem; index: number; onClick: (index: num
   const { url: processedUrl } = useImageUrl(item.url);
   const { url: thumbnailUrl } = useImageUrl(item.thumbnail);
 
+  // Debug logging
+  console.log('🖼️ MediaItem Debug:', {
+    index,
+    originalUrl: item.url,
+    processedUrl,
+    type: item.type
+  });
+
   const handleClick = (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
@@ -71,6 +79,14 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
 }) => {
   // Determinar qué datos usar - priorizar media sobre images
   const mediaItems = media || images?.map(url => ({ type: 'image' as const, url })) || [];
+  
+  // Debug logging
+  console.log('📸 MediaGallery Debug:', {
+    hasMedia: !!media,
+    hasImages: !!images,
+    mediaItemsLength: mediaItems.length,
+    mediaItems: mediaItems.map(item => ({ type: item.type, url: item.url }))
+  });
   
   if (!mediaItems.length) return null;
 

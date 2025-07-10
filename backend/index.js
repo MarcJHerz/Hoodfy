@@ -57,23 +57,41 @@ app.use((req, res, next) => {
   }
 });
 
-// Middleware para debugging de requests desde móviles
+// Middleware para debugging de requests desde móviles y Stripe
 app.use((req, res, next) => {
   // Log específico para requests POST desde móviles
   if (req.method === 'POST' && req.path.includes('/api/posts')) {
-    console.log('📱 POST Request desde móvil:', {
+    console.log('📱 POST Request a /api/posts:', {
       method: req.method,
       url: req.url,
       headers: {
         'user-agent': req.headers['user-agent'],
         'content-type': req.headers['content-type'],
         'content-length': req.headers['content-length'],
-        'origin': req.headers.origin
+        'origin': req.headers.origin,
+        'authorization': req.headers.authorization ? 'Present' : 'Missing'
       },
       body: req.body ? 'Body present' : 'No body',
-      files: req.files ? `${req.files.length} files` : 'No files yet'
+      files: req.files ? `${req.files.length} files` : 'No files yet',
+      query: req.query
     });
   }
+  
+  // Log específico para requests a Stripe
+  if (req.method === 'POST' && req.path.includes('/api/stripe')) {
+    console.log('💳 POST Request a Stripe:', {
+      method: req.method,
+      url: req.url,
+      headers: {
+        'user-agent': req.headers['user-agent'],
+        'content-type': req.headers['content-type'],
+        'authorization': req.headers.authorization ? 'Present' : 'Missing'
+      },
+      body: req.body,
+      stripeConfigured: !!require('./config/stripe')
+    });
+  }
+  
   next();
 });
 
@@ -101,6 +119,30 @@ app.use('/api/community-stats', communityStatsRoutes);
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/upload', uploadRoutes);
+
+// ✅ Middleware global de manejo de errores
+app.use((error, req, res, next) => {
+  console.error('🚨 Error global capturado:', {
+    message: error.message,
+    stack: error.stack,
+    url: req.url,
+    method: req.method,
+    headers: {
+      'user-agent': req.headers['user-agent'],
+      'origin': req.headers.origin,
+      'authorization': req.headers.authorization ? 'Present' : 'Missing'
+    },
+    body: req.body,
+    params: req.params,
+    query: req.query
+  });
+  
+  res.status(500).json({
+    error: 'Error interno del servidor',
+    message: error.message,
+    timestamp: new Date().toISOString()
+  });
+});
 
 // ✅ Servir archivos estáticos
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
