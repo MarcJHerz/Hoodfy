@@ -10,11 +10,14 @@ import {
   ChatBubbleLeftIcon, 
   ShareIcon,
   BookmarkIcon as BookmarkOutline,
-  EllipsisHorizontalIcon
+  EllipsisHorizontalIcon,
+  MapPinIcon,
+  StarIcon
 } from '@heroicons/react/24/outline';
 import { 
   HeartIcon as HeartSolid,
-  BookmarkIcon as BookmarkSolid
+  BookmarkIcon as BookmarkSolid,
+  MapPinIcon as MapPinIconSolid
 } from '@heroicons/react/24/solid';
 import { Post } from '@/types/post';
 import { useImageUrl } from '@/utils/useImageUrl';
@@ -29,6 +32,8 @@ interface PostCardProps {
   onPostUpdate?: (post: Post) => void;
   showCommunity?: boolean;
   compact?: boolean;
+  isCreator?: boolean;
+  showPinOption?: boolean;
 }
 
 export default function PostCard({ 
@@ -36,7 +41,9 @@ export default function PostCard({
   onCommentClick, 
   onPostUpdate,
   showCommunity = false,
-  compact = false 
+  compact = false,
+  isCreator = false,
+  showPinOption = false
 }: PostCardProps) {
   const { user } = useAuthStore();
   const { url: authorImageUrl } = useImageUrl(post.author.profilePicture);
@@ -44,6 +51,11 @@ export default function PostCard({
   const [isLiked, setIsLiked] = useState(post.likes?.includes(user?._id || '') || false);
   const [likesCount, setLikesCount] = useState(post.likes?.length || 0);
   const [isSaved, setIsSaved] = useState(false); // TODO: Implementar saved posts
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const [isPinning, setIsPinning] = useState(false);
+  
+  // Verificar si el post está destacado
+  const isPinned = (post as any).isPinned || false;
 
   const handleLike = async () => {
     if (!user || isLoading) return;
@@ -107,8 +119,44 @@ export default function PostCard({
     }
   };
 
+  const handleTogglePin = async () => {
+    try {
+      setIsPinning(true);
+      await posts.togglePin(post._id);
+      toast.success(isPinned ? 'Post quitado de destacados' : 'Post destacado exitosamente');
+      setShowOptionsMenu(false);
+      
+      // Actualizar el post en el componente padre
+      if (onPostUpdate) {
+        const updatedPost = {
+          ...post,
+          isPinned: !isPinned
+        };
+        onPostUpdate(updatedPost);
+      }
+    } catch (error: any) {
+      console.error('Error al destacar/quitar destaque:', error);
+      toast.error(error.response?.data?.error || 'Error al cambiar estado de destaque');
+    } finally {
+      setIsPinning(false);
+    }
+  };
+
   return (
-    <article className={`card-hover group ${compact ? 'p-4' : 'p-6'} animate-slide-up`}>
+    <article className={`card-hover group ${compact ? 'p-4' : 'p-6'} animate-slide-up ${
+      isPinned ? 'ring-2 ring-amber-400 dark:ring-amber-500 shadow-lg' : ''
+    }`}>
+      {/* Badge de destacado */}
+      {isPinned && (
+        <div className="bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2 -m-6 mb-4">
+          <div className="flex items-center space-x-2 text-white">
+            <MapPinIconSolid className="w-4 h-4" />
+            <span className="text-sm font-semibold">Post destacado por el creador</span>
+            <StarIcon className="w-4 h-4 animate-pulse" />
+          </div>
+        </div>
+      )}
+
       {/* Header del post */}
       <header className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
@@ -134,6 +182,13 @@ export default function PostCard({
               >
                 {post.author.name}
               </Link>
+              
+              {/* Badge de pin en el nombre */}
+              {isPinned && (
+                <div className="flex items-center space-x-1 text-amber-600 dark:text-amber-400">
+                  <MapPinIconSolid className="w-4 h-4" />
+                </div>
+              )}
               
               {/* Badge verificado (si aplica) */}
               {post.author.verified && (
@@ -168,10 +223,43 @@ export default function PostCard({
           </div>
         </div>
 
-        {/* Menú de opciones */}
-        <button className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 opacity-0 group-hover:opacity-100">
-          <EllipsisHorizontalIcon className="w-5 h-5 text-gray-400" />
-        </button>
+        {/* Menú de opciones para creadores */}
+        {isCreator && showPinOption ? (
+          <div className="relative">
+            <button
+              onClick={() => setShowOptionsMenu(!showOptionsMenu)}
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              <EllipsisHorizontalIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            </button>
+
+            {/* Dropdown del menú */}
+            {showOptionsMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                <button
+                  onClick={handleTogglePin}
+                  disabled={isPinning}
+                  className="w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                >
+                  {isPinning ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-amber-500 border-t-transparent" />
+                  ) : isPinned ? (
+                    <MapPinIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  ) : (
+                    <MapPinIconSolid className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  )}
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {isPinned ? 'Quitar destaque' : 'Destacar post'}
+                  </span>
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <button className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 opacity-0 group-hover:opacity-100">
+            <EllipsisHorizontalIcon className="w-5 h-5 text-gray-400" />
+          </button>
+        )}
       </header>
 
       {/* Contenido del post */}

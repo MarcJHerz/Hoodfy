@@ -111,14 +111,28 @@ export const posts = {
     return api.get(`/api/posts/community/${communityId}/filtered`, { params });
   },
   createPost: async (formData: FormData) => {
-    // Para FormData, NO establecer Content-Type manualmente
-    // El navegador lo hace automáticamente con boundary
-    const config = {
-      timeout: 120000, // 2 minutos para archivos grandes
+    // Crear una instancia específica de axios para FormData
+    // sin el Content-Type global que interfiere
+    const instance = axios.create({
+      baseURL: API_URL,
+      withCredentials: true,
+      timeout: 120000,
       maxContentLength: Infinity,
       maxBodyLength: Infinity
-    };
-    return api.post('/api/posts', formData, config);
+    });
+    
+    // Agregar solo el token de autorización
+    const token = typeof window !== 'undefined' ? 
+      localStorage.getItem('token') || 
+      document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1] : 
+      null;
+    
+    const headers: any = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    
+    return instance.post('/api/posts', formData, { headers });
   },
   likePost: async (postId: string) => {
     return api.post(`/api/posts/${postId}/like`);
