@@ -8,6 +8,9 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// ✅ Configurar trust proxy para servidor detrás de proxy/load balancer
+app.set('trust proxy', 1);
+
 // ✅ Middlewares - Configuración CORS mejorada para móviles
 app.use(cors({
   origin: [
@@ -41,7 +44,22 @@ app.use(cors({
 }));
 
 // Configurar límites de tamaño para archivos grandes (hasta 500MB)
-app.use(express.json({ limit: '500mb' }));
+// EXCLUIR el webhook de Stripe del parsing de JSON
+app.use((req, res, next) => {
+  if (req.path === '/api/stripe/webhook') {
+    // Para el webhook de Stripe, guardar el raw body
+    req.rawBody = '';
+    req.on('data', chunk => {
+      req.rawBody += chunk;
+    });
+    req.on('end', () => {
+      next();
+    });
+  } else {
+    // Para todas las otras rutas, usar el middleware JSON normal
+    express.json({ limit: '500mb' })(req, res, next);
+  }
+});
 app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 
 // Middleware adicional para manejar preflight OPTIONS en móviles
