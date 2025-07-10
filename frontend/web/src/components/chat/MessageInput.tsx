@@ -199,7 +199,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         ref={imageInputRef}
         type="file"
         onChange={handleImageSelect}
-        accept="image/*,video/*"
+        accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm"
         className="hidden"
       />
 

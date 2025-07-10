@@ -256,9 +256,9 @@ export default function PostCard({
             )}
           </div>
         ) : (
-          <button className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 opacity-0 group-hover:opacity-100">
-            <EllipsisHorizontalIcon className="w-5 h-5 text-gray-400" />
-          </button>
+        <button className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 opacity-0 group-hover:opacity-100">
+          <EllipsisHorizontalIcon className="w-5 h-5 text-gray-400" />
+        </button>
         )}
       </header>
 

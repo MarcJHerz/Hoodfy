@@ -12,9 +12,9 @@ console.log('📋 Variables de entorno disponibles:', {
 
 if (process.env.STRIPE_SECRET_KEY) {
   try {
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2022-11-15',
-    });
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2022-11-15',
+  });
     console.log('✅ Stripe inicializado correctamente');
   } catch (error) {
     console.error('❌ Error al inicializar Stripe:', error.message);

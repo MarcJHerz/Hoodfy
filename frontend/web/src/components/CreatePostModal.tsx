@@ -298,7 +298,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
               type="file"
               ref={fileInputRef}
               onChange={handleMediaChange}
-              accept="image/*,video/*"
+              accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm"
               multiple
               className="hidden"
               disabled={isLoading}
