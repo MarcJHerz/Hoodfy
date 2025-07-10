@@ -126,7 +126,15 @@ export const posts = {
       withCredentials: true,
       timeout: isIOS && isSafari ? 180000 : 120000, // Timeout más largo para iOS Safari
       maxContentLength: Infinity,
-      maxBodyLength: Infinity
+      maxBodyLength: Infinity,
+      // Forzar que axios NO establezca Content-Type automáticamente
+      transformRequest: [(data, headers) => {
+        if (data instanceof FormData) {
+          // Remover Content-Type para que el navegador lo configure automáticamente
+          delete headers['Content-Type'];
+        }
+        return data;
+      }]
     });
     
     // Agregar solo el token de autorización
@@ -144,6 +152,10 @@ export const posts = {
     if (isIOS && isSafari) {
       console.log('📱 iOS Safari - Headers configurados:', headers);
       console.log('📱 iOS Safari - FormData entries:', Array.from(formData.entries()).length);
+      
+      // Forzar que NO se establezca Content-Type para que el navegador lo configure automáticamente
+      headers['Content-Type'] = undefined;
+      console.log('📱 iOS Safari - Content-Type removido para FormData automático');
     }
     
     // Agregar interceptor específico para iOS Safari debugging
@@ -154,7 +166,8 @@ export const posts = {
             url: config.url,
             method: config.method,
             headers: config.headers,
-            timeout: config.timeout
+            timeout: config.timeout,
+            contentType: config.headers['Content-Type']
           });
           return config;
         },
