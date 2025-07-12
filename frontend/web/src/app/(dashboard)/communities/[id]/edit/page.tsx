@@ -55,8 +55,8 @@ export default function EditCommunityPage({ params }: { params: { id: string } }
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('La imagen no debe superar los 5MB');
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('La imagen no debe superar los 50MB');
       return;
     }
 
@@ -200,7 +200,7 @@ export default function EditCommunityPage({ params }: { params: { id: string } }
                     <p className="pl-1">o arrastrar y soltar</p>
                   </div>
                   <p className="text-xs text-gray-500">
-                    PNG, JPG, GIF hasta 5MB
+                    PNG, JPG, GIF, HEIC hasta 50MB
                   </p>
                 </div>
               )}

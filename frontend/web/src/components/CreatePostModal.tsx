@@ -127,8 +127,18 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                        file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif');
         if (!isValid) {
           toast.error(`El archivo ${file.name} no es una imagen o video válido`);
+          return false;
         }
-        return isValid;
+        
+        // Validar tamaño (50MB para imágenes, 500MB para videos)
+        const maxSize = file.type.startsWith('image/') ? 50 * 1024 * 1024 : 500 * 1024 * 1024;
+        if (file.size > maxSize) {
+          const maxSizeMB = maxSize / (1024 * 1024);
+          toast.error(`El archivo ${file.name} es demasiado grande. Máximo ${maxSizeMB}MB`);
+          return false;
+        }
+        
+        return true;
       });
 
       if (media.length + validFiles.length > 4) {

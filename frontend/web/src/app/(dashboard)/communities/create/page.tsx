@@ -41,9 +41,9 @@ export default function CreateCommunityPage() {
       return;
     }
 
-    // Validar tamaño (máximo 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('La imagen no debe superar los 5MB');
+    // Validar tamaño (máximo 50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('La imagen no debe superar los 50MB');
       return;
     }
 
@@ -416,7 +416,7 @@ export default function CreateCommunityPage() {
                         Seleccionar archivo
                       </div>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-                        PNG, JPG, GIF hasta 5MB • Recomendado: 1200x630px
+                        PNG, JPG, GIF, HEIC hasta 50MB • Recomendado: 1200x630px
                       </p>
                     </div>
                   </div>

@@ -6,7 +6,8 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "jest --detectOpenHandles",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "setup-s3-cors": "node scripts/setup-s3-cors.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.842.0",

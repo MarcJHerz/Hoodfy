@@ -57,8 +57,8 @@ export default function EditMyProfilePage() {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('La imagen no debe superar los 5MB');
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('La imagen no debe superar los 50MB');
       return;
     }
 
@@ -163,7 +163,7 @@ export default function EditMyProfilePage() {
                 className="sr-only"
               />
             </label>
-            <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF hasta 5MB</p>
+            <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF, HEIC hasta 50MB</p>
           </div>
 
           <div>
