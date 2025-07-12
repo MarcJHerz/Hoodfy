@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface LoadingScreenProps {
   message?: string;
@@ -9,12 +9,12 @@ interface LoadingScreenProps {
   progress?: number;
 }
 
-export default function LoadingScreen({ 
+const LoadingScreen = React.memo(({ 
   message = 'Cargando...', 
   variant = 'default',
   showProgress = false,
   progress = 0
-}: LoadingScreenProps) {
+}: LoadingScreenProps) => {
   const [dots, setDots] = useState('');
   const [currentProgress, setCurrentProgress] = useState(0);
 
@@ -160,7 +160,11 @@ export default function LoadingScreen({
       </div>
     </div>
   );
-}
+});
+
+LoadingScreen.displayName = 'LoadingScreen';
+
+export default LoadingScreen;
 
 // Componente Skeleton para loading states de posts
 export function PostSkeleton({ compact = false }: { compact?: boolean }) {

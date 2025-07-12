@@ -32,10 +32,51 @@ const MessageInput: React.FC<MessageInputProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { user } = useAuthStore();
 
-  // Función para convertir HEIC a JPEG (deshabilitada temporalmente)
+  // Función para convertir HEIC a JPEG
   const convertHeicToJpeg = async (file: File): Promise<File> => {
-    // Por ahora, permitir HEIC/HEIF sin conversión
-    return file;
+    try {
+      // Verificar si es un archivo HEIC/HEIF
+      const isHeic = file.name.toLowerCase().endsWith('.heic') || 
+                     file.name.toLowerCase().endsWith('.heif') ||
+                     file.type === 'image/heic' || 
+                     file.type === 'image/heif';
+      
+      if (!isHeic) {
+        console.log('📸 Archivo no es HEIC/HEIF, manteniendo original:', file.name);
+        return file;
+      }
+      
+      console.log('🔄 Iniciando conversión HEIC a JPEG:', file.name);
+      
+      // Importar heic2any dinámicamente
+      const heic2any = (await import('heic2any')).default;
+      
+      // Convertir HEIC a JPEG
+      const convertedBlob = await heic2any({
+        blob: file,
+        toType: 'image/jpeg',
+        quality: 0.8
+      });
+      
+      // Crear un nuevo archivo con el blob convertido
+      const convertedFile = new File([convertedBlob as Blob], 
+        file.name.replace(/\.(heic|heif)$/i, '.jpg'), 
+        { type: 'image/jpeg' }
+      );
+      
+      console.log('✅ Conversión completada:', {
+        original: file.name,
+        converted: convertedFile.name,
+        originalSize: file.size,
+        convertedSize: convertedFile.size
+      });
+      
+      return convertedFile;
+    } catch (error) {
+      console.error('❌ Error en conversión HEIC:', error);
+      console.log('⚠️ Manteniendo archivo original:', file.name);
+      return file;
+    }
   };
 
   // Auto-resize textarea
@@ -218,7 +259,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         ref={imageInputRef}
         type="file"
         onChange={handleImageSelect}
-        accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm,.heic,.heif"
+        accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm,.avi,.m4v,.3gp,.heic,.heif"
         className="hidden"
       />
 

@@ -51,6 +51,16 @@ interface PostsState {
 export const usePostsStore = create<PostsState>()(
   persist(
     (set, get) => ({
+      // Selectores para optimizar re-renders
+      getFeedPosts: () => get().feedPosts,
+      getCommunityPosts: (communityId: string) => get().communityPosts[communityId] || [],
+      getUserPosts: (userId: string) => get().userPosts[userId] || [],
+      getCurrentPost: () => get().currentPost,
+      getIsLoading: () => get().isLoading,
+      getIsLoadingFeed: () => get().isLoadingFeed,
+      getIsLoadingCommunity: () => get().isLoadingCommunity,
+      getIsLoadingUser: () => get().isLoadingUser,
+      getError: () => get().error,
       // Estado inicial
       feedPosts: [],
       communityPosts: {},

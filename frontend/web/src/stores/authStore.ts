@@ -20,6 +20,7 @@ interface AuthState {
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
   clearError: () => void;
+  clearAllAuthData: () => void;
   initialize: () => Promise<void>;
 }
 
@@ -42,6 +43,13 @@ const syncTokenWithCookies = (token: string | null) => {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
+      // Selectores para optimizar re-renders
+      getUser: () => get().user,
+      getToken: () => get().token,
+      getIsLoading: () => get().isLoading,
+      getIsInitialized: () => get().isInitialized,
+      getError: () => get().error,
+      getIsLoggingOut: () => get().isLoggingOut,
       user: null,
       token: null,
       isLoading: false,
@@ -201,6 +209,8 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         set({ isLoading: true, error: null, isLoggingOut: true });
         try {
+          console.log('🚪 Iniciando proceso de logout...');
+          
           // Primero limpiar el estado local para evitar conflictos
           set({ user: null, token: null, isLoading: false, isInitialized: false });
           
@@ -209,6 +219,19 @@ export const useAuthStore = create<AuthState>()(
           localStorage.removeItem('auth-storage');
           localStorage.removeItem('communities-storage');
           localStorage.removeItem('posts-storage');
+          localStorage.removeItem('user-storage');
+          localStorage.removeItem('ui-storage');
+          
+          // Limpiar todas las cookies relacionadas
+          document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          document.cookie = 'auth-storage=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          document.cookie = 'communities-storage=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          document.cookie = 'posts-storage=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          document.cookie = 'user-storage=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          document.cookie = 'ui-storage=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          
+          // Limpiar sessionStorage
+          sessionStorage.clear();
           
           // Limpiar comunidades
           useCommunitiesStore.getState().clearCommunities();
@@ -216,24 +239,31 @@ export const useAuthStore = create<AuthState>()(
           // Limpiar posts
           usePostsStore.getState().clearPosts();
           
+          console.log('🧹 Datos locales limpiados, procediendo con logout de servicios...');
+          
           // Luego hacer logout de Firebase y backend
           await signOut(auth);
           await apiAuth.logout();
           
-          console.log('Logout completado exitosamente');
+          console.log('✅ Logout completado exitosamente');
+          
+          // Esperar un momento antes de redirigir para asegurar que todo esté limpio
+          await new Promise(resolve => setTimeout(resolve, 500));
           
           // Usar window.location.href para forzar recarga completa y evitar problemas de estado
           if (typeof window !== 'undefined') {
             window.location.href = '/login';
           }
         } catch (error: any) {
-          console.error('Error durante logout:', error);
+          console.error('❌ Error durante logout:', error);
           // Asegurar que el estado esté limpio incluso si hay error
           set({ user: null, token: null, isLoading: false, isInitialized: false });
           syncTokenWithCookies(null);
           localStorage.removeItem('auth-storage');
           localStorage.removeItem('communities-storage');
           localStorage.removeItem('posts-storage');
+          localStorage.removeItem('user-storage');
+          localStorage.removeItem('ui-storage');
           
           // En caso de error, también redirigir
           if (typeof window !== 'undefined') {
@@ -251,6 +281,46 @@ export const useAuthStore = create<AuthState>()(
         syncTokenWithCookies(token);
       },
       clearError: () => set({ error: null }),
+      
+      // Función para limpiar completamente todos los datos de autenticación
+      clearAllAuthData: () => {
+        console.log('🧹 Limpiando todos los datos de autenticación...');
+        
+        // Limpiar estado del store
+        set({ 
+          user: null, 
+          token: null, 
+          isLoading: false, 
+          isInitialized: false,
+          isLoggingOut: false,
+          error: null 
+        });
+        
+        // Limpiar localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('auth-storage');
+        localStorage.removeItem('communities-storage');
+        localStorage.removeItem('posts-storage');
+        localStorage.removeItem('user-storage');
+        localStorage.removeItem('ui-storage');
+        
+        // Limpiar cookies
+        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'auth-storage=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'communities-storage=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'posts-storage=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'user-storage=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'ui-storage=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        
+        // Limpiar sessionStorage
+        sessionStorage.clear();
+        
+        // Limpiar otros stores
+        useCommunitiesStore.getState().clearCommunities();
+        usePostsStore.getState().clearPosts();
+        
+        console.log('✅ Todos los datos de autenticación limpiados');
+      },
     }),
     {
       name: 'auth-storage',
@@ -262,9 +332,11 @@ export const useAuthStore = create<AuthState>()(
 // Escuchar cambios de autenticación de Firebase y sincronizar el store
 if (typeof window !== 'undefined') {
   let isProcessingAuthChange = false;
+  let lastLogoutTime = 0;
   
   onAuthStateChanged(auth, async (firebaseUser) => {
     const store = useAuthStore.getState();
+    const now = Date.now();
     
     // Evitar procesamiento simultáneo
     if (isProcessingAuthChange) {
@@ -278,6 +350,12 @@ if (typeof window !== 'undefined') {
       return;
     }
     
+    // Verificar si se hizo logout recientemente (dentro de los últimos 5 segundos)
+    if (!firebaseUser && (now - lastLogoutTime) < 5000) {
+      console.log('Logout reciente detectado, ignorando onAuthStateChanged');
+      return;
+    }
+    
     isProcessingAuthChange = true;
     
     try {
@@ -286,6 +364,7 @@ if (typeof window !== 'undefined') {
         console.log('Firebase user logged out, clearing store');
         store.setUser(null);
         store.setToken(null);
+        lastLogoutTime = now;
         return;
       }
       

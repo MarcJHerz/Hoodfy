@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useRef, useEffect, useCallback, useState, Fragment } from 'react';
@@ -25,7 +26,7 @@ import { UserAvatar } from './UserAvatar';
 
 const SearchModal = dynamic(() => import('./SearchModal'), { ssr: false });
 
-export default function Navbar() {
+const Navbar = React.memo(() => {
   const pathname = usePathname();
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -490,4 +491,8 @@ export default function Navbar() {
       <SearchModal open={isSearchModalOpen} onClose={closeSearchModal} />
     </nav>
   );
-} 
+});
+
+Navbar.displayName = 'Navbar';
+
+export default Navbar;

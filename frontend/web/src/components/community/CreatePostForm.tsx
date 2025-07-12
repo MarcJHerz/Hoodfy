@@ -64,7 +64,7 @@ export const CreatePostForm: React.FC<CreatePostFormProps> = ({ communityId, onP
         type="file"
         ref={fileInputRef}
         onChange={handleFileSelect}
-        accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm"
+        accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm,.avi,.m4v,.3gp,.heic,.heif"
         multiple
         className="hidden"
       />

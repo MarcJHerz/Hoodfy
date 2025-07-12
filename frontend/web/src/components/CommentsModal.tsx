@@ -3,6 +3,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { Post } from '@/types/post';
 import { User } from '@/types/user';
+import { Comment } from '@/types/comment';
 import PostHeader from './PostHeader';
 import PostContent from './PostContent';
 import Comments from './Comments';
@@ -30,6 +31,7 @@ export default function CommentsModal({
   const [newComment, setNewComment] = useState('');
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [showComments, setShowComments] = useState(true);
+  const [localComments, setLocalComments] = useState(post?.comments || []);
   const { url: currentMediaUrl } = useImageUrl(post?.media?.[currentMediaIndex]?.url);
   const { url: thumbnailUrl } = useImageUrl(post?.media?.[currentMediaIndex]?.thumbnail);
 
@@ -38,16 +40,29 @@ export default function CommentsModal({
     if (!newComment.trim() || !post) return;
 
     try {
-      await comments.createComment(post._id, newComment);
+      const response = await comments.createComment(post._id, newComment);
       setNewComment('');
-      // Recargar los comentarios
-      const response = await comments.getPostComments(post._id);
-      if (response.data) {
-        onPostUpdate({
-          ...post,
-          comments: response.data
-        });
-      }
+      
+      // Actualizar comentarios localmente inmediatamente
+      const newCommentData: Comment = {
+        _id: response.data._id,
+        content: newComment,
+        user: currentUser!,
+        post: post._id,
+        createdAt: new Date().toISOString(),
+        likes: [],
+        replies: []
+      };
+      
+      setLocalComments(prev => [newCommentData, ...prev]);
+      
+      // También actualizar el post en el componente padre
+      const updatedPost = {
+        ...post,
+        comments: [newCommentData, ...(post.comments || [])]
+      };
+      onPostUpdate(updatedPost);
+      
       toast.success('Comentario agregado exitosamente');
     } catch (error) {
       console.error('Error al agregar comentario:', error);
@@ -70,7 +85,8 @@ export default function CommentsModal({
   // Resetear índice cuando cambie el post
   React.useEffect(() => {
     setCurrentMediaIndex(0);
-  }, [post?._id]);
+    setLocalComments(post?.comments || []);
+  }, [post?._id, post?.comments]);
 
   // Si no hay post, no mostrar el modal
   if (!post) {

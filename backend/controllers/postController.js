@@ -96,9 +96,42 @@ exports.createPost = async (req, res) => {
             const s3Key = await uploadFileToS3(buffer, originalname, mimetype);
             console.log(`✅ Archivo subido con key: ${s3Key}`);
             
+            // Si es un video, generar miniatura
+            let thumbnailKey = null;
+            if (mimetype.startsWith('video/')) {
+              try {
+                console.log(`🎬 Generando miniatura para video: ${originalname}`);
+                
+                // Guardar temporalmente el video para generar miniatura
+                const tempVideoPath = `/tmp/${originalname}`;
+                require('fs').writeFileSync(tempVideoPath, buffer);
+                
+                // Generar miniatura
+                const { generateThumbnail } = require('../utils/generateThumbnail');
+                const thumbnailFilename = `${path.parse(originalname).name}_thumb.jpg`;
+                const tempThumbnailPath = `/tmp/${thumbnailFilename}`;
+                
+                await generateThumbnail(tempVideoPath, tempThumbnailPath, 1);
+                
+                // Leer la miniatura generada y subirla a S3
+                const thumbnailBuffer = require('fs').readFileSync(tempThumbnailPath);
+                thumbnailKey = await uploadFileToS3(thumbnailBuffer, thumbnailFilename, 'image/jpeg');
+                
+                console.log(`✅ Miniatura generada y subida: ${thumbnailKey}`);
+                
+                // Limpiar archivos temporales
+                require('fs').unlinkSync(tempVideoPath);
+                require('fs').unlinkSync(tempThumbnailPath);
+              } catch (thumbnailError) {
+                console.error(`❌ Error generando miniatura para ${originalname}:`, thumbnailError);
+                // Continuar sin miniatura si falla
+              }
+            }
+            
             return {
               url: s3Key, // Guardar solo la key de S3
               type: mimetype.startsWith('image/') ? 'image' : 'video',
+              thumbnail: thumbnailKey, // Key de la miniatura si existe
               metadata: {
                 originalName: originalname,
                 size: file.size

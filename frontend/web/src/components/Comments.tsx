@@ -8,6 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useImageUrl } from '@/utils/useImageUrl';
 import { toast } from 'react-hot-toast';
+import { UserAvatar } from './UserAvatar';
 
 interface Comment {
   _id: string;
@@ -29,7 +30,7 @@ interface CommentsProps {
   communityId?: string;
 }
 
-export default function Comments({ postId, postType, communityId }: CommentsProps) {
+const Comments = React.memo(({ postId, postType, communityId }: CommentsProps) => {
   const { user } = useAuthStore();
   const [commentsList, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -129,13 +130,10 @@ export default function Comments({ postId, postType, communityId }: CommentsProp
         )}
         <div className={`flex items-start space-x-3 ${isReply ? 'pl-6' : ''} w-full`}>
           <div className="flex-shrink-0">
-            <Image
-              src={userImageUrl || '/images/defaults/default-avatar.png'}
-              alt={comment.user?.name || 'Usuario'}
-              width={40}
-              height={40}
-              className="rounded-full"
-              sizes="(max-width: 40px) 100vw, 40px"
+            <UserAvatar
+              size={40}
+              source={comment.user?.profilePicture}
+              name={comment.user?.name || 'Usuario'}
             />
           </div>
           <div className={`rounded-lg p-3 flex-1 ${isReply ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-gray-100 dark:bg-gray-700'}`}>
@@ -249,4 +247,8 @@ export default function Comments({ postId, postType, communityId }: CommentsProp
       )}
     </div>
   );
-} 
+});
+
+Comments.displayName = 'Comments';
+
+export default Comments;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuthStore } from '@/stores/authStore';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
@@ -45,7 +45,7 @@ export default function DashboardPage() {
     }
   }, [user]);
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -68,22 +68,22 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?._id]);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
       setSelectedFiles(files);
       setIsCreatePostModalOpen(true);
     }
-  };
+  }, []);
 
-  const handleCreatePost = () => {
+  const handleCreatePost = useCallback(() => {
     setSelectedFiles([]);
     fetchPosts();
-  };
+  }, [fetchPosts]);
 
-  const handleLike = async (postId: string) => {
+  const handleLike = useCallback(async (postId: string) => {
     try {
       const post = feedPosts.find(p => p._id === postId);
       if (!post) return;
@@ -101,19 +101,19 @@ export default function DashboardPage() {
       console.error('Error al dar like:', error);
       toast.error('Error al dar like al post');
     }
-  };
+  }, [feedPosts, user?._id]);
 
-  const handleCommentClick = (post: PostType) => {
+  const handleCommentClick = useCallback((post: PostType) => {
     console.log('Comment icon clicked for post:', post._id);
     setSelectedPost(post);
     setIsCommentsModalOpen(true);
-  };
+  }, []);
 
-  const handlePostUpdate = (updatedPost: PostType) => {
+  const handlePostUpdate = useCallback((updatedPost: PostType) => {
     setFeedPosts(prevPosts => 
       prevPosts.map(p => p._id === updatedPost._id ? updatedPost : p)
     );
-  };
+  }, []);
 
   if (loading && feedPosts.length === 0) {
     return <LoadingScreen message="Cargando tu feed personalizado..." variant="default" />;
@@ -191,7 +191,7 @@ export default function DashboardPage() {
           type="file"
           ref={fileInputRef}
           onChange={handleFileSelect}
-          accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm"
+          accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm,.avi,.m4v,.3gp,.heic,.heif"
           multiple
           className="hidden"
         />

@@ -10,17 +10,21 @@ interface UserAvatarProps {
   name: string;
 }
 
-export const UserAvatar: React.FC<UserAvatarProps> = ({ size, source, name }) => {
+export const UserAvatar: React.FC<UserAvatarProps> = React.memo(({ size, source, name }) => {
   const { url, loading } = useImageUrl(source);
   
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
+  const getInitials = React.useMemo(() => {
+    return (name: string) => {
+      return name
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    };
+  }, []);
+
+  const initials = React.useMemo(() => getInitials(name), [name, getInitials]);
 
   return (
     <div
@@ -40,6 +44,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({ size, source, name }) =>
           className="object-cover"
           sizes={`${size}px`}
           unoptimized
+          priority={size > 60} // Priorizar imágenes grandes
         />
       ) : (
         <span
@@ -48,9 +53,11 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({ size, source, name }) =>
             fontSize: size * 0.4,
           }}
         >
-          {getInitials(name)}
+          {initials}
         </span>
       )}
     </div>
   );
-}; 
+});
+
+UserAvatar.displayName = 'UserAvatar'; 

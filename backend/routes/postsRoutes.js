@@ -36,7 +36,10 @@ function detectMimeType(file) {
     '.webp': 'image/webp',
     '.mp4': 'video/mp4',
     '.mov': 'video/quicktime',
-    '.webm': 'video/webm'
+    '.webm': 'video/webm',
+    '.avi': 'video/x-msvideo',
+    '.m4v': 'video/mp4',
+    '.3gp': 'video/3gpp'
   };
   
   return mimeMap[ext] || file.mimetype;
@@ -51,31 +54,32 @@ const upload = multer({
     fieldSize: 50 * 1024 * 1024, // 50MB por campo
     fieldNameSize: 100 // Tamaño máximo del nombre del campo
   },
-  fileFilter: (req, file, cb) => {
-    console.log('🔍 Archivo recibido en postsRoutes:', {
-      originalname: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size
-    });
-    
-    // Detectar el tipo MIME real basado en la extensión
-    const realMimeType = detectMimeType(file);
-    console.log('📋 Tipo MIME detectado:', realMimeType);
-    
-    const allowedTypes = [
-      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 
-      'image/heic', 'image/heif', 'image/heic-sequence', 'image/heif-sequence',
-      'video/mp4', 'video/quicktime', 'video/webm'
-    ];
-    
-    if (allowedTypes.includes(realMimeType)) {
-      console.log('✅ Archivo aceptado en postsRoutes');
-      cb(null, true);
-    } else {
-      console.log('❌ Archivo rechazado en postsRoutes - tipo no permitido:', realMimeType);
-      cb(new Error(`Tipo de archivo no soportado: ${realMimeType}. Solo se permiten imágenes (JPEG, PNG, GIF, WebP, HEIC, HEIF) y videos (MP4, MOV, WebM)`));
+      fileFilter: (req, file, cb) => {
+      console.log('🔍 Archivo recibido en postsRoutes:', {
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+        sizeInMB: (file.size / (1024 * 1024)).toFixed(2) + ' MB'
+      });
+      
+      // Detectar el tipo MIME real basado en la extensión
+      const realMimeType = detectMimeType(file);
+      console.log('📋 Tipo MIME detectado:', realMimeType);
+      
+      const allowedTypes = [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp', 
+        'image/heic', 'image/heif', 'image/heic-sequence', 'image/heif-sequence',
+        'video/mp4', 'video/quicktime', 'video/webm', 'video/x-msvideo', 'video/avi'
+      ];
+      
+      if (allowedTypes.includes(realMimeType)) {
+        console.log('✅ Archivo aceptado en postsRoutes');
+        cb(null, true);
+      } else {
+        console.log('❌ Archivo rechazado en postsRoutes - tipo no permitido:', realMimeType);
+        cb(new Error(`Tipo de archivo no soportado: ${realMimeType}. Solo se permiten imágenes (JPEG, PNG, GIF, WebP, HEIC, HEIF) y videos (MP4, MOV, WebM, AVI)`));
+      }
     }
-  }
 });
 
 // Middleware de autenticación para todas las rutas

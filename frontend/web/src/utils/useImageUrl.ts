@@ -1,17 +1,14 @@
-import { useEffect, useState } from 'react';
-import api from '@/services/api';
+import { useState, useEffect } from 'react';
 
-export async function getSignedS3Url(key: string): Promise<string> {
-  const response = await api.get(`/api/upload/signed-url/${key}`);
-  return response.data.url;
-}
+// Cache para URLs ya resueltas
+const urlCache = new Map<string, string>();
 
 /**
  * Hook para obtener la URL de una imagen, resolviendo keys de S3 a URLs firmadas si es necesario
  * @param keyOrUrl - Puede ser una URL completa, una ruta local o un key de S3
  * @returns { url, loading, error }
  */
-export function useImageUrlResolved(keyOrUrl?: string) {
+export function useImageUrl(keyOrUrl?: string) {
   const [url, setUrl] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,32 +29,23 @@ export function useImageUrlResolved(keyOrUrl?: string) {
         return;
       }
       
+      // Verificar cache primero
+      if (urlCache.has(keyOrUrl)) {
+        if (isMounted) {
+          setUrl(urlCache.get(keyOrUrl)!);
+          setLoading(false);
+        }
+        return;
+      }
+      
       // Si ya es una URL completa, usarla directamente
       if (keyOrUrl.startsWith('http://') || keyOrUrl.startsWith('https://')) {
         if (isMounted) {
           setUrl(keyOrUrl);
           setLoading(false);
         }
-        return;
-      }
-      
-      // Si parece un key de S3 (no contiene "/" o contiene extensión de imagen)
-      const isS3Key = /^[a-zA-Z0-9\-]+\.(jpg|jpeg|png|webp|gif|jfif|mp4|mov|avi)$/i.test(keyOrUrl);
-      if (isS3Key) {
-        try {
-          const signedUrl = await getSignedS3Url(keyOrUrl);
-          if (isMounted) {
-            setUrl(signedUrl);
-            setLoading(false);
-          }
-        } catch (err) {
-          console.error('Error getting signed URL:', err);
-          if (isMounted) {
-            setError('No se pudo obtener la URL firmada');
-            setUrl('/images/defaults/default-avatar.png');
-            setLoading(false);
-          }
-        }
+        // Cachear URL completa
+        urlCache.set(keyOrUrl, keyOrUrl);
         return;
       }
       
@@ -67,6 +55,8 @@ export function useImageUrlResolved(keyOrUrl?: string) {
       if (isMounted) {
         setUrl(finalUrl);
         setLoading(false);
+        // Cachear URL local
+        urlCache.set(keyOrUrl, finalUrl);
       }
     };
     
@@ -80,5 +70,7 @@ export function useImageUrlResolved(keyOrUrl?: string) {
   return { url, loading, error };
 }
 
-// Mantener el nombre original para compatibilidad
-export const useImageUrl = useImageUrlResolved; 
+// Función para limpiar el cache si es necesario
+export const clearImageUrlCache = () => {
+  urlCache.clear();
+}; 

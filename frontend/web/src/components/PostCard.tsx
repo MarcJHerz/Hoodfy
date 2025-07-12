@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
@@ -25,6 +25,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'react-hot-toast';
 import { posts } from '@/services/api';
 import { MediaGallery } from './MediaGallery';
+import { UserAvatar } from './UserAvatar';
 
 interface PostCardProps {
   post: Post;
@@ -36,7 +37,7 @@ interface PostCardProps {
   showPinOption?: boolean;
 }
 
-export default function PostCard({ 
+const PostCard = React.memo(({ 
   post,
   onCommentClick, 
   onPostUpdate,
@@ -44,7 +45,7 @@ export default function PostCard({
   compact = false,
   isCreator = false,
   showPinOption = false
-}: PostCardProps) {
+}: PostCardProps) => {
   const { user } = useAuthStore();
   const { url: authorImageUrl } = useImageUrl(post.author.profilePicture);
   const [isLoading, setIsLoading] = useState(false);
@@ -164,14 +165,11 @@ export default function PostCard({
             href={`/profile/${post.author._id}`}
             className="flex-shrink-0 group-hover:scale-105 transition-transform duration-200"
           >
-        <Image
-          src={authorImageUrl}
-          alt={post.author.name}
-              width={compact ? 32 : 40}
-              height={compact ? 32 : 40}
-              className="rounded-full ring-2 ring-transparent group-hover:ring-primary-200 transition-all duration-200"
-          unoptimized
-        />
+            <UserAvatar
+              size={compact ? 32 : 40}
+              source={post.author.profilePicture}
+              name={post.author.name}
+            />
           </Link>
           
           <div className="flex-1 min-w-0">
@@ -345,7 +343,11 @@ export default function PostCard({
       </footer>
     </article>
   );
-}
+});
+
+PostCard.displayName = 'PostCard';
+
+export default PostCard;
 
 // Componente Skeleton para loading states
 export function PostSkeleton({ compact = false }: { compact?: boolean }) {

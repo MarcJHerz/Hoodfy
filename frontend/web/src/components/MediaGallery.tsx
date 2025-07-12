@@ -18,7 +18,7 @@ interface MediaGalleryProps {
 }
 
 // Componente para renderizar un item de media con URL procesada
-const MediaItem: React.FC<{ item: MediaItem; index: number; onClick: (index: number, e?: React.MouseEvent) => void }> = ({ 
+const MediaItem: React.FC<{ item: MediaItem; index: number; onClick: (index: number, e?: React.MouseEvent) => void }> = React.memo(({ 
   item, 
   index, 
   onClick 
@@ -59,11 +59,14 @@ const MediaItem: React.FC<{ item: MediaItem; index: number; onClick: (index: num
       src={processedUrl || '/images/defaults/default-avatar.png'}
       alt={`Media ${index + 1}`}
       className="w-full h-full object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity duration-200"
+      loading="lazy"
     />
   );
-};
+});
 
-export const MediaGallery: React.FC<MediaGalleryProps> = ({
+MediaItem.displayName = 'MediaItem';
+
+export const MediaGallery: React.FC<MediaGalleryProps> = React.memo(({
   media,
   images,
   onImageClick,
@@ -173,4 +176,6 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
       {renderMediaGrid()}
     </div>
   );
-}; 
+});
+
+MediaGallery.displayName = 'MediaGallery'; 
