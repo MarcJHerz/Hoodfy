@@ -21,17 +21,28 @@ const ensureDir = (dir) => {
 // 📷 Configuración de multer para imágenes y videos - MIGRADO A S3
 const storage = multer.memoryStorage();
 
-// Filtrar archivos por tipo
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/quicktime'];
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error('Tipo de archivo no soportado. Solo se permiten imágenes (JPEG, PNG, GIF) y videos (MP4, MOV)'));
-  }
-};
+// Función para detectar el tipo MIME real de un archivo
+function detectMimeType(file) {
+  const ext = path.extname(file.originalname).toLowerCase();
+  
+  // Mapeo de extensiones a tipos MIME
+  const mimeMap = {
+    '.heic': 'image/heic',
+    '.heif': 'image/heif',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.png': 'image/png',
+    '.gif': 'image/gif',
+    '.webp': 'image/webp',
+    '.mp4': 'video/mp4',
+    '.mov': 'video/quicktime',
+    '.webm': 'video/webm'
+  };
+  
+  return mimeMap[ext] || file.mimetype;
+}
 
-// Configurar multer con límites más generosos
+// Configurar multer con límites más generosos y detección mejorada de MIME
 const upload = multer({ 
   storage: storage,
   limits: {
@@ -40,11 +51,28 @@ const upload = multer({
     fieldSize: 50 * 1024 * 1024 // 50MB por campo
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif', 'video/mp4', 'video/quicktime', 'video/webm'];
-    if (allowedTypes.includes(file.mimetype)) {
+    console.log('🔍 Archivo recibido en postsRoutes:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size
+    });
+    
+    // Detectar el tipo MIME real basado en la extensión
+    const realMimeType = detectMimeType(file);
+    console.log('📋 Tipo MIME detectado:', realMimeType);
+    
+    const allowedTypes = [
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 
+      'image/heic', 'image/heif', 'image/heic-sequence', 'image/heif-sequence',
+      'video/mp4', 'video/quicktime', 'video/webm'
+    ];
+    
+    if (allowedTypes.includes(realMimeType)) {
+      console.log('✅ Archivo aceptado en postsRoutes');
       cb(null, true);
     } else {
-      cb(new Error('Tipo de archivo no soportado. Solo se permiten imágenes (JPEG, PNG, GIF, WebP, HEIC, HEIF) y videos (MP4, MOV, WebM)'));
+      console.log('❌ Archivo rechazado en postsRoutes - tipo no permitido:', realMimeType);
+      cb(new Error(`Tipo de archivo no soportado: ${realMimeType}. Solo se permiten imágenes (JPEG, PNG, GIF, WebP, HEIC, HEIF) y videos (MP4, MOV, WebM)`));
     }
   }
 });

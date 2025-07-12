@@ -16,7 +16,51 @@ if (!fs.existsSync(profilePicturesPath)) {
 }
 
 // 📌 Configurar `multer` para memoria (para S3)
-const upload = multer({ storage: multer.memoryStorage() });
+// Función para detectar el tipo MIME real de un archivo
+function detectMimeType(file) {
+  const ext = path.extname(file.originalname).toLowerCase();
+  
+  // Mapeo de extensiones a tipos MIME
+  const mimeMap = {
+    '.heic': 'image/heic',
+    '.heif': 'image/heif',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.png': 'image/png',
+    '.gif': 'image/gif',
+    '.webp': 'image/webp'
+  };
+  
+  return mimeMap[ext] || file.mimetype;
+}
+
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  fileFilter: (req, file, cb) => {
+    console.log('🔍 Archivo recibido en userRoutes:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size
+    });
+    
+    // Detectar el tipo MIME real basado en la extensión
+    const realMimeType = detectMimeType(file);
+    console.log('📋 Tipo MIME detectado:', realMimeType);
+    
+    const allowedTypes = [
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 
+      'image/heic', 'image/heif', 'image/heic-sequence', 'image/heif-sequence'
+    ];
+    
+    if (allowedTypes.includes(realMimeType)) {
+      console.log('✅ Archivo aceptado en userRoutes');
+      cb(null, true);
+    } else {
+      console.log('❌ Archivo rechazado en userRoutes - tipo no permitido:', realMimeType);
+      cb(new Error(`Tipo de archivo no soportado: ${realMimeType}. Solo se permiten imágenes (JPEG, PNG, GIF, WebP, HEIC, HEIF)`));
+    }
+  }
+});
 
 // ✅ Ruta para subir imagen de perfil a S3
 router.put('/profile/photo', verifyToken, upload.single('profilePicture'), async (req, res) => {
