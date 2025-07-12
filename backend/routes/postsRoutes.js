@@ -48,7 +48,8 @@ const upload = multer({
   limits: {
     fileSize: 500 * 1024 * 1024, // 500MB límite para videos grandes
     files: 10, // Máximo 10 archivos por request
-    fieldSize: 50 * 1024 * 1024 // 50MB por campo
+    fieldSize: 50 * 1024 * 1024, // 50MB por campo
+    fieldNameSize: 100 // Tamaño máximo del nombre del campo
   },
   fileFilter: (req, file, cb) => {
     console.log('🔍 Archivo recibido en postsRoutes:', {
@@ -80,8 +81,64 @@ const upload = multer({
 // Middleware de autenticación para todas las rutas
 router.use(verifyToken);
 
+// Middleware para manejar errores de multer
+const handleMulterError = (error, req, res, next) => {
+  console.log('🚨 Error de multer detectado:', {
+    message: error.message,
+    code: error.code,
+    field: error.field,
+    file: error.file
+  });
+  
+  if (error.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({
+      error: 'Archivo demasiado grande',
+      message: 'El archivo excede el límite de tamaño permitido (500MB)'
+    });
+  }
+  
+  if (error.code === 'LIMIT_FILE_COUNT') {
+    return res.status(413).json({
+      error: 'Demasiados archivos',
+      message: 'No puedes subir más de 10 archivos a la vez'
+    });
+  }
+  
+  if (error.message.includes('Tipo de archivo no soportado')) {
+    return res.status(400).json({
+      error: 'Tipo de archivo no soportado',
+      message: error.message
+    });
+  }
+  
+  return res.status(500).json({
+    error: 'Error al procesar archivos',
+    message: error.message
+  });
+};
+
 // Crear un nuevo post SOLO usando el controlador moderno (S3)
-router.post('/', rateLimiter, upload.any(), postController.createPost);
+router.post('/', rateLimiter, upload.any(), handleMulterError, (req, res, next) => {
+  console.log('📝 POST /api/posts recibido:', {
+    method: req.method,
+    url: req.url,
+    headers: {
+      'content-type': req.headers['content-type'],
+      'content-length': req.headers['content-length'],
+      'user-agent': req.headers['user-agent']
+    },
+    body: req.body ? Object.keys(req.body) : 'No body',
+    files: req.files ? `${req.files.length} archivos` : 'No files',
+    fileDetails: req.files ? req.files.map(f => ({
+      originalname: f.originalname,
+      mimetype: f.mimetype,
+      size: f.size
+    })) : []
+  });
+  
+  // Llamar al controlador
+  postController.createPost(req, res, next);
+});
 
 // Obtener posts de una comunidad
 router.get('/community/:communityId', rateLimiter, async (req, res) => {

@@ -37,10 +37,12 @@ app.use(cors({
     'User-Agent',
     'Cache-Control',
     'Accept-Language',
-    'Accept-Encoding'
+    'Accept-Encoding',
+    'Content-Length'
   ],
   preflightContinue: false,
-  optionsSuccessStatus: 204
+  optionsSuccessStatus: 204,
+  maxAge: 86400 // Cache preflight por 24 horas
 }));
 
 // Configurar límites de tamaño para archivos grandes (hasta 500MB)
@@ -65,10 +67,17 @@ app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 // Middleware adicional para manejar preflight OPTIONS en móviles
 app.use((req, res, next) => {
   if (req.method === 'OPTIONS') {
+    console.log('🔄 OPTIONS preflight request:', {
+      url: req.url,
+      origin: req.headers.origin,
+      'user-agent': req.headers['user-agent']
+    });
+    
     res.header('Access-Control-Allow-Origin', req.headers.origin);
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, User-Agent, Cache-Control, Accept-Language, Accept-Encoding');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, User-Agent, Cache-Control, Accept-Language, Accept-Encoding, Content-Length');
     res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Max-Age', '86400'); // Cache por 24 horas
     res.status(204).send();
   } else {
     next();
@@ -188,8 +197,19 @@ mongoose
   .then(() => console.log('✅ Conectado a MongoDB'))
   .catch((err) => console.error('❌ Error al conectar a MongoDB:', err));
 
-// ✅ Iniciar el servidor
-app.listen(PORT, '0.0.0.0', () => {
+// ✅ Iniciar el servidor con configuración de timeout
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
   console.log(`🌐 Accesible desde: https://api.qahood.com`);
+});
+
+// Configurar timeouts para archivos grandes
+server.timeout = 300000; // 5 minutos
+server.keepAliveTimeout = 65000; // 65 segundos
+server.headersTimeout = 66000; // 66 segundos
+
+console.log('⏱️ Timeouts configurados:', {
+  serverTimeout: server.timeout,
+  keepAliveTimeout: server.keepAliveTimeout,
+  headersTimeout: server.headersTimeout
 }); 
