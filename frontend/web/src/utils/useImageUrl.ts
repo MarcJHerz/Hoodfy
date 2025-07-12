@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getSignedS3Url } from './s3';
 
 // Cache para URLs ya resueltas
 const urlCache = new Map<string, string>();
@@ -46,6 +47,28 @@ export function useImageUrl(keyOrUrl?: string) {
         }
         // Cachear URL completa
         urlCache.set(keyOrUrl, keyOrUrl);
+        return;
+      }
+      
+      // Si parece un key de S3 (no contiene "/" o contiene extensión de imagen)
+      const isS3Key = /^[a-zA-Z0-9\-]+\.(jpg|jpeg|png|webp|gif|jfif|mp4|mov|avi)$/i.test(keyOrUrl);
+      if (isS3Key) {
+        try {
+          const signedUrl = await getSignedS3Url(keyOrUrl);
+          if (isMounted) {
+            setUrl(signedUrl);
+            setLoading(false);
+            // Cachear URL firmada
+            urlCache.set(keyOrUrl, signedUrl);
+          }
+        } catch (err) {
+          console.error('Error getting signed URL:', err);
+          if (isMounted) {
+            setError('No se pudo obtener la URL firmada');
+            setUrl('/images/defaults/default-avatar.png');
+            setLoading(false);
+          }
+        }
         return;
       }
       
