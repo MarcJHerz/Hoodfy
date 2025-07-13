@@ -43,7 +43,7 @@ function detectMimeType(file) {
   };
   
   return mimeMap[ext] || file.mimetype;
-}
+  }
 
 // Configurar multer con límites más generosos y detección mejorada de MIME
 const upload = multer({ 
@@ -54,7 +54,7 @@ const upload = multer({
     fieldSize: 50 * 1024 * 1024, // 50MB por campo
     fieldNameSize: 100 // Tamaño máximo del nombre del campo
   },
-      fileFilter: (req, file, cb) => {
+  fileFilter: (req, file, cb) => {
       console.log('🔍 Archivo recibido en postsRoutes:', {
         originalname: file.originalname,
         mimetype: file.mimetype,
@@ -74,12 +74,12 @@ const upload = multer({
       
       if (allowedTypes.includes(realMimeType)) {
         console.log('✅ Archivo aceptado en postsRoutes');
-        cb(null, true);
-      } else {
+      cb(null, true);
+    } else {
         console.log('❌ Archivo rechazado en postsRoutes - tipo no permitido:', realMimeType);
         cb(new Error(`Tipo de archivo no soportado: ${realMimeType}. Solo se permiten imágenes (JPEG, PNG, GIF, WebP, HEIC, HEIF) y videos (MP4, MOV, WebM, AVI)`));
-      }
     }
+  }
 });
 
 // Middleware de autenticación para todas las rutas

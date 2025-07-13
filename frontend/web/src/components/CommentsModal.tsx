@@ -58,7 +58,7 @@ export default function CommentsModal({
       
       // También actualizar el post en el componente padre
       const updatedPost = {
-        ...post,
+          ...post,
         comments: [newCommentData, ...(post.comments || [])]
       };
       onPostUpdate(updatedPost);

@@ -27,11 +27,18 @@ function detectMimeType(file) {
 
 const upload = multer({ 
   storage,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB para imágenes
+    files: 1, // Máximo 1 archivo por request
+    fieldSize: 50 * 1024 * 1024, // 50MB por campo
+    fieldNameSize: 100 // Tamaño máximo del nombre del campo
+  },
   fileFilter: (req, file, cb) => {
     console.log('🔍 Archivo recibido en uploadRoutes:', {
       originalname: file.originalname,
       mimetype: file.mimetype,
-      size: file.size
+      size: file.size,
+      sizeInMB: (file.size / (1024 * 1024)).toFixed(2) + ' MB'
     });
     
     // Detectar el tipo MIME real basado en la extensión
@@ -53,8 +60,44 @@ const upload = multer({
   }
 });
 
+// Middleware para manejar errores de multer
+const handleMulterError = (error, req, res, next) => {
+  console.log('🚨 Error de multer detectado en uploadRoutes:', {
+    message: error.message,
+    code: error.code,
+    field: error.field,
+    file: error.file
+  });
+  
+  if (error.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({
+      error: 'Archivo demasiado grande',
+      message: 'El archivo excede el límite de tamaño permitido (50MB)'
+    });
+  }
+  
+  if (error.code === 'LIMIT_FILE_COUNT') {
+    return res.status(413).json({
+      error: 'Demasiados archivos',
+      message: 'No puedes subir más de 1 archivo a la vez'
+    });
+  }
+  
+  if (error.message.includes('Tipo de archivo no soportado')) {
+    return res.status(400).json({
+      error: 'Tipo de archivo no soportado',
+      message: error.message
+    });
+  }
+  
+  return res.status(500).json({
+    error: 'Error al procesar archivos',
+    message: error.message
+  });
+};
+
 // Subir imagen a S3
-router.post('/', verifyToken, upload.single('file'), uploadController.uploadImage);
+router.post('/', verifyToken, upload.single('file'), handleMulterError, uploadController.uploadImage);
 // Obtener URL firmada
 router.get('/signed-url/:key', verifyToken, uploadController.getSignedUrl);
 

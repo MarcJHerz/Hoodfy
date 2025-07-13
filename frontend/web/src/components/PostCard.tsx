@@ -169,7 +169,7 @@ const PostCard = React.memo(({
               size={compact ? 32 : 40}
               source={post.author.profilePicture}
               name={post.author.name}
-            />
+        />
           </Link>
           
           <div className="flex-1 min-w-0">
