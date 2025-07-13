@@ -3,6 +3,7 @@ const Community = require('../models/Community');
 const User = require('../models/User');
 // const { uploadToFirebase } = require('../utils/firebaseStorage'); // Eliminado para usar solo almacenamiento local
 const { validatePostData } = require('../validators/postValidator');
+const path = require('path');
 
 // Función auxiliar para asegurar URLs absolutas
 const ensureAbsoluteUrl = (url) => {
@@ -702,13 +703,13 @@ exports.getCommunityPostsFiltered = async (req, res) => {
       .populate('author', 'name username profilePicture')
       .populate('comments.author', 'name username profilePicture');
 
-    // Asegurar URLs absolutas en los medios
+    // Mantener keys de S3 tal como están - el frontend se encargará de obtener URLs firmadas
     posts.forEach(post => {
       if (post.media && post.media.length > 0) {
         post.media = post.media.map(item => ({
           ...item.toObject(),
-          url: ensureAbsoluteUrl(item.url),
-          thumbnail: item.thumbnail ? ensureAbsoluteUrl(item.thumbnail) : null
+          url: item.url,
+          thumbnail: item.thumbnail || null
         }));
       }
     });
