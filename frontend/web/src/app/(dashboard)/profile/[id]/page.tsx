@@ -358,63 +358,68 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Profile Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Profile Picture */}
-            <div className="flex-shrink-0 flex justify-center lg:justify-start">
-              <div className="relative group">
-                <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden ring-4 ring-white dark:ring-gray-700 shadow-xl group-hover:shadow-2xl transition-all duration-300">
+      <div className="relative bg-gradient-to-br from-blue-500/30 via-purple-500/10 to-gray-900/10 dark:from-blue-900/40 dark:via-purple-900/20 dark:to-gray-900/60 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-soft rounded-b-3xl overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none" style={{background: 'radial-gradient(ellipse at 80% 0%, rgba(56,189,248,0.12) 0%, transparent 70%)'}} />
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-end">
+            {/* Avatar destacado */}
+            <div className="relative group">
+              <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full overflow-hidden ring-4 ring-blue-400/30 dark:ring-blue-600/40 shadow-strong group-hover:shadow-glow transition-all duration-300 bg-white/30 dark:bg-gray-900/30 backdrop-blur-md">
                 {user?.profilePicture ? (
                   <Image
                     src={userImageUrl}
                     alt={`${user.name}'s profile`}
-                      width={160}
-                      height={160}
-                      className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
+                    width={176}
+                    height={176}
+                    className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
                     unoptimized
                   />
                 ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center rounded-full">
-                      <span className="text-4xl font-bold text-white">
-                        {user?.name?.charAt(0)?.toUpperCase()}
-                      </span>
+                  <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center rounded-full">
+                    <span className="text-5xl font-bold text-white">
+                      {user?.name?.charAt(0)?.toUpperCase()}
+                    </span>
                   </div>
                 )}
-                </div>
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 border-4 border-white dark:border-gray-700 rounded-full animate-pulse"></div>
               </div>
+              {/* Estado online */}
+              <div className="absolute bottom-2 right-2 w-8 h-8 bg-green-500 border-4 border-white dark:border-gray-800 rounded-full animate-pulse shadow-glow" title="En línea"></div>
             </div>
-
-            {/* Profile Info */}
+            {/* Info y acciones */}
             <div className="flex-1 text-center lg:text-left">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div>
                   <div className="flex items-center gap-2 justify-center lg:justify-start">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
+                    <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
                       {user?.name}
                     </h1>
-                    {isAlly && !isOwnProfile && (
-                      <CheckBadgeIcon className="w-6 h-6 text-blue-500" title="Aliado" />
+                    {/* Icono de aliado/no aliado */}
+                    {!isOwnProfile && (
+                      isAlly ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-xs font-semibold animate-fade-in" title="Aliado">
+                          <CheckBadgeIcon className="w-4 h-4" /> Aliado
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300 rounded-full text-xs font-semibold animate-fade-in" title="No aliado">
+                          <UserPlusIcon className="w-4 h-4" /> No aliado
+                        </span>
+                      )
                     )}
                   </div>
-                  <p className="text-gray-600 dark:text-gray-400 text-lg">
-                    @{user?.username}
-                  </p>
+                  <p className="text-gray-600 dark:text-gray-400 text-lg">@{user?.username}</p>
                 </div>
-
-                {/* Action Buttons */}
+                {/* Botones de acción */}
                 <div className="flex flex-wrap justify-center lg:justify-end gap-3">
                   {isOwnProfile ? (
                     <>
-                    <Link
+                      <Link
                         href="/profile/edit"
-                        className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 font-medium rounded-xl transition-all duration-200 hover-lift"
-                    >
+                        className="flex items-center gap-2 px-6 py-2.5 btn-secondary btn-lg shadow-soft hover:shadow-md"
+                      >
                         <Cog6ToothIcon className="w-4 h-4" />
                         Editar perfil
-                    </Link>
-                      <button className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 font-medium rounded-xl transition-all duration-200 hover-lift">
+                      </Link>
+                      <button className="flex items-center gap-2 px-6 py-2.5 btn-secondary btn-lg shadow-soft hover:shadow-md">
                         <ShareIcon className="w-4 h-4" />
                         Compartir
                       </button>
@@ -423,7 +428,7 @@ export default function ProfilePage() {
                     <>
                       <button
                         onClick={() => setSelectedAlly(user)}
-                        className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all duration-200 hover-lift shadow-lg hover:shadow-xl"
+                        className="flex items-center gap-2 px-6 py-2.5 btn-primary btn-lg shadow-glow hover:shadow-glow-accent"
                       >
                         <ChatBubbleLeftIcon className="w-4 h-4" />
                         Mensaje
@@ -431,19 +436,17 @@ export default function ProfilePage() {
                       {!allyCheckLoading && !isAlly && (
                         <button
                           onClick={handleAddAlly}
-                          className="flex items-center gap-2 px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-all duration-200 hover-lift"
+                          className="flex items-center gap-2 px-6 py-2.5 btn-success btn-lg shadow-soft hover:shadow-md"
                         >
                           <UserPlusIcon className="w-4 h-4" />
                           Agregar aliado
                         </button>
                       )}
-                      
-                      {/* Menu dropdown */}
+                      {/* Menú */}
                       <Menu as="div" className="relative">
-                        <Menu.Button className="p-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-xl transition-all duration-200 hover-lift">
+                        <Menu.Button className="p-2.5 btn-ghost rounded-xl">
                           <EllipsisHorizontalIcon className="w-5 h-5" />
                         </Menu.Button>
-                        
                         <Menu.Items className="absolute right-0 top-12 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-2 z-50">
                           {isOwnProfile && (
                             <Menu.Item>
@@ -502,45 +505,40 @@ export default function ProfilePage() {
                   )}
                 </div>
               </div>
-
               {/* Bio */}
               {user?.bio && (
-                <p className="text-gray-700 dark:text-gray-300 mb-6 text-base leading-relaxed max-w-2xl">
+                <p className="text-gray-700 dark:text-gray-300 mb-6 text-base leading-relaxed max-w-2xl mx-auto lg:mx-0">
                   {user.bio}
                 </p>
               )}
-
-              {/* Stats */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-8 text-center">
-                <div className="group cursor-pointer">
-                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {userPosts.length}
+              {/* Estadísticas en tarjetas */}
+              <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-center mt-4">
+                <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-xl px-6 py-4 shadow-soft hover:shadow-md transition-all">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <Squares2X2Icon className="w-5 h-5 text-blue-500" />
+                    <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{userPosts.length}</span>
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                    Publicaciones
-                  </div>
+                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Publicaciones</div>
                 </div>
-                <div className="group cursor-pointer">
-                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {allCommunities.length}
+                <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-xl px-6 py-4 shadow-soft hover:shadow-md transition-all">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <UsersIcon className="w-5 h-5 text-purple-500" />
+                    <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{allCommunities.length}</span>
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                    Comunidades
-                  </div>
+                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Comunidades</div>
                 </div>
-                <div className="group cursor-pointer">
-                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {allies.length}
+                <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-xl px-6 py-4 shadow-soft hover:shadow-md transition-all">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <UserPlusIcon className="w-5 h-5 text-green-500" />
+                    <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{allies.length}</span>
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                    Aliados
-                  </div>
-                </div>
-              </div>
+                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Aliados</div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
       {/* Tabs Navigation */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">

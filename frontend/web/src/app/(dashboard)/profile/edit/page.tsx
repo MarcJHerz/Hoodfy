@@ -120,29 +120,30 @@ export default function EditMyProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12 flex flex-col items-center">
-      <div className="w-full max-w-lg bg-white shadow rounded-lg p-8">
-        <h1 className="text-2xl font-bold text-center text-gray-900 mb-8">Editar mi perfil</h1>
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12 flex flex-col items-center justify-center">
+      <div className="w-full max-w-lg glass-strong rounded-2xl shadow-strong p-8 border border-gray-200 dark:border-gray-700 backdrop-blur-md">
+        <h1 className="text-2xl font-extrabold text-center text-gray-900 dark:text-gray-100 mb-8 tracking-tight">Editar mi perfil</h1>
+        <form onSubmit={handleSubmit} className="space-y-8">
           <div className="flex flex-col items-center">
-            <div className="relative w-32 h-32 mb-4">
+            <div className="relative w-32 h-32 mb-4 group">
               {previewUrl ? (
                 <Image
                   src={previewUrl}
                   alt="Vista previa"
                   fill
-                  className="object-cover rounded-full border-4 border-white shadow"
+                  className="object-cover rounded-full border-4 border-white dark:border-gray-800 shadow-glow group-hover:shadow-glow-accent transition-all duration-300"
                 />
               ) : (
-                <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center">
-                  <PhotoIcon className="h-16 w-16 text-gray-400" />
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                  <PhotoIcon className="h-16 w-16 text-white/70" />
                 </div>
               )}
               {previewUrl && (
                 <button
                   type="button"
                   onClick={removeImage}
-                  className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                  className="absolute -top-2 -right-2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-md"
+                  title="Eliminar foto"
                 >
                   <XMarkIcon className="h-5 w-5" />
                 </button>
@@ -150,7 +151,7 @@ export default function EditMyProfilePage() {
             </div>
             <label
               htmlFor="profilePicture"
-              className="cursor-pointer text-indigo-600 hover:text-indigo-800 font-medium"
+              className="cursor-pointer text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
             >
               Cambiar foto de perfil
               <input
@@ -163,48 +164,46 @@ export default function EditMyProfilePage() {
                 className="sr-only"
               />
             </label>
-            <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF, HEIC hasta 50MB</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">PNG, JPG, GIF, HEIC hasta 50MB</p>
           </div>
 
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              Nombre
-            </label>
+            <label htmlFor="name" className="form-label">Nombre</label>
             <input
               type="text"
               name="name"
               id="name"
               value={formData.name}
               onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="input-field mt-1"
+              autoComplete="off"
+              required
             />
           </div>
 
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-              Nombre de usuario
-            </label>
+            <label htmlFor="username" className="form-label">Nombre de usuario</label>
             <input
               type="text"
               name="username"
               id="username"
               value={formData.username}
               onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="input-field mt-1"
+              autoComplete="off"
+              required
             />
           </div>
 
           <div>
-            <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
-              Biografía
-            </label>
+            <label htmlFor="bio" className="form-label">Biografía</label>
             <textarea
               name="bio"
               id="bio"
               rows={4}
               value={formData.bio}
               onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="input-field mt-1 resize-none"
             />
           </div>
 
@@ -212,14 +211,14 @@ export default function EditMyProfilePage() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              className="btn btn-secondary btn-md"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+              className="btn btn-primary btn-md shadow-glow disabled:opacity-50"
             >
               {loading ? 'Guardando...' : 'Guardar cambios'}
             </button>
