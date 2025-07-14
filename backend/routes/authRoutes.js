@@ -102,10 +102,22 @@ router.post('/login', async (req, res) => {
     let user = await User.findOne({ firebaseUid: uid });
     
     if (!user) {
+      // Generar username único
+      let baseUsername = (name || email.split('@')[0] || 'usuario').toLowerCase().replace(/[^a-z0-9_]/g, '');
+      let username = baseUsername;
+      let exists = await User.findOne({ username });
+      let tries = 0;
+      while (exists && tries < 5) {
+        username = baseUsername + Math.floor(Math.random() * 10000);
+        exists = await User.findOne({ username });
+        tries++;
+      }
+
       user = new User({
         firebaseUid: uid,
         email,
         name: name || email.split('@')[0],
+        username,
         profilePicture: picture || DEFAULT_AVATAR_KEY,
       });
       await user.save();
