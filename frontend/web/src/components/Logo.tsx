@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useImageUrl } from '@/utils/useImageUrl';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -16,7 +17,8 @@ const Logo: React.FC<LogoProps> = ({
   className = ''
 }) => {
   // URL de tu logo personalizado (reemplaza con tu URL de S3)
-  const logoUrl = process.env.NEXT_PUBLIC_LOGO_URL || '';
+  const logoKey = process.env.NEXT_PUBLIC_LOGO_URL || '';
+  const { url: logoUrl, loading } = useImageUrl(logoKey);
   
   const sizeClasses = {
     sm: 'w-6 h-6',
@@ -35,7 +37,7 @@ const Logo: React.FC<LogoProps> = ({
   const LogoContent = () => (
     <div className={`flex items-center gap-2 ${className}`}>
       <div className={`relative ${sizeClasses[size]}`}>
-        {logoUrl ? (
+        {logoKey && !loading ? (
           // Logo personalizado
           <Image
             src={logoUrl}
@@ -44,6 +46,7 @@ const Logo: React.FC<LogoProps> = ({
             height={64}
             className="w-full h-full object-contain rounded-full"
             priority
+            unoptimized
           />
         ) : (
           // Logo por defecto con gradiente
