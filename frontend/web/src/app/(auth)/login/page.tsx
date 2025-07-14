@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import { useAuthStore } from '@/stores/authStore';
+import Logo from '@/components/Logo';
 import {
   SunIcon,
   MoonIcon,
@@ -122,14 +123,7 @@ export default function LoginPage() {
         <div className="text-center">
           {/* Logo */}
           <div className="flex justify-center mb-6">
-            <Link href="/" className="group">
-              <div className="relative">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200 group-hover:scale-105">
-                  <span className="text-white font-bold text-2xl">H</span>
-                </div>
-                <div className="absolute inset-0 bg-blue-200 dark:bg-blue-800 rounded-2xl animate-ping opacity-20 group-hover:opacity-30"></div>
-              </div>
-            </Link>
+            <Logo size="xl" showText={false} href={undefined} />
           </div>
 
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">

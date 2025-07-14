@@ -23,6 +23,7 @@ import { useChatStore } from '@/stores/chatStore';
 import { useTheme } from 'next-themes';
 import { useImageUrl } from '@/utils/useImageUrl';
 import { UserAvatar } from './UserAvatar';
+import Logo from './Logo';
 
 const SearchModal = dynamic(() => import('./SearchModal'), { ssr: false });
 
@@ -151,17 +152,7 @@ const Navbar = React.memo(() => {
         <div className="hidden md:flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <Link href="/dashboard" className="flex items-center gap-3 group">
-              <div className="relative">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-200">
-                  <span className="text-white font-bold text-sm">H</span>
-                </div>
-                <div className="absolute inset-0 bg-primary-200 dark:bg-primary-800 rounded-full animate-ping opacity-20 group-hover:opacity-30"></div>
-              </div>
-              <span className="hidden sm:block font-bold text-xl text-gradient hover:scale-105 transition-transform duration-200">
-                Qahood
-              </span>
-            </Link>
+            <Logo size="md" showText={false} href="/dashboard" />
           </div>
 
           {/* Buscador central */}
@@ -372,12 +363,7 @@ const Navbar = React.memo(() => {
           </div>
           
           {/* Mobile logo */}
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-sm">H</span>
-            </div>
-            <span className="font-bold text-lg bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">Qahood</span>
-          </Link>
+          <Logo size="md" showText href="/dashboard" />
             
           {/* Mobile navigation right */}
           <div className="flex items-center gap-1">

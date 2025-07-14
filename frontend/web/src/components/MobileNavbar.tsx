@@ -19,6 +19,7 @@ import dynamic from 'next/dynamic';
 import { useAuthStore, useUIStore } from '@/stores';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
+import Logo from './Logo';
 
 const SearchModal = dynamic(() => import('./SearchModal'), { ssr: false });
 
@@ -115,12 +116,7 @@ export default function MobileNavbar() {
       <div className="flex items-center justify-between h-16 px-4">
         {/* Logo */}
         <div className="flex-shrink-0 flex items-center">
-          <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-sm">H</span>
-            </div>
-              <span className="font-bold text-lg text-gray-900 dark:text-gray-100">Qahood</span>
-          </Link>
+          <Logo size="md" showText href="/dashboard" />
         </div>
         
         {/* Centro: Buscador */}

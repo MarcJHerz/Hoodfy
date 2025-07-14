@@ -28,6 +28,7 @@ import {
   SparklesIcon as SparklesSolid,
 } from '@heroicons/react/24/solid';
 import { Community } from '@/types';
+import Logo from './Logo';
 
 interface QuickAction {
   name: string;
@@ -193,18 +194,7 @@ export default function EnhancedSidebar() {
       <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-r border-gray-200/50 dark:border-gray-700/50 px-6 pb-4">
         {/* Header con logo */}
         <div className="flex h-16 shrink-0 items-center">
-          <Link href="/dashboard" className="flex items-center gap-3 group">
-            <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
-                <span className="text-white font-bold text-lg">H</span>
-              </div>
-              <div className="absolute inset-0 bg-primary-400 rounded-xl animate-ping opacity-20 group-hover:opacity-30"></div>
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">Qahood</h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400 -mt-1">Tu red social privada</p>
-            </div>
-          </Link>
+          <Logo size="lg" showText href="/dashboard" />
         </div>
 
         {/* Navegación rápida */}

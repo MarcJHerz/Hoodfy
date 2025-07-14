@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { Post } from '@/types/post';
+import Logo from './Logo';
 
 interface LoadingScreenProps {
   message?: string;
@@ -70,8 +72,8 @@ const LoadingScreen = React.memo(({
               <div className="absolute inset-0 border-4 border-transparent border-t-primary-500 rounded-full animate-spin [animation-duration:1.5s]"></div>
               
               {/* Logo central */}
-              <div className="absolute inset-2 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">H</span>
+              <div className="absolute inset-2">
+                <Logo size="lg" showText={false} href={undefined} />
               </div>
             </div>
             

@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useCommunitiesStore } from '@/stores/communitiesStore';
 import { useUIStore } from '@/stores/uiStore';
+import Logo from './Logo';
 import { Transition } from '@headlessui/react';
 import {
   HomeIcon,
@@ -236,15 +237,7 @@ export default function MobileSidebar() {
           <div className="flex h-full flex-col overflow-y-auto">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <Link href="/dashboard" onClick={handleLinkClick} className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center shadow-md">
-                  <span className="text-white font-bold text-sm">H</span>
-                </div>
-                <div>
-                  <h1 className="text-lg font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">Qahood</h1>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 -mt-1">Tu red social privada</p>
-                </div>
-              </Link>
+              <Logo size="md" showText href="/dashboard" />
               <button
                 onClick={() => setMobileSidebarOpen(false)}
                 className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"

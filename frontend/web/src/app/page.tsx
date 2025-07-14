@@ -19,6 +19,7 @@ import {
   ArrowRightIcon,
   SparklesIcon
 } from "@heroicons/react/24/outline";
+import Logo from '@/components/Logo';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -141,14 +142,12 @@ export default function Home() {
           <div className="max-w-4xl mx-auto">
             {/* Logo */}
             <div className="mb-8">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg mx-auto mb-4">
-                <span className="text-white font-bold text-2xl">H</span>
-              </div>
+              <Logo size="xl" showText={false} href={undefined} className="mx-auto mb-4" />
               <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white mb-6">
                 <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   Qahood
                 </span>
-        </h1>
+              </h1>
             </div>
 
             {/* Hero Title */}
@@ -395,9 +394,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">H</span>
-                </div>
+                <Logo size="sm" showText={false} href={undefined} />
                 <span className="text-xl font-bold">Qahood</span>
               </div>
               <p className="text-gray-300 text-sm">
