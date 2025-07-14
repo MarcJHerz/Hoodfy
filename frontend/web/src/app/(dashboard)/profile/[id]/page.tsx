@@ -68,29 +68,22 @@ const CommunityImage = ({ coverImage, name }: { coverImage?: string; name: strin
 
 // Componente para manejar imágenes de aliados individualmente
 const AllyImage = ({ profilePicture, name }: { profilePicture?: string; name: string }) => {
-  const { url: allyImageUrl } = useImageUrl(profilePicture || '');
+  const { url: allyImageUrl } = useImageUrl(profilePicture);
   
   return (
-    <div className="relative w-16 h-16 mx-auto mb-4">
-      <div className="w-full h-full rounded-full overflow-hidden ring-2 ring-gray-200 dark:ring-gray-700 group-hover:ring-blue-200 dark:group-hover:ring-blue-800 transition-all">
-        {profilePicture ? (
-          <Image
-            src={allyImageUrl}
-            alt={name}
-            width={64}
-            height={64}
-            className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
-            unoptimized
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center rounded-full">
-            <span className="text-white font-bold text-lg">
-              {name?.charAt(0)?.toUpperCase()}
-            </span>
-          </div>
-        )}
+    <>
+      <div className="relative w-20 h-20 mx-auto mb-4">
+        <Image
+          src={allyImageUrl}
+          alt={name}
+          width={80}
+          height={80}
+          className="w-full h-full rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all"
+          unoptimized
+        />
+        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full animate-pulse"></div>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -358,8 +351,8 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Profile Header */}
-      <div className="relative bg-gradient-to-br from-blue-500/30 via-purple-500/10 to-gray-900/10 dark:from-blue-900/40 dark:via-purple-900/20 dark:to-gray-900/60 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-soft rounded-b-3xl overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none" style={{background: 'radial-gradient(ellipse at 80% 0%, rgba(56,189,248,0.12) 0%, transparent 70%)'}} />
+      <div className="relative bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-soft rounded-b-3xl overflow-hidden">
+        {/* Eliminado el gradiente y fondo especial en dark mode, ahora es consistente */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-end">
             {/* Avatar destacado */}
@@ -426,20 +419,13 @@ export default function ProfilePage() {
                     </>
                   ) : (
                     <>
-                      <button
-                        onClick={() => setSelectedAlly(user)}
-                        className="flex items-center gap-2 px-6 py-2.5 btn-primary btn-lg shadow-glow hover:shadow-glow-accent"
-                      >
-                        <ChatBubbleLeftIcon className="w-4 h-4" />
-                        Mensaje
-                      </button>
-                      {!allyCheckLoading && !isAlly && (
+                      {isAlly && (
                         <button
-                          onClick={handleAddAlly}
-                          className="flex items-center gap-2 px-6 py-2.5 btn-success btn-lg shadow-soft hover:shadow-md"
+                          onClick={() => setSelectedAlly(user)}
+                          className="flex items-center gap-2 px-6 py-2.5 btn-primary btn-lg shadow-glow hover:shadow-glow-accent"
                         >
-                          <UserPlusIcon className="w-4 h-4" />
-                          Agregar aliado
+                          <ChatBubbleLeftIcon className="w-4 h-4" />
+                          Mensaje
                         </button>
                       )}
                       {/* Menú */}
@@ -451,7 +437,7 @@ export default function ProfilePage() {
                           {isOwnProfile && (
                             <Menu.Item>
                               {({ active }) => (
-                      <Link
+                                <Link
                                   href="/profile/edit"
                                   className={`flex items-center gap-2 px-4 py-2 text-sm transition-colors ${
                                     active 
@@ -461,7 +447,7 @@ export default function ProfilePage() {
                                 >
                                   <Cog6ToothIcon className="w-4 h-4" />
                                   Editar perfil
-                      </Link>
+                                </Link>
                               )}
                             </Menu.Item>
                           )}

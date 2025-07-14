@@ -73,13 +73,19 @@ const AllyImage = ({ profilePicture, name, className }: { profilePicture?: strin
   const { url: allyImageUrl } = useImageUrl(profilePicture);
   
   return (
-    <Image
-      src={allyImageUrl}
-      alt={name}
-      fill
-      className={className}
-      unoptimized
-    />
+    <>
+      <div className="relative w-20 h-20 mx-auto mb-4">
+        <Image
+          src={allyImageUrl}
+          alt={name}
+          width={80}
+          height={80}
+          className="w-full h-full rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all"
+          unoptimized
+        />
+        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full animate-pulse"></div>
+      </div>
+    </>
   );
 };
 
@@ -541,23 +547,10 @@ export default function ProfilePage() {
                           className="group"
                       >
                           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 transition-all duration-200 hover-lift text-center">
-                            <div className="relative w-16 h-16 mx-auto mb-4">
-                              <div className="w-full h-full rounded-full overflow-hidden ring-2 ring-gray-200 dark:ring-gray-700 group-hover:ring-blue-200 dark:group-hover:ring-blue-800 transition-all">
-                                {ally.profilePicture ? (
-                          <AllyImage
-                            profilePicture={ally.profilePicture}
-                            name={ally.name}
-                                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                                    <span className="text-white font-bold text-lg">
-                                      {ally.name?.charAt(0)?.toUpperCase()}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                        </div>
+                            <AllyImage
+                              profilePicture={ally.profilePicture}
+                              name={ally.name}
+                            />
                             <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
                               {ally.name}
                             </h3>
