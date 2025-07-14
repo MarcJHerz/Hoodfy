@@ -98,7 +98,9 @@ const handleMulterError = (error, req, res, next) => {
 
 // Subir imagen a S3
 router.post('/', verifyToken, upload.single('file'), handleMulterError, uploadController.uploadImage);
-// Obtener URL firmada
+// Obtener URL firmada (requiere autenticación)
 router.get('/signed-url/:key', verifyToken, uploadController.getSignedUrl);
+// Obtener URL firmada de logo (público, sin autenticación)
+router.get('/logo/:key', uploadController.getLogoSignedUrl);
 
 module.exports = router; 

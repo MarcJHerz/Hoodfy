@@ -47,4 +47,42 @@ export async function getSignedS3Url(key: string): Promise<string> {
     // Fallback: retornar la URL directa si falla
     return `${API_BASE_URL}/uploads/${key}`;
   }
+}
+
+/**
+ * Obtiene una URL firmada de S3 para logos (sin autenticación)
+ * @param key - El key del logo en S3
+ * @returns Promise<string> - La URL firmada
+ */
+export async function getLogoSignedS3Url(key: string): Promise<string> {
+  try {
+    console.log('🔗 getLogoSignedS3Url called with key:', key);
+    
+    const url = `${API_BASE_URL}/api/upload/logo/${encodeURIComponent(key)}`;
+    console.log('🌐 Making request to:', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('📡 Logo Response status:', response.status);
+    console.log('📡 Logo Response ok:', response.ok);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Logo Response error:', errorText);
+      throw new Error(`Error al obtener URL firmada del logo: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('✅ Logo Response data:', data);
+    return data.url;
+  } catch (error) {
+    console.error('❌ Error getting signed S3 URL for logo:', error);
+    // Fallback: retornar la URL directa si falla
+    return `${API_BASE_URL}/uploads/${key}`;
+  }
 } 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getSignedS3Url } from './s3';
+import { getSignedS3Url, getLogoSignedS3Url } from './s3';
 
 // Cache para URLs ya resueltas
 const urlCache = new Map<string, string>();
@@ -24,7 +24,8 @@ export function useImageUrl(keyOrUrl?: string) {
       console.log('🔍 useImageUrl Debug:', {
         keyOrUrl,
         isUrl: keyOrUrl?.startsWith('http'),
-        hasExtension: keyOrUrl ? /\.(jpg|jpeg|png|webp|gif|jfif|mp4|mov|avi)$/i.test(keyOrUrl) : false
+        hasExtension: keyOrUrl ? /\.(jpg|jpeg|png|webp|gif|jfif|mp4|mov|avi)$/i.test(keyOrUrl) : false,
+        isLogo: keyOrUrl?.startsWith('logos/')
       });
       
       // Si no hay keyOrUrl, usar imagen por defecto
@@ -53,6 +54,29 @@ export function useImageUrl(keyOrUrl?: string) {
         }
         // Cachear URL completa
         urlCache.set(keyOrUrl, keyOrUrl);
+        return;
+      }
+      
+      // Si es un logo (empiece con 'logos/')
+      if (keyOrUrl.startsWith('logos/')) {
+        try {
+          console.log('🎨 Getting signed URL for logo:', keyOrUrl);
+          const signedUrl = await getLogoSignedS3Url(keyOrUrl);
+          console.log('✅ Got signed URL for logo:', signedUrl.substring(0, 50) + '...');
+          if (isMounted) {
+            setUrl(signedUrl);
+            setLoading(false);
+            // Cachear URL firmada
+            urlCache.set(keyOrUrl, signedUrl);
+          }
+        } catch (err) {
+          console.error('❌ Error getting signed URL for logo:', err);
+          if (isMounted) {
+            setError('No se pudo obtener la URL firmada del logo');
+            setUrl('/images/defaults/default-avatar.png');
+            setLoading(false);
+          }
+        }
         return;
       }
       
