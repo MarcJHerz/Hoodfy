@@ -18,7 +18,16 @@ const Logo: React.FC<LogoProps> = ({
 }) => {
   // URL de tu logo personalizado (reemplaza con tu URL de S3)
   const logoKey = process.env.NEXT_PUBLIC_LOGO_URL || '';
-  const { url: logoUrl, loading } = useImageUrl(logoKey);
+  const { url: logoUrl, loading, error } = useImageUrl(logoKey);
+  
+  // Debug logs
+  console.log('🔍 Logo Debug:', {
+    logoKey,
+    logoUrl,
+    loading,
+    error,
+    envVar: process.env.NEXT_PUBLIC_LOGO_URL
+  });
   
   const sizeClasses = {
     sm: 'w-6 h-6',

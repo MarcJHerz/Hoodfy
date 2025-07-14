@@ -21,6 +21,12 @@ export function useImageUrl(keyOrUrl?: string) {
       setLoading(true);
       setError(null);
       
+      console.log('🔍 useImageUrl Debug:', {
+        keyOrUrl,
+        isUrl: keyOrUrl?.startsWith('http'),
+        hasExtension: keyOrUrl ? /\.(jpg|jpeg|png|webp|gif|jfif|mp4|mov|avi)$/i.test(keyOrUrl) : false
+      });
+      
       // Si no hay keyOrUrl, usar imagen por defecto
       if (!keyOrUrl) {
         if (isMounted) {
@@ -50,11 +56,23 @@ export function useImageUrl(keyOrUrl?: string) {
         return;
       }
       
-      // Si parece un key de S3 (no contiene "/" o contiene extensión de imagen)
-      const isS3Key = /^[a-zA-Z0-9\-]+\.(jpg|jpeg|png|webp|gif|jfif|mp4|mov|avi)$/i.test(keyOrUrl);
+      // Si parece un key de S3 (contiene extensión de imagen y no es una URL)
+      const isS3Key = /\.(jpg|jpeg|png|webp|gif|jfif|mp4|mov|avi)$/i.test(keyOrUrl) && 
+                     !keyOrUrl.startsWith('http://') && 
+                     !keyOrUrl.startsWith('https://');
+      
+      console.log('🔍 S3 Key Detection:', {
+        keyOrUrl,
+        isS3Key,
+        hasExtension: /\.(jpg|jpeg|png|webp|gif|jfif|mp4|mov|avi)$/i.test(keyOrUrl),
+        notHttp: !keyOrUrl.startsWith('http://') && !keyOrUrl.startsWith('https://')
+      });
+      
       if (isS3Key) {
         try {
+          console.log('🔗 Getting signed URL for:', keyOrUrl);
           const signedUrl = await getSignedS3Url(keyOrUrl);
+          console.log('✅ Got signed URL:', signedUrl.substring(0, 50) + '...');
           if (isMounted) {
             setUrl(signedUrl);
             setLoading(false);
@@ -62,7 +80,7 @@ export function useImageUrl(keyOrUrl?: string) {
             urlCache.set(keyOrUrl, signedUrl);
           }
         } catch (err) {
-          console.error('Error getting signed URL:', err);
+          console.error('❌ Error getting signed URL:', err);
           if (isMounted) {
             setError('No se pudo obtener la URL firmada');
             setUrl('/images/defaults/default-avatar.png');
@@ -75,6 +93,7 @@ export function useImageUrl(keyOrUrl?: string) {
       // Si es una ruta relativa local
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
       const finalUrl = `${baseUrl}/${keyOrUrl.replace(/^\//, '')}`;
+      console.log('🌐 Using local URL:', finalUrl);
       if (isMounted) {
         setUrl(finalUrl);
         setLoading(false);

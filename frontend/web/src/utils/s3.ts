@@ -11,11 +11,18 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com'
  */
 export async function getSignedS3Url(key: string): Promise<string> {
   try {
+    console.log('🔗 getSignedS3Url called with key:', key);
+    
     // Obtener el token de autenticación
     const token = localStorage.getItem('token') || 
                   document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
 
-    const response = await fetch(`${API_BASE_URL}/api/upload/signed-url/${key}`, {
+    console.log('🔑 Token found:', !!token);
+    
+    const url = `${API_BASE_URL}/api/upload/signed-url/${encodeURIComponent(key)}`;
+    console.log('🌐 Making request to:', url);
+
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -23,14 +30,20 @@ export async function getSignedS3Url(key: string): Promise<string> {
       },
     });
 
+    console.log('📡 Response status:', response.status);
+    console.log('📡 Response ok:', response.ok);
+
     if (!response.ok) {
-      throw new Error(`Error al obtener URL firmada: ${response.status}`);
+      const errorText = await response.text();
+      console.error('❌ Response error:', errorText);
+      throw new Error(`Error al obtener URL firmada: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('✅ Response data:', data);
     return data.url;
   } catch (error) {
-    console.error('Error getting signed S3 URL:', error);
+    console.error('❌ Error getting signed S3 URL:', error);
     // Fallback: retornar la URL directa si falla
     return `${API_BASE_URL}/uploads/${key}`;
   }
