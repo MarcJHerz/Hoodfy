@@ -20,6 +20,7 @@ import {
   SparklesIcon
 } from "@heroicons/react/24/outline";
 import Logo from '@/components/Logo';
+import LandingMenu from '@/components/LandingMenu';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -135,35 +136,31 @@ export default function Home() {
         )}
       </div>
 
+      {/* Menú especial de la landing */}
+      <LandingMenu />
+
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 text-center">
-          <div className="max-w-4xl mx-auto">
-            {/* Logo */}
-            <div className="mb-8">
-              <Logo size="xl" showText={false} href={undefined} className="mx-auto mb-4" />
-              <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white mb-6">
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Qahood
-                </span>
-              </h1>
-            </div>
-
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16 text-left flex flex-col items-start">
+          <div className="max-w-4xl">
             {/* Hero Title */}
+            <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white mb-6">
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Qahood
+              </span>
+            </h1>
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
               Encuentra tu <span className="text-blue-600">comunidad perfecta</span><br />
               o <span className="text-purple-600">crea la tuya propia</span>
             </h2>
-
             {/* Hero Subtitle */}
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl leading-relaxed">
               La primera plataforma que conecta personas con intereses comunes en comunidades privadas, 
               donde los lazos reales se forman y los negocios florecen.
             </p>
-
             {/* Hero Stats */}
-            <div className="flex flex-wrap justify-center gap-8 mb-10 text-sm md:text-base">
+            <div className="flex flex-wrap justify-start gap-8 mb-10 text-sm md:text-base">
               <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                 <UsersIcon className="h-5 w-5 text-blue-500" />
                 <span>+10,000 miembros activos</span>
@@ -177,9 +174,8 @@ export default function Home() {
                 <span>95% satisfacción</span>
               </div>
             </div>
-
             {/* Hero CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+            <div className="flex flex-col sm:flex-row gap-4 justify-start items-center mb-8">
               <Link
                 href="/register"
                 className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2"
@@ -187,14 +183,13 @@ export default function Home() {
                 <span>Crear mi cuenta gratis</span>
                 <ArrowRightIcon className="h-5 w-5" />
               </Link>
-          <Link
-            href="/login"
+              <Link
+                href="/login"
                 className="w-full sm:w-auto px-8 py-4 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
-          >
+              >
                 Ya tengo cuenta
-          </Link>
+              </Link>
             </div>
-
             <p className="text-sm text-gray-500 dark:text-gray-400">
               ✨ Sin publicidad • 🔒 100% privado • 🚀 Listo en 2 minutos
             </p>

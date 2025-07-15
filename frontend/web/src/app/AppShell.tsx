@@ -12,8 +12,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { initialize, isInitialized } = useAuthStore();
   
-  // Solo ocultar navbar en páginas de autenticación
-  const hideNavbar = pathname.startsWith('/login') || pathname.startsWith('/register');
+  // Ocultar navbar en login, register y landing
+  const hideNavbar = pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/register');
 
   // Inicializar el AuthStore globalmente
   useEffect(() => {
