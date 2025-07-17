@@ -20,14 +20,7 @@ const Logo: React.FC<LogoProps> = ({
   const logoKey = process.env.NEXT_PUBLIC_LOGO_URL || '';
   const { url: logoUrl, loading, error } = useImageUrl(logoKey);
   
-  // Debug logs
-  console.log('🔍 Logo Debug:', {
-    logoKey,
-    logoUrl,
-    loading,
-    error,
-    envVar: process.env.NEXT_PUBLIC_LOGO_URL
-  });
+  // Debug logs removed for security
   
   const sizeClasses = {
     sm: 'w-6 h-6',

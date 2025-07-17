@@ -142,11 +142,11 @@ export default function ProfilePage() {
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/allies/my-allies`)
         ]);
 
-        if (!userRes.ok) throw new Error('Error al cargar el perfil');
-        if (!postsRes.ok) throw new Error('Error al cargar las publicaciones');
-        if (!createdCommunitiesRes.ok) throw new Error('Error al cargar las comunidades creadas');
-        if (!joinedCommunitiesRes.ok) throw new Error('Error al cargar las comunidades unidas');
-        if (!alliesRes.ok) throw new Error('Error al cargar los aliados');
+        if (!userRes.ok) throw new Error('Error loading profile');
+        if (!postsRes.ok) throw new Error('Error loading posts');
+        if (!createdCommunitiesRes.ok) throw new Error('Error loading created communities');
+        if (!joinedCommunitiesRes.ok) throw new Error('Error loading joined communities');
+        if (!alliesRes.ok) throw new Error('Error loading allies');
 
         const [userData, postsData, createdCommunitiesData, joinedCommunitiesData, alliesData] = await Promise.all([
           userRes.json(),
@@ -188,7 +188,7 @@ export default function ProfilePage() {
             <div className="w-12 h-12 border-4 border-gray-200 dark:border-gray-700 rounded-full animate-spin"></div>
             <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin"></div>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 font-medium">Cargando perfil...</p>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Loading profile...</p>
         </div>
       </div>
     );
@@ -202,7 +202,7 @@ export default function ProfilePage() {
             <span className="text-2xl">😞</span>
           </div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Error al cargar el perfil
+            Error loading profile
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
         </div>
@@ -218,10 +218,10 @@ export default function ProfilePage() {
             <UserCircleIcon className="w-8 h-8 text-gray-400" />
           </div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Usuario no encontrado
+            User not found
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
-            No se pudo cargar la información del perfil.
+            Could not load profile information.
           </p>
         </div>
       </div>
@@ -280,7 +280,7 @@ export default function ProfilePage() {
                   </Link>
                   <button className="flex items-center gap-2 px-6 py-2.5 btn-secondary btn-lg shadow-soft hover:shadow-md">
                     <ShareIcon className="w-4 h-4" />
-                    Compartir
+                    Share
                   </button>
                 </div>
               </div>
@@ -297,21 +297,21 @@ export default function ProfilePage() {
                     <Squares2X2Icon className="w-5 h-5 text-blue-500" />
                     <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{userPosts.length}</span>
                   </div>
-                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Publicaciones</div>
+                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Posts</div>
                 </div>
                 <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-xl px-6 py-4 shadow-soft hover:shadow-md transition-all">
                   <div className="flex items-center justify-center gap-2 mb-1">
                     <UsersIcon className="w-5 h-5 text-purple-500" />
                     <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{allCommunities.length}</span>
                   </div>
-                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Comunidades</div>
+                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Communities</div>
                 </div>
                 <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-xl px-6 py-4 shadow-soft hover:shadow-md transition-all">
                   <div className="flex items-center justify-center gap-2 mb-1">
                     <UserPlusIcon className="w-5 h-5 text-green-500" />
                     <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{allies.length}</span>
                   </div>
-                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Aliados</div>
+                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Allies</div>
                 </div>
               </div>
             </div>

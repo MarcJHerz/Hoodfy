@@ -100,15 +100,7 @@ export default function CommunityPage() {
   const creatorProfilePictureKey = community?.creator?.profilePicture || '';
   const { url: creatorProfileImageUrl } = useImageUrl(creatorProfilePictureKey);
 
-  // Debug logs
-  useEffect(() => {
-    console.log('🖼️ Cover Image Debug:', {
-      coverImageKey,
-      communityCoverImageUrl,
-      community: community?.name,
-      hasCoverImage: !!community?.coverImage
-    });
-  }, [coverImageKey, communityCoverImageUrl, community?.name, community?.coverImage]);
+  // Debug logs removed for security
 
   useEffect(() => {
     const initializeData = async () => {
@@ -129,8 +121,6 @@ export default function CommunityPage() {
     try {
       setLoading(true);
       const response = await communities.getById(id as string);
-      console.log('Respuesta de getById:', response.data);
-      console.log('💰 Precio de la comunidad:', response.data.price);
       setCommunity(response.data);
       
       // Simular conteo de vistas
@@ -139,14 +129,8 @@ export default function CommunityPage() {
       // Verificar si el usuario es el creador
       const currentUser = await users.getProfile();
       const userData = currentUser.data.user || currentUser.data;
-      console.log('Datos del usuario actual:', userData);
       
       const isUserCreator = userData._id === response.data.creator?._id;
-      console.log('Estado del usuario:', {
-        userId: userData._id,
-        creatorId: response.data.creator?._id,
-        isCreator: isUserCreator
-      });
       
       setIsCreator(isUserCreator);
     } catch (error: any) {
@@ -161,7 +145,6 @@ export default function CommunityPage() {
     try {
       const res = await users.getProfile();
       const userData = res.data.user || res.data;
-      console.log('Datos del usuario cargados:', userData);
       setUser(userData);
       return userData;
     } catch (err) {
@@ -303,8 +286,6 @@ export default function CommunityPage() {
             priority
             unoptimized
             onError={(e) => {
-              console.log('❌ Error loading cover image:', e);
-              console.log('🔍 Original URL:', communityCoverImageUrl);
               e.currentTarget.src = '/images/defaults/default-community.png';
             }}
           />

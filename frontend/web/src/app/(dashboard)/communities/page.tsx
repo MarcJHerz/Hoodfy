@@ -143,15 +143,12 @@ export default function CommunitiesPage() {
 
   useEffect(() => {
     if (user?._id) {
-      console.log('🔄 Usuario detectado, cargando comunidades para:', user._id);
-    loadCommunities();
+      loadCommunities();
     } else {
-      console.log('❌ No hay usuario, limpiando comunidades');
       clearCommunities();
     }
     
     return () => {
-      console.log('🧹 Componente desmontándose, limpiando comunidades');
       clearCommunities();
     };
   }, [user?._id]);
@@ -160,16 +157,12 @@ export default function CommunitiesPage() {
     if (!user?._id) return;
     
     try {
-      console.log('Cargando comunidades para usuario:', user._id);
-      
       // Cargar comunidades creadas, suscritas y todas en paralelo
       await Promise.all([
         loadUserCommunities(user._id),
         loadSubscribedCommunities(),
         loadAllCommunities()
       ]);
-      
-      console.log('Comunidades cargadas exitosamente');
     } catch (error) {
       console.error('Error al cargar comunidades:', error);
     }

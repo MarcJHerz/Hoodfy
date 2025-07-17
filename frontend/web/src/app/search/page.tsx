@@ -25,7 +25,7 @@ export default function SearchPage() {
     setLoading(true);
     communities.getAll()
       .then(res => setRecommendations(res.data))
-      .catch(() => setError('Error al cargar comunidades'))
+      .catch(() => setError('Error loading communities'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -42,7 +42,7 @@ export default function SearchPage() {
     const timeout = setTimeout(() => {
       communities.search(query)
         .then(res => setResults(res.data))
-        .catch(() => setError('Error al buscar comunidades'))
+        .catch(() => setError('Error searching communities'))
         .finally(() => setLoading(false));
     }, 350);
     return () => clearTimeout(timeout);
@@ -61,7 +61,7 @@ export default function SearchPage() {
         <input
           type="text"
           className="flex-1 px-4 py-2 rounded-full border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition text-gray-700 bg-gray-50 placeholder-gray-400"
-          placeholder="Buscar comunidades..."
+          placeholder="Search communities..."
           value={query}
           onChange={e => setQuery(e.target.value)}
         />
@@ -81,11 +81,11 @@ export default function SearchPage() {
       </div>
       {/* Sugerencias y resultados */}
       <div className="px-4 py-4">
-        {loading && <div className="text-center text-gray-400 py-8">Cargando...</div>}
+        {loading && <div className="text-center text-gray-400 py-8">Loading...</div>}
         {error && <div className="text-center text-red-500 py-4">{error}</div>}
         {showRecommendations && !loading && !error && (
           <div>
-            <h3 className="text-sm font-semibold text-gray-500 mb-2">Comunidades populares</h3>
+            <h3 className="text-sm font-semibold text-gray-500 mb-2">Communities</h3>
             <div className="grid gap-4">
               {recommendations.map(c => (
                 <div
@@ -107,9 +107,9 @@ export default function SearchPage() {
         )}
         {showResults && !loading && !error && (
           <div>
-            <h3 className="text-sm font-semibold text-gray-500 mb-2">Resultados</h3>
+            <h3 className="text-sm font-semibold text-gray-500 mb-2">Results</h3>
             {results.length === 0 ? (
-              <div className="text-center text-gray-400 py-8">No se encontraron comunidades.</div>
+              <div className="text-center text-gray-400 py-8">No communities found.</div>
             ) : (
               <div className="grid gap-4">
                 {results.map(c => (
@@ -122,7 +122,7 @@ export default function SearchPage() {
                     <div className="flex-1">
                       <div className="font-semibold text-gray-900">{c.name}</div>
                       <div className="text-xs text-gray-500 mb-1">{c.description}</div>
-                      <div className="text-xs text-indigo-600 font-medium">{c.members?.length || 0} miembros</div>
+                      <div className="text-xs text-indigo-600 font-medium">{c.members?.length || 0} members</div>
                     </div>
                     <button className="px-4 py-1.5 rounded-full bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition" onClick={e => { e.stopPropagation(); router.push(`/communities/${c._id}`); }}>Unirse</button>
                   </div>

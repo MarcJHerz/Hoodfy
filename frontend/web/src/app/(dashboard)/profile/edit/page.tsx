@@ -33,8 +33,8 @@ export default function EditMyProfilePage() {
           setPreviewUrl(user.profilePicture);
         }
       } catch (error) {
-        console.error('Error al cargar el perfil:', error);
-        toast.error('Error al cargar el perfil');
+        console.error('Error loading profile:', error);
+        toast.error('Error loading profile');
       }
     };
     fetchProfile();
@@ -53,12 +53,12 @@ export default function EditMyProfilePage() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      toast.error('Por favor, selecciona una imagen válida');
+      toast.error('Please select a valid image');
       return;
     }
 
     if (file.size > 50 * 1024 * 1024) {
-      toast.error('La imagen no debe superar los 50MB');
+      toast.error('Image should not exceed 50MB');
       return;
     }
 
@@ -82,12 +82,12 @@ export default function EditMyProfilePage() {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      toast.error('El nombre es requerido');
+      toast.error('Name is required');
       return;
     }
 
     if (!formData.username.trim()) {
-      toast.error('El nombre de usuario es requerido');
+      toast.error('Username is required');
       return;
     }
 
@@ -109,11 +109,11 @@ export default function EditMyProfilePage() {
 
       await users.updateProfile(profileFormData);
       
-      toast.success('¡Perfil actualizado con éxito!');
+      toast.success('Profile updated successfully!');
       router.push('/dashboard/profile');
     } catch (error: any) {
       console.error('Error al actualizar perfil:', error);
-      toast.error(error.response?.data?.message || 'Error al actualizar el perfil');
+      toast.error(error.response?.data?.message || 'Error updating profile');
     } finally {
       setLoading(false);
     }
@@ -122,7 +122,7 @@ export default function EditMyProfilePage() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12 flex flex-col items-center justify-center">
       <div className="w-full max-w-lg glass-strong rounded-2xl shadow-strong p-8 border border-gray-200 dark:border-gray-700 backdrop-blur-md">
-        <h1 className="text-2xl font-extrabold text-center text-gray-900 dark:text-gray-100 mb-8 tracking-tight">Editar mi perfil</h1>
+        <h1 className="text-2xl font-extrabold text-center text-gray-900 dark:text-gray-100 mb-8 tracking-tight">Edit my profile</h1>
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="flex flex-col items-center">
             <div className="relative w-32 h-32 mb-4 group">
@@ -143,7 +143,7 @@ export default function EditMyProfilePage() {
                   type="button"
                   onClick={removeImage}
                   className="absolute -top-2 -right-2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-md"
-                  title="Eliminar foto"
+                  title="Remove photo"
                 >
                   <XMarkIcon className="h-5 w-5" />
                 </button>
@@ -153,7 +153,7 @@ export default function EditMyProfilePage() {
               htmlFor="profilePicture"
               className="cursor-pointer text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
             >
-              Cambiar foto de perfil
+              Change profile photo
               <input
                 id="profilePicture"
                 name="profilePicture"
@@ -164,11 +164,11 @@ export default function EditMyProfilePage() {
                 className="sr-only"
               />
             </label>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">PNG, JPG, GIF, HEIC hasta 50MB</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">PNG, JPG, GIF, HEIC until 50MB</p>
           </div>
 
           <div>
-            <label htmlFor="name" className="form-label">Nombre</label>
+            <label htmlFor="name" className="form-label">Name</label>
             <input
               type="text"
               name="name"
@@ -182,7 +182,7 @@ export default function EditMyProfilePage() {
           </div>
 
           <div>
-            <label htmlFor="username" className="form-label">Nombre de usuario</label>
+            <label htmlFor="username" className="form-label">Username</label>
             <input
               type="text"
               name="username"
@@ -196,7 +196,7 @@ export default function EditMyProfilePage() {
           </div>
 
           <div>
-            <label htmlFor="bio" className="form-label">Biografía</label>
+            <label htmlFor="bio" className="form-label">Biography</label>
             <textarea
               name="bio"
               id="bio"
@@ -213,14 +213,14 @@ export default function EditMyProfilePage() {
               onClick={() => router.back()}
               className="btn btn-secondary btn-md"
             >
-              Cancelar
+              Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
               className="btn btn-primary btn-md shadow-glow disabled:opacity-50"
             >
-              {loading ? 'Guardando...' : 'Guardar cambios'}
+              {loading ? 'Saving...' : 'Save changes'}
             </button>
           </div>
         </form>

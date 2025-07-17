@@ -49,16 +49,11 @@ export default function DashboardPage() {
     try {
       setLoading(true);
       setError(null);
-      console.log('Fetching posts for user:', user?._id);
-      
       const response = await posts.getHomeFeed(user?._id || '');
-      console.log('API Response:', response);
       
       if (response?.data) {
-        console.log('Setting posts:', response.data);
         setFeedPosts(response.data);
       } else {
-        console.log('No posts found in response');
         setFeedPosts([]);
       }
     } catch (error) {

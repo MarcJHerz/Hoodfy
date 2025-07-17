@@ -269,7 +269,7 @@ export default function ProfilePage() {
 
       } catch (error: any) {
         console.error('Error en fetchData:', error);
-        setError(error.response?.data?.message || error.message || 'Ha ocurrido un error al cargar el perfil');
+        setError(error.response?.data?.message || error.message || 'An error occurred while loading the profile');
       } finally {
         setLoading(false);
       }
@@ -292,7 +292,7 @@ export default function ProfilePage() {
             <div className="w-12 h-12 border-4 border-gray-200 dark:border-gray-700 rounded-full animate-spin"></div>
             <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin"></div>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 font-medium">Cargando perfil...</p>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Loading profile...</p>
         </div>
       </div>
     );
@@ -306,7 +306,7 @@ export default function ProfilePage() {
             <span className="text-2xl">😞</span>
           </div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Error al cargar el perfil
+            Error loading profile
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
         {authUser && (
@@ -314,7 +314,7 @@ export default function ProfilePage() {
             href={`/dashboard/profile/${authUser._id}`}
               className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors"
           >
-            Volver a mi perfil
+            Back to my profile
           </Link>
         )}
         </div>
@@ -330,17 +330,17 @@ export default function ProfilePage() {
             <UserCircleIcon className="w-8 h-8 text-gray-400" />
           </div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Usuario no encontrado
+            User not found
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            El perfil que buscas no existe o ha sido eliminado.
+            The profile you are looking for does not exist or has been deleted.
           </p>
         {authUser && (
           <Link
             href={`/dashboard/profile/${authUser._id}`}
               className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors"
           >
-            Volver a mi perfil
+            Back to my profile
           </Link>
         )}
         </div>
@@ -389,12 +389,12 @@ export default function ProfilePage() {
                     {/* Icono de aliado/no aliado */}
                     {!isOwnProfile && (
                       isAlly ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-xs font-semibold animate-fade-in" title="Aliado">
-                          <CheckBadgeIcon className="w-4 h-4" /> Aliado
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-xs font-semibold animate-fade-in" title="Ally">
+                          <CheckBadgeIcon className="w-4 h-4" /> Ally
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300 rounded-full text-xs font-semibold animate-fade-in" title="No aliado">
-                          <UserPlusIcon className="w-4 h-4" /> No aliado
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300 rounded-full text-xs font-semibold animate-fade-in" title="Not ally">
+                          <UserPlusIcon className="w-4 h-4" /> Not ally
                         </span>
                       )
                     )}
@@ -414,7 +414,7 @@ export default function ProfilePage() {
                       </Link>
                       <button className="flex items-center gap-2 px-6 py-2.5 btn-secondary btn-lg shadow-soft hover:shadow-md">
                         <ShareIcon className="w-4 h-4" />
-                        Compartir
+                        Share
                       </button>
                     </>
                   ) : (
@@ -425,7 +425,7 @@ export default function ProfilePage() {
                           className="flex items-center gap-2 px-6 py-2.5 btn-primary btn-lg shadow-glow hover:shadow-glow-accent"
                         >
                           <ChatBubbleLeftIcon className="w-4 h-4" />
-                          Mensaje
+                          Message
                         </button>
                       )}
                       {/* Menú */}
@@ -465,7 +465,7 @@ export default function ProfilePage() {
                                 }}
                               >
                                 <ShareIcon className="w-4 h-4" />
-                                Compartir perfil
+                                Share profile
                               </button>
                             )}
                           </Menu.Item>
@@ -480,7 +480,7 @@ export default function ProfilePage() {
                                   }`}
                                 >
                                   <UserCircleIcon className="w-4 h-4" />
-                                  Reportar usuario
+                                  Report user
                                 </button>
                               )}
                             </Menu.Item>
@@ -558,10 +558,10 @@ export default function ProfilePage() {
                         <LockClosedIcon className="w-8 h-8 text-gray-400" />
                       </div>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                        Contenido privado
+                        Private content
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400">
-                        Solo los aliados pueden ver las publicaciones de este usuario
+                        Only allies can see this user's posts
                       </p>
                     </div>
                   ) : (
@@ -576,7 +576,7 @@ export default function ProfilePage() {
                                 ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
                                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                             }`}
-                            title="Vista en cuadrícula"
+                            title="Grid view"
                           >
                             <Squares2X2Icon className="w-5 h-5" />
                           </button>
@@ -587,7 +587,7 @@ export default function ProfilePage() {
                                 ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
                                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                             }`}
-                            title="Vista en lista"
+                            title="List view"
                           >
                             <ViewColumnsIcon className="w-5 h-5" />
                           </button>
@@ -600,12 +600,12 @@ export default function ProfilePage() {
                             <Squares2X2Icon className="w-8 h-8 text-gray-400" />
                           </div>
                           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                            No hay publicaciones
+                            No posts yet
                           </h3>
                           <p className="text-gray-600 dark:text-gray-400">
                             {isOwnProfile 
-                              ? 'Comparte tu primera publicación con la comunidad'
-                              : 'Este usuario aún no ha publicado nada'
+                              ? 'Share your first post with the community'
+                              : 'This user has not posted anything yet'
                             }
                           </p>
                         </div>
@@ -741,12 +741,12 @@ export default function ProfilePage() {
                         <UsersIcon className="w-8 h-8 text-gray-400" />
                       </div>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                        No hay comunidades
+                        No communities
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400">
                         {isOwnProfile 
-                          ? 'Únete a comunidades o crea la tuya propia'
-                          : 'Este usuario no participa en ninguna comunidad'
+                          ? 'Join communities or create your own'
+                          : 'This user is not a member of any community'
                         }
                       </p>
                     </div>
@@ -767,7 +767,7 @@ export default function ProfilePage() {
                             {createdCommunities.includes(community) && (
                               <div className="absolute top-3 right-3">
                                 <span className="bg-gradient-to-r from-primary-600 to-accent-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg">
-                                  Creador
+                                  Creator
                                 </span>
                               </div>
                             )}
@@ -785,11 +785,11 @@ export default function ProfilePage() {
                               <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                                 <span className="flex items-center">
                                   <UsersIcon className="w-4 h-4 mr-1" />
-                                  {community.members?.length || 0} miembros
+                                  {community.members?.length || 0} members
                                 </span>
                                 {community.creator && (
                                   <span className="text-primary-600 dark:text-primary-400 font-medium">
-                                    por {community.creator.name}
+                                    by {community.creator.name}
                                   </span>
                                 )}
                               </div>
@@ -811,12 +811,12 @@ export default function ProfilePage() {
                         <UserPlusIcon className="w-8 h-8 text-gray-400" />
                       </div>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                        No hay aliados
+                        No allies
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400">
                         {isOwnProfile 
-                          ? 'Únete a comunidades para conocer gente y hacer aliados'
-                          : 'Este usuario aún no tiene aliados'
+                          ? 'Join communities to meet people and make allies'
+                          : 'This user has no allies yet'
                         }
                       </p>
                       </div>
@@ -847,7 +847,7 @@ export default function ProfilePage() {
                                 }}
                                 className="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors w-full opacity-0 group-hover:opacity-100"
                               >
-                                Mensaje
+                                Message
                                 </button>
                             )}
                           </div>
@@ -863,38 +863,38 @@ export default function ProfilePage() {
                 <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
                   <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-sm border border-gray-200 dark:border-gray-700">
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
-                      Acerca de {user?.name}
+                      About {user?.name}
                     </h3>
                     
                     {user?.bio ? (
                       <div className="space-y-6">
                       <div>
-                          <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Biografía</h4>
+                          <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Biography</h4>
                           <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                             {user.bio}
                           </p>
                       </div>
                         
                         <div>
-                          <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Estadísticas</h4>
+                          <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Statistics</h4>
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
                               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                                 {userPosts.length}
                               </div>
-                              <div className="text-sm text-gray-600 dark:text-gray-400">Publicaciones</div>
+                              <div className="text-sm text-gray-600 dark:text-gray-400">Posts</div>
                             </div>
                             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
                               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                                 {allCommunities.length}
                               </div>
-                              <div className="text-sm text-gray-600 dark:text-gray-400">Comunidades</div>
+                              <div className="text-sm text-gray-600 dark:text-gray-400">Communities</div>
                             </div>
                             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
                               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                                 {allies.length}
                               </div>
-                              <div className="text-sm text-gray-600 dark:text-gray-400">Aliados</div>
+                              <div className="text-sm text-gray-600 dark:text-gray-400">Allies</div>
                             </div>
                           </div>
                         </div>
@@ -905,12 +905,12 @@ export default function ProfilePage() {
                           <TagIcon className="w-8 h-8 text-gray-400" />
                         </div>
                         <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                          Sin información adicional
+                          No additional information
                         </h4>
                         <p className="text-gray-600 dark:text-gray-400">
                           {isOwnProfile 
-                            ? 'Agrega una biografía para que otros sepan más sobre ti'
-                            : 'Este usuario no ha compartido información adicional'
+                            ? 'Add a biography to let others know more about you'
+                            : 'This user has not shared additional information'
                           }
                         </p>
                         </div>
