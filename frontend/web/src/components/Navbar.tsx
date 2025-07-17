@@ -49,11 +49,11 @@ const Navbar = React.memo(() => {
   } = useUIStore();
   const { getTotalUnreadCount } = useChatStore();
 
-  // Crear navItems dinámicamente con el ID del usuario actual
+  // Create navItems dynamically with the current user ID
   const navItems = [
-    { href: '/dashboard', icon: HomeIcon, label: 'Inicio' },
-    { href: '/communities', icon: UsersIcon, label: 'Comunidades' },
-    { href: '/messages', icon: ChatBubbleLeftIcon, label: 'Mensajes' },
+    { href: '/dashboard', icon: HomeIcon, label: 'Home' },
+    { href: '/communities', icon: UsersIcon, label: 'Communities' },
+    { href: '/messages', icon: ChatBubbleLeftIcon, label: 'Messages' },
   ];
 
   const isProfilePage = pathname === '/profile' || pathname.startsWith('/profile/');
@@ -105,12 +105,12 @@ const Navbar = React.memo(() => {
 
   const handleLogout = useCallback(async () => {
     try {
-      console.log('Botón de cerrar sesión PRESIONADO');
+      console.log('Logout button PRESSED');
       setProfileMenuOpen(false);
       await logout();
-      console.log('Logout iniciado desde Navbar');
+      console.log('Logout initiated from Navbar');
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      console.error('Error during logout:', error);
       window.location.href = '/login';
     }
   }, [logout, setProfileMenuOpen]);
@@ -166,7 +166,7 @@ const Navbar = React.memo(() => {
               >
                 <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 group-hover:text-primary-500 transition-colors duration-200" />
                 <span className="text-left flex-1 text-gray-500 dark:text-gray-400">
-                  Buscar personas, temas o comunidades...
+                  Search people, topics or communities...
                 </span>
                 <kbd className="hidden sm:inline-flex items-center px-2 py-1 text-xs font-medium text-gray-400 bg-gray-100 dark:bg-gray-700 rounded">
                   ⌘K
@@ -221,13 +221,13 @@ const Navbar = React.memo(() => {
                 <button
                   className="flex items-center focus:outline-none group"
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                  aria-label="Abrir menú de perfil"
+                  aria-label="Open profile menu"
                 >
                   <div className="relative">
                     <UserAvatar
                       size={32}
                       source={user.profilePicture}
-                      name={user.name || 'Usuario'}
+                      name={user.name || 'User'}
                     />
                     <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary-500/0 to-accent-500/0 group-hover:from-primary-500/10 group-hover:to-accent-500/10 transition-all duration-200"></div>
                   </div>
@@ -245,72 +245,53 @@ const Navbar = React.memo(() => {
                   leaveTo="transform opacity-0 scale-95"
                 >
                   <div ref={menuRef} className="absolute right-0 mt-2 w-72 glass-strong rounded-2xl shadow-strong border border-gray-200/50 dark:border-gray-700/50 py-4 z-50">
-                    {/* Header del perfil */}
+                    {/* Profile header */}
                     <div className="flex flex-col items-center gap-3 mb-4 px-4">
-                      <div className="relative">
-                        <UserAvatar
-                          size={64}
-                          source={user.profilePicture}
-                          name={user.name || 'Usuario'}
-                        />
-                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-success-500 border-2 border-white dark:border-gray-800 rounded-full"></div>
-                      </div>
+                      <UserAvatar
+                        size={48}
+                        source={user.profilePicture}
+                        name={user.name || 'User'}
+                      />
                       <div className="text-center">
-                        <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{user.name}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">@{user.email}</div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                          {user.name || 'User'}
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {user.email}
+                        </p>
                       </div>
                     </div>
-                    
-                    <div className="divide-y divide-gray-200/50 dark:divide-gray-700/50">
-                      {/* Opciones del menú */}
-                      <div className="px-2 py-2">
-                      {isProfilePage ? (
-                          <button
-                            onClick={() => handleGoTo('/profile/edit')}
-                            className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200 flex items-center gap-3"
-                          >
-                            <UserCircleIcon className="h-4 w-4" />
-                            Editar perfil
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => user && handleGoTo(`/profile/${user._id}`)}
-                            className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200 flex items-center gap-3"
-                          >
-                            <UserCircleIcon className="h-4 w-4" />
-                            Ver perfil
-                          </button>
-                        )}
-                        
-                        {/* Toggle tema */}
-                        {mounted && (
-                          <button
-                            onClick={toggleTheme}
-                            className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200 flex items-center gap-3"
-                          >
-                            {theme === 'dark' ? (
-                              <SunIcon className="h-4 w-4" />
-                            ) : (
-                              <MoonIcon className="h-4 w-4" />
-                            )}
-                            {theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
-                          </button>
-                        )}
-                      </div>
-                      
-                      {/* Cerrar sesión */}
-                      <div className="px-2 py-2">
-                        <button
-                          onClick={handleLogout}
-                          disabled={isLoading}
-                          className="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 flex items-center gap-3 disabled:opacity-50"
-                        >
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                          </svg>
-                          {isLoading ? 'Cerrando sesión...' : 'Cerrar sesión'}
-                        </button>
-                      </div>
+
+                    {/* Profile actions */}
+                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                      <button
+                        onClick={() => handleGoTo('/profile/edit')}
+                        className="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 flex items-center gap-3"
+                      >
+                        <UserCircleIcon className="h-5 w-5" />
+                        Edit profile
+                      </button>
+                      <button
+                        onClick={() => handleGoTo('/profile')}
+                        className="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 flex items-center gap-3"
+                      >
+                        <UserCircleIcon className="h-5 w-5" />
+                        View profile
+                      </button>
+                    </div>
+
+                    {/* Logout */}
+                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                      <button
+                        onClick={handleLogout}
+                        disabled={isLoading}
+                        className="w-full px-4 py-2 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-150 flex items-center gap-3 disabled:opacity-50"
+                      >
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        {isLoading ? 'Signing out...' : 'Sign out'}
+                      </button>
                     </div>
                   </div>
                 </Transition>
@@ -326,7 +307,7 @@ const Navbar = React.memo(() => {
             <button
               onClick={toggleMobileSidebar}
               className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group"
-              title="Abrir menú"
+              title="Open menu"
             >
               <Bars3Icon className="h-6 w-6 group-hover:scale-110 transition-transform duration-200" />
             </button>
@@ -370,7 +351,7 @@ const Navbar = React.memo(() => {
             <button
               onClick={openSearchModal}
               className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-all duration-200"
-              title="Buscar"
+              title="Search"
             >
               <MagnifyingGlassIcon className="h-5 w-5" />
             </button>
@@ -380,12 +361,12 @@ const Navbar = React.memo(() => {
                 <button
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                   className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
-                  title="Perfil"
+                  title="Profile"
                 >
                   <UserAvatar
                     size={28}
                     source={user.profilePicture}
-                    name={user.name || 'Usuario'}
+                    name={user.name || 'User'}
                   />
                 </button>
                 
@@ -401,69 +382,53 @@ const Navbar = React.memo(() => {
                   leaveTo="transform opacity-0 scale-95"
                 >
                   <div ref={menuRef} className="absolute right-0 mt-2 w-64 glass-strong rounded-2xl shadow-strong border border-gray-200/50 dark:border-gray-700/50 py-4 z-50">
-                    {/* Header del perfil */}
+                    {/* Profile header */}
                     <div className="flex flex-col items-center gap-3 mb-4 px-4">
-                      <img
-                        src={profileImageUrl}
-                          alt="Avatar"
-                        className="h-12 w-12 rounded-full border-2 border-primary-200 dark:border-primary-700 object-cover"
-                        />
+                      <UserAvatar
+                        size={48}
+                        source={user.profilePicture}
+                        name={user.name || 'User'}
+                      />
                       <div className="text-center">
-                        <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{user.name}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">@{user.email}</div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                          {user.name || 'User'}
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {user.email}
+                        </p>
                       </div>
                     </div>
-                    
-                    <div className="divide-y divide-gray-200/50 dark:divide-gray-700/50">
-                    {/* Opciones del menú */}
-                      <div className="px-2 py-2">
-                      {isProfilePage ? (
-                          <button
-                            onClick={() => handleGoTo('/profile/edit')}
-                            className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200 flex items-center gap-3"
-                          >
-                            <UserCircleIcon className="h-4 w-4" />
-                            Editar perfil
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => user && handleGoTo(`/profile/${user._id}`)}
-                            className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200 flex items-center gap-3"
-                          >
-                            <UserCircleIcon className="h-4 w-4" />
-                            Ver perfil
-                          </button>
-                        )}
-                        
-                        {/* Toggle tema */}
-                        {mounted && (
-                          <button
-                            onClick={toggleTheme}
-                            className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200 flex items-center gap-3"
-                          >
-                            {theme === 'dark' ? (
-                              <SunIcon className="h-4 w-4" />
-                            ) : (
-                              <MoonIcon className="h-4 w-4" />
-                            )}
-                            {theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
-                          </button>
-                        )}
-                      </div>
-                      
-                      {/* Cerrar sesión */}
-                      <div className="px-2 py-2">
-                        <button
-                          onClick={handleLogout}
-                          disabled={isLoading}
-                          className="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 flex items-center gap-3 disabled:opacity-50"
-                        >
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                          </svg>
-                          {isLoading ? 'Cerrando sesión...' : 'Cerrar sesión'}
-                        </button>
-                      </div>
+
+                    {/* Profile actions */}
+                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                      <button
+                        onClick={() => handleGoTo('/profile/edit')}
+                        className="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 flex items-center gap-3"
+                      >
+                        <UserCircleIcon className="h-5 w-5" />
+                        Edit profile
+                      </button>
+                      <button
+                        onClick={() => handleGoTo('/profile')}
+                        className="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 flex items-center gap-3"
+                      >
+                        <UserCircleIcon className="h-5 w-5" />
+                        View profile
+                      </button>
+                    </div>
+
+                    {/* Logout */}
+                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                      <button
+                        onClick={handleLogout}
+                        disabled={isLoading}
+                        className="w-full px-4 py-2 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-150 flex items-center gap-3 disabled:opacity-50"
+                      >
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        {isLoading ? 'Signing out...' : 'Sign out'}
+                      </button>
                     </div>
                   </div>
                 </Transition>

@@ -89,7 +89,7 @@ export const useCommunitiesStore = create<CommunitiesState>()(
           set({ allCommunities: response.data || [], isLoadingCommunities: false });
         } catch (error: any) {
           set({ 
-            error: error.response?.data?.message || 'Error al cargar las comunidades', 
+            error: error.response?.data?.message || 'Error loading communities', 
             isLoadingCommunities: false 
           });
         }
@@ -103,7 +103,7 @@ export const useCommunitiesStore = create<CommunitiesState>()(
           set({ userCommunities: response.data || [], isLoadingCommunities: false });
         } catch (error: any) {
           set({ 
-            error: error.response?.data?.message || 'Error al cargar las comunidades del usuario', 
+            error: error.response?.data?.message || 'Error loading user communities', 
             isLoadingCommunities: false 
           });
         }
@@ -113,19 +113,14 @@ export const useCommunitiesStore = create<CommunitiesState>()(
       loadSubscribedCommunities: async () => {
         set({ isLoadingSubscriptions: true, error: null });
         try {
-          console.log('🔄 Iniciando carga de comunidades suscritas...');
           const response = await communities.getSubscribedCommunities();
-          console.log('📦 Respuesta completa de suscripciones:', response);
-          console.log('📦 Respuesta data de suscripciones:', response.data);
           
           // La respuesta del backend devuelve objetos de suscripción con community populada
           const subscriptions = response.data || [];
-          console.log('📋 Suscripciones encontradas:', subscriptions.length);
           
           // Verificar que las suscripciones pertenezcan al usuario actual
           const currentUser = useAuthStore.getState().user;
           if (!currentUser?._id) {
-            console.error('❌ No hay usuario autenticado');
             set({ 
               subscribedCommunities: [],
               subscriptions: [],
@@ -134,36 +129,16 @@ export const useCommunitiesStore = create<CommunitiesState>()(
             return;
           }
           
-          console.log('👤 Usuario actual:', currentUser._id);
-          
           // Extraer las comunidades de las suscripciones activas
           const subscribedCommunitiesList = subscriptions
             .filter((sub: any) => {
-              console.log('🔍 Analizando suscripción:', sub);
               // Verificar que la suscripción tenga comunidad y esté activa
               const isValid = sub.community && sub.status === 'active';
-              if (!isValid) {
-                console.log('❌ Suscripción inválida o inactiva:', {
-                  hasCommunity: !!sub.community,
-                  status: sub.status,
-                  sub: sub
-                });
-              } else {
-                console.log('✅ Suscripción válida:', {
-                  communityId: sub.community._id,
-                  communityName: sub.community.name,
-                  status: sub.status
-                });
-              }
               return isValid;
             })
             .map((sub: any) => {
-              console.log('🏘️ Mapeando comunidad:', sub.community);
               return sub.community;
             });
-          
-          console.log(`✅ Cargadas ${subscribedCommunitiesList.length} comunidades suscritas para usuario ${currentUser._id}`);
-          console.log('🏘️ Lista final de comunidades:', subscribedCommunitiesList);
           
           set({ 
             subscribedCommunities: subscribedCommunitiesList, 
@@ -171,13 +146,12 @@ export const useCommunitiesStore = create<CommunitiesState>()(
             isLoadingSubscriptions: false 
           });
           
-          console.log('💾 Estado actualizado en el store');
         } catch (error: any) {
-          console.error('❌ Error al cargar suscripciones:', error);
+          console.error('❌ Error loading subscriptions:', error);
           set({ 
             subscribedCommunities: [],
             subscriptions: [],
-            error: error.response?.data?.message || 'Error al cargar las suscripciones', 
+            error: error.response?.data?.message || 'Error loading subscriptions', 
             isLoadingSubscriptions: false 
           });
         }
@@ -191,7 +165,7 @@ export const useCommunitiesStore = create<CommunitiesState>()(
           set({ currentCommunity: response.data, isLoading: false });
         } catch (error: any) {
           set({ 
-            error: error.response?.data?.message || 'Error al cargar la comunidad', 
+            error: error.response?.data?.message || 'Error loading community', 
             isLoading: false 
           });
         }
@@ -210,7 +184,7 @@ export const useCommunitiesStore = create<CommunitiesState>()(
           });
         } catch (error: any) {
           set({ 
-            error: error.response?.data?.message || 'Error al crear la comunidad', 
+            error: error.response?.data?.message || 'Error creating community', 
             isLoading: false 
           });
         }
@@ -236,7 +210,7 @@ export const useCommunitiesStore = create<CommunitiesState>()(
           });
         } catch (error: any) {
           set({ 
-            error: error.response?.data?.message || 'Error al actualizar la comunidad', 
+            error: error.response?.data?.message || 'Error updating community', 
             isLoading: false 
           });
         }
@@ -251,7 +225,7 @@ export const useCommunitiesStore = create<CommunitiesState>()(
           return response.data || [];
         } catch (error: any) {
           set({ 
-            error: error.response?.data?.message || 'Error al buscar comunidades', 
+            error: error.response?.data?.message || 'Error searching communities', 
             isLoadingCommunities: false 
           });
           return [];
@@ -271,7 +245,7 @@ export const useCommunitiesStore = create<CommunitiesState>()(
           });
         } catch (error: any) {
           set({ 
-            error: error.response?.data?.message || 'Error al suscribirse a la comunidad', 
+            error: error.response?.data?.message || 'Error subscribing to community', 
             isLoadingSubscriptions: false 
           });
         }
@@ -292,7 +266,7 @@ export const useCommunitiesStore = create<CommunitiesState>()(
           });
         } catch (error: any) {
           set({ 
-            error: error.response?.data?.message || 'Error al cargar los suscriptores', 
+            error: error.response?.data?.message || 'Error loading subscribers', 
             isLoadingSubscribers: false 
           });
         }
@@ -301,26 +275,12 @@ export const useCommunitiesStore = create<CommunitiesState>()(
       // Verificar si el usuario está suscrito a una comunidad
       checkSubscription: (communityId: string) => {
         const { subscriptions } = get();
-        console.log('🔍 Verificando suscripción para comunidad:', communityId);
-        console.log('📋 Total de suscripciones disponibles:', subscriptions.length);
-        console.log('📋 Suscripciones completas:', subscriptions);
         
         const isSubscribed = subscriptions.some(sub => {
-          console.log('🔍 Analizando suscripción individual:', {
-            subId: sub._id,
-            subCommunityId: sub.community?._id,
-            subCommunityName: sub.community?.name,
-            targetCommunityId: communityId,
-            status: sub.status,
-            hasCommunity: !!sub.community
-          });
-          
           const hasSubscription = sub.community?._id === communityId && sub.status === 'active';
-          console.log('🔍 Resultado de verificación individual:', hasSubscription);
           return hasSubscription;
         });
         
-        console.log('✅ Resultado final de verificación:', isSubscribed);
         return isSubscribed;
       },
 
@@ -329,7 +289,6 @@ export const useCommunitiesStore = create<CommunitiesState>()(
 
       // Limpiar comunidades
       clearCommunities: () => {
-        console.log('🧹 Limpiando datos de comunidades');
         set({ 
           allCommunities: [], 
           userCommunities: [], 

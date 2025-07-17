@@ -20,12 +20,10 @@ export const useNotifications = () => {
   // Solicitar permisos de notificación
   const requestNotificationPermission = async () => {
     if (!FCM_ENABLED) {
-      console.log('📱 Notificaciones FCM deshabilitadas temporalmente (requiere Google Cloud billing)');
       return false;
     }
 
     if (!messaging) {
-      console.log('❌ Firebase Messaging no disponible');
       return false;
     }
 
@@ -34,11 +32,9 @@ export const useNotifications = () => {
       setNotificationPermission(permission);
       
       if (permission === 'granted') {
-        console.log('✅ Permisos de notificación concedidos');
         await getFCMToken();
         return true;
       } else {
-        console.log('❌ Permisos de notificación denegados');
         return false;
       }
     } catch (error) {
@@ -54,22 +50,18 @@ export const useNotifications = () => {
     try {
       // Verificar que el usuario esté completamente autenticado
       if (!auth.currentUser) {
-        console.log('❌ Usuario no autenticado, esperando...');
         return;
       }
 
       // Esperar a que el service worker esté listo
       if ('serviceWorker' in navigator) {
         await navigator.serviceWorker.ready;
-        console.log('✅ Service Worker listo');
       }
 
       // Agregar un pequeño delay para asegurar que todo esté inicializado
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || 'TEMP_VAPID_KEY_NEEDED';
-      
-      console.log('🔄 Obteniendo token FCM...');
       
       if (vapidKey === 'TEMP_VAPID_KEY_NEEDED') {
         console.error('❌ VAPID Key no configurada');
@@ -79,7 +71,6 @@ export const useNotifications = () => {
       const token = await getToken(messaging, { vapidKey });
       
       if (token) {
-        console.log('✅ Token FCM obtenido:', token.substring(0, 20) + '...');
         setFcmToken(token);
         await saveFCMTokenToBackend(token);
       }
@@ -107,9 +98,7 @@ export const useNotifications = () => {
         body: JSON.stringify({ token }),
       });
 
-      if (response.ok) {
-        console.log('✅ Token FCM guardado en backend');
-      } else {
+      if (!response.ok) {
         console.error('❌ Error guardando token FCM en backend');
       }
     } catch (error) {
@@ -122,8 +111,6 @@ export const useNotifications = () => {
     if (!FCM_ENABLED || !messaging) return;
 
     const unsubscribe = onMessage(messaging, (payload) => {
-      console.log('📨 Mensaje recibido en primer plano:', payload);
-      
       // Reproducir sonido de notificación
       try {
         const audio = new Audio('/notification-sound.mp3');
@@ -163,7 +150,6 @@ export const useNotifications = () => {
     const initializeNotifications = async () => {
       // Verificar si las notificaciones están soportadas
       if (!('Notification' in window)) {
-        console.log('❌ Notificaciones no soportadas en este navegador');
         return;
       }
 

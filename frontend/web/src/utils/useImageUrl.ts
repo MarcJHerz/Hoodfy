@@ -21,13 +21,6 @@ export function useImageUrl(keyOrUrl?: string) {
       setLoading(true);
       setError(null);
       
-      console.log('🔍 useImageUrl Debug:', {
-        keyOrUrl,
-        isUrl: keyOrUrl?.startsWith('http'),
-        hasExtension: keyOrUrl ? /\.(jpg|jpeg|png|webp|gif|jfif|mp4|mov|avi)$/i.test(keyOrUrl) : false,
-        isLogo: keyOrUrl?.startsWith('logos/')
-      });
-      
       // Si no hay keyOrUrl, usar imagen por defecto
       if (!keyOrUrl) {
         if (isMounted) {
@@ -60,9 +53,7 @@ export function useImageUrl(keyOrUrl?: string) {
       // Si es un logo (empiece con 'logos/')
       if (keyOrUrl.startsWith('logos/')) {
         try {
-          console.log('🎨 Getting signed URL for logo:', keyOrUrl);
           const signedUrl = await getLogoSignedS3Url(keyOrUrl);
-          console.log('✅ Got signed URL for logo:', signedUrl.substring(0, 50) + '...');
           if (isMounted) {
             setUrl(signedUrl);
             setLoading(false);
@@ -85,18 +76,9 @@ export function useImageUrl(keyOrUrl?: string) {
                      !keyOrUrl.startsWith('http://') && 
                      !keyOrUrl.startsWith('https://');
       
-      console.log('🔍 S3 Key Detection:', {
-        keyOrUrl,
-        isS3Key,
-        hasExtension: /\.(jpg|jpeg|png|webp|gif|jfif|mp4|mov|avi)$/i.test(keyOrUrl),
-        notHttp: !keyOrUrl.startsWith('http://') && !keyOrUrl.startsWith('https://')
-      });
-      
       if (isS3Key) {
         try {
-          console.log('🔗 Getting signed URL for:', keyOrUrl);
           const signedUrl = await getSignedS3Url(keyOrUrl);
-          console.log('✅ Got signed URL:', signedUrl.substring(0, 50) + '...');
           if (isMounted) {
             setUrl(signedUrl);
             setLoading(false);
@@ -117,7 +99,6 @@ export function useImageUrl(keyOrUrl?: string) {
       // Si es una ruta relativa local
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
       const finalUrl = `${baseUrl}/${keyOrUrl.replace(/^\//, '')}`;
-      console.log('🌐 Using local URL:', finalUrl);
       if (isMounted) {
         setUrl(finalUrl);
         setLoading(false);

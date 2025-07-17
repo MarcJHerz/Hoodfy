@@ -238,7 +238,6 @@ class ChatService {
       const recipients = participants.filter((id: string) => id !== message.senderId);
       
       if (recipients.length === 0) {
-        console.log('No hay destinatarios para notificar');
         return;
       }
 
@@ -267,7 +266,6 @@ class ChatService {
       const tokens = await this.getUserFCMTokens(recipients);
       
       if (tokens.length === 0) {
-        console.log('No hay tokens FCM disponibles para enviar notificación');
         return;
       }
 
@@ -287,7 +285,6 @@ class ChatService {
         throw new Error('Error enviando notificación');
       }
 
-      console.log(`✅ Notificación enviada a ${tokens.length} dispositivos`);
     } catch (error) {
       console.error('Error enviando notificación a destinatarios:', error);
     }
@@ -472,7 +469,6 @@ class ChatService {
   // Obtener chats del usuario
   async getUserChats(userId: string) {
     try {
-      console.log('🔄 Suscribiéndose a chats del usuario:', userId);
       const chatsRef = collection(db, 'chats');
       try {
         const q = query(
@@ -497,7 +493,6 @@ class ChatService {
             }
             return acc;
           }, []);
-          console.log('📨 Chats obtenidos:', uniqueChats.length);
           useChatStore.getState().setChatRooms(uniqueChats);
         }, (error) => {
           console.error('Error en consulta con índice:', error);
@@ -516,7 +511,6 @@ class ChatService {
   // Consulta alternativa sin ordenamiento (para cuando el índice no está listo)
   private async getUserChatsAlternative(userId: string) {
     try {
-      console.log('🔄 Usando consulta alternativa para chats');
       const chatsRef = collection(db, 'chats');
       const q = query(
         chatsRef,
@@ -539,7 +533,6 @@ class ChatService {
           }
           return acc;
         }, []);
-        console.log('📨 Chats obtenidos (consulta alternativa):', uniqueChats.length);
         useChatStore.getState().setChatRooms(uniqueChats);
       });
       this.unsubscribeChats = unsubscribe;
@@ -590,7 +583,6 @@ class ChatService {
         throw new Error('Error marcando mensajes como leídos');
       }
 
-      console.log(`Mensajes marcados como leídos para usuario ${userId} en chat ${chatId}`);
     } catch (error) {
       console.error('Error marking messages as read:', error);
     }

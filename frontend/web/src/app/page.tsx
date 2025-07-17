@@ -1,344 +1,240 @@
 "use client";
 
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useTheme } from "next-themes";
-import {
-  SunIcon,
-  MoonIcon,
-  UsersIcon,
-  ChatBubbleLeftIcon,
-  CalendarDaysIcon,
-  TrophyIcon,
-  HeartIcon,
-  CurrencyDollarIcon,
-  ChartBarIcon,
-  GlobeAltIcon,
-  StarIcon,
-  CheckIcon,
-  ArrowRightIcon,
-  SparklesIcon
-} from "@heroicons/react/24/outline";
-import Logo from '@/components/Logo';
+import Link from 'next/link';
+import { CheckIcon, StarIcon, UserGroupIcon, ChatBubbleLeftRightIcon, CalendarIcon, TrophyIcon, ChartBarIcon, HeartIcon } from '@heroicons/react/24/outline';
 import LandingMenu from '@/components/LandingMenu';
 
 export default function Home() {
-  const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
-
-  const benefits = [
+  const features = [
     {
-      icon: UsersIcon,
-      title: "Comunidades Instantáneas",
-      description: "Únete a comunidades afines y haz amigos automáticamente al ingresar."
+      icon: UserGroupIcon,
+      title: "Instant Communities",
+      description: "Join like-minded communities and automatically make friends when you join."
     },
     {
-      icon: ChatBubbleLeftIcon,
-      title: "Chat Grupal y Privado",
-      description: "Chatea en grupo con toda la comunidad o en privado con nuevos amigos."
+      icon: ChatBubbleLeftRightIcon,
+      title: "Group & Private Chat",
+      description: "Chat in groups with the entire community or privately with new friends."
     },
     {
-      icon: CalendarDaysIcon,
-      title: "Eventos Exclusivos",
-      description: "Accede a eventos únicos organizados por tu comunidad."
+      icon: CalendarIcon,
+      title: "Exclusive Events",
+      description: "Access unique events organized by your community."
     },
     {
       icon: TrophyIcon,
-      title: "Concursos Automáticos",
-      description: "Participa automáticamente en concursos al pertenecer a una comunidad."
+      title: "Automatic Contests",
+      description: "Automatically participate in contests by belonging to a community."
     }
   ];
 
-  const creatorBenefits = [
+  const stats = [
+    { label: "Private communities generate 10x more engagement than public networks.", value: "10x" },
+    { label: "United Community", value: "500+" },
+    { label: "Active Members", value: "50K+" },
+    { label: "Communities Created", value: "1000+" }
+  ];
+
+  const testimonials = [
     {
-      icon: CurrencyDollarIcon,
-      title: "Monetización",
-      description: "Genera ingresos a través de suscripciones y eventos premium."
+      name: "Sarah Johnson",
+      role: "Community Creator",
+      content: "My community has grown to 500 members and I generate $2,000 USD monthly. The platform is incredible.",
+      rating: 5
     },
     {
-      icon: ChartBarIcon,
-      title: "Alto Engagement",
-      description: "Comunidades privadas generan 10x más interacción que redes públicas."
+      name: "Mike Chen",
+      role: "Community Member",
+      content: "I found my tribe here. The connections are real and the engagement is amazing.",
+      rating: 5
     },
     {
-      icon: HeartIcon,
-      title: "Comunidad Unida",
-      description: "Crea lazos reales y duraderos con miembros comprometidos."
+      name: "Emma Rodriguez",
+      role: "Community Creator",
+      content: "Creating my community was the best decision. The tools are powerful and the support is excellent.",
+      rating: 5
     }
   ];
 
   const communityExamples = [
     {
-      title: "Expats en Madrid",
-      description: "Latinos viviendo en España se apoyan y comparten experiencias",
-      members: "1,247 miembros",
-      color: "from-blue-500 to-blue-600"
+      name: "Tech Enthusiasts",
+      members: "1,200+",
+      description: "Share the latest in technology and innovation"
     },
     {
-      title: "Intercambio de Idiomas",
-      description: "Practica español, inglés y francés con nativos en Barcelona",
-      members: "856 miembros",
-      color: "from-green-500 to-green-600"
+      name: "Fitness & Wellness",
+      members: "800+",
+      description: "Support each other in health and fitness goals"
     },
     {
-      title: "Fin de Semana Social",
-      description: "Planes y actividades para solteros de 25-35 años en CDMX",
-      members: "2,341 miembros",
-      color: "from-purple-500 to-purple-600"
+      name: "Creative Artists",
+      members: "650+",
+      description: "Showcase and collaborate on creative projects"
     }
   ];
 
-  const testimonials = [
-    {
-      name: "María González",
-      role: "Miembro de 'Expats en Madrid'",
-      content: "Gracias a Qahood encontré mi grupo de amigos en Madrid. En 2 semanas ya tenía planes todos los fines de semana.",
-      rating: 5
-    },
-    {
-      name: "Carlos Ruiz",
-      role: "Fundador de 'Tech Entrepreneurs'",
-      content: "Mi comunidad ha crecido a 500 miembros y genero $2,000 USD mensuales. La plataforma es increíble.",
-      rating: 5
-    },
-    {
-      name: "Ana Torres",
-      role: "Miembro de 'Mamás Primerizas'",
-      content: "El apoyo que recibo aquí no lo encuentro en ninguna otra red social. Es como tener una familia digital.",
-      rating: 5
-    }
+  const benefits = [
+    "Connect with people who share your interests",
+    "Access exclusive content and events",
+    "Build meaningful relationships",
+    "Grow your personal and professional network",
+    "Participate in community challenges and contests",
+    "Get support and advice from like-minded people"
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
-      {/* Theme Toggle */}
-      <div className="fixed top-4 right-4 z-50">
-        {mounted && (
-          <button
-            onClick={toggleTheme}
-            className="p-3 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border border-gray-200/50 dark:border-gray-700/50 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-all duration-200 shadow-lg hover:shadow-xl"
-            title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-          >
-            {theme === 'dark' ? (
-              <SunIcon className="h-5 w-5" />
-            ) : (
-              <MoonIcon className="h-5 w-5" />
-            )}
-          </button>
-        )}
-      </div>
-
-      {/* Menú especial de la landing */}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* Landing Menu */}
       <LandingMenu />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16 text-left flex flex-col items-start">
-          <div className="max-w-4xl">
-            {/* Hero Title */}
-            <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white mb-6">
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Qahood
-              </span>
+      <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+              Be part of a private community<br />
+              Make real connections
             </h1>
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
-              Encuentra tu <span className="text-blue-600">comunidad perfecta</span><br />
-              o <span className="text-purple-600">crea la tuya propia</span>
-            </h2>
-            {/* Hero Subtitle */}
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl leading-relaxed">
-              La primera plataforma que conecta personas con intereses comunes en comunidades privadas, 
-              donde los lazos reales se forman y los negocios florecen.
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
+            A new kind of private platform where shared passions create powerful bonds.<br />
+            Join meaningful communities. Speak freely. Grow together
             </p>
-            {/* Hero Stats */}
-            <div className="flex flex-wrap justify-start gap-8 mb-10 text-sm md:text-base">
-              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                <UsersIcon className="h-5 w-5 text-blue-500" />
-                <span>+10,000 miembros activos</span>
+            
+            {/* Stats */}
+            <div className="flex flex-wrap justify-center gap-8 mb-12">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-600">10x</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">More engagement</div>
               </div>
-              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                <SparklesIcon className="h-5 w-5 text-purple-500" />
-                <span>+500 comunidades creadas</span>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-purple-600">500+</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Communities created</div>
               </div>
-              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                <HeartIcon className="h-5 w-5 text-pink-500" />
-                <span>95% satisfacción</span>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-600">50K+</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Active members</div>
               </div>
             </div>
-            {/* Hero CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-start items-center mb-8">
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/register"
-                className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg px-8 py-4 text-lg shadow-lg hover:scale-105 transition-transform duration-200"
               >
-                <span>Crear mi cuenta gratis</span>
-                <ArrowRightIcon className="h-5 w-5" />
+                Join your community
               </Link>
               <Link
                 href="/login"
-                className="w-full sm:w-auto px-8 py-4 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                className="border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-lg px-8 py-4 text-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
               >
-                Ya tengo cuenta
+                Sign in
               </Link>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              ✨ Sin publicidad • 🔒 100% privado • 🚀 Listo en 2 minutos
-            </p>
           </div>
         </div>
       </section>
 
-      {/* Beneficios para Usuarios */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Features Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h3 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              ¿Por qué unirte a una comunidad?
-            </h3>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Descubre todo lo que puedes obtener al formar parte de una comunidad en Qahood
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Everything you need to build amazing communities
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300">
+              Discover all the tools and features that make Qahood the perfect platform for your community
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {benefits.map((benefit, index) => (
-              <div key={index} className="group">
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-gray-700">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200">
-                    <benefit.icon className="h-6 w-6 text-white" />
-                  </div>
-                  <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    {benefit.title}
-                  </h4>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    {benefit.description}
-                  </p>
-                </div>
+            {features.map((feature, index) => (
+              <div key={index} className="text-center p-6 rounded-xl bg-gray-50 dark:bg-gray-700 hover:shadow-lg transition-shadow duration-200">
+                <feature.icon className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Ejemplos de Comunidades */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h3 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Comunidades que están cambiando vidas
-            </h3>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Mira algunos ejemplos de las comunidades más exitosas en nuestra plataforma
-            </p>
-          </div>
+      {/* Stats Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-12">
+            Communities that are changing lives
+          </h2>
+          <p className="text-xl text-blue-100 mb-16">
+            See some examples of the most successful communities on our platform
+          </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {communityExamples.map((community, index) => (
-              <div key={index} className="group">
-                <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-gray-700">
-                  <div className={`h-32 bg-gradient-to-r ${community.color} flex items-center justify-center`}>
-                    <UsersIcon className="h-12 w-12 text-white opacity-80" />
-                  </div>
-                  <div className="p-6">
-                    <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                      {community.title}
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      {community.description}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                        {community.members}
-                      </span>
-                      <div className="flex text-yellow-400">
-                        {[...Array(5)].map((_, i) => (
-                          <StarIcon key={i} className="h-4 w-4 fill-current" />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div key={index} className="bg-white/10 backdrop-blur-lg rounded-xl p-6 text-white">
+                <h3 className="text-xl font-semibold mb-2">{community.name}</h3>
+                <p className="text-blue-100 mb-4">{community.description}</p>
+                <div className="text-2xl font-bold text-yellow-300">{community.members}</div>
+                <div className="text-sm text-blue-100">members</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Beneficios para Creadores */}
-      <section className="py-20 bg-gradient-to-r from-blue-900 to-purple-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h3 className="text-3xl md:text-4xl font-bold mb-4">
-              ¿Quieres crear tu propia comunidad?
-            </h3>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Conviértete en líder, genera ingresos y construye algo significativo
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {creatorBenefits.map((benefit, index) => (
-              <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-white/10 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                  <benefit.icon className="h-8 w-8 text-white" />
-                </div>
-                <h4 className="text-xl font-semibold mb-2">{benefit.title}</h4>
-                <p className="text-blue-100">{benefit.description}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center">
+      {/* CTA Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+            Want to create your own community?
+          </h2>
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+            Join thousands of community creators who are building meaningful connections and generating income
+          </p>
           <Link
             href="/register"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-900 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg px-8 py-4 text-lg shadow-lg hover:scale-105 transition-transform duration-200 inline-block"
           >
-              <span>Crear mi comunidad</span>
-              <ArrowRightIcon className="h-5 w-5" />
+            Create my community
           </Link>
-          </div>
         </div>
       </section>
 
-      {/* Testimonios */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Testimonials Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h3 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Lo que dicen nuestros usuarios
-            </h3>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              What our users say
+            </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300">
-              Historias reales de personas que han transformado sus vidas
+              Real stories from real people who found their community on Qahood
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
-                <div className="flex text-yellow-400 mb-4">
+              <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+                <div className="flex items-center mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <StarIcon key={i} className="h-5 w-5 fill-current" />
+                    <StarIcon key={i} className="h-5 w-5 text-yellow-400 fill-current" />
                   ))}
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 mb-4 italic">
+                <p className="text-gray-700 dark:text-gray-300 mb-4">
                   "{testimonial.content}"
                 </p>
                 <div>
-                  <p className="font-semibold text-gray-900 dark:text-white">
+                  <div className="font-semibold text-gray-900 dark:text-white">
                     {testimonial.name}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
                     {testimonial.role}
-                  </p>
+                  </div>
                 </div>
               </div>
             ))}
@@ -346,89 +242,71 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Final */}
-      <section className="py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h3 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Tu comunidad te está esperando
-          </h3>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-            Únete a miles de personas que ya encontraron su lugar en el mundo
+      {/* Final CTA */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+            Your community is waiting for you
+          </h2>
+          <p className="text-xl text-blue-100 mb-8">
+            Join thousands of people who have already found their perfect community
           </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-            <Link
-              href="/register"
-              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2"
-            >
-              <span>Comenzar ahora - Es gratis</span>
-              <ArrowRightIcon className="h-5 w-5" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center text-sm text-gray-500 dark:text-gray-400">
-            <div className="flex items-center justify-center gap-2">
-              <CheckIcon className="h-4 w-4 text-green-500" />
-              <span>Sin tarjeta de crédito</span>
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <CheckIcon className="h-4 w-4 text-green-500" />
-              <span>Configura en 2 minutos</span>
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <CheckIcon className="h-4 w-4 text-green-500" />
-              <span>Soporte 24/7</span>
-            </div>
-          </div>
+          <Link
+            href="/register"
+            className="bg-white text-blue-600 font-semibold rounded-lg px-8 py-4 text-lg shadow-lg hover:scale-105 transition-transform duration-200 inline-block"
+          >
+            Get started today
+          </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 dark:bg-gray-950 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Logo size="sm" showText={false} href={undefined} />
-                <span className="text-xl font-bold">Qahood</span>
-              </div>
-              <p className="text-gray-300 text-sm">
-                Conectando comunidades, creando vínculos reales.
+            <div className="col-span-1 md:col-span-2">
+              <h3 className="text-2xl font-bold mb-4">Qahood</h3>
+              <p className="text-gray-400 mb-4">
+                Connecting communities, creating real bonds.
               </p>
+              <div className="flex space-x-4">
+                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  Twitter
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  LinkedIn
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  Instagram
+                </a>
+              </div>
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Producto</h4>
-              <ul className="space-y-2 text-sm text-gray-300">
-                <li><Link href="/features" className="hover:text-white transition-colors">Características</Link></li>
-                <li><Link href="/pricing" className="hover:text-white transition-colors">Precios</Link></li>
-                <li><Link href="/communities" className="hover:text-white transition-colors">Comunidades</Link></li>
+              <h4 className="font-semibold mb-4">Platform</h4>
+              <ul className="space-y-2">
+                <li><Link href="/communities" className="hover:text-white transition-colors">Communities</Link></li>
+                <li><Link href="/how-it-works" className="hover:text-white transition-colors">How it works</Link></li>
+                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link href="/features" className="hover:text-white transition-colors">Features</Link></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Soporte</h4>
-              <ul className="space-y-2 text-sm text-gray-300">
-                <li><Link href="/help" className="hover:text-white transition-colors">Centro de ayuda</Link></li>
-                <li><Link href="/contact" className="hover:text-white transition-colors">Contacto</Link></li>
-                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacidad</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Comunidad</h4>
-              <ul className="space-y-2 text-sm text-gray-300">
-                <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
-                <li><Link href="/success-stories" className="hover:text-white transition-colors">Casos de éxito</Link></li>
-                <li><Link href="/events" className="hover:text-white transition-colors">Eventos</Link></li>
+              <h4 className="font-semibold mb-4">Support</h4>
+              <ul className="space-y-2">
+                <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition-colors">Terms</Link></li>
               </ul>
             </div>
           </div>
           
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-            <p>&copy; {new Date().getFullYear()} Qahood. Todos los derechos reservados.</p>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>&copy; 2024 Qahood. All rights reserved.</p>
+          </div>
         </div>
-      </div>
       </footer>
     </div>
   );

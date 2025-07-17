@@ -55,16 +55,8 @@ const upload = multer({
     fieldNameSize: 100 // Tamaño máximo del nombre del campo
   },
   fileFilter: (req, file, cb) => {
-      console.log('🔍 Archivo recibido en postsRoutes:', {
-        originalname: file.originalname,
-        mimetype: file.mimetype,
-        size: file.size,
-        sizeInMB: (file.size / (1024 * 1024)).toFixed(2) + ' MB'
-      });
-      
       // Detectar el tipo MIME real basado en la extensión
       const realMimeType = detectMimeType(file);
-      console.log('📋 Tipo MIME detectado:', realMimeType);
       
       const allowedTypes = [
         'image/jpeg', 'image/png', 'image/gif', 'image/webp', 
@@ -73,12 +65,10 @@ const upload = multer({
       ];
       
       if (allowedTypes.includes(realMimeType)) {
-        console.log('✅ Archivo aceptado en postsRoutes');
-      cb(null, true);
-    } else {
-        console.log('❌ Archivo rechazado en postsRoutes - tipo no permitido:', realMimeType);
+        cb(null, true);
+      } else {
         cb(new Error(`Tipo de archivo no soportado: ${realMimeType}. Solo se permiten imágenes (JPEG, PNG, GIF, WebP, HEIC, HEIF) y videos (MP4, MOV, WebM, AVI)`));
-    }
+      }
   }
 });
 
@@ -87,59 +77,61 @@ router.use(verifyToken);
 
 // Middleware para manejar errores de multer
 const handleMulterError = (error, req, res, next) => {
-  console.log('🚨 Error de multer detectado:', {
-    message: error.message,
-    code: error.code,
-    field: error.field,
-    file: error.file
-  });
-  
   if (error.code === 'LIMIT_FILE_SIZE') {
     return res.status(413).json({
-      error: 'Archivo demasiado grande',
-      message: 'El archivo excede el límite de tamaño permitido (500MB)'
+      error: 'File too large',
+      message: 'The file exceeds the allowed size limit (500MB)'
     });
   }
   
   if (error.code === 'LIMIT_FILE_COUNT') {
     return res.status(413).json({
-      error: 'Demasiados archivos',
-      message: 'No puedes subir más de 10 archivos a la vez'
+      error: 'Too many files',
+      message: 'You cannot upload more than 10 files at once'
     });
   }
   
   if (error.message.includes('Tipo de archivo no soportado')) {
     return res.status(400).json({
-      error: 'Tipo de archivo no soportado',
+      error: 'Unsupported file type',
       message: error.message
     });
   }
   
   return res.status(500).json({
-    error: 'Error al procesar archivos',
+    error: 'Error processing files',
     message: error.message
   });
 };
 
+// Middleware para validar archivos de posts
+const validatePostFile = (req, res, next) => {
+  if (!req.file) {
+    return next();
+  }
+
+  const { originalname, mimetype, size } = req.file;
+  
+  // Detectar MIME type real
+  const realMimeType = detectMimeType(req.file);
+  
+  // Verificar tipo de archivo permitido
+  const allowedTypes = [
+    'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif',
+    'video/mp4', 'video/quicktime', 'video/x-msvideo'
+  ];
+
+  if (allowedTypes.includes(realMimeType)) {
+    return next();
+  } else {
+    return res.status(400).json({ 
+      error: `File type not allowed: ${realMimeType}` 
+    });
+  }
+};
+
 // Crear un nuevo post SOLO usando el controlador moderno (S3)
 router.post('/', rateLimiter, upload.any(), handleMulterError, (req, res, next) => {
-  console.log('📝 POST /api/posts recibido:', {
-    method: req.method,
-    url: req.url,
-    headers: {
-      'content-type': req.headers['content-type'],
-      'content-length': req.headers['content-length'],
-      'user-agent': req.headers['user-agent']
-    },
-    body: req.body ? Object.keys(req.body) : 'No body',
-    files: req.files ? `${req.files.length} archivos` : 'No files',
-    fileDetails: req.files ? req.files.map(f => ({
-      originalname: f.originalname,
-      mimetype: f.mimetype,
-      size: f.size
-    })) : []
-  });
-  
   // Llamar al controlador
   postController.createPost(req, res, next);
 });
@@ -164,8 +156,8 @@ router.get('/community/:communityId', rateLimiter, async (req, res) => {
 
     res.json(posts);
   } catch (error) {
-    console.error('Error al obtener posts:', error);
-    res.status(500).json({ error: 'Error al obtener los posts' });
+    console.error('Error getting posts:', error);
+    res.status(500).json({ error: 'Error getting posts' });
   }
 });
 
@@ -174,21 +166,21 @@ router.post('/:postId/like', rateLimiter, async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
     if (!post) {
-      return res.status(404).json({ error: 'Post no encontrado' });
+      return res.status(404).json({ error: 'Post not found' });
     }
 
     const userId = req.user._id;
     if (post.likes.includes(userId)) {
-      return res.status(400).json({ error: 'Ya has dado like a este post' });
+      return res.status(400).json({ error: 'You have already liked this post' });
     }
 
     post.likes.push(userId);
     await post.save();
 
-    res.json({ message: 'Like agregado exitosamente' });
+    res.json({ message: 'Like added successfully' });
   } catch (error) {
-    console.error('Error al dar like:', error);
-    res.status(500).json({ error: 'Error al dar like al post' });
+    console.error('Error liking post:', error);
+    res.status(500).json({ error: 'Error liking the post' });
   }
 });
 
@@ -197,21 +189,21 @@ router.post('/:postId/unlike', rateLimiter, async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
     if (!post) {
-      return res.status(404).json({ error: 'Post no encontrado' });
+      return res.status(404).json({ error: 'Post not found' });
     }
 
     const userId = req.user._id;
     if (!post.likes.includes(userId)) {
-      return res.status(400).json({ error: 'No has dado like a este post' });
+      return res.status(400).json({ error: 'You have not liked this post' });
     }
 
     post.likes = post.likes.filter(id => id.toString() !== userId.toString());
     await post.save();
 
-    res.json({ message: 'Like removido exitosamente' });
+    res.json({ message: 'Like removed successfully' });
   } catch (error) {
-    console.error('Error al quitar like:', error);
-    res.status(500).json({ error: 'Error al quitar like al post' });
+    console.error('Error unliking post:', error);
+    res.status(500).json({ error: 'Error unliking the post' });
   }
 });
 
@@ -220,12 +212,12 @@ router.post('/:postId/comment', rateLimiter, async (req, res) => {
   try {
     const { content } = req.body;
     if (!content) {
-      return res.status(400).json({ error: 'El contenido del comentario es requerido' });
+      return res.status(400).json({ error: 'Comment content is required' });
     }
 
     const post = await Post.findById(req.params.postId);
     if (!post) {
-      return res.status(404).json({ error: 'Post no encontrado' });
+      return res.status(404).json({ error: 'Post not found' });
     }
 
     const comment = {
@@ -241,12 +233,12 @@ router.post('/:postId/comment', rateLimiter, async (req, res) => {
     await post.populate('comments.author', 'name username profilePicture');
 
     res.json({
-      message: 'Comentario agregado exitosamente',
+      message: 'Comment added successfully',
       comment: post.comments[post.comments.length - 1]
     });
   } catch (error) {
-    console.error('Error al comentar:', error);
-    res.status(500).json({ error: 'Error al agregar el comentario' });
+    console.error('Error commenting:', error);
+    res.status(500).json({ error: 'Error adding the comment' });
   }
 });
 
@@ -255,7 +247,7 @@ router.delete('/:postId', rateLimiter, async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
     if (!post) {
-      return res.status(404).json({ error: 'Post no encontrado' });
+      return res.status(404).json({ error: 'Post not found' });
     }
 
     // Verificar si el usuario es el autor o el creador de la comunidad
@@ -264,7 +256,7 @@ router.delete('/:postId', rateLimiter, async (req, res) => {
     const isCreator = community.creator.toString() === req.user._id.toString();
 
     if (!isAuthor && !isCreator) {
-      return res.status(403).json({ error: 'No tienes permiso para eliminar este post' });
+      return res.status(403).json({ error: 'You do not have permission to delete this post' });
     }
 
     await post.deleteOne();
@@ -274,10 +266,10 @@ router.delete('/:postId', rateLimiter, async (req, res) => {
       $inc: { postCount: -1 }
     });
 
-    res.json({ message: 'Post eliminado exitosamente' });
+    res.json({ message: 'Post deleted successfully' });
   } catch (error) {
-    console.error('Error al eliminar post:', error);
-    res.status(500).json({ error: 'Error al eliminar el post' });
+    console.error('Error deleting post:', error);
+    res.status(500).json({ error: 'Error deleting the post' });
   }
 });
 
@@ -398,19 +390,19 @@ router.post('/:postId/comments', rateLimiter, async (req, res) => {
     const userId = req.userId;
 
     if (!content) {
-      return res.status(400).json({ error: 'El contenido del comentario es requerido' });
+      return res.status(400).json({ error: 'Comment content is required' });
     }
 
     const post = await Post.findById(postId);
     if (!post) {
-      return res.status(404).json({ error: 'Post no encontrado' });
+      return res.status(404).json({ error: 'Post not found' });
     }
 
     // Si es una respuesta a otro comentario
     if (parentCommentId) {
       const parentComment = await Comment.findById(parentCommentId);
       if (!parentComment) {
-        return res.status(404).json({ error: 'Comentario padre no encontrado' });
+        return res.status(404).json({ error: 'Parent comment not found' });
       }
 
       const reply = new Comment({
@@ -430,7 +422,7 @@ router.post('/:postId/comments', rateLimiter, async (req, res) => {
       await reply.populate('user', 'name username profilePicture');
 
       res.status(201).json({
-        message: 'Respuesta agregada exitosamente',
+        message: 'Reply added successfully',
         comment: reply
       });
     } else {
@@ -451,13 +443,13 @@ router.post('/:postId/comments', rateLimiter, async (req, res) => {
       await comment.populate('user', 'name username profilePicture');
 
       res.status(201).json({
-        message: 'Comentario agregado exitosamente',
+        message: 'Comment added successfully',
         comment
       });
     }
   } catch (error) {
-    console.error('Error al agregar comentario:', error);
-    res.status(500).json({ error: 'Error al agregar el comentario' });
+    console.error('Error adding comment:', error);
+    res.status(500).json({ error: 'Error adding the comment' });
   }
 });
 
@@ -491,8 +483,8 @@ router.get('/:postId/comments', rateLimiter, async (req, res) => {
 
     res.json(comments);
   } catch (error) {
-    console.error('Error al obtener comentarios:', error);
-    res.status(500).json({ error: 'Error al obtener los comentarios' });
+    console.error('Error getting comments:', error);
+    res.status(500).json({ error: 'Error getting comments' });
   }
 });
 
@@ -522,8 +514,8 @@ router.post('/create', upload.array('media', 10), async (req, res) => {
         });
         }
       } catch (error) {
-        console.error('Error al subir archivos a S3:', error);
-        return res.status(500).json({ error: 'Error al subir los archivos' });
+        console.error('Error uploading files to S3:', error);
+        return res.status(500).json({ error: 'Error uploading files' });
       }
     }
 
@@ -539,9 +531,9 @@ router.post('/create', upload.array('media', 10), async (req, res) => {
     await post.save();
     res.status(201).json(post);
   } catch (error) {
-    console.error('Error al crear post:', error);
+    console.error('Error creating post:', error);
     res.status(500).json({ 
-      error: 'Error al crear el post',
+      error: 'Error creating the post',
       details: error.message 
     });
   }

@@ -25,18 +25,11 @@ class StripeService {
    */
   async createCheckoutSession(params: CreateCheckoutSessionParams): Promise<CheckoutSessionResponse> {
     try {
-      console.log('🛒 Creando sesión de checkout con Stripe...', params);
-      
-      const response = await api.post('/api/stripe/create-checkout-session', {
-        communityId: params.communityId,
-        priceId: params.priceId
-      });
-
-      console.log('✅ Sesión de checkout creada:', response.data);
+      const response = await api.post('/stripe/create-checkout-session', params);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Error creando sesión de checkout:', error);
-      throw new Error(error.response?.data?.error || 'Error al crear sesión de checkout');
+      console.error('Error creating checkout session:', error);
+      throw error;
     }
   }
 
@@ -45,18 +38,11 @@ class StripeService {
    */
   async createCustomPrice(params: CreateCustomPriceParams): Promise<CustomPriceResponse> {
     try {
-      console.log('💰 Creando precio personalizado en Stripe...', params);
-      
-      const response = await api.post('/api/stripe/create-product-price', {
-        communityName: params.communityName,
-        price: params.price
-      });
-
-      console.log('✅ Precio personalizado creado:', response.data);
+      const response = await api.post('/stripe/create-price', params);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Error creando precio personalizado:', error);
-      throw new Error(error.response?.data?.error || 'Error al crear precio personalizado');
+      console.error('Error creating custom price:', error);
+      throw error;
     }
   }
 
@@ -64,8 +50,9 @@ class StripeService {
    * Redirigir a Stripe Checkout
    */
   redirectToCheckout(checkoutUrl: string): void {
-    console.log('🔄 Redirigiendo a Stripe Checkout:', checkoutUrl);
-    window.location.href = checkoutUrl;
+    if (typeof window !== 'undefined') {
+      window.location.href = checkoutUrl;
+    }
   }
 
   /**

@@ -2,6 +2,7 @@ const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/clien
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
+const FileType = require('file-type');
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -40,68 +41,58 @@ function detectIphoneMimeType(originalName, mimetype) {
 }
 
 // Sube un archivo a S3 y retorna el key
-async function uploadFileToS3(buffer, originalName, mimetype) {
+const uploadFileToS3 = async (buffer, originalname, mimetype) => {
   try {
-    console.log('📤 Iniciando subida a S3:', {
-      originalName,
-      originalMimeType: mimetype,
-      bufferSize: buffer.length,
-      bufferSizeMB: (buffer.length / (1024 * 1024)).toFixed(2)
-    });
-    
-    // Detectar MIME type real para archivos de iPhone
-    const realMimeType = detectIphoneMimeType(originalName, mimetype);
-    console.log('📋 MIME type detectado:', realMimeType);
-    
-    const ext = path.extname(originalName);
-    const key = `${uuidv4()}${ext}`;
-    
-    const command = new PutObjectCommand({
-      Bucket: BUCKET,
+    // Generar key único
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 15);
+    const extension = path.extname(originalname);
+    const key = `uploads/${timestamp}-${randomString}${extension}`;
+
+    // Detectar MIME type real
+    const realMimeType = await FileType.fromBuffer(buffer) || mimetype;
+
+    // Verificar tipo de archivo permitido
+    const allowedTypes = [
+      'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif',
+      'video/mp4', 'video/quicktime', 'video/x-msvideo'
+    ];
+
+    if (!allowedTypes.includes(realMimeType)) {
+      throw new Error(`Tipo de archivo no permitido: ${realMimeType}`);
+    }
+
+    // Configurar parámetros de subida
+    const uploadParams = {
+      Bucket: process.env.AWS_S3_BUCKET,
       Key: key,
       Body: buffer,
       ContentType: realMimeType,
-      // Metadatos adicionales para archivos de iPhone
-      Metadata: {
-        'original-name': originalName,
-        'uploaded-from': 'iphone',
-        'file-size': buffer.length.toString()
-      }
-    });
-    
-    console.log('🚀 Enviando comando a S3...');
-    await s3.send(command);
-    console.log('✅ Archivo subido exitosamente:', key);
-    
-    return key;
+      ACL: 'public-read'
+    };
+
+    // Subir a S3
+    const result = await s3.upload(uploadParams).promise();
+    return result.Key;
   } catch (error) {
-    console.error('❌ Error subiendo archivo a S3:', {
-      originalName,
-      mimetype,
-      error: error.message,
-      code: error.Code,
-      statusCode: error.$metadata?.httpStatusCode
-    });
+    console.error('Error uploading file to S3:', error);
     throw error;
   }
-}
+};
 
 // Genera una URL firmada temporal para acceder al archivo
 async function getS3SignedUrl(key, expiresIn = 3600) {
   try {
-    console.log('🔗 Generando URL firmada para:', key);
-    
-    const command = new GetObjectCommand({
-      Bucket: BUCKET,
+    const params = {
+      Bucket: process.env.AWS_S3_BUCKET,
       Key: key,
-    });
-    
-    const url = await getSignedUrl(s3, command, { expiresIn });
-    console.log('✅ URL firmada generada:', url.substring(0, 50) + '...');
-    
+      Expires: 3600 // 1 hora
+    };
+
+    const url = await s3.getSignedUrlPromise('getObject', params);
     return url;
   } catch (error) {
-    console.error('❌ Error generando URL firmada:', error);
+    console.error('Error generating signed URL:', error);
     throw error;
   }
 }

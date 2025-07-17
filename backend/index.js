@@ -67,12 +67,6 @@ app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 // Middleware adicional para manejar preflight OPTIONS en móviles
 app.use((req, res, next) => {
   if (req.method === 'OPTIONS') {
-    console.log('🔄 OPTIONS preflight request:', {
-      url: req.url,
-      origin: req.headers.origin,
-      'user-agent': req.headers['user-agent']
-    });
-    
     res.header('Access-Control-Allow-Origin', req.headers.origin);
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, User-Agent, Cache-Control, Accept-Language, Accept-Encoding, Content-Length');
@@ -84,43 +78,26 @@ app.use((req, res, next) => {
   }
 });
 
-// Middleware para debugging de requests desde móviles y Stripe
+// Middleware para manejar CORS
 app.use((req, res, next) => {
-  // Log específico para requests POST desde móviles
-  if (req.method === 'POST' && req.path.includes('/api/posts')) {
-    console.log('📱 POST Request a /api/posts:', {
-      method: req.method,
-      url: req.url,
-      headers: {
-        'user-agent': req.headers['user-agent'],
-        'content-type': req.headers['content-type'],
-        'content-length': req.headers['content-length'],
-        'origin': req.headers.origin,
-        'authorization': req.headers.authorization ? 'Present' : 'Missing'
-      },
-      body: req.body ? 'Body present' : 'No body',
-      files: req.files ? `${req.files.length} files` : 'No files yet',
-      query: req.query
-    });
-  }
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   
-  // Log específico para requests a Stripe
-  if (req.method === 'POST' && req.path.includes('/api/stripe')) {
-    console.log('💳 POST Request a Stripe:', {
-      method: req.method,
-      url: req.url,
-      headers: {
-        'user-agent': req.headers['user-agent'],
-        'content-type': req.headers['content-type'],
-        'authorization': req.headers.authorization ? 'Present' : 'Missing'
-      },
-      body: req.body,
-      stripeConfigured: !!require('./config/stripe')
-    });
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
   }
-  
-  next();
 });
+
+// Middleware para logging de requests (solo en desarrollo)
+if (process.env.NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    // Solo log básico sin información sensible
+    next();
+  });
+}
 
 // ✅ Importar rutas
 const userRoutes = require('./routes/userRoutes');

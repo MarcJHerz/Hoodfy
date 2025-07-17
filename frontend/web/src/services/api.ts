@@ -44,24 +44,12 @@ api.interceptors.request.use((config) => {
 // Interceptor para manejar errores
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
+  (error) => {
     if (error.response?.status === 401) {
-      // Token expirado o inválido
-      console.log('Token expirado, limpiando localStorage y cookies');
-      
-      // Limpiar todas las fuentes de token
+      // Token expirado, limpiar datos de autenticación
       localStorage.removeItem('token');
-      localStorage.removeItem('auth-storage');
-      localStorage.removeItem('communities-storage');
-      localStorage.removeItem('posts-storage');
-      
-      // Limpiar cookies
-      document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      
-      // Solo redirigir si no estamos ya en login
-      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
-      }
+      document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
@@ -72,7 +60,7 @@ export const auth = {
   register: (data: any) => api.post('/api/auth/register', data),
   login: async (token: string) => {
     if (loginRequestInProgress) {
-      throw new Error('Ya hay una solicitud de login en progreso');
+      throw new Error('There is already a login request in progress');
     }
     loginRequestInProgress = true;
     try {
@@ -146,52 +134,6 @@ export const posts = {
     const headers: any = {};
     if (token) {
       headers.Authorization = `Bearer ${token}`;
-    }
-    
-    // Configuración específica para iOS Safari
-    if (isIOS && isSafari) {
-      console.log('📱 iOS Safari - Headers configurados:', headers);
-      console.log('📱 iOS Safari - FormData entries:', Array.from(formData.entries()).length);
-      
-      // Forzar que NO se establezca Content-Type para que el navegador lo configure automáticamente
-      headers['Content-Type'] = undefined;
-      console.log('📱 iOS Safari - Content-Type removido para FormData automático');
-    }
-    
-    // Agregar interceptor específico para iOS Safari debugging
-    if (isIOS && isSafari) {
-      instance.interceptors.request.use(
-        (config) => {
-          console.log('📱 iOS Safari - Request config:', {
-            url: config.url,
-            method: config.method,
-            headers: config.headers,
-            timeout: config.timeout,
-            contentType: config.headers['Content-Type']
-          });
-          return config;
-        },
-        (error) => {
-          console.log('📱 iOS Safari - Request error:', error);
-          return Promise.reject(error);
-        }
-      );
-      
-      instance.interceptors.response.use(
-        (response) => {
-          console.log('📱 iOS Safari - Response success:', response.status);
-          return response;
-        },
-        (error) => {
-          console.log('📱 iOS Safari - Response error:', {
-            message: error.message,
-            code: error.code,
-            status: error.response?.status,
-            statusText: error.response?.statusText
-          });
-          return Promise.reject(error);
-        }
-      );
     }
     
     return instance.post('/api/posts', formData, { headers });

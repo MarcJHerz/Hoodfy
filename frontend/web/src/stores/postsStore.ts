@@ -80,8 +80,8 @@ export const usePostsStore = create<PostsState>()(
           set({ feedPosts: response.data || [], isLoadingFeed: false });
         } catch (error: any) {
           set({ 
-            error: error.response?.data?.message || 'Error al cargar el feed', 
-            isLoadingFeed: false 
+            isLoadingFeed: false,
+            error: error.response?.data?.message || 'Error loading feed',
           });
         }
       },
@@ -93,16 +93,16 @@ export const usePostsStore = create<PostsState>()(
           const response = await posts.getCommunityPosts(communityId, sort);
           const currentPosts = get().communityPosts;
           set({ 
-            communityPosts: { 
-              ...currentPosts, 
-              [communityId]: response.data || [] 
+            communityPosts: {
+              ...currentPosts,
+              [communityId]: response.data || []
             },
             isLoadingCommunity: false 
           });
         } catch (error: any) {
           set({ 
-            error: error.response?.data?.message || 'Error al cargar posts de la comunidad', 
-            isLoadingCommunity: false 
+            isLoadingCommunity: false,
+            error: error.response?.data?.message || 'Error loading community posts',
           });
         }
       },
@@ -114,16 +114,16 @@ export const usePostsStore = create<PostsState>()(
           const response = await posts.getUserPosts(userId);
           const currentPosts = get().userPosts;
           set({ 
-            userPosts: { 
-              ...currentPosts, 
-              [userId]: response.data?.posts || [] 
+            userPosts: {
+              ...currentPosts,
+              [userId]: response.data?.posts || []
             },
             isLoadingUser: false 
           });
         } catch (error: any) {
           set({ 
-            error: error.response?.data?.message || 'Error al cargar posts del usuario', 
-            isLoadingUser: false 
+            isLoadingUser: false,
+            error: error.response?.data?.message || 'Error loading user posts',
           });
         }
       },

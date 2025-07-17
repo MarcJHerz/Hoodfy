@@ -11,16 +11,11 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com'
  */
 export async function getSignedS3Url(key: string): Promise<string> {
   try {
-    console.log('🔗 getSignedS3Url called with key:', key);
-    
     // Obtener el token de autenticación
     const token = localStorage.getItem('token') || 
                   document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
 
-    console.log('🔑 Token found:', !!token);
-    
     const url = `${API_BASE_URL}/api/upload/signed-url/${encodeURIComponent(key)}`;
-    console.log('🌐 Making request to:', url);
 
     const response = await fetch(url, {
       method: 'GET',
@@ -30,9 +25,6 @@ export async function getSignedS3Url(key: string): Promise<string> {
       },
     });
 
-    console.log('📡 Response status:', response.status);
-    console.log('📡 Response ok:', response.ok);
-
     if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ Response error:', errorText);
@@ -40,7 +32,6 @@ export async function getSignedS3Url(key: string): Promise<string> {
     }
 
     const data = await response.json();
-    console.log('✅ Response data:', data);
     return data.url;
   } catch (error) {
     console.error('❌ Error getting signed S3 URL:', error);
@@ -56,10 +47,7 @@ export async function getSignedS3Url(key: string): Promise<string> {
  */
 export async function getLogoSignedS3Url(key: string): Promise<string> {
   try {
-    console.log('🔗 getLogoSignedS3Url called with key:', key);
-    
     const url = `${API_BASE_URL}/api/upload/logo/${encodeURIComponent(key)}`;
-    console.log('🌐 Making request to:', url);
 
     const response = await fetch(url, {
       method: 'GET',
@@ -68,9 +56,6 @@ export async function getLogoSignedS3Url(key: string): Promise<string> {
       },
     });
 
-    console.log('📡 Logo Response status:', response.status);
-    console.log('📡 Logo Response ok:', response.ok);
-
     if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ Logo Response error:', errorText);
@@ -78,7 +63,6 @@ export async function getLogoSignedS3Url(key: string): Promise<string> {
     }
 
     const data = await response.json();
-    console.log('✅ Logo Response data:', data);
     return data.url;
   } catch (error) {
     console.error('❌ Error getting signed S3 URL for logo:', error);

@@ -65,7 +65,7 @@ export const useUserStore = create<UserState>()(
           });
         } catch (error: any) {
           set({ 
-            error: error.response?.data?.message || 'Error al cargar el perfil', 
+            error: error.response?.data?.message || 'Error loading profile', 
             isLoadingProfile: false 
           });
         }
@@ -86,7 +86,7 @@ export const useUserStore = create<UserState>()(
           });
         } catch (error: any) {
           set({ 
-            error: error.response?.data?.message || 'Error al cargar el perfil del usuario', 
+            error: error.response?.data?.message || 'Error loading user profile', 
             isLoadingUserProfiles: false 
           });
         }
@@ -110,7 +110,7 @@ export const useUserStore = create<UserState>()(
           });
         } catch (error: any) {
           set({ 
-            error: error.response?.data?.message || 'Error al actualizar el perfil', 
+            error: error.response?.data?.message || 'Error updating profile', 
             isLoading: false 
           });
         }
@@ -134,7 +134,7 @@ export const useUserStore = create<UserState>()(
           });
         } catch (error: any) {
           set({ 
-            error: error.response?.data?.message || 'Error al actualizar la foto de perfil', 
+            error: error.response?.data?.message || 'Error updating profile picture', 
             isLoading: false 
           });
         }
@@ -159,7 +159,7 @@ export const useUserStore = create<UserState>()(
             });
           }
         } catch (error: any) {
-          set({ error: error.response?.data?.message || 'Error al seguir al usuario' });
+          set({ error: error.response?.data?.message || 'Error following user' });
         }
       },
 
@@ -182,7 +182,7 @@ export const useUserStore = create<UserState>()(
             });
           }
         } catch (error: any) {
-          set({ error: error.response?.data?.message || 'Error al dejar de seguir al usuario' });
+          set({ error: error.response?.data?.message || 'Error unfollowing user' });
         }
       },
 
@@ -192,7 +192,7 @@ export const useUserStore = create<UserState>()(
           const response = await users.getFollowers(userId);
           return response.data || [];
         } catch (error: any) {
-          set({ error: error.response?.data?.message || 'Error al cargar los seguidores' });
+          set({ error: error.response?.data?.message || 'Error loading followers' });
           return [];
         }
       },
@@ -203,7 +203,7 @@ export const useUserStore = create<UserState>()(
           const response = await users.getFollowing(userId);
           return response.data || [];
         } catch (error: any) {
-          set({ error: error.response?.data?.message || 'Error al cargar los seguidos' });
+          set({ error: error.response?.data?.message || 'Error loading following' });
           return [];
         }
       },
@@ -214,7 +214,7 @@ export const useUserStore = create<UserState>()(
           const response = await users.getAllies(userId);
           return response.data || [];
         } catch (error: any) {
-          set({ error: error.response?.data?.message || 'Error al cargar los aliados' });
+          set({ error: error.response?.data?.message || 'Error loading allies' });
           return [];
         }
       },
