@@ -181,7 +181,7 @@ export const communities = {
 // Users endpoints
 export const users = {
   getProfile: () => api.get('/api/users/profile'),
-  getProfileById: (id: string) => api.get(`/api/users/${id}`),
+  getProfileById: (id: string) => api.get(`/api/users/profile/${id}`),
   updateProfile: (data: any) => api.put('/api/users/profile', data),
   uploadProfilePicture: (data: any) => api.post('/api/users/profile/picture', data),
   search: async (query: string) => {
@@ -213,7 +213,9 @@ export const users = {
   unfollow: (id: string) => api.post(`/api/users/${id}/unfollow`),
   getCreatedCommunities: (id: string) => api.get(`/api/communities/created-by/${id}`),
   getJoinedCommunities: (id: string) => api.get(`/api/communities/joined-by/${id}`),
-  getAllies: (id: string) => api.get(`/api/users/${id}/allies`),
+  getAllies: () => api.get('/api/allies/my-allies'),
+  getAllyOfUser: (userId: string) => api.get(`/api/allies/of/${userId}`),
+  checkAlly: (targetUserId: string) => api.get(`/api/allies/check/${targetUserId}`),
   getJoinedCommunitiesWithMembers: (id: string) => api.get(`/api/communities/joined-by/${id}`),
 };
 

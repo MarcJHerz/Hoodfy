@@ -91,13 +91,12 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center">
+          <div className="text-left">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
               Be part of a private community<br />
               Make real connections
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-            A new kind of private platform where shared passions create powerful bonds.<br />
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl">
             Join meaningful communities. Speak freely. Grow together
             </p>
             

@@ -132,38 +132,25 @@ export default function ProfilePage() {
         }
 
         // Si no hay ID, usar el usuario autenticado
-        const userId = id || authUser._id;
+        const userId = (id as string) || authUser._id;
         
+        // Usar los servicios de API en lugar de fetch directo
         const [userRes, postsRes, createdCommunitiesRes, joinedCommunitiesRes, alliesRes] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/user/${userId}`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/communities/created-by/${userId}`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/communities/joined-by/${userId}`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/allies/my-allies`)
+          users.getProfileById(userId),
+          posts.getUserPosts(userId),
+          communities.getCreatedCommunities(userId),
+          users.getJoinedCommunities(userId),
+          users.getAllies()
         ]);
 
-        if (!userRes.ok) throw new Error('Error loading profile');
-        if (!postsRes.ok) throw new Error('Error loading posts');
-        if (!createdCommunitiesRes.ok) throw new Error('Error loading created communities');
-        if (!joinedCommunitiesRes.ok) throw new Error('Error loading joined communities');
-        if (!alliesRes.ok) throw new Error('Error loading allies');
-
-        const [userData, postsData, createdCommunitiesData, joinedCommunitiesData, alliesData] = await Promise.all([
-          userRes.json(),
-          postsRes.json(),
-          createdCommunitiesRes.json(),
-          joinedCommunitiesRes.json(),
-          alliesRes.json()
-        ]);
-
-        setUser(userData);
-        setUserPosts(postsData);
-        setCreatedCommunities(createdCommunitiesData);
-        setJoinedCommunities(joinedCommunitiesData);
-        setAllies(alliesData.allies || []);
+        setUser(userRes.data);
+        setUserPosts(postsRes.data.posts || postsRes.data);
+        setCreatedCommunities(createdCommunitiesRes.data);
+        setJoinedCommunities(joinedCommunitiesRes.data);
+        setAllies(alliesRes.data.allies || []);
       } catch (error: any) {
-        console.error('Error:', error);
-        setError(error.message);
+        console.error('❌ Error in fetchData:', error);
+        setError(error.response?.data?.error || error.message || 'Error loading profile');
       } finally {
         setLoading(false);
       }

@@ -115,8 +115,6 @@ const PostMediaVideo = ({ src, className }: { src?: string; className?: string }
   );
 };
 
-console.log('Cargando archivo: frontend/web/src/app/(dashboard)/profile/[id]/page.tsx');
-
 export default function ProfilePage() {
   const { id } = useParams();
   const router = useRouter();
@@ -212,7 +210,7 @@ export default function ProfilePage() {
         const userId = Array.isArray(id) ? id[0] : id;
 
         // Obtener datos del usuario
-        const userResponse = await api.get(`/api/users/profile/${userId}`);
+        const userResponse = await users.getProfileById(userId);
         if (!userResponse.data) {
           throw new Error('No se pudo obtener la información del usuario');
         }
@@ -225,7 +223,7 @@ export default function ProfilePage() {
         // Si no es el propio perfil, verificar si son aliados
         if (!isOwn && authUser) {
           try {
-            const allyResponse = await api.get(`/api/allies/check/${userId}`);
+            const allyResponse = await users.checkAlly(userId);
             setIsAlly(allyResponse.data.isAlly);
           } catch (error) {
             console.error('Error al verificar alianza:', error);
@@ -259,10 +257,10 @@ export default function ProfilePage() {
         // Obtener aliados
         let alliesData = [];
         if (authUser && userId === authUser._id) {
-          const response = await api.get('/api/allies/my-allies');
+          const response = await users.getAllies();
           alliesData = response.data?.allies || [];
         } else {
-          const response = await api.get(`/api/allies/of/${userId}`);
+          const response = await users.getAllyOfUser(userId);
           alliesData = response.data?.allies || [];
         }
         setAllies(alliesData);

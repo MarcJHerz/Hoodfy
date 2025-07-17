@@ -29,7 +29,7 @@ interface UserState {
   getFollowing: (userId: string) => Promise<any[]>;
   
   // Funciones para aliados
-  getAllies: (userId: string) => Promise<any[]>;
+  getAllies: () => Promise<any[]>;
   
   // Funciones de utilidad
   setCurrentUser: (user: User | null) => void;
@@ -209,9 +209,9 @@ export const useUserStore = create<UserState>()(
       },
 
       // Obtener aliados
-      getAllies: async (userId: string) => {
+      getAllies: async () => {
         try {
-          const response = await users.getAllies(userId);
+          const response = await users.getAllies();
           return response.data || [];
         } catch (error: any) {
           set({ error: error.response?.data?.message || 'Error loading allies' });
