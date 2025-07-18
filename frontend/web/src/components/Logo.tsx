@@ -43,7 +43,7 @@ const Logo: React.FC<LogoProps> = ({
           // Logo personalizado
           <Image
             src={logoUrl}
-            alt="Qahood Logo"
+            alt="Hoodfy Logo"
             width={64}
             height={64}
             className="w-full h-full object-contain rounded-full"
@@ -60,7 +60,7 @@ const Logo: React.FC<LogoProps> = ({
       
       {showText && (
         <span className={`font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent ${textSizes[size]}`}>
-          Qahood
+          Hoodfy
         </span>
       )}
     </div>

@@ -271,7 +271,7 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
         <button
             className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all duration-200 hover-lift touch-manipulation z-10"
           onClick={onClose}
-            aria-label="Cerrar búsqueda"
+            aria-label="Close search"
         >
             <XMarkIcon className="h-5 w-5" />
         </button>
@@ -285,7 +285,7 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
             ref={inputRef}
             type="text"
               className="w-full pl-12 pr-4 py-4 text-lg border-0 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-0 min-w-0"
-              placeholder="Buscar personas, comunidades o temas..."
+              placeholder="Search for people, communities or topics..."
             value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -319,7 +319,7 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <ClockIcon className="h-5 w-5 text-gray-400" />
-                    <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">Búsquedas recientes</h3>
+                    <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">Recent searches</h3>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {recentSearches.map((term, index) => (
@@ -340,13 +340,13 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
             <div>
                   <div className="flex items-center gap-2 mb-4">
                     <ArrowTrendingUpIcon className="h-5 w-5 text-primary-500" />
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Recomendaciones para ti</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Recommendations for you</h3>
                   </div>
                   
                   <div className="space-y-2">
                     <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
                       <FireIcon className="h-4 w-4 text-orange-500" />
-                      Comunidades populares
+                      Popular communities
                     </h4>
                     <div className="grid gap-2">
                       {recommendations.slice(0, 8).map((community) => (
@@ -382,7 +382,7 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
                               </p>
                             )}
                             <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 block truncate">
-                              {community.members?.length || 0} miembros
+                              {community.members?.length || 0} members
                             </span>
                           </div>
                           <ChevronRightIcon className="w-4 h-4 text-gray-400 group-hover:text-primary-500 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0 mt-1" />
@@ -397,23 +397,23 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <SparklesIcon className="h-5 w-5 text-purple-500" />
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Explora</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Explore</h3>
                 </div>
                 
                 <div className="space-y-3">
                   <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-100 dark:border-blue-800/50">
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">🚀 Descubre nuevas comunidades</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Únete a grupos con intereses similares y conecta con personas increíbles</p>
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">🚀 Discover new communities</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Join groups with similar interests and connect with amazing people</p>
                   </div>
                   
                   <div className="p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-100 dark:border-green-800/50">
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">👥 Conecta con personas</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Encuentra profesionales, amigos y mentores en tu área de interés</p>
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">👥 Connect with people</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Find professionals, friends and mentors in your area of interest</p>
                   </div>
                   
                   <div className="p-4 rounded-xl bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border border-orange-100 dark:border-orange-800/50">
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">🎯 Búsqueda inteligente</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Usa palabras clave específicas para encontrar exactamente lo que buscas</p>
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">🎯 Smart search</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Use specific keywords to find exactly what you're looking for</p>
                   </div>
                 </div>
               </div>
@@ -427,7 +427,7 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
                 <div className="space-y-4">
                   <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-                    Buscando...
+                    Searching...
                   </div>
                   {[...Array(4)].map((_, i) => (
                     <div key={i} className="flex items-center gap-4 p-4 rounded-xl animate-pulse">
@@ -447,7 +447,7 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                         <UserIcon className="h-5 w-5 text-primary-500" />
-                        Personas ({users_results.length})
+                        People ({users_results.length})
                       </h3>
                       <div className="grid gap-2">
                         {users_results.map((user) => (
@@ -466,7 +466,7 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                         <UsersIcon className="h-5 w-5 text-primary-500" />
-                        Comunidades ({communities_results.length})
+                        Communities ({communities_results.length})
                       </h3>
                       <div className="grid gap-2">
                         {communities_results.map((community) => (
@@ -491,7 +491,7 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
                                 <p className="text-sm text-gray-600 dark:text-gray-400 truncate mt-1">{community.description}</p>
                               )}
                               <span className="text-xs text-gray-500 dark:text-gray-400">
-                                {community.members?.length || 0} miembros
+                                {community.members?.length || 0} members
                               </span>
                             </div>
                             <ChevronRightIcon className="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0" />
@@ -505,10 +505,10 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
                 <div className="text-center py-12">
                   <MagnifyingGlassIcon className="h-16 w-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                    No se encontraron resultados
+                    No results found
                   </h3>
                   <p className="text-gray-500 dark:text-gray-400">
-                    Intenta con otros términos de búsqueda
+                    Try with other search terms
                   </p>
                 </div>
               )}
@@ -519,8 +519,8 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
         {/* Footer con atajos */}
         <div className="px-4 md:px-6 py-3 bg-gray-50/50 dark:bg-gray-800/50 border-t border-gray-200/50 dark:border-gray-700/50 flex-shrink-0">
           <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-            <span>Presiona <kbd className="px-1.5 py-0.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded">Esc</kbd> para cerrar</span>
-            <span className="hidden sm:block"><kbd className="px-1.5 py-0.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded">⌘K</kbd> para buscar</span>
+            <span>Press <kbd className="px-1.5 py-0.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded">Esc</kbd> to close</span>
+            <span className="hidden sm:block"><kbd className="px-1.5 py-0.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded">⌘K</kbd> to search</span>
           </div>
         </div>
 
@@ -534,10 +534,10 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
               </div>
               <div className="text-center">
                 <p className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">
-                  Cargando...
+                  Loading...
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Preparando el contenido
+                  Preparing the content
                 </p>
               </div>
             </div>

@@ -18,28 +18,12 @@ const NotificationInitializer = dynamic(() => import("@/components/NotificationI
 });
 
 export const metadata: Metadata = {
-  title: "Qahood - Tu red social privada",
+  title: "Hoodfy - Tu red social privada",
   description: "La red social privada para tu comunidad",
   icons: {
-    icon: [
-      {
-        url: process.env.NEXT_PUBLIC_LOGO_URL || '/images/defaults/default-avatar.png',
-        sizes: '32x32',
-        type: 'image/png',
-      },
-      {
-        url: process.env.NEXT_PUBLIC_LOGO_URL || '/images/defaults/default-avatar.png',
-        sizes: '16x16',
-        type: 'image/png',
-      },
-    ],
-    apple: [
-      {
-        url: process.env.NEXT_PUBLIC_LOGO_URL || '/images/defaults/default-avatar.png',
-        sizes: '180x180',
-        type: 'image/png',
-      },
-    ],
+    icon: process.env.NEXT_PUBLIC_LOGO_URL || '/favicon.svg',
+    shortcut: process.env.NEXT_PUBLIC_LOGO_URL || '/favicon.svg',
+    apple: process.env.NEXT_PUBLIC_LOGO_URL || '/favicon.svg',
   },
 };
 

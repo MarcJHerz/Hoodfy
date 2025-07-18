@@ -181,13 +181,13 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim() && media.length === 0) {
-      toast.error('Debes agregar contenido o al menos un archivo');
+      toast.error('You must add content or at least one file');
       return;
     }
 
     setIsLoading(true);
     try {
-      console.log('📱 Iniciando creación de post desde dispositivo:', {
+      console.log('📱 Starting post creation from device:', {
         userAgent: navigator.userAgent,
         isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
         contentLength: content.length,
@@ -205,18 +205,17 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
       }
       
       media.forEach((file, index) => {
-        console.log(`📎 Agregando archivo ${index + 1}:`, { name: file.name, size: file.size, type: file.type });
+        console.log(`📎 Adding file ${index + 1}:`, { name: file.name, size: file.size, type: file.type });
         formData.append('media', file);
       });
 
-      console.log('🚀 Enviando FormData a createPost...');
       
       // Debugging específico para iOS
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
       
       if (isIOS && isSafari) {
-        console.log('📱 iOS Safari detectado - Debugging especial activado');
+        console.log('📱 iOS Safari detected - Special debugging activated');
         console.log('📊 FormData details:', {
           entries: Array.from(formData.entries()).map(([key, value]) => ({
             key,
@@ -228,7 +227,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
       }
       
       const response = await posts.createPost(formData);
-      console.log('✅ Post creado exitosamente:', response.data);
+      console.log('✅ Post created successfully:', response.data);
       
       // Limpiar formulario
       setContent('');
@@ -237,7 +236,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
       
       onPostCreated();
       onClose();
-      toast.success('Post creado exitosamente');
+      toast.success('Post created successfully');
     } catch (error: any) {
       console.error('❌ Error detallado al crear el post:', {
         message: error.message,
@@ -254,7 +253,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
         stack: error.stack
       });
       
-      let errorMessage = 'Error al crear el post';
+      let errorMessage = 'Error creating the post';
       
       if (error.code === 'ERR_NETWORK') {
         // Debugging específico para iOS Safari
@@ -262,7 +261,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
         const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
         
         if (isIOS && isSafari) {
-          console.log('🚨 iOS Safari ERR_NETWORK detectado');
+          console.log('🚨 iOS Safari ERR_NETWORK detected');
           console.log('🔍 Error details:', {
             message: error.message,
             code: error.code,
@@ -273,11 +272,11 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
           });
         }
         
-        errorMessage = 'Error de red. Verifica tu conexión a internet.';
+        errorMessage = 'Network error. Check your internet connection.';
       } else if (error.response?.status === 413) {
-        errorMessage = 'El archivo es demasiado grande. Intenta con archivos más pequeños.';
+        errorMessage = 'The file is too large. Try with smaller files.';
       } else if (error.response?.status === 401) {
-        errorMessage = 'Sesión expirada. Por favor, inicia sesión nuevamente.';
+        errorMessage = 'Session expired. Please log in again.';
       } else if (error.response?.data?.error) {
         errorMessage = error.response.data.error;
       }
@@ -311,8 +310,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
               </svg>
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">Crear publicación</h2>
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">Comparte algo increíble con la comunidad</p>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">Create post</h2>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">Share something amazing with the community</p>
             </div>
           </div>
           <button
@@ -330,7 +329,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="¿Qué quieres compartir?"
+            placeholder="What do you want to share?"
             className="w-full p-4 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent transition-all"
             rows={4}
             disabled={isLoading}
@@ -339,7 +338,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
           {/* Vista previa de archivos */}
           {mediaPreviews.length > 0 && (
             <div className="mt-6">
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Archivos adjuntos</h4>
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Attached files</h4>
               <div className="grid grid-cols-2 gap-4">
                 {mediaPreviews.map((preview, index) => (
                   <div key={index} className="relative group">
@@ -368,7 +367,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                       onClick={() => removeMedia(index)}
                       className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 hover-lift"
                       disabled={isLoading}
-                      title="Eliminar archivo"
+                      title="Delete file"
                     >
                       <XCircleIcon className="h-4 w-4" />
                     </button>
@@ -388,7 +387,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 disabled={isLoading}
               >
                 <PhotoIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="hidden sm:inline">Imagen</span>
+                <span className="hidden sm:inline">Image</span>
               </button>
               <button
                 type="button"
@@ -423,10 +422,10 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
               {isLoading ? (
                 <div className="flex items-center justify-center space-x-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  <span>Publicando...</span>
+                  <span>Publishing...</span>
                 </div>
               ) : (
-                'Publicar'
+                'Publish'
               )}
             </button>
           </div>

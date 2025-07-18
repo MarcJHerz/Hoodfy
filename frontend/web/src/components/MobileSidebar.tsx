@@ -89,20 +89,20 @@ export default function MobileSidebar() {
       description: 'Lo más popular'
     },
     {
-      name: 'Mis Comunidades',
+      name: 'My communities',
       href: '/communities',
       icon: UserGroupIcon,
       solidIcon: UserGroupSolid,
       color: 'from-green-500 to-emerald-500',
-      description: 'Donde participo'
+      description: 'Where I participate'
     },
     {
-      name: 'Descubrir',
+      name: 'Discover',
       href: '/communities/discover',
       icon: SparklesIcon,
       solidIcon: SparklesSolid,
       color: 'from-purple-500 to-pink-500',
-      description: 'Nuevas comunidades'
+      description: 'New communities'
     }
   ];
 
@@ -128,15 +128,21 @@ export default function MobileSidebar() {
         setSuggestedCommunities([
           {
             _id: 'suggested-1',
-            name: 'Tecnología',
-            description: 'Últimas tendencias tech',
+            name: 'Nomads Dating Bali',
+            description: 'Meeting every weekend in Bali Indonesia',
             isNew: true
           },
           {
             _id: 'suggested-2',
-            name: 'Emprendimiento',
-            description: 'Ideas de negocio',
+            name: 'F1 Miami',
+            description: 'Fanbase F1 Miami',
             isNew: false
+          },
+          {
+            _id: 'suggested-3',
+            name: 'Stoics Daily',
+            description: 'Stoicism for everyone',
+            isNew: true
           }
         ]);
       } catch (error) {
@@ -251,7 +257,7 @@ export default function MobileSidebar() {
               {/* Dashboard Personal */}
               <div>
                 <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
-                  📊 Mi Dashboard
+                  📊 Dashboard
                 </h2>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
@@ -270,7 +276,7 @@ export default function MobileSidebar() {
                     <div className="text-lg font-semibold text-green-600 dark:text-green-400">
                       {formatNumber(userStats.totalCommunities)}
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Comunidades</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Communities</div>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
                     <div className="flex items-center justify-center mb-1">
@@ -279,7 +285,7 @@ export default function MobileSidebar() {
                     <div className="text-lg font-semibold text-purple-600 dark:text-purple-400">
                       {formatNumber(userStats.totalViews)}
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Vistas</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Views</div>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
                     <div className="flex items-center justify-center mb-1">
@@ -296,7 +302,7 @@ export default function MobileSidebar() {
               {/* Navegación rápida */}
               <div>
                 <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
-                  🚀 Navegación
+                  🚀 Navigation
                 </h2>
                 <div className="space-y-2">
                   {quickActions.map((action) => {
@@ -334,14 +340,14 @@ export default function MobileSidebar() {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                    🏘️ Mis Comunidades
+                    🏘️ My Communities
                   </h2>
                   <Link
                     href="/communities"
                     onClick={handleLinkClick}
                     className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
                   >
-                    Ver todas
+                    See all
                   </Link>
                 </div>
                 
@@ -378,7 +384,7 @@ export default function MobileSidebar() {
                             {community.name}
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                            {community.members?.length || 0} miembros
+                            {community.members?.length || 0} members
                           </div>
                         </div>
                         <ChevronRightIcon className="h-4 w-4 text-gray-400" />
@@ -389,14 +395,14 @@ export default function MobileSidebar() {
                       <div className="text-center py-4">
                         <UserGroupIcon className="mx-auto h-6 w-6 text-gray-400 mb-2" />
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                          No tienes comunidades aún
+                          You are not a member of any community
                         </p>
                         <Link
                           href="/communities/discover"
                           onClick={handleLinkClick}
                           className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
                         >
-                          Descubrir comunidades
+                          Discover communities
                         </Link>
                       </div>
                     )}
@@ -408,7 +414,7 @@ export default function MobileSidebar() {
               {suggestedCommunities.length > 0 && (
                 <div>
                   <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
-                    ⭐ Sugeridas
+                    ⭐ Suggested Communities
                   </h2>
                   <div className="space-y-2">
                     {suggestedCommunities.map((community, index) => (
@@ -428,9 +434,9 @@ export default function MobileSidebar() {
                             {community.name}
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                            {community.members?.length || 0} miembros
+                            {community.members?.length || 0} members
                             {community.isNew && (
-                              <span className="ml-1 text-green-600 dark:text-green-400">• Nuevo</span>
+                              <span className="ml-1 text-green-600 dark:text-green-400">• New</span>
                             )}
                           </div>
                         </div>
@@ -454,7 +460,7 @@ export default function MobileSidebar() {
                   className="flex flex-col items-center gap-1 p-3 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
                 >
                   <PlusIcon className="h-5 w-5" />
-                  <span className="text-xs font-medium">Crear Post</span>
+                  <span className="text-xs font-medium">Create Post</span>
                 </Link>
                 <Link
                   href="/communities/create"
@@ -462,7 +468,7 @@ export default function MobileSidebar() {
                   className="flex flex-col items-center gap-1 p-3 bg-gradient-to-r from-accent-500 to-accent-600 rounded-lg text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
                 >
                   <UserGroupIcon className="h-5 w-5" />
-                  <span className="text-xs font-medium">Nueva Comunidad</span>
+                  <span className="text-xs font-medium">New Community</span>
                 </Link>
               </div>
             </div>

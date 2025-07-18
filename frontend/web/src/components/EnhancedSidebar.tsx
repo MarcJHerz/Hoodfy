@@ -130,25 +130,25 @@ export default function EnhancedSidebar() {
         setSuggestedCommunities([
           {
             _id: 'suggested-1',
-            name: 'Tecnología',
-            description: 'Últimas tendencias tech',
+            name: 'Nomads Dating Bali',
+            description: 'Meeting every weekend in Bali Indonesia',
             isNew: true
           },
           {
             _id: 'suggested-2',
-            name: 'Emprendimiento',
-            description: 'Ideas de negocio',
+            name: 'F1 Miami',
+            description: 'Fanbase F1 Miami',
             isNew: false
           },
           {
             _id: 'suggested-3',
-            name: 'Diseño',
-            description: 'Creatividad visual',
+            name: 'Stoics Daily',
+            description: 'Stoicism for everyone',
             isNew: true
           }
         ]);
       } catch (error) {
-        console.error('Error cargando datos del sidebar:', error);
+        console.error('Error updating sidebar:', error);
       } finally {
         setLoading(false);
       }
@@ -201,7 +201,7 @@ export default function EnhancedSidebar() {
         <nav className="flex flex-1 flex-col gap-y-7">
           <div>
             <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">
-              🚀 Navegación Rápida
+              🚀 Quick Actions
             </h2>
             <ul className="space-y-2">
               {quickActions.map((action) => {
@@ -242,7 +242,7 @@ export default function EnhancedSidebar() {
           {/* Dashboard Personal */}
           <div>
             <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">
-              📊 Mi Dashboard
+              📊 Dashboard
             </h2>
             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 space-y-3">
               <div className="flex items-center justify-between">
@@ -252,13 +252,13 @@ export default function EnhancedSidebar() {
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Comunidades</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Communities</span>
                 <span className="font-semibold text-green-600 dark:text-green-400">
                   {formatNumber(userStats.totalCommunities)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Vistas</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Views</span>
                 <span className="font-semibold text-purple-600 dark:text-purple-400">
                   {formatNumber(userStats.totalViews)}
                 </span>
@@ -276,13 +276,13 @@ export default function EnhancedSidebar() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">
-                🏘️ Mis Comunidades
+                🏘️ Communities
               </h2>
               <Link
                 href="/communities"
                 className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
               >
-                Ver todas
+                See all
               </Link>
             </div>
             
@@ -330,14 +330,14 @@ export default function EnhancedSidebar() {
                   <div className="text-center py-4">
                     <UserGroupIcon className="mx-auto h-8 w-8 text-gray-400 mb-2" />
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                      Aún no perteneces a ninguna comunidad
+                      You are not a member of any community
                     </p>
                     <Link
                       href="/communities/discover"
                       className="inline-flex items-center gap-2 text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
                     >
                       <SparklesIcon className="h-4 w-4" />
-                      Descubrir comunidades
+                      Discover communities
                     </Link>
                   </div>
                 )}
@@ -349,7 +349,7 @@ export default function EnhancedSidebar() {
           {suggestedCommunities.length > 0 && (
             <div>
               <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">
-                ⭐ Sugeridas para ti
+                  ⭐ Suggested Communities
               </h2>
               <ul className="space-y-2">
                 {suggestedCommunities.map((community, index) => (
@@ -368,10 +368,10 @@ export default function EnhancedSidebar() {
                           {community.name}
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                          {community.members?.length || 0} miembros
+                          {community.members?.length || 0} members
                           {community.isNew && (
                             <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                              Nuevo
+                              New
                             </span>
                           )}
                         </div>
@@ -395,14 +395,14 @@ export default function EnhancedSidebar() {
                 className="flex-1 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl p-3 text-center text-sm font-medium text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
               >
                 <PlusIcon className="h-4 w-4 mx-auto mb-1" />
-                Crear Post
+                Create Post
               </Link>
               <Link
                 href="/communities/create"
                 className="flex-1 bg-gradient-to-r from-accent-500 to-accent-600 rounded-xl p-3 text-center text-sm font-medium text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
               >
                 <UserGroupIcon className="h-4 w-4 mx-auto mb-1" />
-                Nueva Comunidad
+                New Community
               </Link>
             </div>
           </div>
