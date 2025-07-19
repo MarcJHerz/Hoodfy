@@ -75,8 +75,7 @@ const uploadFileToS3 = async (buffer, originalname, mimetype) => {
       Bucket: process.env.S3_BUCKET_NAME,
       Key: key,
       Body: buffer,
-      ContentType: realMimeType,
-      ACL: 'public-read'
+      ContentType: realMimeType
     });
 
     // Subir a S3
