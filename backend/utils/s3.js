@@ -63,17 +63,17 @@ const uploadFileToS3 = async (buffer, originalname, mimetype) => {
     }
 
     // Configurar parámetros de subida
-    const uploadParams = {
-      Bucket: process.env.AWS_S3_BUCKET,
+    const command = new PutObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME,
       Key: key,
       Body: buffer,
       ContentType: realMimeType,
       ACL: 'public-read'
-    };
+    });
 
     // Subir a S3
-    const result = await s3.upload(uploadParams).promise();
-    return result.Key;
+    await s3.send(command);
+    return key;
   } catch (error) {
     console.error('Error uploading file to S3:', error);
     throw error;
@@ -83,13 +83,12 @@ const uploadFileToS3 = async (buffer, originalname, mimetype) => {
 // Genera una URL firmada temporal para acceder al archivo
 async function getS3SignedUrl(key, expiresIn = 3600) {
   try {
-    const params = {
-      Bucket: process.env.AWS_S3_BUCKET,
+    const command = new GetObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME,
       Key: key,
-      Expires: 3600 // 1 hora
-    };
+    });
 
-    const url = await s3.getSignedUrlPromise('getObject', params);
+    const url = await getSignedUrl(s3, command, { expiresIn });
     return url;
   } catch (error) {
     console.error('Error generating signed URL:', error);
