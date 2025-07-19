@@ -18,8 +18,8 @@ const NotificationInitializer = dynamic(() => import("@/components/NotificationI
 });
 
 export const metadata: Metadata = {
-  title: "Hoodfy - Tu red social privada",
-  description: "La red social privada para tu comunidad",
+  title: "Hoodfy - Connect with your passions",
+  description: "The private social network for communities",
   icons: {
     icon: process.env.NEXT_PUBLIC_FAVICON_URL || process.env.NEXT_PUBLIC_LOGO_URL || '/favicon.svg',
     shortcut: process.env.NEXT_PUBLIC_FAVICON_URL || process.env.NEXT_PUBLIC_LOGO_URL || '/favicon.svg',

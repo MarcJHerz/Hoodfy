@@ -11,20 +11,22 @@ const PORT = process.env.PORT || 5000;
 // ✅ Configurar trust proxy para servidor detrás de proxy/load balancer
 app.set('trust proxy', 1);
 
-// ✅ Middlewares - Configuración CORS mejorada para móviles
+// ✅ Middlewares - Configuración CORS mejorada para múltiples dominios
 app.use(cors({
   origin: [
     'https://qahood.com',
     'https://www.qahood.com',
+    'https://hoodfy.com',
+    'https://www.hoodfy.com',
     'http://localhost:3000',
     'http://localhost:19006',
     'exp://192.168.1.100:8081', // Para Expo en desarrollo
     /^https:\/\/.*\.qahood\.com$/, // Cualquier subdominio de qahood.com
+    /^https:\/\/.*\.hoodfy\.com$/, // Cualquier subdominio de hoodfy.com
     /^https:\/\/.*\.amplifyapp\.com$/, // Para Amplify previews
     /^https:\/\/.*\.vercel\.app$/, // Para Vercel deployments
     /^http:\/\/localhost:\d+$/, // Para desarrollo local con cualquier puerto
-    /^https:\/\/.*\.ngrok\.io$/, // Para túneles ngrok
-    '*' // Temporal para debugging móvil - QUITAR EN PRODUCCIÓN
+    /^https:\/\/.*\.ngrok\.io$/ // Para túneles ngrok
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
@@ -64,32 +66,13 @@ app.use((req, res, next) => {
 });
 app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 
-// Middleware adicional para manejar preflight OPTIONS en móviles
-app.use((req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    res.header('Access-Control-Allow-Origin', req.headers.origin);
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, User-Agent, Cache-Control, Accept-Language, Accept-Encoding, Content-Length');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Max-Age', '86400'); // Cache por 24 horas
-    res.status(204).send();
-  } else {
+// Middleware para logging de requests (solo en desarrollo)
+if (process.env.NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    // Solo log básico sin información sensible
     next();
-  }
-});
-
-// Middleware para manejar CORS
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
-});
+  });
+}
 
 // Middleware para logging de requests (solo en desarrollo)
 if (process.env.NODE_ENV === 'development') {
