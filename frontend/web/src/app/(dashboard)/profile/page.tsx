@@ -75,14 +75,14 @@ const AllyImage = ({ profilePicture, name, className }: { profilePicture?: strin
   return (
     <>
       <div className="relative w-20 h-20 mx-auto mb-4">
-        <Image
-          src={allyImageUrl}
-          alt={name}
+    <Image
+      src={allyImageUrl}
+      alt={name}
           width={80}
           height={80}
           className="w-full h-full rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all"
-          unoptimized
-        />
+      unoptimized
+    />
         <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full animate-pulse"></div>
       </div>
     </>
@@ -223,36 +223,36 @@ export default function ProfilePage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-end">
             {/* Avatar destacado */}
-            <div className="relative group">
+              <div className="relative group">
               <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full overflow-hidden ring-4 ring-blue-400/30 dark:ring-blue-600/40 shadow-strong group-hover:shadow-glow transition-all duration-300 bg-white/30 dark:bg-gray-900/30 backdrop-blur-md">
-                {user?.profilePicture ? (
-                  <Image
-                    src={userImageUrl}
-                    alt={`${user.name}'s profile`}
+                  {user?.profilePicture ? (
+            <Image
+              src={userImageUrl}
+                      alt={`${user.name}'s profile`}
                     width={176}
                     height={176}
-                    className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
-                    unoptimized
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center rounded-full">
+                      className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
+              unoptimized
+            />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center rounded-full">
                     <span className="text-5xl font-bold text-white">
-                      {user?.name?.charAt(0)?.toUpperCase()}
-                    </span>
-                  </div>
-                )}
-              </div>
+                        {user?.name?.charAt(0)?.toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+          </div>
               {/* Estado online */}
               <div className="absolute bottom-2 right-2 w-8 h-8 bg-green-500 border-4 border-white dark:border-gray-800 rounded-full animate-pulse shadow-glow" title="En línea"></div>
-            </div>
+        </div>
             {/* Info y acciones */}
             <div className="flex-1 text-center lg:text-left">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                <div>
+            <div>
                   <div className="flex items-center gap-2 justify-center lg:justify-start">
                     <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
-                      {user?.name}
-                    </h1>
+                    {user?.name}
+                  </h1>
                   </div>
                   <p className="text-gray-600 dark:text-gray-400 text-lg">@{user?.username}</p>
                 </div>
@@ -299,8 +299,8 @@ export default function ProfilePage() {
                     <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{allies.length}</span>
                   </div>
                   <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Allies</div>
-                </div>
-              </div>
+            </div>
+            </div>
             </div>
           </div>
         </div>
@@ -534,9 +534,9 @@ export default function ProfilePage() {
                           className="group"
                       >
                           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 transition-all duration-200 hover-lift text-center">
-                            <AllyImage
-                              profilePicture={ally.profilePicture}
-                              name={ally.name}
+                          <AllyImage
+                            profilePicture={ally.profilePicture}
+                            name={ally.name}
                             />
                             <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
                               {ally.name}

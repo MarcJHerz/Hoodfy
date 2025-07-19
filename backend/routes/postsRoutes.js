@@ -65,10 +65,10 @@ const upload = multer({
       ];
       
       if (allowedTypes.includes(realMimeType)) {
-        cb(null, true);
-      } else {
+      cb(null, true);
+    } else {
         cb(new Error(`Tipo de archivo no soportado: ${realMimeType}. Solo se permiten imágenes (JPEG, PNG, GIF, WebP, HEIC, HEIF) y videos (MP4, MOV, WebM, AVI)`));
-      }
+    }
   }
 });
 

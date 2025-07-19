@@ -143,7 +143,7 @@ export default function CommunitiesPage() {
 
   useEffect(() => {
     if (user?._id) {
-      loadCommunities();
+    loadCommunities();
     } else {
       clearCommunities();
     }

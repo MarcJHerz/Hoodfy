@@ -73,16 +73,16 @@ const AllyImage = ({ profilePicture, name }: { profilePicture?: string; name: st
   return (
     <>
       <div className="relative w-20 h-20 mx-auto mb-4">
-        <Image
-          src={allyImageUrl}
-          alt={name}
+          <Image
+            src={allyImageUrl}
+            alt={name}
           width={80}
           height={80}
           className="w-full h-full rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all"
-          unoptimized
-        />
+            unoptimized
+          />
         <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full animate-pulse"></div>
-      </div>
+          </div>
     </>
   );
 };
@@ -354,7 +354,7 @@ export default function ProfilePage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-end">
             {/* Avatar destacado */}
-            <div className="relative group">
+              <div className="relative group">
               <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full overflow-hidden ring-4 ring-blue-400/30 dark:ring-blue-600/40 shadow-strong group-hover:shadow-glow transition-all duration-300 bg-white/30 dark:bg-gray-900/30 backdrop-blur-md">
                 {user?.profilePicture ? (
                   <Image
@@ -362,20 +362,20 @@ export default function ProfilePage() {
                     alt={`${user.name}'s profile`}
                     width={176}
                     height={176}
-                    className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
                     unoptimized
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center rounded-full">
+                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center rounded-full">
                     <span className="text-5xl font-bold text-white">
-                      {user?.name?.charAt(0)?.toUpperCase()}
-                    </span>
+                        {user?.name?.charAt(0)?.toUpperCase()}
+                      </span>
                   </div>
                 )}
-              </div>
+                </div>
               {/* Estado online */}
               <div className="absolute bottom-2 right-2 w-8 h-8 bg-green-500 border-4 border-white dark:border-gray-800 rounded-full animate-pulse shadow-glow" title="En línea"></div>
-            </div>
+              </div>
             {/* Info y acciones */}
             <div className="flex-1 text-center lg:text-left">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -403,13 +403,13 @@ export default function ProfilePage() {
                 <div className="flex flex-wrap justify-center lg:justify-end gap-3">
                   {isOwnProfile ? (
                     <>
-                      <Link
+                    <Link
                         href="/profile/edit"
                         className="flex items-center gap-2 px-6 py-2.5 btn-secondary btn-lg shadow-soft hover:shadow-md"
-                      >
+                    >
                         <Cog6ToothIcon className="w-4 h-4" />
                         Editar perfil
-                      </Link>
+                    </Link>
                       <button className="flex items-center gap-2 px-6 py-2.5 btn-secondary btn-lg shadow-soft hover:shadow-md">
                         <ShareIcon className="w-4 h-4" />
                         Share
@@ -418,11 +418,11 @@ export default function ProfilePage() {
                   ) : (
                     <>
                       {isAlly && (
-                        <button
-                          onClick={() => setSelectedAlly(user)}
+                      <button
+                        onClick={() => setSelectedAlly(user)}
                           className="flex items-center gap-2 px-6 py-2.5 btn-primary btn-lg shadow-glow hover:shadow-glow-accent"
-                        >
-                          <ChatBubbleLeftIcon className="w-4 h-4" />
+                      >
+                        <ChatBubbleLeftIcon className="w-4 h-4" />
                           Message
                         </button>
                       )}
@@ -435,7 +435,7 @@ export default function ProfilePage() {
                           {isOwnProfile && (
                             <Menu.Item>
                               {({ active }) => (
-                                <Link
+                      <Link
                                   href="/profile/edit"
                                   className={`flex items-center gap-2 px-4 py-2 text-sm transition-colors ${
                                     active 
@@ -445,7 +445,7 @@ export default function ProfilePage() {
                                 >
                                   <Cog6ToothIcon className="w-4 h-4" />
                                   Editar perfil
-                                </Link>
+                      </Link>
                               )}
                             </Menu.Item>
                           )}
@@ -503,14 +503,14 @@ export default function ProfilePage() {
                     <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{userPosts.length}</span>
                   </div>
                   <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Publicaciones</div>
-                </div>
+                  </div>
                 <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-xl px-6 py-4 shadow-soft hover:shadow-md transition-all">
                   <div className="flex items-center justify-center gap-2 mb-1">
                     <UsersIcon className="w-5 h-5 text-purple-500" />
                     <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{allCommunities.length}</span>
-                  </div>
-                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Comunidades</div>
                 </div>
+                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Comunidades</div>
+                  </div>
                 <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-xl px-6 py-4 shadow-soft hover:shadow-md transition-all">
                   <div className="flex items-center justify-center gap-2 mb-1">
                     <UserPlusIcon className="w-5 h-5 text-green-500" />
@@ -519,10 +519,10 @@ export default function ProfilePage() {
                   <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Aliados</div>
                 </div>
               </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
       {/* Tabs Navigation */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">

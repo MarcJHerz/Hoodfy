@@ -247,11 +247,11 @@ const Navbar = React.memo(() => {
                   <div ref={menuRef} className="absolute right-0 mt-2 w-72 glass-strong rounded-2xl shadow-strong border border-gray-200/50 dark:border-gray-700/50 py-4 z-50">
                     {/* Profile header */}
                     <div className="flex flex-col items-center gap-3 mb-4 px-4">
-                      <UserAvatar
+                        <UserAvatar
                         size={48}
-                        source={user.profilePicture}
+                          source={user.profilePicture}
                         name={user.name || 'User'}
-                      />
+                        />
                       <div className="text-center">
                         <h3 className="font-semibold text-gray-900 dark:text-white">
                           {user.name || 'User'}
@@ -261,37 +261,37 @@ const Navbar = React.memo(() => {
                         </p>
                       </div>
                     </div>
-
+                    
                     {/* Profile actions */}
                     <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                      <button
-                        onClick={() => handleGoTo('/profile/edit')}
+                          <button
+                            onClick={() => handleGoTo('/profile/edit')}
                         className="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 flex items-center gap-3"
-                      >
+                          >
                         <UserCircleIcon className="h-5 w-5" />
                         Edit profile
-                      </button>
-                      <button
+                          </button>
+                          <button
                         onClick={() => handleGoTo('/profile')}
                         className="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 flex items-center gap-3"
-                      >
+                          >
                         <UserCircleIcon className="h-5 w-5" />
                         View profile
-                      </button>
-                    </div>
-
+                          </button>
+                      </div>
+                      
                     {/* Logout */}
                     <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-                      <button
-                        onClick={handleLogout}
-                        disabled={isLoading}
+                        <button
+                          onClick={handleLogout}
+                          disabled={isLoading}
                         className="w-full px-4 py-2 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-150 flex items-center gap-3 disabled:opacity-50"
-                      >
+                        >
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                          </svg>
                         {isLoading ? 'Signing out...' : 'Sign out'}
-                      </button>
+                        </button>
                     </div>
                   </div>
                 </Transition>
@@ -388,7 +388,7 @@ const Navbar = React.memo(() => {
                         size={48}
                         source={user.profilePicture}
                         name={user.name || 'User'}
-                      />
+                        />
                       <div className="text-center">
                         <h3 className="font-semibold text-gray-900 dark:text-white">
                           {user.name || 'User'}
@@ -398,37 +398,37 @@ const Navbar = React.memo(() => {
                         </p>
                       </div>
                     </div>
-
+                    
                     {/* Profile actions */}
                     <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                      <button
-                        onClick={() => handleGoTo('/profile/edit')}
+                          <button
+                            onClick={() => handleGoTo('/profile/edit')}
                         className="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 flex items-center gap-3"
-                      >
+                          >
                         <UserCircleIcon className="h-5 w-5" />
                         Edit profile
-                      </button>
-                      <button
+                          </button>
+                          <button
                         onClick={() => handleGoTo('/profile')}
                         className="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 flex items-center gap-3"
-                      >
+                          >
                         <UserCircleIcon className="h-5 w-5" />
                         View profile
-                      </button>
-                    </div>
-
+                          </button>
+                      </div>
+                      
                     {/* Logout */}
                     <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-                      <button
-                        onClick={handleLogout}
-                        disabled={isLoading}
+                        <button
+                          onClick={handleLogout}
+                          disabled={isLoading}
                         className="w-full px-4 py-2 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-150 flex items-center gap-3 disabled:opacity-50"
-                      >
+                        >
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                          </svg>
                         {isLoading ? 'Signing out...' : 'Sign out'}
-                      </button>
+                        </button>
                     </div>
                   </div>
                 </Transition>
