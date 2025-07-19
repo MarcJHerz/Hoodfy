@@ -78,7 +78,7 @@ export default function EnhancedSidebar() {
       icon: HomeIcon,
       solidIcon: HomeSolid,
       color: 'from-blue-500 to-cyan-500',
-      description: 'Ver todas las publicaciones'
+      description: 'See all posts'
     },
     {
       name: 'Trending',
@@ -86,23 +86,23 @@ export default function EnhancedSidebar() {
       icon: FireIcon,
       solidIcon: FireSolid,
       color: 'from-orange-500 to-red-500',
-      description: 'Lo más popular'
+      description: 'See trending posts'
     },
     {
-      name: 'Mis Comunidades',
+      name: 'My Communities',
       href: '/communities',
       icon: UserGroupIcon,
       solidIcon: UserGroupSolid,
       color: 'from-green-500 to-emerald-500',
-      description: 'Comunidades donde participo'
+      description: 'See all communities'
     },
     {
-      name: 'Descubrir',
+      name: 'Discover',
       href: '/communities/discover',
       icon: SparklesIcon,
       solidIcon: SparklesSolid,
       color: 'from-purple-500 to-pink-500',
-      description: 'Explorar nuevas comunidades'
+      description: 'Discover new communities'
     }
   ];
 

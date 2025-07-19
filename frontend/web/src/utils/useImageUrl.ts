@@ -1,52 +1,54 @@
 import { useState, useEffect } from 'react';
 import { getSignedS3Url, getLogoSignedS3Url } from './s3';
 
-// Cache para URLs ya resueltas
+// Cache para URLs firmadas
 const urlCache = new Map<string, string>();
 
-/**
- * Hook para obtener la URL de una imagen, resolviendo keys de S3 a URLs firmadas si es necesario
- * @param keyOrUrl - Puede ser una URL completa, una ruta local o un key de S3
- * @returns { url, loading, error }
- */
+// Función para detectar automáticamente qué API usar según el dominio
+const getApiUrl = () => {
+  if (typeof window === 'undefined') {
+    return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+  }
+  
+  const currentDomain = window.location.hostname;
+  
+  if (currentDomain === 'hoodfy.com' || currentDomain === 'www.hoodfy.com') {
+    return process.env.NEXT_PUBLIC_API_URL_HOODFY || 'https://api.hoodfy.com';
+  }
+  
+  return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+};
+
 export function useImageUrl(keyOrUrl?: string) {
-  const [url, setUrl] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
+  const [url, setUrl] = useState<string>('/images/defaults/default-avatar.png');
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!keyOrUrl) {
+      setUrl('/images/defaults/default-avatar.png');
+      setLoading(false);
+      return;
+    }
+
     let isMounted = true;
     
     const resolveUrl = async () => {
-      setLoading(true);
-      setError(null);
-      
-      // Si no hay keyOrUrl, usar imagen por defecto
-      if (!keyOrUrl) {
-        if (isMounted) {
-          setUrl('/images/defaults/default-avatar.png');
-          setLoading(false);
-        }
-        return;
-      }
-      
-      // Verificar cache primero
-      if (urlCache.has(keyOrUrl)) {
-        if (isMounted) {
-          setUrl(urlCache.get(keyOrUrl)!);
-          setLoading(false);
-        }
-        return;
-      }
-      
       // Si ya es una URL completa, usarla directamente
       if (keyOrUrl.startsWith('http://') || keyOrUrl.startsWith('https://')) {
         if (isMounted) {
           setUrl(keyOrUrl);
           setLoading(false);
         }
-        // Cachear URL completa
-        urlCache.set(keyOrUrl, keyOrUrl);
+        return;
+      }
+
+      // Verificar cache primero
+      if (urlCache.has(keyOrUrl)) {
+        if (isMounted) {
+          setUrl(urlCache.get(keyOrUrl)!);
+          setLoading(false);
+        }
         return;
       }
       
@@ -97,7 +99,7 @@ export function useImageUrl(keyOrUrl?: string) {
       }
       
       // Si es una ruta relativa local
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+      const baseUrl = getApiUrl();
       const finalUrl = `${baseUrl}/${keyOrUrl.replace(/^\//, '')}`;
       if (isMounted) {
         setUrl(finalUrl);

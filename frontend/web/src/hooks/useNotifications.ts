@@ -1,11 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { messaging, auth } from '@/config/firebase';
 import { getToken, onMessage } from 'firebase/messaging';
 import { useAuthStore } from '@/stores/authStore';
 import { useChatStore } from '@/stores/chatStore';
 import { toast } from 'react-hot-toast';
+
+// Función para detectar automáticamente qué API usar según el dominio
+const getApiUrl = () => {
+  if (typeof window === 'undefined') {
+    return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+  }
+  
+  const currentDomain = window.location.hostname;
+  
+  if (currentDomain === 'hoodfy.com' || currentDomain === 'www.hoodfy.com') {
+    return process.env.NEXT_PUBLIC_API_URL_HOODFY || 'https://api.hoodfy.com';
+  }
+  
+  return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+};
 
 export const useNotifications = () => {
   const { user } = useAuthStore();
@@ -89,7 +104,7 @@ export const useNotifications = () => {
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com'}/api/users/fcm-token`, {
+      const response = await fetch(`${getApiUrl()}/api/users/fcm-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

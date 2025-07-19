@@ -1,6 +1,24 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+// Función para detectar automáticamente qué API usar según el dominio
+const getApiUrl = () => {
+  if (typeof window === 'undefined') {
+    // Server-side: usar la variable por defecto
+    return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+  }
+  
+  // Client-side: detectar según el dominio actual
+  const currentDomain = window.location.hostname;
+  
+  if (currentDomain === 'hoodfy.com' || currentDomain === 'www.hoodfy.com') {
+    return process.env.NEXT_PUBLIC_API_URL_HOODFY || 'https://api.hoodfy.com';
+  }
+  
+  // Para qahood.com o cualquier otro dominio
+  return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+};
+
+const API_URL = getApiUrl();
 
 const api = axios.create({
   baseURL: API_URL,

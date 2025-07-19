@@ -1,8 +1,8 @@
 'use client';
 
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useRef, useEffect, useCallback, useState } from 'react';
 import {
   BellIcon,
   UserCircleIcon,
@@ -23,12 +23,27 @@ import Logo from './Logo';
 
 const SearchModal = dynamic(() => import('./SearchModal'), { ssr: false });
 
+// Función para detectar automáticamente qué API usar según el dominio
+const getApiUrl = () => {
+  if (typeof window === 'undefined') {
+    return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+  }
+  
+  const currentDomain = window.location.hostname;
+  
+  if (currentDomain === 'hoodfy.com' || currentDomain === 'www.hoodfy.com') {
+    return process.env.NEXT_PUBLIC_API_URL_HOODFY || 'https://api.hoodfy.com';
+  }
+  
+  return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+};
+
 // Formatear URL de imagen
 const formatImageUrl = (url?: string) => {
   if (!url) return '/images/defaults/default-avatar.png';
   if (url.startsWith('http')) return url;
   
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+  const baseUrl = getApiUrl();
   return `${baseUrl}/${url.replace(/^\//, '')}`;
 };
 

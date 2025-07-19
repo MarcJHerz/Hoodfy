@@ -2,7 +2,22 @@
  * Utilidad para obtener URLs firmadas de S3 desde el frontend
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+// Función para detectar automáticamente qué API usar según el dominio
+const getApiUrl = () => {
+  if (typeof window === 'undefined') {
+    return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+  }
+  
+  const currentDomain = window.location.hostname;
+  
+  if (currentDomain === 'hoodfy.com' || currentDomain === 'www.hoodfy.com') {
+    return process.env.NEXT_PUBLIC_API_URL_HOODFY || 'https://api.hoodfy.com';
+  }
+  
+  return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+};
+
+const API_BASE_URL = getApiUrl();
 
 /**
  * Obtiene una URL firmada de S3 para un key específico

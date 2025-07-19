@@ -143,7 +143,7 @@ export default function Home() {
               Everything you need to build amazing communities
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300">
-              Discover all the tools and features that make Qahood the perfect platform for your community
+              Discover all the tools and features that make Hoodfy the perfect platform for your community
             </p>
           </div>
 
@@ -212,7 +212,7 @@ export default function Home() {
               What our users say
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300">
-              Real stories from real people who found their community on Qahood
+              Real stories from real people who found their community on Hoodfy
             </p>
           </div>
 
@@ -264,7 +264,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
-              <h3 className="text-2xl font-bold mb-4">Qahood</h3>
+              <h3 className="text-2xl font-bold mb-4">Hoodfy</h3>
               <p className="text-gray-400 mb-4">
                 Connecting communities, creating real bonds.
               </p>
@@ -303,7 +303,7 @@ export default function Home() {
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 Qahood. All rights reserved.</p>
+            <p>&copy; 2024 Hoodfy. All rights reserved.</p>
           </div>
         </div>
       </footer>
