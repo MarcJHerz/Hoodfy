@@ -21,9 +21,9 @@ export const metadata: Metadata = {
   title: "Hoodfy - Connect with your passions",
   description: "The private social network for communities",
   icons: {
-    icon: process.env.NEXT_PUBLIC_FAVICON_URL || process.env.NEXT_PUBLIC_LOGO_URL || '/favicon.svg',
-    shortcut: process.env.NEXT_PUBLIC_FAVICON_URL || process.env.NEXT_PUBLIC_LOGO_URL || '/favicon.svg',
-    apple: process.env.NEXT_PUBLIC_FAVICON_URL || process.env.NEXT_PUBLIC_LOGO_URL || '/favicon.svg',
+    icon: 'https://hoodfy-community-media.s3.us-east-1.amazonaws.com/public/hoodfy-logo.png',
+    shortcut: 'https://hoodfy-community-media.s3.us-east-1.amazonaws.com/public/hoodfy-logo.png',
+    apple: 'https://hoodfy-community-media.s3.us-east-1.amazonaws.com/public/hoodfy-logo.png',
   },
 };
 

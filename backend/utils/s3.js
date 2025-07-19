@@ -49,8 +49,16 @@ const uploadFileToS3 = async (buffer, originalname, mimetype) => {
     const extension = path.extname(originalname);
     const key = `uploads/${timestamp}-${randomString}${extension}`;
 
-    // Detectar MIME type real
-    const realMimeType = await FileType.fromBuffer(buffer) || mimetype;
+    // Detectar MIME type real usando la API correcta de file-type
+    let realMimeType = mimetype;
+    try {
+      const fileType = await FileType.fromBuffer(buffer);
+      if (fileType) {
+        realMimeType = fileType.mime;
+      }
+    } catch (error) {
+      console.log('⚠️ No se pudo detectar el tipo MIME, usando el original:', mimetype);
+    }
 
     // Verificar tipo de archivo permitido
     const allowedTypes = [
