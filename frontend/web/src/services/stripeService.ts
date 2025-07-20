@@ -25,7 +25,7 @@ class StripeService {
    */
   async createCheckoutSession(params: CreateCheckoutSessionParams): Promise<CheckoutSessionResponse> {
     try {
-      const response = await api.post('/stripe/create-checkout-session', params);
+      const response = await api.post('/api/stripe/create-checkout-session', params);
       return response.data;
     } catch (error: any) {
       console.error('Error creating checkout session:', error);
@@ -38,7 +38,7 @@ class StripeService {
    */
   async createCustomPrice(params: CreateCustomPriceParams): Promise<CustomPriceResponse> {
     try {
-      const response = await api.post('/stripe/create-price', params);
+      const response = await api.post('/api/stripe/create-product-price', params);
       return response.data;
     } catch (error: any) {
       console.error('Error creating custom price:', error);
@@ -60,7 +60,7 @@ class StripeService {
    */
   async createPortalSession(): Promise<CheckoutSessionResponse> {
     try {
-      const response = await api.post('/stripe/create-portal-session');
+      const response = await api.post('/api/stripe/create-portal-session');
       return response.data;
     } catch (error: any) {
       console.error('Error creating portal session:', error);
