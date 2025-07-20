@@ -13,7 +13,7 @@ const SubscriptionSchema = new mongoose.Schema({
   },
   status: { 
     type: String, 
-    enum: ['active', 'canceled', 'expired'], 
+    enum: ['active', 'canceled', 'expired', 'payment_failed'], 
     default: 'active' 
   },
   startDate: { 
@@ -38,6 +38,13 @@ const SubscriptionSchema = new mongoose.Schema({
   stripeCustomerId: {
     type: String,
     required: false
+  },
+  lastPaymentAttempt: {
+    type: Date
+  },
+  failedPaymentCount: {
+    type: Number,
+    default: 0
   }
 });
 

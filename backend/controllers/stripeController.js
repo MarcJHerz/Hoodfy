@@ -369,8 +369,27 @@ async function handlePaymentFailed(invoice) {
     amountDue: invoice.amount_due
   });
   
-  // Aquí puedes agregar lógica para manejar pagos fallidos
-  // Por ejemplo, enviar notificaciones al usuario
+  try {
+    // Buscar la suscripción en la BD
+    const subscription = await Subscription.findOne({
+      stripeSubscriptionId: invoice.subscription,
+      status: 'active'
+    });
+    
+    if (subscription) {
+      // Marcar la suscripción como con pago pendiente
+      subscription.status = 'payment_failed';
+      subscription.lastPaymentAttempt = new Date();
+      await subscription.save();
+      
+      console.log('⚠️ Suscripción marcada como pago fallido:', subscription._id);
+      
+      // Aquí podrías enviar notificación al usuario
+      // await sendPaymentFailedNotification(subscription.user);
+    }
+  } catch (error) {
+    console.error('❌ Error manejando pago fallido:', error);
+  }
 }
 
 // Función para manejar pago exitoso
@@ -381,6 +400,33 @@ async function handlePaymentSucceeded(invoice) {
     amountPaid: invoice.amount_paid
   });
   
-  // Aquí puedes agregar lógica para confirmar pagos exitosos
-  // Por ejemplo, extender la suscripción
+  try {
+    // Buscar la suscripción en la BD
+    const subscription = await Subscription.findOne({
+      stripeSubscriptionId: invoice.subscription
+    });
+    
+    if (subscription) {
+      // Si estaba marcada como pago fallido, reactivarla
+      if (subscription.status === 'payment_failed') {
+        subscription.status = 'active';
+        subscription.lastPaymentAttempt = new Date();
+        await subscription.save();
+        
+        console.log('🔄 Suscripción reactivada después de pago exitoso:', subscription._id);
+        
+        // Asegurar que el usuario esté en la comunidad
+        const community = await Community.findById(subscription.community);
+        if (community && !community.members.includes(subscription.user)) {
+          community.members.push(subscription.user);
+          await community.save();
+          console.log('✅ Usuario re-agregado a la comunidad');
+        }
+      } else {
+        console.log('ℹ️ Suscripción ya estaba activa:', subscription._id);
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error manejando pago exitoso:', error);
+  }
 } 

@@ -190,6 +190,11 @@ export default function CommunityPage() {
         return sub.community && sub.community._id === id;
       });
       setIsSubscribed(isSubscribedToCommunity);
+      console.log('🔍 Estado de suscripción:', {
+        communityId: id,
+        isSubscribed: isSubscribedToCommunity,
+        subscriptions: response.data
+      });
       return isSubscribedToCommunity;
     } catch (error) {
       console.error('Error al verificar suscripción:', error);
