@@ -30,6 +30,14 @@ const SubscriptionSchema = new mongoose.Schema({
   amount: { 
     type: Number, 
     required: true 
+  },
+  stripeSubscriptionId: {
+    type: String,
+    required: false
+  },
+  stripeCustomerId: {
+    type: String,
+    required: false
   }
 });
 

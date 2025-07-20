@@ -160,7 +160,7 @@ mongoose
 // ✅ Iniciar el servidor con configuración de timeout
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
-  console.log(`🌐 Accesible desde: https://api.qahood.com`);
+  console.log(`🌐 Accesible desde: https://api.qahood.com y https://api.hoodfy.com`);
 });
 
 // Configurar timeouts para archivos grandes

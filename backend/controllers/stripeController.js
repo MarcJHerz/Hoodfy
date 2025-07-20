@@ -75,14 +75,24 @@ exports.createCheckoutSession = async (req, res) => {
     console.log('📧 Email del usuario:', user.email);
     console.log('🌐 Frontend URL:', process.env.FRONTEND_URL);
     
+    // Determinar la URL del frontend basada en el origen de la request
+    const origin = req.headers.origin || req.headers.referer;
+    let frontendUrl = process.env.FRONTEND_URL || 'https://www.qahood.com';
+    
+    if (origin && origin.includes('hoodfy.com')) {
+      frontendUrl = 'https://www.hoodfy.com';
+    }
+    
+    console.log('🌐 URL del frontend detectada:', frontendUrl);
+    
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'subscription',
       customer_email: user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       metadata: { userId: userId.toString(), communityId: communityId.toString() },
-      success_url: (process.env.FRONTEND_URL || 'https://www.qahood.com') + '/success?session_id={CHECKOUT_SESSION_ID}',
-      cancel_url: (process.env.FRONTEND_URL || 'https://www.qahood.com') + '/cancel',
+      success_url: frontendUrl + '/success?session_id={CHECKOUT_SESSION_ID}',
+      cancel_url: frontendUrl + '/cancel',
     });
     
     console.log('✅ Sesión creada exitosamente:', session.url);
@@ -113,97 +123,55 @@ exports.stripeWebhook = async (req, res) => {
 
     const sig = req.headers['stripe-signature'];
     let event;
+    
+    // Determinar qué webhook secret usar basándose en el dominio
+    const host = req.headers.host || req.headers['x-forwarded-host'];
+    let webhookSecret = process.env.STRIPE_WEBHOOK_SECRET; // Default para qahood.com
+    
+    if (host && host.includes('hoodfy.com')) {
+      webhookSecret = process.env.STRIPE_WEBHOOK_SECRET_HOODFY;
+      console.log('🌐 Usando webhook secret de Hoodfy.com');
+    } else {
+      console.log('🌐 Usando webhook secret de Qahood.com');
+    }
+    
     try {
-      event = stripe.webhooks.constructEvent(req.rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
+      event = stripe.webhooks.constructEvent(req.rawBody, sig, webhookSecret);
       console.log('✅ Webhook verificado exitosamente');
     } catch (err) {
       console.error('❌ Error de verificación de webhook:', err.message);
+      console.error('🔍 Host detectado:', host);
+      console.error('🔑 Webhook secret usado:', webhookSecret ? 'Presente' : 'No encontrado');
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
     
     console.log('🔍 Tipo de evento:', event.type);
     console.log('📋 Datos del evento:', event.data.object);
     
-    // Manejar evento de suscripción completada
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object;
-      const { userId, communityId } = session.metadata;
-      
-      console.log('💳 Checkout completado:', {
-        sessionId: session.id,
-        userId,
-        communityId,
-        amountTotal: session.amount_total,
-        paymentStatus: session.payment_status
-      });
-      
-      // Verificar que tenemos los datos necesarios
-      if (!userId || !communityId) {
-        console.error('❌ Faltan datos en metadata:', { userId, communityId });
-        return res.json({ received: true, error: 'Metadata incompleta' });
-      }
-      
-      // Registrar suscripción activa
-      try {
-        // Validar que los IDs sean válidos
-        const mongoose = require('mongoose');
-        if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(communityId)) {
-          console.error('❌ IDs inválidos:', { userId, communityId });
-          return;
-        }
+    // Manejar diferentes tipos de eventos de Stripe
+    switch (event.type) {
+      case 'checkout.session.completed':
+        await handleCheckoutCompleted(event.data.object);
+        break;
         
-        // Verificar que la comunidad existe
-        const community = await Community.findById(communityId);
-        if (!community) {
-          console.error('❌ Comunidad no encontrada:', communityId);
-          return;
-        }
+      case 'customer.subscription.updated':
+        await handleSubscriptionUpdated(event.data.object);
+        break;
         
-        // Verificar que no exista una suscripción duplicada
-        const existing = await Subscription.findOne({ 
-          user: userId, 
-          community: communityId, 
-          status: 'active' 
-        });
+      case 'customer.subscription.deleted':
+        await handleSubscriptionDeleted(event.data.object);
+        break;
         
-        if (!existing) {
-          console.log('🆕 Creando nueva suscripción...');
-          
-          const newSubscription = await Subscription.create({
-            user: userId,
-            community: communityId,
-            status: 'active',
-            startDate: new Date(),
-            paymentMethod: 'stripe',
-            amount: session.amount_total ? session.amount_total / 100 : 0,
-          });
-          
-          console.log('✅ Suscripción creada:', newSubscription._id);
-          
-          // Agregar usuario como miembro si no lo es ya
-          if (!community.members.includes(userId)) {
-            community.members.push(userId);
-            await community.save();
-            console.log('✅ Usuario agregado como miembro de la comunidad');
-            
-            // Crear relaciones de aliados - IMPORTANTE!
-            try {
-              await makeAllies(userId, communityId);
-              console.log('✅ Relaciones de aliados creadas');
-            } catch (allyError) {
-              console.error('❌ Error creando aliados:', allyError);
-            }
-          } else {
-            console.log('ℹ️ Usuario ya era miembro de la comunidad');
-          }
-        } else {
-          console.log('ℹ️ Suscripción ya existe:', existing._id);
-        }
-      } catch (err) {
-        console.error('❌ Error registrando suscripción:', err);
-      }
-    } else {
-      console.log('ℹ️ Evento no es checkout.session.completed, ignorando');
+      case 'invoice.payment_failed':
+        await handlePaymentFailed(event.data.object);
+        break;
+        
+      case 'invoice.payment_succeeded':
+        await handlePaymentSucceeded(event.data.object);
+        break;
+        
+      default:
+        console.log('ℹ️ Evento no manejado:', event.type);
     }
     
     res.json({ received: true });
@@ -211,4 +179,208 @@ exports.stripeWebhook = async (req, res) => {
     console.error('❌ Error en webhook de Stripe:', error);
     res.status(500).json({ error: 'Error procesando webhook' });
   }
-}; 
+};
+
+// Crear sesión del Portal de Cliente
+exports.createPortalSession = async (req, res) => {
+  try {
+    console.log('🌐 Iniciando createPortalSession...');
+    console.log('👤 Usuario ID:', req.userId);
+    
+    if (!stripe) {
+      console.error('❌ Stripe no está configurado');
+      return res.status(503).json({ error: 'Stripe no está configurado' });
+    }
+
+    const userId = req.userId;
+    
+    // Buscar usuario
+    const user = await User.findById(userId);
+    if (!user) {
+      console.error('❌ Usuario no encontrado:', userId);
+      return res.status(404).json({ error: 'Usuario no encontrado.' });
+    }
+    
+    // Determinar la URL de retorno basada en el origen
+    const origin = req.headers.origin || req.headers.referer;
+    let returnUrl = process.env.FRONTEND_URL || 'https://www.qahood.com';
+    
+    if (origin && origin.includes('hoodfy.com')) {
+      returnUrl = 'https://www.hoodfy.com';
+    }
+    
+    console.log('🌐 URL de retorno detectada:', returnUrl);
+    
+    // Crear sesión del portal
+    const session = await stripe.billingPortal.sessions.create({
+      customer_email: user.email,
+      return_url: returnUrl + '/dashboard',
+    });
+    
+    console.log('✅ Sesión del portal creada exitosamente');
+    res.json({ url: session.url });
+  } catch (error) {
+    console.error('❌ Error creando sesión del portal:', error);
+    res.status(500).json({ 
+      error: 'Error creando sesión del portal', 
+      details: error.message 
+    });
+  }
+};
+
+// Función para manejar checkout completado
+async function handleCheckoutCompleted(session) {
+  const { userId, communityId } = session.metadata;
+  
+  console.log('💳 Checkout completado:', {
+    sessionId: session.id,
+    userId,
+    communityId,
+    amountTotal: session.amount_total,
+    paymentStatus: session.payment_status
+  });
+  
+  // Verificar que tenemos los datos necesarios
+  if (!userId || !communityId) {
+    console.error('❌ Faltan datos en metadata:', { userId, communityId });
+    return;
+  }
+  
+  // Registrar suscripción activa
+  try {
+    // Validar que los IDs sean válidos
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(communityId)) {
+      console.error('❌ IDs inválidos:', { userId, communityId });
+      return;
+    }
+    
+    // Verificar que la comunidad existe
+    const community = await Community.findById(communityId);
+    if (!community) {
+      console.error('❌ Comunidad no encontrada:', communityId);
+      return;
+    }
+    
+    // Verificar que no exista una suscripción duplicada
+    const existing = await Subscription.findOne({ 
+      user: userId, 
+      community: communityId, 
+      status: 'active' 
+    });
+    
+    if (!existing) {
+      console.log('🆕 Creando nueva suscripción...');
+      
+      const newSubscription = await Subscription.create({
+        user: userId,
+        community: communityId,
+        status: 'active',
+        startDate: new Date(),
+        paymentMethod: 'stripe',
+        amount: session.amount_total ? session.amount_total / 100 : 0,
+        stripeSubscriptionId: session.subscription || null,
+        stripeCustomerId: session.customer || null,
+      });
+      
+      console.log('✅ Suscripción creada:', newSubscription._id);
+      
+      // Agregar usuario como miembro si no lo es ya
+      if (!community.members.includes(userId)) {
+        community.members.push(userId);
+        await community.save();
+        console.log('✅ Usuario agregado como miembro de la comunidad');
+        
+        // Crear relaciones de aliados - IMPORTANTE!
+        try {
+          await makeAllies(userId, communityId);
+          console.log('✅ Relaciones de aliados creadas');
+        } catch (allyError) {
+          console.error('❌ Error creando aliados:', allyError);
+        }
+      } else {
+        console.log('ℹ️ Usuario ya era miembro de la comunidad');
+      }
+    } else {
+      console.log('ℹ️ Suscripción ya existe:', existing._id);
+    }
+  } catch (err) {
+    console.error('❌ Error registrando suscripción:', err);
+  }
+}
+
+// Función para manejar actualización de suscripción
+async function handleSubscriptionUpdated(subscription) {
+  console.log('🔄 Suscripción actualizada:', {
+    subscriptionId: subscription.id,
+    status: subscription.status,
+    currentPeriodEnd: subscription.current_period_end
+  });
+  
+  // Aquí puedes agregar lógica para manejar cambios en la suscripción
+  // Por ejemplo, actualizar el estado en tu base de datos
+}
+
+// Función para manejar cancelación de suscripción
+async function handleSubscriptionDeleted(subscription) {
+  console.log('❌ Suscripción cancelada:', {
+    subscriptionId: subscription.id,
+    status: subscription.status,
+    customerId: subscription.customer
+  });
+  
+  try {
+    // Buscar la suscripción en tu base de datos
+    const dbSubscription = await Subscription.findOne({
+      stripeSubscriptionId: subscription.id,
+      status: 'active'
+    });
+    
+    if (dbSubscription) {
+      // Actualizar estado de la suscripción
+      dbSubscription.status = 'canceled';
+      dbSubscription.endDate = new Date();
+      await dbSubscription.save();
+      
+      console.log('✅ Suscripción actualizada en BD:', dbSubscription._id);
+      
+      // Remover usuario de la comunidad
+      const community = await Community.findById(dbSubscription.community);
+      if (community) {
+        community.members = community.members.filter(
+          memberId => memberId.toString() !== dbSubscription.user.toString()
+        );
+        await community.save();
+        console.log('✅ Usuario removido de la comunidad');
+      }
+    } else {
+      console.log('⚠️ Suscripción no encontrada en BD:', subscription.id);
+    }
+  } catch (error) {
+    console.error('❌ Error manejando cancelación de suscripción:', error);
+  }
+}
+
+// Función para manejar pago fallido
+async function handlePaymentFailed(invoice) {
+  console.log('💸 Pago fallido:', {
+    invoiceId: invoice.id,
+    subscriptionId: invoice.subscription,
+    amountDue: invoice.amount_due
+  });
+  
+  // Aquí puedes agregar lógica para manejar pagos fallidos
+  // Por ejemplo, enviar notificaciones al usuario
+}
+
+// Función para manejar pago exitoso
+async function handlePaymentSucceeded(invoice) {
+  console.log('✅ Pago exitoso:', {
+    invoiceId: invoice.id,
+    subscriptionId: invoice.subscription,
+    amountPaid: invoice.amount_paid
+  });
+  
+  // Aquí puedes agregar lógica para confirmar pagos exitosos
+  // Por ejemplo, extender la suscripción
+} 

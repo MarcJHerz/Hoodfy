@@ -242,15 +242,16 @@ export const subscriptions = {
   getAll: () => api.get('/api/subscriptions'),
   create: (data: any) => api.post('/api/subscriptions', data),
   delete: (id: string) => api.delete(`/api/subscriptions/${id}`),
-  
-  // Funciones adicionales que estaban siendo usadas
-  subscribe: async (communityId: string, amount: number, paymentMethod: string) => {
+  subscribe: (communityId: string, amount: number, paymentMethod: string) => {
     return api.post('/api/subscriptions/subscribe', { communityId, amount, paymentMethod });
   },
   getSubscribers: (communityId: string) => {
     return api.get(`/api/subscriptions/community/${communityId}/subscribers`);
   },
   getMySubscriptions: () => api.get('/api/subscriptions/my-subscriptions'),
+  cancel: (subscriptionId: string) => api.post('/api/subscriptions/cancel', { subscriptionId }),
+  cancelSubscription: (communityId: string) => api.post('/api/subscriptions/cancel', { communityId }),
+  checkSubscription: (communityId: string) => api.get(`/api/subscriptions/check/${communityId}`),
 };
 
 // Comments endpoints

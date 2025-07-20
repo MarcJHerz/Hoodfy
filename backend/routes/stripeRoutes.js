@@ -5,6 +5,7 @@ const stripeController = require('../controllers/stripeController');
 
 router.post('/create-product-price', verifyToken, stripeController.createStripeProductAndPrice);
 router.post('/create-checkout-session', verifyToken, stripeController.createCheckoutSession);
+router.post('/create-portal-session', verifyToken, stripeController.createPortalSession);
 router.post('/webhook', express.raw({ type: 'application/json' }), stripeController.stripeWebhook);
 
 module.exports = router; 

@@ -68,18 +68,29 @@ router.post('/subscribe', verifyToken, async (req, res) => {
 // 📌 Cancelar suscripción
 router.post('/cancel', verifyToken, async (req, res) => {
   try {
-    const { subscriptionId } = req.body;
+    const { subscriptionId, communityId } = req.body;
     const userId = req.userId;
 
-    // Buscar la suscripción
-    const subscription = await Subscription.findOne({ 
-      _id: subscriptionId, 
-      user: userId, 
-      status: 'active' 
-    });
+    let subscription;
+    
+    if (communityId) {
+      // Buscar por communityId
+      subscription = await Subscription.findOne({ 
+        community: communityId, 
+        user: userId, 
+        status: 'active' 
+      });
+    } else if (subscriptionId) {
+      // Buscar por subscriptionId (mantener compatibilidad)
+      subscription = await Subscription.findOne({ 
+        _id: subscriptionId, 
+        user: userId, 
+        status: 'active' 
+      });
+    }
     
     if (!subscription) {
-      return res.status(404).json({ error: 'No tienes una suscripción activa con este ID.' });
+      return res.status(404).json({ error: 'No tienes una suscripción activa para esta comunidad.' });
     }
 
     // Cancelar suscripción

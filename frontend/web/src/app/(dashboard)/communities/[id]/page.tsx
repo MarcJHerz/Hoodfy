@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { communities, users } from '@/services/api';
+import { communities, users, subscriptions } from '@/services/api';
 import Image from 'next/image';
 import { 
   UserGroupIcon, 
@@ -17,7 +17,9 @@ import {
   SparklesIcon,
   LockClosedIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  EllipsisVerticalIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import CommunityFeed from '@/components/community/CommunityFeed';
@@ -25,6 +27,7 @@ import { CreatePostForm } from '@/components/community/CreatePostForm';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import SubscriptionModal from '@/components/SubscriptionModal';
+import CancelSubscriptionModal from '@/components/CancelSubscriptionModal';
 import { formatImageUrl } from '@/utils/imageUtils';
 import { useImageUrl } from '@/utils/useImageUrl';
 import { useAuthStore } from '@/stores/authStore';
@@ -84,6 +87,7 @@ export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState<'posts' | 'about' | 'members'>('posts');
   const [isCreator, setIsCreator] = useState(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [isCancelSubscriptionModalOpen, setIsCancelSubscriptionModalOpen] = useState(false);
   const [subscribers, setSubscribers] = useState<any[]>([]);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [communityChat, setCommunityChat] = useState<any | null>(null);
@@ -91,6 +95,7 @@ export default function CommunityPage() {
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [viewCount, setViewCount] = useState(0);
+  const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
   
   // Hook para manejar la cover image de la comunidad - asegurar consistencia
   const coverImageKey = community?.coverImage || '';
@@ -116,6 +121,21 @@ export default function CommunityPage() {
 
     initializeData();
   }, [id]);
+
+  // Cerrar menú de opciones cuando se hace clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (isOptionsMenuOpen && !target.closest('.options-menu')) {
+        setIsOptionsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOptionsMenuOpen]);
 
   const loadCommunity = async () => {
     try {
@@ -206,6 +226,25 @@ export default function CommunityPage() {
   const handleLike = () => {
     setIsLiked(!isLiked);
     toast.success(isLiked ? 'Quitado de favoritos' : 'Agregado a favoritos');
+  };
+
+  const handleCancelSubscription = async () => {
+    setIsOptionsMenuOpen(false);
+    setIsCancelSubscriptionModalOpen(true);
+  };
+
+  const handleConfirmCancelSubscription = async () => {
+    try {
+      await subscriptions.cancelSubscription(id as string);
+      toast.success('Suscripción cancelada exitosamente');
+      setIsSubscribed(false);
+      
+      // Recargar la comunidad para actualizar el estado
+      await loadCommunity();
+    } catch (error) {
+      console.error('Error al cancelar suscripción:', error);
+      toast.error('Error al cancelar la suscripción');
+    }
   };
 
   if (loading) {
@@ -309,28 +348,52 @@ export default function CommunityPage() {
               <HeartIcon className="h-5 w-5" />
             )}
           </button>
-                <button
-                  onClick={handleShare}
+          <button
+            onClick={handleShare}
             className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200 hover-lift"
             title="Compartir comunidad"
-                >
-                  <ShareIcon className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={handleReport}
+          >
+            <ShareIcon className="h-5 w-5" />
+          </button>
+          <button
+            onClick={handleReport}
             className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200 hover-lift"
             title="Reportar comunidad"
-                >
-                  <FlagIcon className="h-5 w-5" />
-                </button>
-                {authUser && community.creator?._id === authUser._id && (
-                  <Link
-                    href={`/communities/${community._id}/edit`}
+          >
+            <FlagIcon className="h-5 w-5" />
+          </button>
+          {authUser && community.creator?._id === authUser._id && (
+            <Link
+              href={`/communities/${community._id}/edit`}
               className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200 hover-lift"
               title="Editar comunidad"
+            >
+              <PencilIcon className="h-5 w-5" />
+            </Link>
+          )}
+          {isSubscribed && !isCreator && (
+            <div className="relative options-menu">
+              <button
+                onClick={() => setIsOptionsMenuOpen(!isOptionsMenuOpen)}
+                className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200 hover-lift"
+                title="Opciones de suscripción"
+              >
+                <EllipsisVerticalIcon className="h-5 w-5" />
+              </button>
+              
+              {/* Dropdown Menu */}
+              {isOptionsMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
+                  <button
+                    onClick={handleCancelSubscription}
+                    className="w-full flex items-center space-x-3 px-4 py-3 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                   >
-                    <PencilIcon className="h-5 w-5" />
-                  </Link>
+                    <XMarkIcon className="w-5 h-5" />
+                    <span className="font-medium">Cancelar suscripción</span>
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
@@ -711,6 +774,14 @@ export default function CommunityPage() {
         isOpen={isChatModalOpen}
         onClose={() => setIsChatModalOpen(false)}
         communityId={id as string}
+        communityName={community.name}
+      />
+
+      {/* Cancel Subscription Modal */}
+      <CancelSubscriptionModal
+        isOpen={isCancelSubscriptionModalOpen}
+        onClose={() => setIsCancelSubscriptionModalOpen(false)}
+        onConfirm={handleConfirmCancelSubscription}
         communityName={community.name}
       />
     </div>

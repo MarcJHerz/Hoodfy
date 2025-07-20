@@ -56,6 +56,28 @@ class StripeService {
   }
 
   /**
+   * Crear sesión del Portal de Cliente de Stripe
+   */
+  async createPortalSession(): Promise<CheckoutSessionResponse> {
+    try {
+      const response = await api.post('/stripe/create-portal-session');
+      return response.data;
+    } catch (error: any) {
+      console.error('Error creating portal session:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Redirigir al Portal de Cliente de Stripe
+   */
+  redirectToPortal(portalUrl: string): void {
+    if (typeof window !== 'undefined') {
+      window.location.href = portalUrl;
+    }
+  }
+
+  /**
    * Obtener precios predefinidos
    */
   getPredefinedPrices(): Record<number, string> {
