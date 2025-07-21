@@ -49,7 +49,7 @@ export default function SubscriptionsPage() {
       
       const response = await subscriptionsApi.getMySubscriptions();
       // El backend devuelve directamente el array
-      setSubscriptions(response.data || response);
+      setSubscriptions(response.data);
     } catch (error: any) {
       console.error('Error fetching subscriptions:', error);
       setError(error.response?.data?.error || 'Error cargando suscripciones');

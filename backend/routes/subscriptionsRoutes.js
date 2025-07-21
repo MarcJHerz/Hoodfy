@@ -132,7 +132,7 @@ router.get('/my-subscriptions', verifyToken, async (req, res) => {
     // Filtramos suscripciones sin comunidad (por si acaso alguna está corrupta)
     const filtered = subscriptions.filter(sub => sub.community !== null);
     
-    res.json({ data: filtered });
+    res.json(filtered);
   } catch (err) {
     console.error('❌ Error al obtener suscripciones:', err);
     res.status(500).json({ error: 'Error al obtener suscripciones' });
