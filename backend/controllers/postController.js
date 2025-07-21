@@ -3,6 +3,7 @@ const Community = require('../models/Community');
 const User = require('../models/User');
 // const { uploadToFirebase } = require('../utils/firebaseStorage'); // Eliminado para usar solo almacenamiento local
 const { validatePostData } = require('../validators/postValidator');
+const { notificationHelpers } = require('./notificationController');
 const path = require('path');
 
 // Función auxiliar para asegurar URLs absolutas
@@ -170,6 +171,30 @@ exports.createPost = async (req, res) => {
 
     // Poblar los datos del autor
     await post.populate('author', 'name username profilePicture');
+
+    // Crear notificaciones para miembros de la comunidad (solo si es post de comunidad)
+    if (req.body.postType === 'community' && community) {
+      try {
+        // Obtener todos los miembros de la comunidad excepto el autor
+        const communityMembers = community.members.filter(
+          memberId => memberId.toString() !== userId.toString()
+        );
+
+        // Crear notificación para cada miembro
+        for (const memberId of communityMembers) {
+          await notificationHelpers.createNewPostNotification(
+            memberId,
+            communityId,
+            post._id
+          );
+        }
+
+        console.log(`✅ Notificaciones de nuevo post creadas para ${communityMembers.length} miembros`);
+      } catch (notificationError) {
+        console.error('❌ Error creando notificaciones de nuevo post:', notificationError);
+        // No fallar el post si las notificaciones fallan
+      }
+    }
 
     res.status(201).json({
       message: 'Post creado exitosamente',

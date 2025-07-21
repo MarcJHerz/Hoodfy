@@ -73,16 +73,16 @@ const AllyImage = ({ profilePicture, name }: { profilePicture?: string; name: st
   return (
     <>
       <div className="relative w-20 h-20 mx-auto mb-4">
-          <Image
-            src={allyImageUrl}
-            alt={name}
+        <Image
+          src={allyImageUrl}
+          alt={name}
           width={80}
           height={80}
           className="w-full h-full rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all"
-            unoptimized
-          />
+          unoptimized
+        />
         <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full animate-pulse"></div>
-          </div>
+      </div>
     </>
   );
 };
@@ -188,8 +188,6 @@ export default function ProfilePage() {
     }
   };
 
-
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -234,9 +232,9 @@ export default function ProfilePage() {
 
         // Solo obtener posts si es el propio perfil o son aliados
         if (isOwn || isAlly) {
-        const postsResponse = await posts.getUserPosts(userId);
-        if (postsResponse.data?.posts) {
-          setUserPosts(postsResponse.data.posts);
+          const postsResponse = await posts.getUserPosts(userId);
+          if (postsResponse.data?.posts) {
+            setUserPosts(postsResponse.data.posts);
           } else {
             setUserPosts([]);
           }
@@ -307,14 +305,14 @@ export default function ProfilePage() {
             Error loading profile
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
-        {authUser && (
-          <Link
-            href={`/dashboard/profile/${authUser._id}`}
+          {authUser && (
+            <Link
+              href={`/dashboard/profile/${authUser._id}`}
               className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors"
-          >
-            Back to my profile
-          </Link>
-        )}
+            >
+              Back to my profile
+            </Link>
+          )}
         </div>
       </div>
     );
@@ -333,14 +331,14 @@ export default function ProfilePage() {
           <p className="text-gray-600 dark:text-gray-400 mb-6">
             The profile you are looking for does not exist or has been deleted.
           </p>
-        {authUser && (
-          <Link
-            href={`/dashboard/profile/${authUser._id}`}
+          {authUser && (
+            <Link
+              href={`/dashboard/profile/${authUser._id}`}
               className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors"
-          >
-            Back to my profile
-          </Link>
-        )}
+            >
+              Back to my profile
+            </Link>
+          )}
         </div>
       </div>
     );
@@ -348,107 +346,100 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Profile Header */}
+      {/* Profile Header - Optimizado para móvil y consistente */}
       <div className="relative bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-soft rounded-b-3xl overflow-hidden">
-        {/* Eliminado el gradiente y fondo especial en dark mode, ahora es consistente */}
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-end">
-            {/* Avatar destacado */}
-              <div className="relative group">
-              <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full overflow-hidden ring-4 ring-blue-400/30 dark:ring-blue-600/40 shadow-strong group-hover:shadow-glow transition-all duration-300 bg-white/30 dark:bg-gray-900/30 backdrop-blur-md">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+          <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8 items-center lg:items-end">
+            {/* Avatar - Reducido para móvil */}
+            <div className="relative group">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-44 lg:h-44 rounded-full overflow-hidden ring-4 ring-blue-400/30 dark:ring-blue-600/40 shadow-strong group-hover:shadow-glow transition-all duration-300 bg-white/30 dark:bg-gray-900/30 backdrop-blur-md">
                 {user?.profilePicture ? (
                   <Image
                     src={userImageUrl}
                     alt={`${user.name}'s profile`}
                     width={176}
                     height={176}
-                      className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
                     unoptimized
                   />
                 ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center rounded-full">
-                    <span className="text-5xl font-bold text-white">
-                        {user?.name?.charAt(0)?.toUpperCase()}
-                      </span>
+                  <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center rounded-full">
+                    <span className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white">
+                      {user?.name?.charAt(0)?.toUpperCase()}
+                    </span>
                   </div>
                 )}
-                </div>
-              {/* Estado online */}
-              <div className="absolute bottom-2 right-2 w-8 h-8 bg-green-500 border-4 border-white dark:border-gray-800 rounded-full animate-pulse shadow-glow" title="En línea"></div>
               </div>
-            {/* Info y acciones */}
-            <div className="flex-1 text-center lg:text-left">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              {/* Estado online */}
+              <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 bg-green-500 border-2 sm:border-4 border-white dark:border-gray-800 rounded-full animate-pulse shadow-glow" title="En línea"></div>
+            </div>
+            
+            {/* Info y acciones - Optimizado para móvil */}
+            <div className="flex-1 text-center lg:text-left w-full">
+              <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div>
-                  <div className="flex items-center gap-2 justify-center lg:justify-start">
-                    <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
+                  <div className="flex items-center gap-2 justify-center lg:justify-start flex-wrap">
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
                       {user?.name}
                     </h1>
                     {/* Icono de aliado/no aliado */}
-                    {!isOwnProfile && (
+                    {!isOwnProfile && !allyCheckLoading && (
                       isAlly ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-xs font-semibold animate-fade-in" title="Ally">
-                          <CheckBadgeIcon className="w-4 h-4" /> Ally
+                          <CheckBadgeIcon className="w-3 h-3 sm:w-4 sm:h-4" /> Ally
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300 rounded-full text-xs font-semibold animate-fade-in" title="Not ally">
-                          <UserPlusIcon className="w-4 h-4" /> Not ally
+                          <UserPlusIcon className="w-3 h-3 sm:w-4 sm:h-4" /> Not ally
                         </span>
                       )
                     )}
                   </div>
-                  <p className="text-gray-600 dark:text-gray-400 text-lg">@{user?.username}</p>
+                  <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg">@{user?.username}</p>
                 </div>
-                {/* Botones de acción */}
-                <div className="flex flex-wrap justify-center lg:justify-end gap-3">
+                
+                {/* Botones de acción - Optimizados para móvil */}
+                <div className="flex flex-wrap justify-center lg:justify-start gap-2 sm:gap-3">
                   {isOwnProfile ? (
                     <>
-                    <Link
+                      <Link
                         href="/profile/edit"
-                        className="flex items-center gap-2 px-6 py-2.5 btn-secondary btn-lg shadow-soft hover:shadow-md"
-                    >
+                        className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-secondary btn-sm sm:btn-lg shadow-soft hover:shadow-md text-sm sm:text-base"
+                      >
                         <Cog6ToothIcon className="w-4 h-4" />
-                        Editar perfil
-                    </Link>
-                      <button className="flex items-center gap-2 px-6 py-2.5 btn-secondary btn-lg shadow-soft hover:shadow-md">
+                        Editar
+                      </Link>
+                      <button className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-secondary btn-sm sm:btn-lg shadow-soft hover:shadow-md text-sm sm:text-base">
                         <ShareIcon className="w-4 h-4" />
-                        Share
+                        Compartir
                       </button>
                     </>
                   ) : (
                     <>
                       {isAlly && (
-                      <button
-                        onClick={() => setSelectedAlly(user)}
-                          className="flex items-center gap-2 px-6 py-2.5 btn-primary btn-lg shadow-glow hover:shadow-glow-accent"
-                      >
-                        <ChatBubbleLeftIcon className="w-4 h-4" />
-                          Message
+                        <button
+                          onClick={() => setSelectedAlly(user)}
+                          className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-primary btn-sm sm:btn-lg shadow-glow hover:shadow-glow-accent text-sm sm:text-base"
+                        >
+                          <ChatBubbleLeftIcon className="w-4 h-4" />
+                          Mensaje
                         </button>
                       )}
-                      {/* Menú */}
+                      {!isAlly && !allyCheckLoading && (
+                        <button
+                          onClick={handleAddAlly}
+                          className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-primary btn-sm sm:btn-lg shadow-glow hover:shadow-glow-accent text-sm sm:text-base"
+                        >
+                          <UserPlusIcon className="w-4 h-4" />
+                          Agregar Aliado
+                        </button>
+                      )}
+                      {/* Menú móvil optimizado */}
                       <Menu as="div" className="relative">
-                        <Menu.Button className="p-2.5 btn-ghost rounded-xl">
-                          <EllipsisHorizontalIcon className="w-5 h-5" />
+                        <Menu.Button className="p-2 sm:p-2.5 btn-ghost rounded-xl">
+                          <EllipsisHorizontalIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                         </Menu.Button>
                         <Menu.Items className="absolute right-0 top-12 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-2 z-50">
-                          {isOwnProfile && (
-                            <Menu.Item>
-                              {({ active }) => (
-                      <Link
-                                  href="/profile/edit"
-                                  className={`flex items-center gap-2 px-4 py-2 text-sm transition-colors ${
-                                    active 
-                                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100' 
-                                      : 'text-gray-700 dark:text-gray-300'
-                                  }`}
-                                >
-                                  <Cog6ToothIcon className="w-4 h-4" />
-                                  Editar perfil
-                      </Link>
-                              )}
-                            </Menu.Item>
-                          )}
                           <Menu.Item>
                             {({ active }) => (
                               <button
@@ -463,77 +454,77 @@ export default function ProfilePage() {
                                 }}
                               >
                                 <ShareIcon className="w-4 h-4" />
-                                Share profile
+                                Compartir perfil
                               </button>
                             )}
                           </Menu.Item>
-                          {!isOwnProfile && (
-                            <Menu.Item>
-                              {({ active }) => (
-                                <button
-                                  className={`flex items-center gap-2 w-full px-4 py-2 text-sm transition-colors ${
-                                    active 
-                                      ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' 
-                                      : 'text-red-600 dark:text-red-400'
-                                  }`}
-                                >
-                                  <UserCircleIcon className="w-4 h-4" />
-                                  Report user
-                                </button>
-                              )}
-                            </Menu.Item>
-                          )}
+                          <Menu.Item>
+                            {({ active }) => (
+                              <button
+                                className={`flex items-center gap-2 w-full px-4 py-2 text-sm transition-colors ${
+                                  active 
+                                    ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' 
+                                    : 'text-red-600 dark:text-red-400'
+                                }`}
+                              >
+                                <UserCircleIcon className="w-4 h-4" />
+                                Reportar usuario
+                              </button>
+                            )}
+                          </Menu.Item>
                         </Menu.Items>
                       </Menu>
                     </>
                   )}
                 </div>
               </div>
-              {/* Bio */}
+              
+              {/* Bio - Compacta en móvil */}
               {user?.bio && (
-                <p className="text-gray-700 dark:text-gray-300 mb-6 text-base leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                <p className="text-gray-700 dark:text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto lg:mx-0 line-clamp-3 sm:line-clamp-none">
                   {user.bio}
                 </p>
               )}
-              {/* Estadísticas en tarjetas */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-center mt-4">
-                <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-xl px-6 py-4 shadow-soft hover:shadow-md transition-all">
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <Squares2X2Icon className="w-5 h-5 text-blue-500" />
-                    <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{userPosts.length}</span>
+              
+              {/* Estadísticas compactas para móvil */}
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6 text-center">
+                <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-lg sm:rounded-xl px-3 py-2 sm:px-6 sm:py-4 shadow-soft hover:shadow-md transition-all">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
+                    <Squares2X2Icon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+                    <span className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{userPosts.length}</span>
                   </div>
-                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Publicaciones</div>
-                  </div>
-                <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-xl px-6 py-4 shadow-soft hover:shadow-md transition-all">
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <UsersIcon className="w-5 h-5 text-purple-500" />
-                    <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{allCommunities.length}</span>
+                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Posts</div>
                 </div>
-                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Comunidades</div>
+                <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-lg sm:rounded-xl px-3 py-2 sm:px-6 sm:py-4 shadow-soft hover:shadow-md transition-all">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
+                    <UsersIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
+                    <span className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{allCommunities.length}</span>
                   </div>
-                <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-xl px-6 py-4 shadow-soft hover:shadow-md transition-all">
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <UserPlusIcon className="w-5 h-5 text-green-500" />
-                    <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{allies.length}</span>
+                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Comunidades</div>
+                </div>
+                <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-lg sm:rounded-xl px-3 py-2 sm:px-6 sm:py-4 shadow-soft hover:shadow-md transition-all">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
+                    <UserPlusIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                    <span className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{allies.length}</span>
                   </div>
                   <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Aliados</div>
                 </div>
               </div>
-                </div>
-              </div>
             </div>
           </div>
+        </div>
+      </div>
 
-      {/* Tabs Navigation */}
+      {/* Tabs Navigation - Mejorado para móvil */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Tab.Group onChange={setActiveTab}>
-            <Tab.List className="flex space-x-8 overflow-x-auto">
-                {tabList.map((tab, index) => (
-                  <Tab
+          <Tab.Group onChange={setActiveTab}>
+            <Tab.List className="flex overflow-x-auto scrollbar-hide">
+              {tabList.map((tab, index) => (
+                <Tab
                   key={tab.key}
-                    className={({ selected }) =>
-                    `flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-all duration-200 ${
+                  className={({ selected }) =>
+                    `flex items-center gap-2 py-3 sm:py-4 px-3 sm:px-4 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap transition-all duration-200 min-w-fit ${
                       selected
                         ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                         : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
@@ -541,14 +532,15 @@ export default function ProfilePage() {
                   }
                 >
                   <tab.icon className="w-4 h-4" />
-                  {tab.label}
-                  </Tab>
-                ))}
-              </Tab.List>
+                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
+                </Tab>
+              ))}
+            </Tab.List>
 
-            <Tab.Panels className="mt-6 pb-8">
+            <Tab.Panels className="mt-4 sm:mt-6 pb-8">
               {/* Posts Panel */}
-                <Tab.Panel>
+              <Tab.Panel>
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
                   {!isOwnProfile && !isAlly ? (
                     <div className="text-center py-16">
@@ -556,11 +548,19 @@ export default function ProfilePage() {
                         <LockClosedIcon className="w-8 h-8 text-gray-400" />
                       </div>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                        Private content
+                        Contenido privado
                       </h3>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        Only allies can see this user's posts
+                      <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        Solo los aliados pueden ver las publicaciones de este usuario
                       </p>
+                      {!allyCheckLoading && (
+                        <button
+                          onClick={handleAddAlly}
+                          className="btn-primary btn-md"
+                        >
+                          Agregar como aliado
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <>
@@ -574,7 +574,7 @@ export default function ProfilePage() {
                                 ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
                                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                             }`}
-                            title="Grid view"
+                            title="Vista en cuadrícula"
                           >
                             <Squares2X2Icon className="w-5 h-5" />
                           </button>
@@ -585,25 +585,25 @@ export default function ProfilePage() {
                                 ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
                                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                             }`}
-                            title="List view"
+                            title="Vista en lista"
                           >
                             <ViewColumnsIcon className="w-5 h-5" />
                           </button>
                         </div>
                       </div>
 
-                    {userPosts.length === 0 ? (
+                      {userPosts.length === 0 ? (
                         <div className="text-center py-16">
                           <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Squares2X2Icon className="w-8 h-8 text-gray-400" />
                           </div>
                           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                            No posts yet
+                            No hay publicaciones
                           </h3>
                           <p className="text-gray-600 dark:text-gray-400">
                             {isOwnProfile 
-                              ? 'Share your first post with the community'
-                              : 'This user has not posted anything yet'
+                              ? 'Comparte tu primera publicación con la comunidad'
+                              : 'Este usuario aún no ha publicado nada'
                             }
                           </p>
                         </div>
@@ -637,8 +637,8 @@ export default function ProfilePage() {
                                       />
                                       {/* Indicador de video */}
                                       <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="w-12 h-12 bg-black/60 rounded-full flex items-center justify-center">
-                                          <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                        <div className="w-8 h-8 sm:w-12 sm:h-12 bg-black/60 rounded-full flex items-center justify-center">
+                                          <svg className="w-4 h-4 sm:w-6 sm:h-6 text-white ml-0.5 sm:ml-1" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M8 5v14l11-7z"/>
                                           </svg>
                                         </div>
@@ -652,8 +652,8 @@ export default function ProfilePage() {
                                       />
                                       {/* Indicador de video */}
                                       <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="w-12 h-12 bg-black/60 rounded-full flex items-center justify-center">
-                                          <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                        <div className="w-8 h-8 sm:w-12 sm:h-12 bg-black/60 rounded-full flex items-center justify-center">
+                                          <svg className="w-4 h-4 sm:w-6 sm:h-6 text-white ml-0.5 sm:ml-1" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M8 5v14l11-7z"/>
                                           </svg>
                                         </div>
@@ -702,36 +702,36 @@ export default function ProfilePage() {
                               </div>
                             );
                           })}
-                      </div>
-                    ) : (
+                        </div>
+                      ) : (
                         <div className="space-y-6">
                           {userPosts.map((post) => (
-                        <PostCard
-                          key={post._id}
-                          post={post}
+                            <PostCard
+                              key={post._id}
+                              post={post}
                               onCommentClick={(post) => {
                                 setSelectedPost(post);
                                 setIsCommentsModalOpen(true);
                               }}
-                          onPostUpdate={(updatedPost) => {
-                            const index = userPosts.findIndex(p => p._id === updatedPost._id);
-                            if (index !== -1) {
-                              const newPosts = [...userPosts];
-                              newPosts[index] = updatedPost;
-                              setUserPosts(newPosts);
-                            }
-                          }}
-                        />
+                              onPostUpdate={(updatedPost) => {
+                                const index = userPosts.findIndex(p => p._id === updatedPost._id);
+                                if (index !== -1) {
+                                  const newPosts = [...userPosts];
+                                  newPosts[index] = updatedPost;
+                                  setUserPosts(newPosts);
+                                }
+                              }}
+                            />
                           ))}
                         </div>
                       )}
                     </>
-                    )}
-                  </div>
-                </Tab.Panel>
+                  )}
+                </div>
+              </Tab.Panel>
 
               {/* Communities Panel */}
-                <Tab.Panel>
+              <Tab.Panel>
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
                   {allCommunities.length === 0 ? (
                     <div className="text-center py-16">
@@ -739,12 +739,12 @@ export default function ProfilePage() {
                         <UsersIcon className="w-8 h-8 text-gray-400" />
                       </div>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                        No communities
+                        No hay comunidades
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400">
                         {isOwnProfile 
-                          ? 'Join communities or create your own'
-                          : 'This user is not a member of any community'
+                          ? 'Únete a comunidades o crea la tuya propia'
+                          : 'Este usuario no es miembro de ninguna comunidad'
                         }
                       </p>
                     </div>
@@ -765,7 +765,7 @@ export default function ProfilePage() {
                             {createdCommunities.includes(community) && (
                               <div className="absolute top-3 right-3">
                                 <span className="bg-gradient-to-r from-primary-600 to-accent-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg">
-                                  Creator
+                                  Creador
                                 </span>
                               </div>
                             )}
@@ -783,44 +783,44 @@ export default function ProfilePage() {
                               <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                                 <span className="flex items-center">
                                   <UsersIcon className="w-4 h-4 mr-1" />
-                                  {community.members?.length || 0} members
+                                  {community.members?.length || 0} miembros
                                 </span>
                                 {community.creator && (
                                   <span className="text-primary-600 dark:text-primary-400 font-medium">
-                                    by {community.creator.name}
+                                    por {community.creator.name}
                                   </span>
                                 )}
                               </div>
                             </div>
-                      </div>
+                          </div>
                         </Link>
-                    ))}
+                      ))}
                     </div>
                   )}
-                  </div>
-                </Tab.Panel>
+                </div>
+              </Tab.Panel>
 
               {/* Allies Panel */}
-                <Tab.Panel>
+              <Tab.Panel>
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {allies.length === 0 ? (
+                  {allies.length === 0 ? (
                     <div className="text-center py-16">
                       <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
                         <UserPlusIcon className="w-8 h-8 text-gray-400" />
                       </div>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                        No allies
+                        No hay aliados
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400">
                         {isOwnProfile 
-                          ? 'Join communities to meet people and make allies'
-                          : 'This user has no allies yet'
+                          ? 'Únete a comunidades para conocer gente y hacer aliados'
+                          : 'Este usuario aún no tiene aliados'
                         }
                       </p>
-                      </div>
-                    ) : (
+                    </div>
+                  ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {allies.map((ally) => (
+                      {allies.map((ally) => (
                         <Link
                           key={ally._id}
                           href={`/dashboard/profile/${ally._id}`}
@@ -837,62 +837,62 @@ export default function ProfilePage() {
                             <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                               @{ally.username}
                             </p>
-                              {!isOwnProfile && (
-                                <button
+                            {!isOwnProfile && isAlly && (
+                              <button
                                 onClick={(e) => {
                                   e.preventDefault();
                                   setSelectedAlly(ally);
                                 }}
                                 className="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors w-full opacity-0 group-hover:opacity-100"
                               >
-                                Message
-                                </button>
+                                Mensaje
+                              </button>
                             )}
                           </div>
                         </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Tab.Panel>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Tab.Panel>
 
               {/* About Panel */}
-                <Tab.Panel>
+              <Tab.Panel>
                 <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
                   <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-sm border border-gray-200 dark:border-gray-700">
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
-                      About {user?.name}
+                      Acerca de {user?.name}
                     </h3>
                     
                     {user?.bio ? (
                       <div className="space-y-6">
-                      <div>
-                          <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Biography</h4>
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Biografía</h4>
                           <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                             {user.bio}
                           </p>
-                      </div>
+                        </div>
                         
                         <div>
-                          <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Statistics</h4>
+                          <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Estadísticas</h4>
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
                               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                                 {userPosts.length}
                               </div>
-                              <div className="text-sm text-gray-600 dark:text-gray-400">Posts</div>
+                              <div className="text-sm text-gray-600 dark:text-gray-400">Publicaciones</div>
                             </div>
                             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
                               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                                 {allCommunities.length}
                               </div>
-                              <div className="text-sm text-gray-600 dark:text-gray-400">Communities</div>
+                              <div className="text-sm text-gray-600 dark:text-gray-400">Comunidades</div>
                             </div>
                             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
                               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                                 {allies.length}
                               </div>
-                              <div className="text-sm text-gray-600 dark:text-gray-400">Allies</div>
+                              <div className="text-sm text-gray-600 dark:text-gray-400">Aliados</div>
                             </div>
                           </div>
                         </div>
@@ -903,23 +903,23 @@ export default function ProfilePage() {
                           <TagIcon className="w-8 h-8 text-gray-400" />
                         </div>
                         <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                          No additional information
+                          Sin información adicional
                         </h4>
                         <p className="text-gray-600 dark:text-gray-400">
                           {isOwnProfile 
-                            ? 'Add a biography to let others know more about you'
-                            : 'This user has not shared additional information'
+                            ? 'Agrega una biografía para que otros sepan más sobre ti'
+                            : 'Este usuario no ha compartido información adicional'
                           }
                         </p>
-                        </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
-                </Tab.Panel>
-              </Tab.Panels>
-            </Tab.Group>
-          </div>
+                </div>
+              </Tab.Panel>
+            </Tab.Panels>
+          </Tab.Group>
         </div>
+      </div>
 
       {/* Modals */}
       {selectedAlly && (

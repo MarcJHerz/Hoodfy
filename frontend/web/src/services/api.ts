@@ -275,4 +275,34 @@ export const comments = {
     api.delete(`/api/comments/${commentId}/like`)
 };
 
+// Notifications endpoints
+export const notifications = {
+  getAll: (params?: { page?: number; limit?: number; unreadOnly?: boolean }) => 
+    api.get('/api/notifications', { params }),
+  getUnreadCount: () => 
+    api.get('/api/notifications/unread-count'),
+  getStats: () => 
+    api.get('/api/notifications/stats'),
+  markAsRead: (notificationId: string) => 
+    api.put(`/api/notifications/${notificationId}/read`),
+  markAllAsRead: () => 
+    api.put('/api/notifications/mark-all-read'),
+  delete: (notificationId: string) => 
+    api.delete(`/api/notifications/${notificationId}`),
+  deleteAll: () => 
+    api.delete('/api/notifications/all'),
+  create: (data: {
+    userId: string;
+    type: string;
+    communityId?: string;
+    postId?: string;
+    subscriptionId?: string;
+    commentId?: string;
+    customData?: any;
+  }) => 
+    api.post('/api/notifications', data),
+  cleanup: () => 
+    api.post('/api/notifications/cleanup')
+};
+
 export default api; 

@@ -4,6 +4,7 @@ const Community = require('../models/Community');
 const Subscription = require('../models/Subscription');
 const User = require('../models/User');
 const { makeAllies } = require('../routes/communitiesRoutes');
+const { notificationHelpers } = require('./notificationController');
 
 // Crear Price y Product en Stripe para precio personalizado
 exports.createStripeProductAndPrice = async (req, res) => {
@@ -285,6 +286,18 @@ async function handleCheckoutCompleted(session) {
       
       console.log('✅ Suscripción creada:', newSubscription._id);
       
+      // Crear notificación de suscripción exitosa
+      try {
+        await notificationHelpers.createSubscriptionSuccessNotification(
+          userId, 
+          communityId, 
+          newSubscription._id
+        );
+        console.log('✅ Notificación de suscripción exitosa creada');
+      } catch (notificationError) {
+        console.error('❌ Error creando notificación de suscripción:', notificationError);
+      }
+      
       // Agregar usuario como miembro si no lo es ya
       if (!community.members.includes(userId)) {
         community.members.push(userId);
@@ -344,6 +357,18 @@ async function handleSubscriptionDeleted(subscription) {
       
       console.log('✅ Suscripción actualizada en BD:', dbSubscription._id);
       
+      // Crear notificación de suscripción cancelada
+      try {
+        await notificationHelpers.createSubscriptionCanceledNotification(
+          dbSubscription.user,
+          dbSubscription.community,
+          dbSubscription._id
+        );
+        console.log('✅ Notificación de suscripción cancelada creada');
+      } catch (notificationError) {
+        console.error('❌ Error creando notificación de cancelación:', notificationError);
+      }
+      
       // Remover usuario de la comunidad
       const community = await Community.findById(dbSubscription.community);
       if (community) {
@@ -384,8 +409,17 @@ async function handlePaymentFailed(invoice) {
       
       console.log('⚠️ Suscripción marcada como pago fallido:', subscription._id);
       
-      // Aquí podrías enviar notificación al usuario
-      // await sendPaymentFailedNotification(subscription.user);
+      // Crear notificación de pago fallido
+      try {
+        await notificationHelpers.createPaymentFailedNotification(
+          subscription.user,
+          subscription.community,
+          subscription._id
+        );
+        console.log('✅ Notificación de pago fallido creada');
+      } catch (notificationError) {
+        console.error('❌ Error creando notificación de pago fallido:', notificationError);
+      }
     }
   } catch (error) {
     console.error('❌ Error manejando pago fallido:', error);
@@ -415,6 +449,19 @@ async function handlePaymentSucceeded(invoice) {
         
         console.log('🔄 Suscripción reactivada después de pago exitoso:', subscription._id);
         
+        // Crear notificación de pago exitoso
+        try {
+          await notificationHelpers.createPaymentSuccessNotification(
+            subscription.user,
+            subscription.community,
+            subscription._id,
+            invoice.amount_paid / 100 // Convertir de centavos a dólares
+          );
+          console.log('✅ Notificación de pago exitoso creada');
+        } catch (notificationError) {
+          console.error('❌ Error creando notificación de pago exitoso:', notificationError);
+        }
+        
         // Asegurar que el usuario esté en la comunidad
         const community = await Community.findById(subscription.community);
         if (community && !community.members.includes(subscription.user)) {
@@ -424,6 +471,19 @@ async function handlePaymentSucceeded(invoice) {
         }
       } else {
         console.log('ℹ️ Suscripción ya estaba activa:', subscription._id);
+        
+        // Crear notificación de pago exitoso incluso si ya estaba activa
+        try {
+          await notificationHelpers.createPaymentSuccessNotification(
+            subscription.user,
+            subscription.community,
+            subscription._id,
+            invoice.amount_paid / 100 // Convertir de centavos a dólares
+          );
+          console.log('✅ Notificación de pago exitoso creada');
+        } catch (notificationError) {
+          console.error('❌ Error creando notificación de pago exitoso:', notificationError);
+        }
       }
     }
   } catch (error) {

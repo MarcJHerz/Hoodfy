@@ -94,6 +94,7 @@ const config: Config = {
         'bounce-gentle': 'bounceGentle 0.6s ease-in-out',
         'pulse-slow': 'pulse 3s infinite',
         'shimmer': 'shimmer 2s infinite linear',
+        'shrink-width': 'shrinkWidth 5s linear forwards',
       },
       keyframes: {
         fadeIn: {
@@ -117,6 +118,10 @@ const config: Config = {
         shimmer: {
           '0%': { transform: 'translateX(-100%)' },
           '100%': { transform: 'translateX(100%)' },
+        },
+        shrinkWidth: {
+          '0%': { width: '100%' },
+          '100%': { width: '0%' },
         },
       },
       boxShadow: {

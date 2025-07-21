@@ -136,6 +136,38 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
+      {/* Enlaces rápidos */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <Link 
+          href="/communities"
+          className="card p-4 hover-lift text-center group transition-all duration-200"
+        >
+          <UsersIcon className="h-8 w-8 mx-auto mb-2 text-blue-500 group-hover:text-blue-600" />
+          <h3 className="font-medium text-gray-900 dark:text-gray-100">Comunidades</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Explorar y unirse</p>
+        </Link>
+        
+        <Link 
+          href="/subscriptions"
+          className="card p-4 hover-lift text-center group transition-all duration-200"
+        >
+          <svg className="h-8 w-8 mx-auto mb-2 text-green-500 group-hover:text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          </svg>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100">Suscripciones</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Gestionar pagos</p>
+        </Link>
+        
+        <Link 
+          href="/messages"
+          className="card p-4 hover-lift text-center group transition-all duration-200"
+        >
+          <ChatBubbleLeftIcon className="h-8 w-8 mx-auto mb-2 text-purple-500 group-hover:text-purple-600" />
+          <h3 className="font-medium text-gray-900 dark:text-gray-100">Mensajes</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Chat y aliados</p>
+        </Link>
+      </div>
+
       {/* Botón para crear post */}
       <div className="card p-6 mb-6 hover-lift">
         <div className="flex items-center space-x-4">

@@ -17,6 +17,10 @@ const NotificationInitializer = dynamic(() => import("@/components/NotificationI
   ssr: false
 });
 
+const NotificationToastManager = dynamic(() => import("@/components/notifications/NotificationToastManager"), {
+  ssr: false
+});
+
 export const metadata: Metadata = {
   title: "Hoodfy - Connect with your passions",
   description: "The private social network for communities",
@@ -45,6 +49,7 @@ export default function RootLayout({
           </AppShell>
           <ServiceWorkerRegistration />
           <NotificationInitializer />
+          <NotificationToastManager />
           <Toaster 
             position="top-right"
             toastOptions={{

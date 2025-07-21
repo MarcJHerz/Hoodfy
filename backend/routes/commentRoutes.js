@@ -3,6 +3,7 @@ const router = express.Router();
 const Comment = require('../models/Comment');
 const Post = require('../models/Post');
 const { verifyToken } = require('../middleware/authMiddleware');
+const { notificationHelpers } = require('../controllers/notificationController');
 
 // ✅ Agregar un comentario
 router.post('/:postId', verifyToken, async (req, res) => {
@@ -65,6 +66,36 @@ router.post('/:postId', verifyToken, async (req, res) => {
     const populatedComment = await Comment.findById(newComment._id)
       .populate('user', 'name username profilePicture')
       .lean();
+
+    // Crear notificación para el autor del post (si no es el mismo que comentó)
+    try {
+      if (post.author.toString() !== userId.toString()) {
+        await notificationHelpers.createNewCommentNotification(
+          post.author,
+          postId,
+          newComment._id
+        );
+        console.log('✅ Notificación de nuevo comentario creada para el autor del post');
+      }
+
+      // Si es una respuesta, notificar también al autor del comentario padre
+      if (parentComment) {
+        const parentCommentData = await Comment.findById(parentComment).populate('user');
+        if (parentCommentData && 
+            parentCommentData.user._id.toString() !== userId.toString() && 
+            parentCommentData.user._id.toString() !== post.author.toString()) {
+          await notificationHelpers.createNewCommentNotification(
+            parentCommentData.user._id,
+            postId,
+            newComment._id
+          );
+          console.log('✅ Notificación de respuesta creada para el autor del comentario padre');
+        }
+      }
+    } catch (notificationError) {
+      console.error('❌ Error creando notificaciones de comentario:', notificationError);
+      // No fallar el comentario si las notificaciones fallan
+    }
 
     res.status(201).json({ 
       message: 'Comentario agregado con éxito',

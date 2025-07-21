@@ -1,69 +1,55 @@
 const express = require('express');
 const router = express.Router();
 const { verifyToken } = require('../middleware/authMiddleware');
+const {
+  getNotifications,
+  getUnreadCount,
+  markAsRead,
+  markAllAsRead,
+  deleteNotification,
+  deleteAllNotifications,
+  createNotification,
+  cleanupExpiredNotifications,
+  getNotificationStats
+} = require('../controllers/notificationController');
 
-// Enviar notificación push
-router.post('/send', verifyToken, async (req, res) => {
-  try {
-    const { notification, tokens } = req.body;
+// 📋 Obtener todas las notificaciones del usuario
+// GET /api/notifications
+// Query params: page, limit, unreadOnly
+router.get('/', verifyToken, getNotifications);
 
-    if (!notification || !tokens || !Array.isArray(tokens)) {
-      return res.status(400).json({ error: 'Datos de notificación inválidos' });
-    }
+// 🔢 Obtener conteo de notificaciones no leídas
+// GET /api/notifications/unread-count
+router.get('/unread-count', verifyToken, getUnreadCount);
 
-    // Usar Firebase Admin para enviar notificación
-    const admin = require('../config/firebase-admin');
-    const messaging = admin.messaging();
+// 📊 Obtener estadísticas de notificaciones
+// GET /api/notifications/stats
+router.get('/stats', verifyToken, getNotificationStats);
 
-    const message = {
-      notification: {
-        title: notification.title,
-        body: notification.body,
-      },
-      data: notification.data || {},
-      tokens: tokens,
-      android: {
-        notification: {
-          sound: 'default',
-          priority: 'high',
-        },
-      },
-      apns: {
-        payload: {
-          aps: {
-            sound: 'default',
-            badge: 1,
-          },
-        },
-      },
-      webpush: {
-        notification: {
-          icon: '/default-avatar.png',
-          badge: '/default-avatar.png',
-          actions: [
-            {
-              action: 'open',
-              title: 'Abrir',
-            },
-            {
-              action: 'close',
-              title: 'Cerrar',
-            },
-          ],
-        },
-        fcm_options: {
-          link: notification.data?.click_action || '/messages',
-        },
-      },
-    };
+// ✅ Marcar notificación específica como leída
+// PUT /api/notifications/:notificationId/read
+router.put('/:notificationId/read', verifyToken, markAsRead);
 
-    const response = await messaging.sendMulticast(message);
-    
-    res.json({ success: true, response });
-  } catch (error) {
-    console.error('Error enviando notificación:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-});
+// ✅ Marcar todas las notificaciones como leídas
+// PUT /api/notifications/mark-all-read
+router.put('/mark-all-read', verifyToken, markAllAsRead);
+
+// 🗑️ Eliminar notificación específica
+// DELETE /api/notifications/:notificationId
+router.delete('/:notificationId', verifyToken, deleteNotification);
+
+// 🗑️ Eliminar todas las notificaciones del usuario
+// DELETE /api/notifications/all
+router.delete('/all', verifyToken, deleteAllNotifications);
+
+// 📝 Crear notificación (uso interno/admin)
+// POST /api/notifications
+// Body: { userId, type, communityId?, postId?, subscriptionId?, commentId?, customData? }
+router.post('/', verifyToken, createNotification);
+
+// 🧹 Limpiar notificaciones expiradas (endpoint para cron jobs)
+// POST /api/notifications/cleanup
+// Nota: Este endpoint podría requerir autenticación de admin o key especial
+router.post('/cleanup', cleanupExpiredNotifications);
 
 module.exports = router; 

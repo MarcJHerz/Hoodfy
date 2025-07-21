@@ -36,6 +36,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useImageUrl } from '@/utils/useImageUrl';
 import PostCard from '@/components/PostCard';
+import CommentsModal from '@/components/CommentsModal';
 import type { UserProfile, Community } from '@/types';
 import { Post } from '@/types/post';
 import { User } from '@/types/user';
@@ -51,6 +52,18 @@ const PostMediaImage = ({ mediaUrl, alt, className }: { mediaUrl: string; alt: s
       fill
       className={className}
       unoptimized
+    />
+  );
+};
+
+const PostMediaVideo = ({ src, className }: { src?: string; className?: string }) => {
+  const { url: mediaUrl } = useImageUrl(src || '');
+  
+  return (
+    <video
+      src={mediaUrl}
+      className={className}
+      preload="metadata"
     />
   );
 };
@@ -75,14 +88,14 @@ const AllyImage = ({ profilePicture, name, className }: { profilePicture?: strin
   return (
     <>
       <div className="relative w-20 h-20 mx-auto mb-4">
-    <Image
-      src={allyImageUrl}
-      alt={name}
+        <Image
+          src={allyImageUrl}
+          alt={name}
           width={80}
           height={80}
           className="w-full h-full rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all"
-      unoptimized
-    />
+          unoptimized
+        />
         <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full animate-pulse"></div>
       </div>
     </>
@@ -104,6 +117,8 @@ export default function ProfilePage() {
   const [allies, setAllies] = useState<UserProfile[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
   // Combinamos comunidades creadas y unidas
   const allCommunities = [...createdCommunities, ...joinedCommunities];
@@ -217,105 +232,108 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Profile Header */}
-      <div className="relative bg-gradient-to-br from-blue-500/30 via-purple-500/10 to-gray-900/10 dark:from-blue-900/40 dark:via-purple-900/20 dark:to-gray-900/60 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-soft rounded-b-3xl overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none" style={{background: 'radial-gradient(ellipse at 80% 0%, rgba(56,189,248,0.12) 0%, transparent 70%)'}} />
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-end">
-            {/* Avatar destacado */}
-              <div className="relative group">
-              <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full overflow-hidden ring-4 ring-blue-400/30 dark:ring-blue-600/40 shadow-strong group-hover:shadow-glow transition-all duration-300 bg-white/30 dark:bg-gray-900/30 backdrop-blur-md">
-                  {user?.profilePicture ? (
-            <Image
-              src={userImageUrl}
-                      alt={`${user.name}'s profile`}
+      {/* Profile Header - Optimizado para móvil */}
+      <div className="relative bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-soft rounded-b-3xl overflow-hidden">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+          <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8 items-center lg:items-end">
+            {/* Avatar - Reducido para móvil */}
+            <div className="relative group">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-44 lg:h-44 rounded-full overflow-hidden ring-4 ring-blue-400/30 dark:ring-blue-600/40 shadow-strong group-hover:shadow-glow transition-all duration-300 bg-white/30 dark:bg-gray-900/30 backdrop-blur-md">
+                {user?.profilePicture ? (
+                  <Image
+                    src={userImageUrl}
+                    alt={`${user.name}'s profile`}
                     width={176}
                     height={176}
-                      className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
-              unoptimized
-            />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center rounded-full">
-                    <span className="text-5xl font-bold text-white">
-                        {user?.name?.charAt(0)?.toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-          </div>
-              {/* Estado online */}
-              <div className="absolute bottom-2 right-2 w-8 h-8 bg-green-500 border-4 border-white dark:border-gray-800 rounded-full animate-pulse shadow-glow" title="En línea"></div>
-        </div>
-            {/* Info y acciones */}
-            <div className="flex-1 text-center lg:text-left">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div>
-                  <div className="flex items-center gap-2 justify-center lg:justify-start">
-                    <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
-                    {user?.name}
-                  </h1>
+                    className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center rounded-full">
+                    <span className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white">
+                      {user?.name?.charAt(0)?.toUpperCase()}
+                    </span>
                   </div>
-                  <p className="text-gray-600 dark:text-gray-400 text-lg">@{user?.username}</p>
+                )}
+              </div>
+              {/* Estado online */}
+              <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 bg-green-500 border-2 sm:border-4 border-white dark:border-gray-800 rounded-full animate-pulse shadow-glow" title="En línea"></div>
+            </div>
+            
+            {/* Info y acciones - Optimizado para móvil */}
+            <div className="flex-1 text-center lg:text-left w-full">
+              <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
+                <div>
+                  <div className="flex items-center gap-2 justify-center lg:justify-start">
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
+                      {user?.name}
+                    </h1>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg">@{user?.username}</p>
                 </div>
-                {/* Botones de acción */}
-                <div className="flex flex-wrap justify-center lg:justify-end gap-3">
+                
+                {/* Botones de acción - Optimizados para móvil */}
+                <div className="flex flex-wrap justify-center lg:justify-start gap-2 sm:gap-3">
                   <Link
                     href="/profile/edit"
-                    className="flex items-center gap-2 px-6 py-2.5 btn-secondary btn-lg shadow-soft hover:shadow-md"
+                    className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-secondary btn-sm sm:btn-lg shadow-soft hover:shadow-md text-sm sm:text-base"
                   >
                     <Cog6ToothIcon className="w-4 h-4" />
-                    Editar perfil
+                    Editar
                   </Link>
-                  <button className="flex items-center gap-2 px-6 py-2.5 btn-secondary btn-lg shadow-soft hover:shadow-md">
+                  <button className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-secondary btn-sm sm:btn-lg shadow-soft hover:shadow-md text-sm sm:text-base">
                     <ShareIcon className="w-4 h-4" />
-                    Share
+                    Compartir
                   </button>
                 </div>
               </div>
-              {/* Bio */}
+              
+              {/* Bio - Compacta en móvil */}
               {user?.bio && (
-                <p className="text-gray-700 dark:text-gray-300 mb-6 text-base leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                <p className="text-gray-700 dark:text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto lg:mx-0 line-clamp-3 sm:line-clamp-none">
                   {user.bio}
                 </p>
               )}
-              {/* Estadísticas en tarjetas */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-center mt-4">
-                <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-xl px-6 py-4 shadow-soft hover:shadow-md transition-all">
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <Squares2X2Icon className="w-5 h-5 text-blue-500" />
-                    <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{userPosts.length}</span>
+              
+              {/* Estadísticas compactas para móvil */}
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6 text-center">
+                <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-lg sm:rounded-xl px-3 py-2 sm:px-6 sm:py-4 shadow-soft hover:shadow-md transition-all">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
+                    <Squares2X2Icon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+                    <span className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{userPosts.length}</span>
                   </div>
                   <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Posts</div>
                 </div>
-                <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-xl px-6 py-4 shadow-soft hover:shadow-md transition-all">
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <UsersIcon className="w-5 h-5 text-purple-500" />
-                    <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{allCommunities.length}</span>
+                <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-lg sm:rounded-xl px-3 py-2 sm:px-6 sm:py-4 shadow-soft hover:shadow-md transition-all">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
+                    <UsersIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
+                    <span className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{allCommunities.length}</span>
                   </div>
-                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Communities</div>
+                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Comunidades</div>
                 </div>
-                <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-xl px-6 py-4 shadow-soft hover:shadow-md transition-all">
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <UserPlusIcon className="w-5 h-5 text-green-500" />
-                    <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{allies.length}</span>
+                <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-lg sm:rounded-xl px-3 py-2 sm:px-6 sm:py-4 shadow-soft hover:shadow-md transition-all">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
+                    <UserPlusIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                    <span className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{allies.length}</span>
                   </div>
-                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Allies</div>
-            </div>
-            </div>
+                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Aliados</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tabs Navigation */}
+      {/* Tabs Navigation - Mejorado para móvil */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <Tab.Group onChange={setActiveTab}>
-            <Tab.List className="flex space-x-8 overflow-x-auto">
+            <Tab.List className="flex overflow-x-auto scrollbar-hide">
               {tabList.map((tab, index) => (
                 <Tab
                   key={tab.key}
                   className={({ selected }) =>
-                    `flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-all duration-200 ${
+                    `flex items-center gap-2 py-3 sm:py-4 px-3 sm:px-4 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap transition-all duration-200 min-w-fit ${
                       selected
                         ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                         : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
@@ -323,12 +341,13 @@ export default function ProfilePage() {
                   }
                 >
                   <tab.icon className="w-4 h-4" />
-                  {tab.label}
+                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
                 </Tab>
               ))}
             </Tab.List>
 
-            <Tab.Panels className="mt-6 pb-8">
+            <Tab.Panels className="mt-4 sm:mt-6 pb-8">
               {/* Posts Panel */}
               <Tab.Panel>
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -374,59 +393,114 @@ export default function ProfilePage() {
                     </div>
                   ) : viewMode === 'grid' ? (
                     <div className="grid grid-cols-3 gap-1 sm:gap-2 md:gap-4">
-                      {userPosts.map((post) => (
-                        <div key={post._id} className="group cursor-pointer">
-                          <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative group-hover:shadow-lg transition-all duration-300">
-                            {post.media && post.media.length > 0 ? (
-                              <PostMediaImage
-                                mediaUrl={post.media[0].url}
-                                alt="Post"
-                                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50 dark:bg-gray-800 p-2">
-                                <Squares2X2Icon className="w-6 h-6 sm:w-8 sm:h-8 mb-1" />
-                                {post.content && (
-                                  <p className="text-xs text-center line-clamp-3 px-1">
-                                    {post.content.substring(0, 50)}...
-                                  </p>
-                                )}
-                              </div>
-                            )}
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                              <div className="flex items-center gap-2 sm:gap-4 text-white">
-                                <div className="flex items-center gap-1">
-                                  <HeartSolidIcon className="w-3 h-3 sm:w-5 sm:h-5" />
-                                  <span className="font-medium text-xs sm:text-sm">{post.likes?.length || 0}</span>
+                      {userPosts.map((post) => {
+                        // Determinar si hay media y tipos
+                        const hasMedia = post.media && post.media.length > 0;
+                        const firstMedia = hasMedia ? post.media![0] : null;
+                        const isVideo = firstMedia?.type === 'video';
+                        const isImage = firstMedia?.type === 'image';
+                        const videoThumbnail = isVideo ? firstMedia.thumbnail : null;
+                        
+                        return (
+                          <div 
+                            key={post._id} 
+                            className="group cursor-pointer"
+                            onClick={() => {
+                              setSelectedPost(post);
+                              setIsCommentsModalOpen(true);
+                            }}
+                          >
+                            <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative group-hover:shadow-lg transition-all duration-300">
+                              {/* Mostrar video thumbnail, imagen, o placeholder */}
+                              {isVideo && videoThumbnail ? (
+                                <div className="relative w-full h-full">
+                                  <PostMediaImage
+                                    mediaUrl={videoThumbnail}
+                                    alt="Video thumbnail"
+                                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                  />
+                                  {/* Indicador de video */}
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-black/60 rounded-full flex items-center justify-center">
+                                      <svg className="w-4 h-4 sm:w-6 sm:h-6 text-white ml-0.5 sm:ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M8 5v14l11-7z"/>
+                                      </svg>
+                                    </div>
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-1">
-                                  <ChatBubbleLeftIcon className="w-3 h-3 sm:w-5 sm:h-5" />
-                                  <span className="font-medium text-xs sm:text-sm">{post.comments?.length || 0}</span>
+                              ) : isVideo && !videoThumbnail ? (
+                                <div className="relative w-full h-full">
+                                  <PostMediaVideo
+                                    src={firstMedia.url}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                  />
+                                  {/* Indicador de video */}
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-black/60 rounded-full flex items-center justify-center">
+                                      <svg className="w-4 h-4 sm:w-6 sm:h-6 text-white ml-0.5 sm:ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M8 5v14l11-7z"/>
+                                      </svg>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : isImage ? (
+                                <PostMediaImage
+                                  mediaUrl={firstMedia.url}
+                                  alt="Post"
+                                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50 dark:bg-gray-800 p-2">
+                                  <Squares2X2Icon className="w-6 h-6 sm:w-8 sm:h-8 mb-1" />
+                                  {post.content && (
+                                    <p className="text-xs text-center line-clamp-3 px-1">
+                                      {post.content.substring(0, 50)}...
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                              
+                              {/* Overlay con estadísticas */}
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                <div className="flex items-center gap-2 sm:gap-4 text-white">
+                                  <div className="flex items-center gap-1">
+                                    <HeartSolidIcon className="w-3 h-3 sm:w-5 sm:h-5" />
+                                    <span className="font-medium text-xs sm:text-sm">{post.likes?.length || 0}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <ChatBubbleLeftIcon className="w-3 h-3 sm:w-5 sm:h-5" />
+                                    <span className="font-medium text-xs sm:text-sm">{post.comments?.length || 0}</span>
+                                  </div>
                                 </div>
                               </div>
+                              
+                              {/* Indicador de múltiples medios */}
+                              {hasMedia && post.media!.length > 1 && (
+                                <div className="absolute top-2 right-2">
+                                  <div className="bg-black/50 rounded-full p-1">
+                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                            {/* Indicador de múltiples medios */}
-                            {post.media && post.media.length > 1 && (
-                              <div className="absolute top-2 right-2">
-                                <div className="bg-black/50 rounded-full p-1">
-                                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                                </div>
-                              </div>
-                            )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
-                  <div className="space-y-6">
-                    {userPosts.map((post) => (
-                      <PostCard
-                        key={post._id}
-                        post={post}
-                        onPostUpdate={onPostUpdate}
-                      />
-                    ))}
-                  </div>
+                    <div className="space-y-6">
+                      {userPosts.map((post) => (
+                        <PostCard
+                          key={post._id}
+                          post={post}
+                          onPostUpdate={onPostUpdate}
+                          onCommentClick={(post) => {
+                            setSelectedPost(post);
+                            setIsCommentsModalOpen(true);
+                          }}
+                        />
+                      ))}
+                    </div>
                   )}
                 </div>
               </Tab.Panel>
@@ -449,9 +523,9 @@ export default function ProfilePage() {
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {allCommunities.map((community) => (
-                      <Link
-                        key={community._id}
-                        href={`/communities/${community._id}`}
+                        <Link
+                          key={community._id}
+                          href={`/communities/${community._id}`}
                           className="group"
                         >
                           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 transition-all duration-200 hover-lift overflow-hidden">
@@ -501,11 +575,11 @@ export default function ProfilePage() {
                                   </span>
                                 )}
                               </div>
-                  </div>
-                </div>
-                      </Link>
-                    ))}
-                  </div>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
                   )}
                 </div>
               </Tab.Panel>
@@ -527,27 +601,27 @@ export default function ProfilePage() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {allies.map((ally) => (
-                      <Link
-                        key={ally._id}
+                      {allies.map((ally) => (
+                        <Link
+                          key={ally._id}
                           href={`/dashboard/profile/${ally._id}`}
                           className="group"
-                      >
+                        >
                           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 transition-all duration-200 hover-lift text-center">
-                          <AllyImage
-                            profilePicture={ally.profilePicture}
-                            name={ally.name}
+                            <AllyImage
+                              profilePicture={ally.profilePicture}
+                              name={ally.name}
                             />
                             <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
                               {ally.name}
                             </h3>
                             <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                               @{ally.username}
-                          </p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
                   )}
                 </div>
               </Tab.Panel>
@@ -597,7 +671,7 @@ export default function ProfilePage() {
                       <div className="text-center py-8">
                         <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
                           <TagIcon className="w-8 h-8 text-gray-400" />
-                      </div>
+                        </div>
                         <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                           Sin información adicional
                         </h4>
@@ -613,6 +687,17 @@ export default function ProfilePage() {
           </Tab.Group>
         </div>
       </div>
+
+      {/* Modal de comentarios */}
+      {isCommentsModalOpen && selectedPost && (
+        <CommentsModal
+          isOpen={isCommentsModalOpen}
+          onClose={() => setIsCommentsModalOpen(false)}
+          post={selectedPost}
+          currentUser={authUser}
+          onPostUpdate={onPostUpdate}
+        />
+      )}
     </div>
   );
 } 

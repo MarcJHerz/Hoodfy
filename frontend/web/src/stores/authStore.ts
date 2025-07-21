@@ -6,6 +6,7 @@ import { auth as apiAuth } from '@/services/api';
 import { User } from '@/types/user';
 import { useCommunitiesStore } from './communitiesStore';
 import { usePostsStore } from './postsStore';
+import { useNotificationStore } from './notificationStore';
 
 interface AuthState {
   user: User | null;
@@ -239,6 +240,9 @@ export const useAuthStore = create<AuthState>()(
           // Limpiar posts
           usePostsStore.getState().clearPosts();
           
+          // Limpiar notificaciones
+          useNotificationStore.getState().clearNotifications();
+          
           console.log('🧹 Datos locales limpiados, procediendo con logout de servicios...');
           
           // Luego hacer logout de Firebase y backend
@@ -318,6 +322,7 @@ export const useAuthStore = create<AuthState>()(
         // Limpiar otros stores
         useCommunitiesStore.getState().clearCommunities();
         usePostsStore.getState().clearPosts();
+        useNotificationStore.getState().clearNotifications();
         
         console.log('✅ Todos los datos de autenticación limpiados');
       },
