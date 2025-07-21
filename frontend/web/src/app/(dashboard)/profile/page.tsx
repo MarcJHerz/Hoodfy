@@ -88,14 +88,14 @@ const AllyImage = ({ profilePicture, name, className }: { profilePicture?: strin
   return (
     <>
       <div className="relative w-20 h-20 mx-auto mb-4">
-        <Image
-          src={allyImageUrl}
-          alt={name}
+    <Image
+      src={allyImageUrl}
+      alt={name}
           width={80}
           height={80}
           className="w-full h-full rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all"
-          unoptimized
-        />
+      unoptimized
+    />
         <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full animate-pulse"></div>
       </div>
     </>
@@ -237,37 +237,37 @@ export default function ProfilePage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
           <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8 items-center lg:items-end">
             {/* Avatar - Reducido para móvil */}
-            <div className="relative group">
+              <div className="relative group">
               <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-44 lg:h-44 rounded-full overflow-hidden ring-4 ring-blue-400/30 dark:ring-blue-600/40 shadow-strong group-hover:shadow-glow transition-all duration-300 bg-white/30 dark:bg-gray-900/30 backdrop-blur-md">
-                {user?.profilePicture ? (
-                  <Image
-                    src={userImageUrl}
-                    alt={`${user.name}'s profile`}
+                  {user?.profilePicture ? (
+            <Image
+              src={userImageUrl}
+                      alt={`${user.name}'s profile`}
                     width={176}
                     height={176}
-                    className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
-                    unoptimized
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center rounded-full">
+                      className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
+              unoptimized
+            />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center rounded-full">
                     <span className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white">
-                      {user?.name?.charAt(0)?.toUpperCase()}
-                    </span>
-                  </div>
-                )}
-              </div>
+                        {user?.name?.charAt(0)?.toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+          </div>
               {/* Estado online */}
               <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 bg-green-500 border-2 sm:border-4 border-white dark:border-gray-800 rounded-full animate-pulse shadow-glow" title="En línea"></div>
-            </div>
+        </div>
             
             {/* Info y acciones - Optimizado para móvil */}
             <div className="flex-1 text-center lg:text-left w-full">
               <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
-                <div>
+            <div>
                   <div className="flex items-center gap-2 justify-center lg:justify-start">
                     <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
-                      {user?.name}
-                    </h1>
+                    {user?.name}
+                  </h1>
                   </div>
                   <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg">@{user?.username}</p>
                 </div>
@@ -317,8 +317,8 @@ export default function ProfilePage() {
                     <span className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{allies.length}</span>
                   </div>
                   <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Aliados</div>
-                </div>
-              </div>
+            </div>
+            </div>
             </div>
           </div>
         </div>
@@ -410,7 +410,7 @@ export default function ProfilePage() {
                               setIsCommentsModalOpen(true);
                             }}
                           >
-                            <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative group-hover:shadow-lg transition-all duration-300">
+                          <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative group-hover:shadow-lg transition-all duration-300">
                               {/* Mostrar video thumbnail, imagen, o placeholder */}
                               {isVideo && videoThumbnail ? (
                                 <div className="relative w-full h-full">
@@ -444,63 +444,63 @@ export default function ProfilePage() {
                                   </div>
                                 </div>
                               ) : isImage ? (
-                                <PostMediaImage
+                              <PostMediaImage
                                   mediaUrl={firstMedia.url}
-                                  alt="Post"
-                                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50 dark:bg-gray-800 p-2">
-                                  <Squares2X2Icon className="w-6 h-6 sm:w-8 sm:h-8 mb-1" />
-                                  {post.content && (
-                                    <p className="text-xs text-center line-clamp-3 px-1">
-                                      {post.content.substring(0, 50)}...
-                                    </p>
-                                  )}
-                                </div>
-                              )}
+                                alt="Post"
+                                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50 dark:bg-gray-800 p-2">
+                                <Squares2X2Icon className="w-6 h-6 sm:w-8 sm:h-8 mb-1" />
+                                {post.content && (
+                                  <p className="text-xs text-center line-clamp-3 px-1">
+                                    {post.content.substring(0, 50)}...
+                                  </p>
+                                )}
+                              </div>
+                            )}
                               
                               {/* Overlay con estadísticas */}
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                <div className="flex items-center gap-2 sm:gap-4 text-white">
-                                  <div className="flex items-center gap-1">
-                                    <HeartSolidIcon className="w-3 h-3 sm:w-5 sm:h-5" />
-                                    <span className="font-medium text-xs sm:text-sm">{post.likes?.length || 0}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <ChatBubbleLeftIcon className="w-3 h-3 sm:w-5 sm:h-5" />
-                                    <span className="font-medium text-xs sm:text-sm">{post.comments?.length || 0}</span>
-                                  </div>
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                              <div className="flex items-center gap-2 sm:gap-4 text-white">
+                                <div className="flex items-center gap-1">
+                                  <HeartSolidIcon className="w-3 h-3 sm:w-5 sm:h-5" />
+                                  <span className="font-medium text-xs sm:text-sm">{post.likes?.length || 0}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <ChatBubbleLeftIcon className="w-3 h-3 sm:w-5 sm:h-5" />
+                                  <span className="font-medium text-xs sm:text-sm">{post.comments?.length || 0}</span>
                                 </div>
                               </div>
-                              
-                              {/* Indicador de múltiples medios */}
-                              {hasMedia && post.media!.length > 1 && (
-                                <div className="absolute top-2 right-2">
-                                  <div className="bg-black/50 rounded-full p-1">
-                                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                                  </div>
-                                </div>
-                              )}
                             </div>
+                              
+                            {/* Indicador de múltiples medios */}
+                              {hasMedia && post.media!.length > 1 && (
+                              <div className="absolute top-2 right-2">
+                                <div className="bg-black/50 rounded-full p-1">
+                                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                                </div>
+                              </div>
+                            )}
                           </div>
+                        </div>
                         );
                       })}
                     </div>
                   ) : (
-                    <div className="space-y-6">
-                      {userPosts.map((post) => (
-                        <PostCard
-                          key={post._id}
-                          post={post}
-                          onPostUpdate={onPostUpdate}
+                  <div className="space-y-6">
+                    {userPosts.map((post) => (
+                      <PostCard
+                        key={post._id}
+                        post={post}
+                        onPostUpdate={onPostUpdate}
                           onCommentClick={(post) => {
                             setSelectedPost(post);
                             setIsCommentsModalOpen(true);
                           }}
-                        />
-                      ))}
-                    </div>
+                      />
+                    ))}
+                  </div>
                   )}
                 </div>
               </Tab.Panel>
@@ -523,9 +523,9 @@ export default function ProfilePage() {
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {allCommunities.map((community) => (
-                        <Link
-                          key={community._id}
-                          href={`/communities/${community._id}`}
+                      <Link
+                        key={community._id}
+                        href={`/communities/${community._id}`}
                           className="group"
                         >
                           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 transition-all duration-200 hover-lift overflow-hidden">
@@ -575,11 +575,11 @@ export default function ProfilePage() {
                                   </span>
                                 )}
                               </div>
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
+                  </div>
+                </div>
+                      </Link>
+                    ))}
+                  </div>
                   )}
                 </div>
               </Tab.Panel>
@@ -601,27 +601,27 @@ export default function ProfilePage() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                      {allies.map((ally) => (
-                        <Link
-                          key={ally._id}
+                    {allies.map((ally) => (
+                      <Link
+                        key={ally._id}
                           href={`/dashboard/profile/${ally._id}`}
                           className="group"
-                        >
+                      >
                           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 transition-all duration-200 hover-lift text-center">
-                            <AllyImage
-                              profilePicture={ally.profilePicture}
-                              name={ally.name}
+                          <AllyImage
+                            profilePicture={ally.profilePicture}
+                            name={ally.name}
                             />
                             <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
                               {ally.name}
                             </h3>
                             <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                               @{ally.username}
-                            </p>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
                   )}
                 </div>
               </Tab.Panel>
@@ -671,7 +671,7 @@ export default function ProfilePage() {
                       <div className="text-center py-8">
                         <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
                           <TagIcon className="w-8 h-8 text-gray-400" />
-                        </div>
+                      </div>
                         <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                           Sin información adicional
                         </h4>

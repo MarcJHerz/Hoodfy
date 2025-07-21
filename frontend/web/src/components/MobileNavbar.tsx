@@ -202,17 +202,17 @@ export default function MobileNavbar() {
                       <>
                         <button
                             className="w-full text-left py-3 px-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center gap-3"
-                          onClick={() => handleGoTo('/profile/edit')}
+                          onClick={() => handleGoTo('/profile')}
                         >
                           <UserCircleIcon className="h-5 w-5 text-gray-400" />
-                            <span className="text-gray-700 dark:text-gray-300">Editar perfil</span>
+                            <span className="text-gray-700 dark:text-gray-300">Ver perfil</span>
                         </button>
                         <button
                             className="w-full text-left py-3 px-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center gap-3"
-                          onClick={() => handleGoTo('/profile')}
+                          onClick={() => handleGoTo('/profile/edit')}
                         >
                           <Cog6ToothIcon className="h-5 w-5 text-gray-400" />
-                            <span className="text-gray-700 dark:text-gray-300">Configuración</span>
+                            <span className="text-gray-700 dark:text-gray-300">Editar perfil</span>
                         </button>
                       </>
                     ) : isUserProfilePage ? (

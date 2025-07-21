@@ -202,6 +202,23 @@ exports.createPortalSession = async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado.' });
     }
     
+    // Buscar una suscripción del usuario que tenga stripeCustomerId
+    console.log('🔍 Buscando suscripciones del usuario...');
+    const subscription = await Subscription.findOne({
+      user: userId,
+      stripeCustomerId: { $exists: true, $ne: null }
+    }).sort({ createdAt: -1 }); // Más reciente primero
+    
+    if (!subscription || !subscription.stripeCustomerId) {
+      console.log('❌ Usuario no tiene suscripciones con customer ID de Stripe');
+      return res.status(400).json({ 
+        error: 'No tienes suscripciones activas para gestionar',
+        details: 'Debes tener al menos una suscripción para acceder al portal de gestión'
+      });
+    }
+    
+    console.log('✅ Customer ID encontrado:', subscription.stripeCustomerId);
+    
     // Determinar la URL de retorno basada en el origen
     const origin = req.headers.origin || req.headers.referer;
     let returnUrl = process.env.FRONTEND_URL || 'https://www.qahood.com';
@@ -212,10 +229,10 @@ exports.createPortalSession = async (req, res) => {
     
     console.log('🌐 URL de retorno detectada:', returnUrl);
     
-    // Crear sesión del portal
+    // Crear sesión del portal usando customer ID
     const session = await stripe.billingPortal.sessions.create({
-      customer_email: user.email,
-      return_url: returnUrl + '/dashboard',
+      customer: subscription.stripeCustomerId,
+      return_url: returnUrl + '/subscriptions',
     });
     
     console.log('✅ Sesión del portal creada exitosamente');
