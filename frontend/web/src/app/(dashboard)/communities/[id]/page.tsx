@@ -411,19 +411,19 @@ export default function CommunityPage() {
                   {isCreator && (
                     <span className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center shadow-lg">
                       <StarIcon className="w-4 h-4 mr-2" />
-                      Creador
+                      Creator
                     </span>
                   )}
                   {isSubscribed && (
                     <span className="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center shadow-lg">
                       <CheckCircleIcon className="w-4 h-4 mr-2" />
-                      Suscrito
+                      Subscribed
                     </span>
                   )}
                   {community.isPrivate && (
                     <span className="bg-purple-500 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center shadow-lg">
                       <LockClosedIcon className="w-4 h-4 mr-2" />
-                      Privada
+                      Private
                     </span>
                   )}
                 </div>
@@ -440,7 +440,7 @@ export default function CommunityPage() {
                   <div className="flex items-center space-x-2">
                     <UserGroupIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                     <span className="font-semibold">{community.members?.length || 0}</span>
-                    <span className="text-sm sm:text-base">miembros</span>
+                    <span className="text-sm sm:text-base">members</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <EyeIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
@@ -486,12 +486,12 @@ export default function CommunityPage() {
                   <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-white/30 transition-colors">
                     <ChatBubbleLeftRightIcon className="w-8 h-8" />
                   </div>
-                  <h3 className="text-xl font-bold mb-2">Chat Grupal</h3>
+                  <h3 className="text-xl font-bold mb-2">Group Chat</h3>
                   <p className="text-white/80 text-sm mb-4">
-                    Conecta con todos los miembros de la comunidad
+                    Connect with all community members
                   </p>
                   <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-sm font-medium">
-                    Abrir chat
+                    Open chat
                   </div>
                 </div>
               </div>
@@ -526,7 +526,7 @@ export default function CommunityPage() {
                       {community.creator.name}
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Fundador de la comunidad
+                      Community founder
                     </p>
                   </div>
                 </Link>
@@ -543,7 +543,7 @@ export default function CommunityPage() {
                   {community.members?.length || 0}
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  {community.members?.length === 1 ? 'miembro' : 'miembros'}
+                  {community.members?.length === 1 ? 'member' : 'members'}
                 </p>
               </div>
             </div>
@@ -569,7 +569,7 @@ export default function CommunityPage() {
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
                 >
-                  Acerca de
+                  About
                 </button>
                 <button
                   onClick={() => setActiveTab('members')}
@@ -579,7 +579,7 @@ export default function CommunityPage() {
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
                 >
-                  Miembros
+                  Members
                 </button>
               </nav>
             </div>
@@ -615,16 +615,16 @@ export default function CommunityPage() {
                         <LockClosedIcon className="w-10 h-10 text-amber-600 dark:text-amber-400" />
                       </div>
                       <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-                        Contenido exclusivo
+                        Exclusive content
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                        Únete a esta comunidad para acceder a posts exclusivos y conectar con otros miembros
+                        Join this community to access exclusive posts and connect with other members
                       </p>
                       <button
                         onClick={handleSubscribe}
                         className="px-8 py-4 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover-lift"
                       >
-                        Únete ahora
+                        Join now
                       </button>
                     </div>
                   </div>
@@ -636,7 +636,7 @@ export default function CommunityPage() {
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
                   <SparklesIcon className="w-8 h-8 mr-3 text-primary-600 dark:text-primary-400" />
-                  Acerca de {community.name}
+                  About {community.name}
                 </h2>
                 
                 <div className="prose prose-lg dark:prose-invert max-w-none">
@@ -671,7 +671,7 @@ export default function CommunityPage() {
                 {community.creator && (
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
                     <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                      Creado por
+                      Created by
                     </h3>
                     <Link
                       href={`/profile/${community.creator._id}`}
@@ -695,7 +695,7 @@ export default function CommunityPage() {
                           {community.creator.name}
                         </p>
                         <p className="text-gray-600 dark:text-gray-400">
-                          Fundador de la comunidad
+                          Community founder
                         </p>
                         {community.createdAt && (
                           <p className="text-sm text-gray-500 dark:text-gray-500">

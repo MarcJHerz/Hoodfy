@@ -12,11 +12,11 @@ export default function TrendingPage() {
             Trending
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Descubre las publicaciones y comunidades más populares
+            Discover the most popular posts and communities
           </p>
           <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
             <p className="text-yellow-800 dark:text-yellow-200 text-sm">
-              🚧 Esta funcionalidad está en desarrollo. Pronto podrás ver el contenido trending.
+              🚧 This feature is under development. Soon you will be able to see the trending content.
             </p>
           </div>
         </div>

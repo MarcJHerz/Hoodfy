@@ -37,13 +37,13 @@ export default function CreateCommunityPage() {
 
     // Validar tipo de archivo
     if (!file.type.startsWith('image/')) {
-      toast.error('Por favor, selecciona una imagen válida');
+      toast.error('Please select a valid image');
       return;
     }
 
     // Validar tamaño (máximo 50MB)
     if (file.size > 50 * 1024 * 1024) {
-      toast.error('La imagen no debe superar los 50MB');
+      toast.error('The image must be less than 50MB');
       return;
     }
 
@@ -68,33 +68,33 @@ export default function CreateCommunityPage() {
 
     // Validaciones
     if (!formData.name.trim()) {
-      toast.error('El nombre de la comunidad es requerido');
+      toast.error('The community name is required');
       return;
     }
 
     if (!formData.description.trim()) {
-      toast.error('La descripción es requerida');
+      toast.error('The description is required');
       return;
     }
 
     if (formData.name.length < 3) {
-      toast.error('El nombre debe tener al menos 3 caracteres');
+      toast.error('The name must have at least 3 characters');
       return;
     }
 
     if (formData.description.length < 10) {
-      toast.error('La descripción debe tener al menos 10 caracteres');
+      toast.error('The description must have at least 10 characters');
       return;
     }
 
     // Validar precio si no es gratis
     if (formData.priceType === 'predefined' && !predefinedPrices.includes(formData.price)) {
-      toast.error('Por favor, selecciona un precio válido');
+      toast.error('Please select a valid price');
       return;
     }
 
     if (formData.priceType === 'custom' && (formData.price <= 0 || formData.price > 1000)) {
-      toast.error('El precio personalizado debe estar entre $1 y $1000');
+      toast.error('The custom price must be between $1 and $1000');
       return;
     }
 
@@ -115,11 +115,11 @@ export default function CreateCommunityPage() {
           'Content-Type': 'multipart/form-data',
         },
       });
-      toast.success('¡Comunidad creada con éxito!');
+      toast.success('Community created successfully');
       router.push('/communities');
     } catch (error: any) {
-      console.error('Error al crear comunidad:', error);
-      toast.error(error.response?.data?.error || 'Error al crear la comunidad');
+      console.error('Error creating community:', error);
+      toast.error(error.response?.data?.error || 'Error creating the community');
     } finally {
       setLoading(false);
     }
@@ -137,10 +137,10 @@ export default function CreateCommunityPage() {
               </div>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Crea tu Comunidad
+              Create your Community
             </h1>
             <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Dale vida a tu visión. Crea un espacio donde las personas puedan conectar, aprender y crecer juntas.
+              Give life to your vision. Create a space where people can connect, learn and grow together.
             </p>
           </div>
         </div>
@@ -156,8 +156,8 @@ export default function CreateCommunityPage() {
                   <UserGroupIcon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Información Básica</h2>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Configura los datos fundamentales de tu comunidad</p>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Basic Information</h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Configure the fundamental data of your community</p>
                 </div>
               </div>
               <div className="hidden sm:flex items-center space-x-2">
@@ -166,7 +166,7 @@ export default function CreateCommunityPage() {
                   <div className="w-3 h-3 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
                   <div className="w-3 h-3 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
                 </div>
-                <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">Paso 1 de 3</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">Step 1 of 3</span>
               </div>
             </div>
           </div>
@@ -176,7 +176,7 @@ export default function CreateCommunityPage() {
             <div className="space-y-3">
               <label htmlFor="name" className="flex items-center text-base font-semibold text-gray-900 dark:text-gray-100">
                 <div className="w-2 h-2 bg-primary-500 rounded-full mr-3"></div>
-                Nombre de la comunidad
+                Community name
               </label>
               <div className="relative">
                 <input
@@ -186,7 +186,7 @@ export default function CreateCommunityPage() {
                   value={formData.name}
                   onChange={handleInputChange}
                   className="w-full px-4 py-4 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-2xl focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 dark:focus:border-primary-400 transition-all duration-200 text-lg"
-                  placeholder="Ej: Desarrolladores React, Artistas Digitales, Emprendedores..."
+                  placeholder="Ex: React Developers, Digital Artists, Entrepreneurs..."
                   maxLength={50}
                 />
                 <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
@@ -203,7 +203,7 @@ export default function CreateCommunityPage() {
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
                 <SparklesIcon className="w-4 h-4 mr-1" />
-                Este será el nombre público de tu comunidad
+                This will be the public name of your community
               </p>
             </div>
 
@@ -211,7 +211,7 @@ export default function CreateCommunityPage() {
             <div className="space-y-3">
               <label htmlFor="description" className="flex items-center text-base font-semibold text-gray-900 dark:text-gray-100">
                 <div className="w-2 h-2 bg-accent-500 rounded-full mr-3"></div>
-                Descripción
+                Description
               </label>
               <div className="relative">
                 <textarea
@@ -221,7 +221,7 @@ export default function CreateCommunityPage() {
                   onChange={handleInputChange}
                   rows={4}
                   className="w-full px-4 py-4 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-2xl focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 dark:focus:border-primary-400 transition-all duration-200 text-lg resize-none"
-                  placeholder="Describe de qué trata tu comunidad, qué tipo de contenido compartirán, quién puede unirse..."
+                  placeholder="Describe what your community is about, what type of content will be shared, who can join..."
                   maxLength={500}
                 />
                 <div className="absolute bottom-4 right-4 pointer-events-none">
@@ -238,7 +238,7 @@ export default function CreateCommunityPage() {
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
                 <SparklesIcon className="w-4 h-4 mr-1" />
-                Una buena descripción ayuda a las personas a entender el valor de tu comunidad
+                A good description helps people understand the value of your community
               </p>
             </div>
 
@@ -247,7 +247,7 @@ export default function CreateCommunityPage() {
               <label className="flex items-center text-base font-semibold text-gray-900 dark:text-gray-100">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
                 <CurrencyDollarIcon className="w-5 h-5 mr-2" />
-                Configuración de Precio
+                Price configuration
               </label>
               
               {/* Tipo de precio */}
@@ -267,8 +267,8 @@ export default function CreateCommunityPage() {
                       className="sr-only"
                     />
                     <div className="flex flex-col">
-                      <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">Gratuita</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Cualquiera puede unirse</div>
+                      <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">Free</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Anyone can join</div>
                     </div>
                   </label>
 
@@ -286,8 +286,8 @@ export default function CreateCommunityPage() {
                       className="sr-only"
                     />
                     <div className="flex flex-col">
-                      <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">Precio Fijo</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Selecciona un precio estándar</div>
+                      <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">Fixed Price</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Select a standard price</div>
                     </div>
                   </label>
 
@@ -305,8 +305,8 @@ export default function CreateCommunityPage() {
                       className="sr-only"
                     />
                     <div className="flex flex-col">
-                      <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">Personalizado</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Define tu propio precio</div>
+                      <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">Custom</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Define your own price</div>
                     </div>
                   </label>
                 </div>
@@ -315,7 +315,7 @@ export default function CreateCommunityPage() {
                 {formData.priceType === 'predefined' && (
                   <div className="space-y-3">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Selecciona el precio mensual
+                      Select the monthly price
                     </label>
                     <div className="grid grid-cols-5 gap-3">
                       {predefinedPrices.map((priceOption) => (
@@ -346,7 +346,7 @@ export default function CreateCommunityPage() {
                 {formData.priceType === 'custom' && (
                   <div className="space-y-3">
                     <label htmlFor="customPrice" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Precio mensual personalizado (USD)
+                      Custom monthly price (USD)
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -364,7 +364,7 @@ export default function CreateCommunityPage() {
                       />
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Mínimo: $1 USD • Máximo: $1000 USD
+                      Minimum: $1 USD • Maximum: $1000 USD
                     </p>
                   </div>
                 )}
@@ -375,8 +375,8 @@ export default function CreateCommunityPage() {
             <div className="space-y-3">
               <label className="flex items-center text-base font-semibold text-gray-900 dark:text-gray-100">
                 <div className="w-2 h-2 bg-success-500 rounded-full mr-3"></div>
-                Imagen de portada
-                <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">(Opcional)</span>
+                Cover image
+                <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">(Optional)</span>
               </label>
               
               <div className="relative">
@@ -407,16 +407,16 @@ export default function CreateCommunityPage() {
                         <PhotoIcon className="w-8 h-8 text-primary-600 dark:text-primary-400" />
                       </div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                        Agregar imagen de portada
+                        Add cover image
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400 mb-4">
-                        Sube una imagen que represente tu comunidad
+                        Upload an image that represents your community
                       </p>
                       <div className="inline-flex items-center px-4 py-2 bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 rounded-lg text-sm font-medium">
-                        Seleccionar archivo
+                        Select file
                       </div>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-                        PNG, JPG, GIF, HEIC hasta 50MB • Recomendado: 1200x630px
+                        PNG, JPG, GIF, HEIC up to 50MB • Recommended: 1200x630px
                       </p>
                     </div>
                   </div>
@@ -442,7 +442,7 @@ export default function CreateCommunityPage() {
                 disabled={loading}
                 className="flex-1 sm:flex-none px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-400 disabled:opacity-50 transition-all duration-200 font-medium"
               >
-                Cancelar
+                Cancel
               </button>
               <button
                 type="submit"
@@ -452,12 +452,12 @@ export default function CreateCommunityPage() {
                 {loading ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                    <span>Creando comunidad...</span>
+                    <span>Creating community...</span>
                   </>
                 ) : (
                   <>
                     <SparklesIcon className="w-5 h-5" />
-                    <span>Crear mi comunidad</span>
+                    <span>Create my community</span>
                   </>
                 )}
               </button>

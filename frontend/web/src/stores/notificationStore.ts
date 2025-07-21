@@ -28,6 +28,7 @@ interface NotificationState {
   isLoading: boolean;
   error: string | null;
   lastFetch: number | null;
+  newNotifications: Notification[]; // Para toasts
   
   // Actions
   fetchNotifications: (params?: { page?: number; limit?: number; unreadOnly?: boolean }) => Promise<void>;
@@ -39,6 +40,8 @@ interface NotificationState {
   addNotification: (notification: Notification) => void;
   clearError: () => void;
   clearNotifications: () => void;
+  addNewNotification: (notification: Notification) => void;
+  clearNewNotifications: () => void;
   
   // Utility functions
   getUnreadNotifications: () => Notification[];
@@ -54,6 +57,7 @@ export const useNotificationStore = create<NotificationState>()(
       isLoading: false,
       error: null,
       lastFetch: null,
+      newNotifications: [],
 
       // Obtener notificaciones
       fetchNotifications: async (params = {}) => {
@@ -192,6 +196,20 @@ export const useNotificationStore = create<NotificationState>()(
         error: null, 
         lastFetch: null 
       }),
+
+      // Agregar nueva notificación (para toasts)
+      addNewNotification: (notification: Notification) => {
+        set(state => ({
+          newNotifications: [notification, ...state.newNotifications],
+          notifications: [notification, ...state.notifications],
+          unreadCount: !notification.read ? state.unreadCount + 1 : state.unreadCount
+        }));
+      },
+
+      // Limpiar nuevas notificaciones (después de mostrar toasts)
+      clearNewNotifications: () => {
+        set({ newNotifications: [] });
+      },
 
       // Funciones utilitarias
       getUnreadNotifications: () => 

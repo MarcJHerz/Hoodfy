@@ -125,14 +125,14 @@ router.get('/my-subscriptions', verifyToken, async (req, res) => {
     }
     
     const subscriptions = await Subscription.find({ 
-      user: req.userId,
-      status: 'active' // Solo suscripciones activas
+      user: req.userId
+      // Removed status filter to show all subscriptions (active, canceled, etc.)
     }).populate('community', 'name description coverImage members creator');
 
     // Filtramos suscripciones sin comunidad (por si acaso alguna está corrupta)
     const filtered = subscriptions.filter(sub => sub.community !== null);
     
-    res.json(filtered);
+    res.json({ data: filtered });
   } catch (err) {
     console.error('❌ Error al obtener suscripciones:', err);
     res.status(500).json({ error: 'Error al obtener suscripciones' });

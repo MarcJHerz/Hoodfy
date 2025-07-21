@@ -11,37 +11,36 @@ interface ToastNotification extends Notification {
 
 export default function NotificationToastManager() {
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
-  const { notifications, markAsRead } = useNotificationStore();
+  const { newNotifications, markAsRead, clearNewNotifications } = useNotificationStore();
 
   // Escuchar nuevas notificaciones
   useEffect(() => {
-    // Obtener la última notificación
-    if (notifications.length > 0) {
-      const latestNotification = notifications[0];
+    // Procesar todas las nuevas notificaciones
+    if (newNotifications.length > 0) {
+      const newToasts: ToastNotification[] = [];
       
-      // Verificar si es una notificación nueva (creada en los últimos 30 segundos)
-      const createdAt = new Date(latestNotification.createdAt);
-      const now = new Date();
-      const diffInSeconds = (now.getTime() - createdAt.getTime()) / 1000;
-      
-      // Si es nueva y no leída, mostrar como toast
-      if (diffInSeconds < 30 && !latestNotification.read) {
-        const toastId = `toast-${latestNotification._id}-${Date.now()}`;
-        
-        // Verificar si ya está en los toasts
-        const existingToast = toasts.find(t => t._id === latestNotification._id);
-        if (!existingToast) {
-          const toastNotification: ToastNotification = {
-            ...latestNotification,
+      newNotifications.forEach(notification => {
+        // Verificar si ya está en los toasts actuales
+        const existingToast = toasts.find(t => t._id === notification._id);
+        if (!existingToast && !notification.read) {
+          const toastId = `toast-${notification._id}-${Date.now()}`;
+          newToasts.push({
+            ...notification,
             id: toastId,
             showAsToast: true
-          };
-          
-          setToasts(prev => [toastNotification, ...prev.slice(0, 2)]); // Máximo 3 toasts
+          });
         }
+      });
+
+      if (newToasts.length > 0) {
+        // Agregar nuevos toasts (máximo 3 total)
+        setToasts(prev => [...newToasts, ...prev].slice(0, 3));
       }
+
+      // Limpiar las nuevas notificaciones después de procesarlas
+      clearNewNotifications();
     }
-  }, [notifications, toasts]);
+  }, [newNotifications, toasts, clearNewNotifications]);
 
   // Remover toast
   const removeToast = (toastId: string) => {

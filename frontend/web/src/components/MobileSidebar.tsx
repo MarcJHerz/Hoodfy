@@ -78,7 +78,7 @@ export default function MobileSidebar() {
       icon: HomeIcon,
       solidIcon: HomeSolid,
       color: 'from-blue-500 to-cyan-500',
-      description: 'Todas las publicaciones'
+      description: 'All posts'
     },
     {
       name: 'Trending',
@@ -86,7 +86,7 @@ export default function MobileSidebar() {
       icon: FireIcon,
       solidIcon: FireSolid,
       color: 'from-orange-500 to-red-500',
-      description: 'Lo más popular'
+      description: 'Most popular'
     },
     {
       name: 'My communities',

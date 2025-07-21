@@ -17,11 +17,13 @@ import {
 } from '@heroicons/react/24/outline';
 import dynamic from 'next/dynamic';
 import { useAuthStore, useUIStore } from '@/stores';
+import { useNotificationStore } from '@/stores/notificationStore';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
 import Logo from './Logo';
 
 const SearchModal = dynamic(() => import('./SearchModal'), { ssr: false });
+const NotificationDropdown = dynamic(() => import('./notifications/NotificationDropdown'), { ssr: false });
 
 // Función para detectar automáticamente qué API usar según el dominio
 const getApiUrl = () => {
@@ -62,15 +64,16 @@ export default function MobileNavbar() {
     closeSearchModal,
     setProfileMenuOpen
   } = useUIStore();
+  const { unreadCount } = useNotificationStore();
 
   const isProfilePage = pathname === '/profile';
   const isUserProfilePage = pathname.startsWith('/profile/') && pathname !== '/profile';
 
   // Items de navegación para la barra inferior
   const bottomNavItems = [
-    { href: '/dashboard', icon: HomeIcon, label: 'Inicio' },
-    { href: '/communities', icon: UsersIcon, label: 'Comunidades' },
-    { href: '/messages', icon: ChatBubbleLeftIcon, label: 'Mensajes' },
+    { href: '/dashboard', icon: HomeIcon, label: 'Home' },
+    { href: '/communities', icon: UsersIcon, label: 'Communities' },
+    { href: '/messages', icon: ChatBubbleLeftIcon, label: 'Messages' },
   ];
 
   // Efecto para theme
@@ -150,16 +153,7 @@ export default function MobileNavbar() {
         {/* Iconos de acción */}
         <div className="flex items-center space-x-2">
           {/* Notificaciones */}
-          <button
-            onClick={() => router.push('/dashboard/notifications')}
-              className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition"
-            title="Notificaciones"
-            aria-label="Notificaciones"
-            type="button"
-          >
-            <BellIcon className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-900"></span>
-          </button>
+          {user && <NotificationDropdown />}
           
           {/* Perfil */}
           {user && (
@@ -275,7 +269,7 @@ export default function MobileNavbar() {
                       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                       </svg>
-                      <span>{isLoading ? 'Cerrando sesión...' : 'Cerrar sesión'}</span>
+                      <span>{isLoading ? 'Closing session...' : 'Close session'}</span>
                     </button>
                   </div>
                 </div>

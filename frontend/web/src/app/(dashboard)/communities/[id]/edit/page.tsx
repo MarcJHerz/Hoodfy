@@ -31,8 +31,8 @@ export default function EditCommunityPage({ params }: { params: { id: string } }
           setPreviewUrl(community.coverImage);
         }
       } catch (error) {
-        console.error('Error al cargar la comunidad:', error);
-        toast.error('Error al cargar la comunidad');
+        console.error('Error loading community:', error);
+        toast.error('Error loading community');
       }
     };
     fetchCommunity();
@@ -56,7 +56,7 @@ export default function EditCommunityPage({ params }: { params: { id: string } }
     }
 
     if (file.size > 50 * 1024 * 1024) {
-      toast.error('La imagen no debe superar los 50MB');
+      toast.error('The image must be less than 50MB');
       return;
     }
 
@@ -80,12 +80,12 @@ export default function EditCommunityPage({ params }: { params: { id: string } }
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      toast.error('El nombre de la comunidad es requerido');
+      toast.error('The community name is required');
       return;
     }
 
     if (!formData.description.trim()) {
-      toast.error('La descripción es requerida');
+      toast.error('The description is required');
       return;
     }
 
@@ -103,10 +103,10 @@ export default function EditCommunityPage({ params }: { params: { id: string } }
           'Content-Type': 'multipart/form-data',
         },
       });
-      toast.success('¡Comunidad actualizada con éxito!');
+      toast.success('Community updated successfully!');
       router.push(`/communities/${params.id}`);
     } catch (error: any) {
-      console.error('Error al actualizar comunidad:', error);
+      console.error('Error updating community:', error);
       toast.error(error.response?.data?.message || 'Error al actualizar la comunidad');
     } finally {
       setLoading(false);
@@ -121,7 +121,7 @@ export default function EditCommunityPage({ params }: { params: { id: string } }
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre de la comunidad
+              Community name
             </label>
             <input
               type="text"
@@ -130,7 +130,7 @@ export default function EditCommunityPage({ params }: { params: { id: string } }
               value={formData.name}
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Ej: Programadores React"
+              placeholder="Ex: Programmers React"
               maxLength={50}
             />
             <p className="mt-1 text-sm text-gray-500">
@@ -140,7 +140,7 @@ export default function EditCommunityPage({ params }: { params: { id: string } }
 
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-              Descripción
+              Description
             </label>
             <textarea
               id="description"
@@ -159,7 +159,7 @@ export default function EditCommunityPage({ params }: { params: { id: string } }
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Imagen de portada
+              Cover image
             </label>
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
               {previewUrl ? (
@@ -186,7 +186,7 @@ export default function EditCommunityPage({ params }: { params: { id: string } }
                       htmlFor="coverImage"
                       className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
                     >
-                      <span>Subir una imagen</span>
+                      <span>Upload an image</span>
                       <input
                         id="coverImage"
                         name="coverImage"
@@ -197,10 +197,10 @@ export default function EditCommunityPage({ params }: { params: { id: string } }
                         className="sr-only"
                       />
                     </label>
-                    <p className="pl-1">o arrastrar y soltar</p>
+                    <p className="pl-1">or drag and drop</p>
                   </div>
                   <p className="text-xs text-gray-500">
-                    PNG, JPG, GIF, HEIC hasta 50MB
+                    PNG, JPG, GIF, HEIC up to 50MB
                   </p>
                 </div>
               )}
@@ -213,14 +213,14 @@ export default function EditCommunityPage({ params }: { params: { id: string } }
               onClick={() => router.back()}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
-              Cancelar
+              Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
               className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
             >
-              {loading ? 'Guardando...' : 'Guardar cambios'}
+              {loading ? 'Saving...' : 'Save changes'}
             </button>
           </div>
         </form>

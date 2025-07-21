@@ -2,6 +2,7 @@
 
 import { useNotificationStore } from '@/stores/notificationStore';
 import { useEffect, useState, useRef } from 'react';
+import { BellIcon } from '@heroicons/react/24/outline';
 import NotificationItem from './NotificationItem';
 import NotificationBadge from './NotificationBadge';
 
@@ -21,7 +22,8 @@ export default function NotificationDropdown({
     error,
     fetchNotifications,
     markAllAsRead,
-    clearError
+    clearError,
+    addNewNotification
   } = useNotificationStore();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -88,25 +90,7 @@ export default function NotificationDropdown({
         aria-haspopup="true"
       >
         {/* Icono de campana */}
-        <svg 
-          className="w-6 h-6" 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M15 17h5l-3.5-3.5a12.995 12.995 0 0 1-.5-8.5c0-1.5-3-2.5-8-2.5s-8 1-8 2.5c0 3.5 0 6.5-.5 8.5L7 17h8z" 
-          />
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M13.73 21a2 2 0 0 1-3.46 0" 
-          />
-        </svg>
+        <BellIcon className="w-6 h-6" />
 
         {/* Badge de notificaciones no leídas */}
         {unreadCount > 0 && (
@@ -209,8 +193,32 @@ export default function NotificationDropdown({
           </div>
 
           {/* Footer */}
-          {notifications.length > 10 && (
-            <div className="border-t border-gray-200 dark:border-gray-700 p-3">
+          <div className="border-t border-gray-200 dark:border-gray-700 p-3 space-y-2">
+            {/* Test Toast Button (temporal) */}
+            <button
+              onClick={() => {
+                const testNotification = {
+                  _id: 'test-' + Date.now(),
+                  user: 'current-user',
+                  type: 'new_post' as const,
+                  title: 'Nueva publicación de prueba',
+                  message: 'Este es un toast de prueba para verificar que funciona correctamente',
+                  read: false,
+                  createdAt: new Date().toISOString(),
+                  expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                  metadata: {
+                    actionUrl: '/communities/test'
+                  }
+                };
+                addNewNotification(testNotification);
+                handleClose();
+              }}
+              className="w-full px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            >
+              🧪 Probar Toast (Debug)
+            </button>
+            
+            {notifications.length > 10 && (
               <button
                 onClick={() => {
                   handleClose();
@@ -225,8 +233,8 @@ export default function NotificationDropdown({
               >
                 Ver todas las notificaciones
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </div>
