@@ -29,7 +29,15 @@ interface Subscription {
 }
 
 // Componente separado para cada tarjeta de suscripción
-function SubscriptionCard({ subscription }: { subscription: Subscription }) {
+function SubscriptionCard({ 
+  subscription, 
+  onOpenPortal, 
+  isOpeningPortal 
+}: { 
+  subscription: Subscription;
+  onOpenPortal: () => void;
+  isOpeningPortal: boolean;
+}) {
   const { url: coverImageUrl } = useImageUrl(subscription.community.coverImage);
   
   // Función para calcular el estado visual
@@ -48,7 +56,7 @@ function SubscriptionCard({ subscription }: { subscription: Subscription }) {
     }
   };
 
-  // Función para calcular días hasta próximo cobro
+  // Función para calcular días hasta próximo cobro  
   const getDaysUntilNextBilling = () => {
     if (!subscription.endDate || subscription.status !== 'active') return null;
     const now = new Date();
@@ -77,10 +85,10 @@ function SubscriptionCard({ subscription }: { subscription: Subscription }) {
             </div>
           )}
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {subscription.community.name}
             </h3>
-            <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(subscription.status)}`}>
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(subscription.status)}`}>
               {subscription.status === 'active' ? 'Activa' :
                subscription.status === 'canceled' ? 'Cancelada' :
                subscription.status === 'expired' ? 'Expirada' :
@@ -92,44 +100,94 @@ function SubscriptionCard({ subscription }: { subscription: Subscription }) {
 
       {/* Información de la suscripción */}
       <div className="space-y-3">
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Fecha de inicio:</span>
-          <span className="text-gray-900 dark:text-gray-100">
-            {new Date(subscription.startDate).toLocaleDateString('es-ES')}
+        {/* Precio mensual */}
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-gray-600 dark:text-gray-400">Precio mensual:</span>
+          <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            ${subscription.amount}/mes
           </span>
         </div>
 
+        {/* Fecha de inicio */}
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-gray-600 dark:text-gray-400">Inicio:</span>
+          <span className="text-sm text-gray-900 dark:text-gray-100">
+            {new Date(subscription.startDate).toLocaleDateString('es-ES', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </span>
+        </div>
+
+        {/* Próximo cobro o estado */}
+        {subscription.status === 'active' && daysUntilBilling !== null && (
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Próximo cobro:</span>
+            <span className="text-sm text-gray-900 dark:text-gray-100">
+              En {daysUntilBilling} días
+            </span>
+          </div>
+        )}
+
+        {/* Fecha de finalización/renovación */}
         {subscription.endDate && (
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600 dark:text-gray-400">Próximo cobro:</span>
-            <span className="text-gray-900 dark:text-gray-100">
-              {new Date(subscription.endDate).toLocaleDateString('es-ES')}
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {subscription.status === 'active' ? 'Se renueva:' : 'Finalizó:'}
+            </span>
+            <span className="text-sm text-gray-900 dark:text-gray-100">
+              {new Date(subscription.endDate).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long', 
+                day: 'numeric'
+              })}
             </span>
           </div>
         )}
 
-        {daysUntilBilling !== null && subscription.status === 'active' && (
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600 dark:text-gray-400">Días restantes:</span>
-            <span className={`font-medium ${daysUntilBilling <= 7 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-900 dark:text-gray-100'}`}>
-              {daysUntilBilling} días
-            </span>
-          </div>
-        )}
-
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Monto:</span>
-          <span className="text-gray-900 dark:text-gray-100 font-semibold">
-            ${subscription.amount}
-          </span>
-        </div>
-
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Método de pago:</span>
-          <span className="text-gray-900 dark:text-gray-100">
+        {/* Método de pago */}
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-gray-600 dark:text-gray-400">Método de pago:</span>
+          <span className="text-sm text-gray-900 dark:text-gray-100 capitalize">
             {subscription.paymentMethod}
           </span>
         </div>
+
+        {/* Alertas especiales */}
+        {subscription.status === 'payment_failed' && (
+          <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-sm text-red-700 dark:text-red-400">
+                Problem with the payment. Update your payment method.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Acciones individuales */}
+      <div className="mt-6 flex space-x-3">
+        <a
+          href={`/communities/${subscription.community._id}`}
+          className="flex-1 text-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+        >
+          View Community
+        </a>
+        
+        {/* Botón individual para gestionar esta suscripción específica */}
+        {subscription.status === 'active' && subscription.stripeCustomerId && (
+          <button
+            onClick={onOpenPortal}
+            disabled={isOpeningPortal}
+            className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors duration-200"
+          >
+            {isOpeningPortal ? 'Abriendo...' : 'Gestionar'}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -166,10 +224,12 @@ export default function SubscriptionsPage() {
     }
   };
 
-  // Abrir Stripe Portal
-  const openStripePortal = async () => {
+  // Abrir Stripe Portal para suscripción específica
+  const openStripePortalForSubscription = async (subscription: Subscription) => {
     try {
       setIsOpeningPortal(true);
+      setError(null);
+      
       const response = await stripeService.createPortalSession();
       
       // Redirigir al portal de Stripe
@@ -179,7 +239,7 @@ export default function SubscriptionsPage() {
       
       // Manejar el error específico de no tener suscripciones
       if (error.response?.status === 400) {
-        setError(error.response.data.details || 'No tienes suscripciones para gestionar');
+        setError(error.response.data.details || 'No se puede gestionar esta suscripción');
       } else {
         setError('Error abriendo el portal de gestión de pagos');
       }
@@ -234,10 +294,10 @@ export default function SubscriptionsPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Acceso requerido
+            Access required
           </h2>
           <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Debes iniciar sesión para ver tus suscripciones.
+            You must be logged in to view your subscriptions.
           </p>
         </div>
       </div>
@@ -251,43 +311,14 @@ export default function SubscriptionsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              Mis Suscripciones
+              My Subscriptions
             </h1>
             <p className="mt-2 text-gray-600 dark:text-gray-400">
-              Gestiona todas tus suscripciones activas y pagos
+              Manage all your active subscriptions and payments
             </p>
           </div>
           
-          {/* Botón de Stripe Portal - Solo si hay suscripciones */}
-          {!isLoading && subscriptions.length > 0 && (
-            <div className="mt-4 sm:mt-0">
-              <button
-                onClick={openStripePortal}
-                disabled={isOpeningPortal}
-                className="
-                  inline-flex items-center px-4 py-2
-                  bg-blue-600 text-white rounded-lg
-                  hover:bg-blue-700 disabled:opacity-50
-                  transition-colors duration-200
-                "
-              >
-                {isOpeningPortal ? (
-                  <>
-                    <div className="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    Abriendo...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    Gestionar Pagos
-                  </>
-                )}
-              </button>
-            </div>
-          )}
+
         </div>
       </div>
 
@@ -311,7 +342,7 @@ export default function SubscriptionsPage() {
             onClick={fetchSubscriptions}
             className="mt-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-sm hover:underline"
           >
-            Reintentar
+            Try again
           </button>
         </div>
       )}
@@ -323,16 +354,16 @@ export default function SubscriptionsPage() {
             <div className="text-center py-12">
               <div className="text-6xl mb-4">💳</div>
               <h3 className="text-xl font-medium text-gray-900 dark:text-gray-100 mb-2">
-                No tienes suscripciones activas
+                You don't have any active subscriptions
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Explora comunidades y suscríbete para acceder a contenido exclusivo y gestionar tus pagos
+                Explore communities and subscribe to access exclusive content and manage your payments
               </p>
               <a
                 href="/communities"
                 className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
               >
-                Explorar Comunidades
+                Explore Communities
               </a>
             </div>
           ) : (
@@ -341,6 +372,8 @@ export default function SubscriptionsPage() {
                 <SubscriptionCard
                   key={subscription._id}
                   subscription={subscription}
+                  onOpenPortal={() => openStripePortalForSubscription(subscription)}
+                  isOpeningPortal={isOpeningPortal}
                 />
               ))}
             </div>
