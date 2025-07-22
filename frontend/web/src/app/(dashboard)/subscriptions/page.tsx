@@ -30,15 +30,48 @@ interface Subscription {
 
 // Componente separado para cada tarjeta de suscripción
 function SubscriptionCard({ 
-  subscription, 
-  onOpenPortal, 
-  isOpeningPortal 
+  subscription
 }: { 
   subscription: Subscription;
-  onOpenPortal: () => void;
-  isOpeningPortal: boolean;
 }) {
+  const [isOpeningPortal, setIsOpeningPortal] = useState(false);
   const { url: coverImageUrl } = useImageUrl(subscription.community.coverImage);
+
+  // Función individual para abrir portal de esta suscripción específica
+  const openPortalForThisSubscription = async () => {
+    try {
+      setIsOpeningPortal(true);
+      
+      console.log('🎯 Opening portal for subscription:', subscription._id, 'Community:', subscription.community.name);
+      
+      // Pasar el ID de esta suscripción específica
+      const response = await stripeService.createPortalSession(subscription._id);
+      
+      // Usar window.location.href en iPhone para evitar pop-up blockers
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (isIOS) {
+        window.location.href = response.url;
+      } else {
+        // Abrir en nueva pestaña en otros dispositivos
+        window.open(response.url, '_blank');
+      }
+    } catch (error: any) {
+      console.error('Error opening Stripe portal for subscription:', subscription._id, error);
+      
+      // Manejo de errores más específico
+      let errorMessage = 'Error opening payment management portal. Please try again.';
+      
+      if (error.response?.status === 400) {
+        errorMessage = error.response.data.details || error.response.data.error || errorMessage;
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Subscription not found. Please refresh the page.';
+      }
+      
+      alert(errorMessage);
+    } finally {
+      setIsOpeningPortal(false);
+    }
+  };
   
   // Función para calcular el estado visual
   const getStatusColor = (status: string) => {
@@ -179,15 +212,19 @@ function SubscriptionCard({
         </a>
         
         {/* Botón individual para gestionar esta suscripción específica */}
-        {subscription.status === 'active' && subscription.stripeCustomerId && (
+        {subscription.status === 'active' && subscription.stripeCustomerId ? (
           <button
-            onClick={onOpenPortal}
+            onClick={openPortalForThisSubscription}
             disabled={isOpeningPortal}
             className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors duration-200"
           >
-            {isOpeningPortal ? 'Abriendo...' : 'Gestionar'}
+            {isOpeningPortal ? 'Loading...' : 'Manage'}
           </button>
-        )}
+        ) : subscription.status === 'active' && !subscription.stripeCustomerId ? (
+          <div className="flex-1 px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-center rounded-lg text-sm">
+            Legacy subscription
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -198,7 +235,6 @@ export default function SubscriptionsPage() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isOpeningPortal, setIsOpeningPortal] = useState(false);
 
   // Cargar suscripciones al montar el componente
   useEffect(() => {
@@ -215,7 +251,30 @@ export default function SubscriptionsPage() {
       
       const response = await subscriptionsApi.getMySubscriptions();
       // El backend devuelve directamente el array
-      setSubscriptions(response.data);
+      const subs = response.data;
+      setSubscriptions(subs);
+      
+      // Debug: Reportar suscripciones sin stripeCustomerId
+      const subsWithoutStripeId = subs.filter((sub: Subscription) => 
+        sub.status === 'active' && !sub.stripeCustomerId
+      );
+      
+      if (subsWithoutStripeId.length > 0) {
+        console.warn('⚠️ Active subscriptions without stripeCustomerId:', subsWithoutStripeId.map((sub: Subscription) => ({
+          id: sub._id,
+          community: sub.community.name,
+          amount: sub.amount,
+          startDate: sub.startDate,
+          paymentMethod: sub.paymentMethod
+        })));
+      }
+      
+      console.log('📊 Subscription summary:', {
+        total: subs.length,
+        active: subs.filter((sub: Subscription) => sub.status === 'active').length,
+        withStripeId: subs.filter((sub: Subscription) => sub.stripeCustomerId).length,
+        manageable: subs.filter((sub: Subscription) => sub.status === 'active' && sub.stripeCustomerId).length
+      });
     } catch (error: any) {
       console.error('Error fetching subscriptions:', error);
       setError(error.response?.data?.error || 'Error cargando suscripciones');
@@ -224,29 +283,7 @@ export default function SubscriptionsPage() {
     }
   };
 
-  // Abrir Stripe Portal para suscripción específica
-  const openStripePortalForSubscription = async (subscription: Subscription) => {
-    try {
-      setIsOpeningPortal(true);
-      setError(null);
-      
-      const response = await stripeService.createPortalSession();
-      
-      // Redirigir al portal de Stripe
-      window.open(response.url, '_blank');
-    } catch (error: any) {
-      console.error('Error opening Stripe portal:', error);
-      
-      // Manejar el error específico de no tener suscripciones
-      if (error.response?.status === 400) {
-        setError(error.response.data.details || 'No se puede gestionar esta suscripción');
-      } else {
-        setError('Error abriendo el portal de gestión de pagos');
-      }
-    } finally {
-      setIsOpeningPortal(false);
-    }
-  };
+
 
   // Obtener color del status
   const getStatusColor = (status: string) => {
@@ -372,8 +409,6 @@ export default function SubscriptionsPage() {
                 <SubscriptionCard
                   key={subscription._id}
                   subscription={subscription}
-                  onOpenPortal={() => openStripePortalForSubscription(subscription)}
-                  isOpeningPortal={isOpeningPortal}
                 />
               ))}
             </div>

@@ -194,6 +194,7 @@ exports.createPortalSession = async (req, res) => {
     }
 
     const userId = req.userId;
+    const { subscriptionId } = req.body; // Nuevo: subscriptionId específico opcional
     
     // Buscar usuario
     const user = await User.findById(userId);
@@ -202,22 +203,43 @@ exports.createPortalSession = async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado.' });
     }
     
-    // Buscar una suscripción del usuario que tenga stripeCustomerId
-    console.log('🔍 Buscando suscripciones del usuario...');
-    const subscription = await Subscription.findOne({
-      user: userId,
-      stripeCustomerId: { $exists: true, $ne: null }
-    }).sort({ createdAt: -1 }); // Más reciente primero
+    let subscription;
     
-    if (!subscription || !subscription.stripeCustomerId) {
-      console.log('❌ Usuario no tiene suscripciones con customer ID de Stripe');
-      return res.status(400).json({ 
-        error: 'No tienes suscripciones activas para gestionar',
-        details: 'Debes tener al menos una suscripción para acceder al portal de gestión'
+    if (subscriptionId) {
+      // Buscar suscripción específica del usuario
+      console.log('🎯 Buscando suscripción específica:', subscriptionId);
+      subscription = await Subscription.findOne({
+        _id: subscriptionId,
+        user: userId,
+        stripeCustomerId: { $exists: true, $ne: null }
       });
+      
+      if (!subscription) {
+        console.log('❌ Suscripción específica no encontrada o sin customer ID');
+        return res.status(400).json({ 
+          error: 'Suscripción no encontrada o no válida',
+          details: 'La suscripción especificada no existe o no puede ser gestionada'
+        });
+      }
+    } else {
+      // Buscar la suscripción más reciente (comportamiento original)
+      console.log('🔍 Buscando suscripción más reciente del usuario...');
+      subscription = await Subscription.findOne({
+        user: userId,
+        stripeCustomerId: { $exists: true, $ne: null }
+      }).sort({ createdAt: -1 }); // Más reciente primero
+      
+      if (!subscription || !subscription.stripeCustomerId) {
+        console.log('❌ Usuario no tiene suscripciones con customer ID de Stripe');
+        return res.status(400).json({ 
+          error: 'No tienes suscripciones activas para gestionar',
+          details: 'Debes tener al menos una suscripción para acceder al portal de gestión'
+        });
+      }
     }
     
     console.log('✅ Customer ID encontrado:', subscription.stripeCustomerId);
+    console.log('📋 Suscripción seleccionada:', subscription._id);
     
     // Determinar la URL de retorno basada en el origen
     const origin = req.headers.origin || req.headers.referer;

@@ -57,10 +57,12 @@ class StripeService {
 
   /**
    * Crear sesión del Portal de Cliente de Stripe
+   * @param subscriptionId - ID opcional de la suscripción específica a gestionar
    */
-  async createPortalSession(): Promise<CheckoutSessionResponse> {
+  async createPortalSession(subscriptionId?: string): Promise<CheckoutSessionResponse> {
     try {
-      const response = await api.post('/api/stripe/create-portal-session');
+      const body = subscriptionId ? { subscriptionId } : {};
+      const response = await api.post('/api/stripe/create-portal-session', body);
       return response.data;
     } catch (error: any) {
       console.error('Error creating portal session:', error);
