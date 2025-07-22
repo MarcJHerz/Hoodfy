@@ -121,14 +121,14 @@ export default function DashboardPage() {
         <div className="card p-8 text-center max-w-md mx-auto">
           <div className="text-red-500 text-5xl mb-4">⚠️</div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Oops, algo salió mal
+            Oops, something went wrong
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
           <button 
             onClick={fetchPosts}
             className="btn-primary btn-md"
           >
-            Intentar de nuevo
+            Try again
           </button>
         </div>
       </div>
@@ -155,7 +155,7 @@ export default function DashboardPage() {
               onClick={() => setIsCreatePostModalOpen(true)}
               className="w-full text-left p-4 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-200 font-medium"
             >
-              ¿Qué estás pensando, {user?.name}?
+              ¿What's on your mind, {user?.name}?
             </button>
           </div>
         </div>
@@ -167,7 +167,7 @@ export default function DashboardPage() {
               className="flex items-center space-x-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all duration-200"
             >
               <PhotoIcon className="h-5 w-5" />
-              <span className="text-sm font-medium">Foto</span>
+              <span className="text-sm font-medium">Photo</span>
             </button>
             <button
               onClick={() => fileInputRef.current?.click()}
@@ -182,7 +182,7 @@ export default function DashboardPage() {
             onClick={() => setIsCreatePostModalOpen(true)}
             className="btn-primary btn-sm"
           >
-            Publicar
+            Publish
           </button>
         </div>
         
@@ -201,16 +201,16 @@ export default function DashboardPage() {
         <div className="card p-12 text-center">
           <div className="text-6xl mb-4">📝</div>
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            ¡Tu feed está vacío!
+            Your feed is empty!
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Sé el primero en compartir algo increíble con tu comunidad
+            Be the first to share something amazing with your community
           </p>
           <button 
             onClick={() => setIsCreatePostModalOpen(true)}
             className="btn-primary btn-md"
           >
-            Crear mi primer post
+            Create my first post
           </button>
         </div>
       ) : (

@@ -6,6 +6,7 @@ import { subscriptions as subscriptionsApi } from '@/services/api';
 import { stripeService } from '@/services/stripeService';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useImageUrl } from '@/utils/useImageUrl';
 
 interface Subscription {
   _id: string;
@@ -25,6 +26,113 @@ interface Subscription {
   stripeCustomerId?: string;
   lastPaymentAttempt?: string;
   failedPaymentCount?: number;
+}
+
+// Componente separado para cada tarjeta de suscripción
+function SubscriptionCard({ subscription }: { subscription: Subscription }) {
+  const { url: coverImageUrl } = useImageUrl(subscription.community.coverImage);
+  
+  // Función para calcular el estado visual
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
+      case 'canceled':
+        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+      case 'expired':
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+      case 'payment_failed':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+    }
+  };
+
+  // Función para calcular días hasta próximo cobro
+  const getDaysUntilNextBilling = () => {
+    if (!subscription.endDate || subscription.status !== 'active') return null;
+    const now = new Date();
+    const endDate = new Date(subscription.endDate);
+    const diffTime = endDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
+
+  const daysUntilBilling = getDaysUntilNextBilling();
+
+  return (
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow duration-200">
+      {/* Header de la tarjeta */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          {coverImageUrl ? (
+            <img
+              src={coverImageUrl}
+              alt={subscription.community.name}
+              className="w-12 h-12 rounded-lg object-cover"
+            />
+          ) : (
+            <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+              <span className="text-2xl">🏘️</span>
+            </div>
+          )}
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+              {subscription.community.name}
+            </h3>
+            <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(subscription.status)}`}>
+              {subscription.status === 'active' ? 'Activa' :
+               subscription.status === 'canceled' ? 'Cancelada' :
+               subscription.status === 'expired' ? 'Expirada' :
+               subscription.status === 'payment_failed' ? 'Pago Fallido' : subscription.status}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Información de la suscripción */}
+      <div className="space-y-3">
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-600 dark:text-gray-400">Fecha de inicio:</span>
+          <span className="text-gray-900 dark:text-gray-100">
+            {new Date(subscription.startDate).toLocaleDateString('es-ES')}
+          </span>
+        </div>
+
+        {subscription.endDate && (
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600 dark:text-gray-400">Próximo cobro:</span>
+            <span className="text-gray-900 dark:text-gray-100">
+              {new Date(subscription.endDate).toLocaleDateString('es-ES')}
+            </span>
+          </div>
+        )}
+
+        {daysUntilBilling !== null && subscription.status === 'active' && (
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600 dark:text-gray-400">Días restantes:</span>
+            <span className={`font-medium ${daysUntilBilling <= 7 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-900 dark:text-gray-100'}`}>
+              {daysUntilBilling} días
+            </span>
+          </div>
+        )}
+
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-600 dark:text-gray-400">Monto:</span>
+          <span className="text-gray-900 dark:text-gray-100 font-semibold">
+            ${subscription.amount}
+          </span>
+        </div>
+
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-600 dark:text-gray-400">Método de pago:</span>
+          <span className="text-gray-900 dark:text-gray-100">
+            {subscription.paymentMethod}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function SubscriptionsPage() {
@@ -230,123 +338,10 @@ export default function SubscriptionsPage() {
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {subscriptions.map((subscription) => (
-                <div
+                <SubscriptionCard
                   key={subscription._id}
-                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow duration-200"
-                >
-                  {/* Header de la tarjeta */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      {subscription.community.coverImage ? (
-                        <img
-                          src={subscription.community.coverImage}
-                          alt={subscription.community.name}
-                          className="w-12 h-12 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                          <span className="text-2xl">🏘️</span>
-                        </div>
-                      )}
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                          {subscription.community.name}
-                        </h3>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(subscription.status)}`}>
-                          {getStatusText(subscription.status)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Información de la suscripción */}
-                  <div className="space-y-3">
-                    {/* Precio */}
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Precio mensual:</span>
-                      <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                        ${subscription.amount}/mes
-                      </span>
-                    </div>
-
-                    {/* Fecha de inicio */}
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Inicio:</span>
-                      <span className="text-sm text-gray-900 dark:text-gray-100">
-                        {new Date(subscription.startDate).toLocaleDateString('es-ES', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
-                      </span>
-                    </div>
-
-                    {/* Próximo cobro o estado */}
-                    {subscription.status === 'active' && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Próximo cobro:</span>
-                        <span className="text-sm text-gray-900 dark:text-gray-100">
-                          En {getDaysUntilNextBilling(subscription.startDate)} días
-                        </span>
-                      </div>
-                    )}
-
-                    {subscription.endDate && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Fecha de fin:</span>
-                        <span className="text-sm text-gray-900 dark:text-gray-100">
-                          {new Date(subscription.endDate).toLocaleDateString('es-ES', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Método de pago */}
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Método de pago:</span>
-                      <span className="text-sm text-gray-900 dark:text-gray-100 capitalize">
-                        {subscription.paymentMethod}
-                      </span>
-                    </div>
-
-                    {/* Alertas especiales */}
-                    {subscription.status === 'payment_failed' && (
-                      <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
-                        <div className="flex items-center">
-                          <svg className="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          <p className="text-sm text-red-700 dark:text-red-400">
-                            Problema con el pago. Actualiza tu método de pago.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Acciones */}
-                  <div className="mt-6 flex space-x-3">
-                    <a
-                      href={`/communities/${subscription.community._id}`}
-                      className="flex-1 text-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
-                    >
-                      Ver Comunidad
-                    </a>
-                    
-                    {subscription.status === 'active' && (
-                      <button
-                        onClick={openStripePortal}
-                        disabled={isOpeningPortal}
-                        className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors duration-200"
-                      >
-                        {isOpeningPortal ? 'Abriendo...' : 'Gestionar'}
-                      </button>
-                    )}
-                  </div>
-                </div>
+                  subscription={subscription}
+                />
               ))}
             </div>
           )}
