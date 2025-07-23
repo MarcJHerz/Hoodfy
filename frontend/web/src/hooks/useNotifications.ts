@@ -30,7 +30,7 @@ export const useNotifications = () => {
 
   // 🚧 NOTIFICACIONES TEMPORALMENTE DESHABILITADAS
   // Motivo: Requiere Google Cloud billing habilitado
-  const FCM_ENABLED = false;
+  const FCM_ENABLED = true;
 
   // Solicitar permisos de notificación
   const requestNotificationPermission = async () => {
@@ -83,11 +83,16 @@ export const useNotifications = () => {
         return;
       }
       
+      console.log('🔑 VAPID Key encontrada:', vapidKey.substring(0, 20) + '...');
+      
       const token = await getToken(messaging, { vapidKey });
       
       if (token) {
         setFcmToken(token);
+        console.log('✅ Token FCM obtenido:', token.substring(0, 20) + '...');
         await saveFCMTokenToBackend(token);
+      } else {
+        console.warn('⚠️ No se pudo obtener token FCM');
       }
     } catch (error) {
       console.error('Error al obtener token FCM:', error);
@@ -104,17 +109,21 @@ export const useNotifications = () => {
         return;
       }
 
+      console.log('📤 Enviando token FCM al backend...');
+      
       const response = await fetch(`${getApiUrl()}/api/users/fcm-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${idToken}`,
         },
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({ fcmToken: token }),
       });
 
-      if (!response.ok) {
-        console.error('❌ Error guardando token FCM en backend');
+      if (response.ok) {
+        console.log('✅ Token FCM guardado exitosamente en el backend');
+      } else {
+        console.error('❌ Error guardando token FCM en backend:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Error enviando token FCM al backend:', error);
@@ -125,7 +134,11 @@ export const useNotifications = () => {
   const setupForegroundMessageListener = () => {
     if (!FCM_ENABLED || !messaging) return;
 
+    console.log('🎧 Configurando listener de mensajes en primer plano...');
+
     const unsubscribe = onMessage(messaging, (payload) => {
+      console.log('📨 Mensaje recibido en primer plano:', payload);
+      
       // Reproducir sonido de notificación
       try {
         const audio = new Audio('/notification-sound.mp3');
@@ -162,18 +175,28 @@ export const useNotifications = () => {
   useEffect(() => {
     if (!FCM_ENABLED || !user) return;
 
+    console.log('🚀 Inicializando sistema de notificaciones...');
+
     const initializeNotifications = async () => {
       // Verificar si las notificaciones están soportadas
       if (!('Notification' in window)) {
+        console.warn('⚠️ Este navegador no soporta notificaciones');
         return;
       }
 
       // Verificar permisos actuales
       const currentPermission = Notification.permission;
       setNotificationPermission(currentPermission);
+      
+      console.log('🔐 Permisos de notificación actuales:', currentPermission);
 
       if (currentPermission === 'granted') {
+        console.log('✅ Permisos concedidos, obteniendo token FCM...');
         await getFCMToken();
+      } else if (currentPermission === 'denied') {
+        console.warn('❌ Permisos de notificación denegados');
+      } else {
+        console.log('⏳ Permisos de notificación no solicitados aún');
       }
     };
 
@@ -196,6 +219,9 @@ export const useNotifications = () => {
     fcmToken,
     requestNotificationPermission,
     getFCMToken,
-    isEnabled: FCM_ENABLED
+    isEnabled: FCM_ENABLED,
+    isSupported: 'Notification' in window,
+    hasValidConfig: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY && 
+                   process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY !== 'TEMP_VAPID_KEY_NEEDED'
   };
 }; 

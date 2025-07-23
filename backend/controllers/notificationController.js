@@ -202,6 +202,19 @@ exports.createNotification = async (req, res) => {
     
     console.log('✅ Notificación creada:', notification._id);
     
+    // Enviar notificación push si el usuario tiene token FCM
+    if (user.fcmToken) {
+      try {
+        await sendPushNotification(user.fcmToken, notification);
+        console.log('📱 Notificación push enviada al usuario:', userId);
+      } catch (pushError) {
+        console.error('❌ Error enviando notificación push:', pushError);
+        // No fallar la creación de notificación si falla el push
+      }
+    } else {
+      console.log('📱 Usuario no tiene token FCM, saltando notificación push');
+    }
+    
     res.status(201).json({ 
       message: 'Notificación creada exitosamente',
       notification
@@ -269,12 +282,20 @@ exports.notificationHelpers = {
   // Notificación de suscripción exitosa
   async createSubscriptionSuccessNotification(userId, communityId, subscriptionId) {
     try {
-      return await Notification.createNotification({
+      const notification = await Notification.createNotification({
         userId,
         type: 'subscription_success',
         communityId,
         subscriptionId
       });
+      
+      // Enviar notificación push
+      const user = await User.findById(userId);
+      if (user?.fcmToken) {
+        await sendPushNotification(user.fcmToken, notification);
+      }
+      
+      return notification;
     } catch (error) {
       console.error('Error creando notificación de suscripción exitosa:', error);
     }
@@ -283,12 +304,20 @@ exports.notificationHelpers = {
   // Notificación de nuevo post
   async createNewPostNotification(userId, communityId, postId) {
     try {
-      return await Notification.createNotification({
+      const notification = await Notification.createNotification({
         userId,
         type: 'new_post',
         communityId,
         postId
       });
+      
+      // Enviar notificación push
+      const user = await User.findById(userId);
+      if (user?.fcmToken) {
+        await sendPushNotification(user.fcmToken, notification);
+      }
+      
+      return notification;
     } catch (error) {
       console.error('Error creando notificación de nuevo post:', error);
     }
@@ -297,12 +326,20 @@ exports.notificationHelpers = {
   // Notificación de nuevo comentario
   async createNewCommentNotification(userId, postId, commentId) {
     try {
-      return await Notification.createNotification({
+      const notification = await Notification.createNotification({
         userId,
         type: 'new_comment',
         postId,
         commentId
       });
+      
+      // Enviar notificación push
+      const user = await User.findById(userId);
+      if (user?.fcmToken) {
+        await sendPushNotification(user.fcmToken, notification);
+      }
+      
+      return notification;
     } catch (error) {
       console.error('Error creando notificación de nuevo comentario:', error);
     }
@@ -311,12 +348,20 @@ exports.notificationHelpers = {
   // Notificación de pago fallido
   async createPaymentFailedNotification(userId, communityId, subscriptionId) {
     try {
-      return await Notification.createNotification({
+      const notification = await Notification.createNotification({
         userId,
         type: 'payment_failed',
         communityId,
         subscriptionId
       });
+      
+      // Enviar notificación push
+      const user = await User.findById(userId);
+      if (user?.fcmToken) {
+        await sendPushNotification(user.fcmToken, notification);
+      }
+      
+      return notification;
     } catch (error) {
       console.error('Error creando notificación de pago fallido:', error);
     }
@@ -351,3 +396,68 @@ exports.notificationHelpers = {
     }
   }
 }; 
+
+// 🚀 Función para enviar notificación push
+async function sendPushNotification(fcmToken, notification) {
+  try {
+    const admin = require('../config/firebase-admin');
+    const messaging = admin.messaging();
+
+    const message = {
+      notification: {
+        title: notification.title,
+        body: notification.message,
+      },
+      data: {
+        notificationId: notification._id.toString(),
+        type: notification.type,
+        communityId: notification.metadata?.communityId?.toString() || '',
+        postId: notification.metadata?.postId?.toString() || '',
+        actionUrl: notification.metadata?.actionUrl || '/dashboard',
+        click_action: notification.metadata?.actionUrl || '/dashboard'
+      },
+      token: fcmToken,
+      android: {
+        notification: {
+          sound: 'default',
+          priority: 'high',
+          channelId: 'hoodfy-notifications'
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: 'default',
+            badge: 1,
+          },
+        },
+      },
+      webpush: {
+        notification: {
+          icon: '/default-avatar.png',
+          badge: '/default-avatar.png',
+          actions: [
+            {
+              action: 'open',
+              title: 'Abrir',
+            },
+            {
+              action: 'close',
+              title: 'Cerrar',
+            },
+          ],
+        },
+        fcm_options: {
+          link: notification.metadata?.actionUrl || '/dashboard',
+        },
+      },
+    };
+
+    const response = await messaging.send(message);
+    console.log('✅ Notificación push enviada exitosamente:', response);
+    return response;
+  } catch (error) {
+    console.error('❌ Error enviando notificación push:', error);
+    throw error;
+  }
+} 
