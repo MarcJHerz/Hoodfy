@@ -25,6 +25,7 @@ import { useImageUrl } from '@/utils/useImageUrl';
 import { UserAvatar } from './UserAvatar';
 import Logo from './Logo';
 import NotificationDropdown from './notifications/NotificationDropdown';
+import ChatNotificationBadge from './chat/ChatNotificationBadge';
 
 const SearchModal = dynamic(() => import('./SearchModal'), { ssr: false });
 
@@ -180,7 +181,7 @@ const Navbar = React.memo(() => {
           <div className="flex items-center gap-2 relative">
             {navItems.map(({ href, icon: Icon, label }) => {
               const isActive = pathname.startsWith(href);
-              const unreadCount = href.includes('messages') ? getTotalUnreadCount() : 0;
+              const isMessages = href.includes('messages');
               
               return (
               <Link
@@ -198,13 +199,11 @@ const Navbar = React.memo(() => {
                       isActive ? 'scale-110' : 'group-hover:scale-110'
                     }`} />
                     
-                    {/* Badge de notificaciones */}
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center animate-pulse">
-                      <span className="text-xs font-bold text-white">
-                        {unreadCount > 99 ? '99+' : unreadCount}
-                      </span>
-                    </span>
+                    {/* Badge de notificaciones mejorado para mensajes */}
+                    {isMessages && (
+                      <div className="absolute -top-2 -right-2">
+                        <ChatNotificationBadge size="sm" animated />
+                      </div>
                     )}
                   </div>
                   <span className={`text-xs font-medium hidden lg:block transition-all duration-200 ${
@@ -328,7 +327,6 @@ const Navbar = React.memo(() => {
             {/* Solo mostrar mensajes aquí ya que el resto está en el sidebar */}
             {navItems.slice(2, 3).map(({ href, icon: Icon, label }) => {
               const isActive = pathname.startsWith(href);
-              const unreadCount = href.includes('messages') ? getTotalUnreadCount() : 0;
               
               return (
                 <Link
@@ -343,13 +341,9 @@ const Navbar = React.memo(() => {
                 >
                   <div className="relative">
                     <Icon className="h-5 w-5" />
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-bold text-white">
-                          {unreadCount > 9 ? '9' : unreadCount}
-                        </span>
-                      </span>
-                    )}
+                    <div className="absolute -top-2 -right-2">
+                      <ChatNotificationBadge size="sm" animated />
+                    </div>
                   </div>
                 </Link>
               );

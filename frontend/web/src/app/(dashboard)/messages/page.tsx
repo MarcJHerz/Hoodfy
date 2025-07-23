@@ -14,6 +14,7 @@ import { ChatBubbleLeftIcon, UserGroupIcon, UserIcon, ExclamationTriangleIcon, S
 import PrivateChatModal from '@/components/chat/PrivateChatModal';
 import { User } from '@/types/user';
 import { users } from '@/services/api';
+import { UsersIcon } from '@heroicons/react/24/outline';
 
 export default function MessagesPage() {
   const { user } = useAuthStore();
@@ -207,203 +208,254 @@ export default function MessagesPage() {
       <div className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Header mejorado */}
         <div className="mb-8">
-          <div className="flex items-center space-x-4 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center shadow-lg">
-              <ChatBubbleLeftIcon className="w-6 h-6 text-white" />
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="relative">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-600 to-pink-500 rounded-2xl flex items-center justify-center shadow-xl rotate-3 hover:rotate-0 transition-transform duration-300">
+                <ChatBubbleLeftIcon className="w-8 h-8 text-white drop-shadow-lg" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-700 dark:from-white dark:via-blue-300 dark:to-purple-400 bg-clip-text text-transparent">
                 Mensajes
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-gray-600 dark:text-gray-400 mt-2 font-medium">
                 Tus conversaciones privadas y chats de comunidad
               </p>
             </div>
           </div>
           
-          {/* Stats rápidas */}
-          {chatRooms.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                    <ChatBubbleLeftIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{chatRooms.length}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">Conversaciones</p>
-                  </div>
+          {/* Stats mejoradas con animaciones */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8">
+            <div className="group bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border border-blue-200/50 dark:border-blue-700/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <ChatBubbleLeftIcon className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-blue-700 dark:text-blue-300 group-hover:scale-105 transition-transform duration-300">
+                    {chatRooms.length}
+                  </p>
+                  <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Conversaciones</p>
                 </div>
               </div>
-              
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-                    <UserIcon className="w-4 h-4 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                      {chatRooms.filter(chat => chat.type === 'private').length}
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">Chats privados</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
-                    <UserGroupIcon className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                      {chatRooms.filter(chat => chat.type === 'community').length}
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">Comunidades</p>
-                  </div>
-                </div>
+              <div className="mt-4 flex items-center text-xs text-blue-600 dark:text-blue-400">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
+                Activas ahora
               </div>
             </div>
-          )}
+            
+            <div className="group bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-6 border border-green-200/50 dark:border-green-700/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <UserIcon className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-green-700 dark:text-green-300 group-hover:scale-105 transition-transform duration-300">
+                    {chatRooms.filter(chat => chat.type === 'private').length}
+                  </p>
+                  <p className="text-sm font-medium text-green-600 dark:text-green-400">Chats privados</p>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center text-xs text-green-600 dark:text-green-400">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                Con aliados
+              </div>
+            </div>
+            
+            <div className="group bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-6 border border-purple-200/50 dark:border-purple-700/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <UserGroupIcon className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-purple-700 dark:text-purple-300 group-hover:scale-105 transition-transform duration-300">
+                    {chatRooms.filter(chat => chat.type === 'community').length}
+                  </p>
+                  <p className="text-sm font-medium text-purple-600 dark:text-purple-400">Comunidades</p>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center text-xs text-purple-600 dark:text-purple-400">
+                <div className="w-2 h-2 bg-purple-500 rounded-full mr-2 animate-pulse"></div>
+                Grupos activos
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Contenido */}
+        {/* Estados mejorados */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-16">
+          <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <div className="relative">
-                <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary-600 dark:border-primary-400 border-t-transparent mx-auto mb-4"></div>
+              <div className="relative mb-8">
+                <div className="w-20 h-20 border-4 border-blue-200 dark:border-blue-800 rounded-full animate-spin"></div>
+                <div className="absolute inset-0 w-20 h-20 border-4 border-transparent border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <ChatBubbleLeftIcon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                  <ChatBubbleLeftIcon className="w-8 h-8 text-blue-600 dark:text-blue-400 animate-pulse" />
                 </div>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
                 Cargando chats
               </h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                Obteniendo tus conversaciones...
+              <p className="text-gray-600 dark:text-gray-400 max-w-sm mx-auto leading-relaxed">
+                Obteniendo tus conversaciones más recientes...
               </p>
+              <div className="mt-6 flex justify-center space-x-2">
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+              </div>
             </div>
           </div>
         ) : error ? (
-          <div className="text-center py-16">
-            <div className="w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <ExclamationTriangleIcon className="h-10 w-10 text-red-600 dark:text-red-400" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
-              Error al cargar chats
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-              {error}
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all duration-200 hover-lift shadow-lg"
-            >
-              Reintentar
-            </button>
-          </div>
-        ) : chatRooms.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-24 h-24 bg-gradient-to-br from-primary-100 to-accent-100 dark:from-primary-900/20 dark:to-accent-900/20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
-              <SparklesIcon className="h-12 w-12 text-primary-600 dark:text-primary-400" />
+          <div className="text-center py-20">
+            <div className="relative mb-8 mx-auto w-24 h-24">
+              <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/20 dark:to-orange-900/20 rounded-full flex items-center justify-center animate-pulse">
+                <ExclamationTriangleIcon className="h-12 w-12 text-red-600 dark:text-red-400" />
+              </div>
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 animate-ping"></div>
             </div>
             <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              ¡Tu bandeja está limpia!
+              Error al cargar chats
             </h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto leading-relaxed">
-              No tienes chats aún. Inicia una conversación con tus aliados o únete a comunidades para comenzar a chatear.
+            <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto leading-relaxed">
+              {error}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => window.location.reload()}
+                className="px-8 py-3 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+              >
+                Reintentar
+              </button>
               <Link
                 href="/communities"
-                className="px-6 py-3 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-medium rounded-lg transition-all duration-200 hover-lift shadow-lg"
+                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
               >
+                Explorar Comunidades
+              </Link>
+            </div>
+          </div>
+        ) : chatRooms.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="relative mb-8 mx-auto">
+              <div className="w-32 h-32 bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 dark:from-blue-900/20 dark:via-purple-900/20 dark:to-pink-900/20 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
+                <SparklesIcon className="h-16 w-16 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="absolute -top-4 -right-4 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-bounce"></div>
+              <div className="absolute -bottom-2 -left-2 w-6 h-6 bg-gradient-to-r from-green-400 to-blue-500 rounded-full animate-pulse"></div>
+            </div>
+            <h3 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+              ¡Tu bandeja está limpia!
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-lg mx-auto leading-relaxed text-lg">
+              No tienes chats aún. Inicia una conversación con tus aliados o únete a comunidades para comenzar a chatear.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <Link
+                href="/communities"
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white font-bold rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1 group"
+              >
+                <UsersIcon className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
                 Explorar comunidades
               </Link>
               <Link
                 href={`/profile/${user._id}`}
-                className="px-6 py-3 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white font-medium rounded-lg transition-all duration-200 hover-lift"
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 group"
               >
+                <UserIcon className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
                 Ver mi perfil
               </Link>
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {chatRooms.map((chat) => (
               <div
                 key={chat.id}
                 onClick={() => handleChatClick(chat)}
-                className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover-lift group"
+                className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer border border-gray-200/60 dark:border-gray-700/60 hover:border-blue-300/60 dark:hover:border-blue-600/60 overflow-hidden hover:-translate-y-1"
               >
-                <div className="flex items-center space-x-4">
-                  {/* Avatar/Icono mejorado */}
-                  <div className="flex-shrink-0 relative">
-                    <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all duration-200">
-                      {chat.type === 'private' ? (
-                        <UserAvatar
-                          source={getChatImage(chat)}
-                          name={getChatName(chat)}
-                          size={56}
-                        />
-                      ) : (
-                        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center">
-                          <UserGroupIcon className="w-4 h-4 text-white" />
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Indicador de estado */}
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></div>
-                  </div>
-
-                  {/* Información del chat */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                        {getChatName(chat)}
-                      </h3>
-                      {chat.lastMessage && (
-                        <span className="text-sm text-gray-500 dark:text-gray-400 ml-2 flex-shrink-0">
-                          {formatDistanceToNow(chat.lastMessage.timestamp, { 
-                            addSuffix: true, 
-                            locale: es 
-                          })}
-                        </span>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        {getChatIcon(chat)}
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                          {chat.type === 'community' ? 'Chat de comunidad' : 'Chat privado'}
-                        </span>
-                        {(chat as any).unreadCount > 0 && (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 dark:bg-primary-900/20 text-primary-800 dark:text-primary-200 animate-pulse">
-                            {(chat as any).unreadCount} nuevo{(chat as any).unreadCount !== 1 ? 's' : ''}
-                          </span>
+                {/* Gradiente sutil de fondo */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-50/30 to-purple-50/30 dark:from-transparent dark:via-blue-900/10 dark:to-purple-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                <div className="relative p-6">
+                  <div className="flex items-center space-x-4">
+                    {/* Avatar/Icono mejorado con efectos */}
+                    <div className="flex-shrink-0 relative">
+                      <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center ring-2 ring-gray-200/60 dark:ring-gray-600/60 group-hover:ring-blue-300/60 dark:group-hover:ring-blue-600/60 transition-all duration-300 group-hover:scale-105">
+                        {chat.type === 'private' ? (
+                          <div className="relative w-full h-full">
+                            <UserAvatar
+                              source={getChatImage(chat)}
+                              name={getChatName(chat)}
+                              size={64}
+                            />
+                            {/* Indicador de estado online */}
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 border-3 border-white dark:border-gray-800 rounded-full shadow-lg animate-pulse"></div>
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-purple-600 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+                            <UserGroupIcon className="w-6 h-6 text-white" />
+                          </div>
                         )}
                       </div>
                     </div>
 
-                    {/* Último mensaje */}
-                    {chat.lastMessage && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 truncate leading-relaxed">
-                        <span className="font-medium text-gray-800 dark:text-gray-200">
-                          {chat.lastMessage.senderName}:
-                        </span>{' '}
-                        {chat.lastMessage.content}
-                      </p>
-                    )}
-                  </div>
+                    {/* Información del chat mejorada */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+                          {getChatName(chat)}
+                        </h3>
+                        {chat.lastMessage && (
+                          <span className="text-sm text-gray-500 dark:text-gray-400 ml-3 flex-shrink-0 font-medium">
+                            {formatDistanceToNow(chat.lastMessage.timestamp, { 
+                              addSuffix: true, 
+                              locale: es 
+                            })}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          {getChatIcon(chat)}
+                          <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                            {chat.type === 'community' ? 'Chat de comunidad' : 'Chat privado'}
+                          </span>
+                          {(chat as any).unreadCount > 0 && (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg animate-bounce">
+                              {(chat as any).unreadCount} nuevo{(chat as any).unreadCount !== 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+                      </div>
 
-                  {/* Indicador de flecha */}
-                  <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <svg className="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
+                      {/* Último mensaje mejorado */}
+                      {chat.lastMessage && (
+                        <div className="mt-3 p-3 bg-gray-50/80 dark:bg-gray-700/50 rounded-xl border border-gray-200/40 dark:border-gray-600/40">
+                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">
+                              {chat.lastMessage.senderName}:
+                            </span>{' '}
+                            <span className="truncate">
+                              {chat.lastMessage.content}
+                            </span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Indicador de flecha con animación */}
+                    <div className="flex-shrink-0 opacity-60 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

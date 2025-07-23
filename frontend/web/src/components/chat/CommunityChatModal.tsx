@@ -8,6 +8,7 @@ import { chatService } from '@/services/chatService';
 import { CommunityChat } from '@/types/chat';
 import { toast } from 'react-hot-toast';
 import { XMarkIcon, UserGroupIcon, LockClosedIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CommunityChatModalProps {
   isOpen: boolean;
@@ -102,141 +103,377 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
 
   if (!user?._id) {
     return (
-      <div className="fixed inset-0 z-50 overflow-y-auto">
+      <motion.div 
+        className="fixed inset-0 z-50 overflow-y-auto"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
         <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity" />
-          <div className="inline-block align-bottom bg-white dark:bg-gray-900 rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-700">
-            <div className="bg-white dark:bg-gray-900 px-6 pt-6 pb-4 sm:p-8">
+          {/* Backdrop animado */}
+          <motion.div 
+            className="fixed inset-0 bg-gradient-to-br from-black/40 via-gray-900/50 to-black/60 backdrop-blur-md transition-opacity"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          />
+          
+          <motion.div 
+            className="inline-block align-bottom bg-white dark:bg-gray-900 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200/60 dark:border-gray-700/60"
+            initial={{ scale: 0.8, opacity: 0, y: 50 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          >
+            <div className="bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 px-6 pt-6 pb-4 sm:p-8">
               <div className="text-center">
-                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <UserGroupIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                <motion.div 
+                  className="relative mb-6 mx-auto w-20 h-20"
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25, delay: 0.2 }}
+                >
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 rounded-full flex items-center justify-center shadow-xl">
+                    <UserGroupIcon className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <motion.div 
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full border-2 border-white dark:border-gray-900"
+                    animate={{ scale: [1, 1.3, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  />
+                </motion.div>
+                <motion.h3 
+                  className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
                   Autenticación requerida
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400">
-                  Debes iniciar sesión para acceder al chat
-                </p>
+                </motion.h3>
+                <motion.p 
+                  className="text-gray-600 dark:text-gray-400 leading-relaxed"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  Debes iniciar sesión para acceder al chat de la comunidad
+                </motion.p>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-50" style={{ overflow: 'hidden' }}>
-      <div className="flex items-center justify-center min-h-screen p-4">
-        <div 
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity" 
-          onClick={handleClose}
-          onWheel={(e) => e.preventDefault()} 
-        />
-        
-        <div 
-          className="relative bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden"
-          onWheel={(e) => e.stopPropagation()}
-          onClick={(e) => e.stopPropagation()}
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          className="fixed inset-0 z-50" 
+          style={{ overflow: 'hidden' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
         >
-          {/* Header mejorado */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 flex-shrink-0">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center shadow-lg">
-                <UserGroupIcon className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                  {communityName}
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Chat de comunidad
-                </p>
-              </div>
-            </div>
-            <button
+          <div className="flex items-center justify-center min-h-screen p-4">
+            {/* Backdrop mejorado con gradiente y blur */}
+            <motion.div 
+              className="fixed inset-0 bg-gradient-to-br from-black/40 via-gray-900/50 to-black/60 backdrop-blur-md transition-opacity" 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
               onClick={handleClose}
-              className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all duration-200 hover-lift"
-              title="Cerrar chat"
+              onWheel={(e) => e.preventDefault()} 
+            />
+            
+            <motion.div 
+              className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200/60 dark:border-gray-700/60 w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden backdrop-blur-lg"
+              initial={{ opacity: 0, scale: 0.8, y: 50 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: -30 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              onWheel={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
             >
-              <XMarkIcon className="h-6 w-6" />
-            </button>
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 overflow-hidden min-h-0">
-            {isLoading ? (
-              <div className="flex items-center justify-center h-full bg-gray-50 dark:bg-gray-900">
-                <div className="text-center p-8">
-                  <div className="relative">
-                    <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary-600 dark:border-primary-400 border-t-transparent mx-auto mb-4"></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <UserGroupIcon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+              {/* Header mejorado con gradiente */}
+              <motion.div 
+                className="flex items-center justify-between p-6 border-b border-gray-200/60 dark:border-gray-700/60 bg-gradient-to-r from-white via-purple-50/30 to-blue-50/30 dark:from-gray-900 dark:via-purple-900/10 dark:to-blue-900/10 flex-shrink-0"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.3 }}
+              >
+                <div className="flex items-center space-x-4">
+                  <motion.div 
+                    className="relative"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 via-blue-600 to-indigo-500 rounded-2xl flex items-center justify-center shadow-xl">
+                      <UserGroupIcon className="w-6 h-6 text-white drop-shadow-lg" />
                     </div>
+                    <motion.div 
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white dark:border-gray-900"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                  </motion.div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                      {communityName}
+                    </h3>
+                    <motion.p 
+                      className="text-sm text-gray-600 dark:text-gray-400 font-medium flex items-center"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <motion.div 
+                        className="w-2 h-2 bg-green-400 rounded-full mr-2"
+                        animate={{ scale: [1, 1.3, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      />
+                      Chat de comunidad
+                    </motion.p>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                    Verificando acceso
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-400">
-                    Comprobando permisos para acceder al chat...
-                  </p>
                 </div>
-              </div>
-            ) : !isSubscribed ? (
-              <div className="flex items-center justify-center h-full bg-gray-50 dark:bg-gray-900">
-                <div className="text-center max-w-md p-8">
-                  <div className="w-20 h-20 bg-orange-100 dark:bg-orange-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <LockClosedIcon className="w-10 h-10 text-orange-600 dark:text-orange-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                    Acceso restringido
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                    Debes estar suscrito a esta comunidad para acceder al chat grupal
-                  </p>
-                  <button
-                    onClick={handleClose}
-                    className="px-6 py-3 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white font-medium rounded-lg transition-all duration-200 hover-lift shadow-lg"
+                <motion.button
+                  onClick={handleClose}
+                  className="group p-3 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200"
+                  title="Cerrar chat"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <motion.div
+                    whileHover={{ rotate: 90 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    Cerrar
-                  </button>
-                </div>
+                    <XMarkIcon className="h-6 w-6" />
+                  </motion.div>
+                </motion.button>
+              </motion.div>
+
+              {/* Content con mejores estados */}
+              <div className="flex-1 relative overflow-hidden">
+                <AnimatePresence mode="wait">
+                  {isLoading ? (
+                    <motion.div
+                      key="loading"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -30 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex items-center justify-center h-full bg-gradient-to-br from-gray-50 to-purple-50/30 dark:from-gray-900 dark:to-purple-900/10"
+                    >
+                      <div className="text-center p-8">
+                        <motion.div 
+                          className="relative mb-6"
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        >
+                          <div className="w-16 h-16 border-4 border-purple-200 dark:border-purple-800 rounded-full"></div>
+                          <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-purple-600 dark:border-t-purple-400 rounded-full"></div>
+                          <motion.div 
+                            className="absolute inset-0 flex items-center justify-center"
+                            animate={{ scale: [1, 1.1, 1] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                          >
+                            <UserGroupIcon className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                          </motion.div>
+                        </motion.div>
+                        <motion.h3 
+                          className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.3 }}
+                        >
+                          Verificando acceso
+                        </motion.h3>
+                        <motion.p 
+                          className="text-gray-600 dark:text-gray-400 max-w-sm mx-auto leading-relaxed"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.4 }}
+                        >
+                          Comprobando permisos para acceder al chat de {communityName}...
+                        </motion.p>
+                        <motion.div 
+                          className="mt-6 flex justify-center space-x-2"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.5 }}
+                        >
+                          {[0, 1, 2].map((i) => (
+                            <motion.div
+                              key={i}
+                              className="w-2 h-2 bg-purple-600 rounded-full"
+                              animate={{ y: [0, -8, 0] }}
+                              transition={{
+                                duration: 0.6,
+                                repeat: Infinity,
+                                delay: i * 0.2
+                              }}
+                            />
+                          ))}
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  ) : !isSubscribed ? (
+                    <motion.div
+                      key="no-access"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -30 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex items-center justify-center h-full bg-gradient-to-br from-orange-50 to-red-50/30 dark:from-orange-900/10 dark:to-red-900/10"
+                    >
+                      <div className="text-center max-w-md p-8">
+                        <motion.div 
+                          className="relative mb-8 mx-auto w-24 h-24"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        >
+                          <div className="w-24 h-24 bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/20 dark:to-red-900/20 rounded-full flex items-center justify-center shadow-xl">
+                            <LockClosedIcon className="h-12 w-12 text-orange-600 dark:text-orange-400" />
+                          </div>
+                          <motion.div 
+                            className="absolute -top-2 -right-2 w-6 h-6 bg-orange-500 rounded-full border-2 border-white dark:border-gray-900"
+                            animate={{ scale: [1, 1.5, 1] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                          />
+                        </motion.div>
+                        <motion.h3 
+                          className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                        >
+                          Acceso restringido
+                        </motion.h3>
+                        <motion.p 
+                          className="text-gray-700 dark:text-gray-300 mb-8 leading-relaxed"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
+                        >
+                          Debes estar suscrito a <span className="font-semibold text-purple-600 dark:text-purple-400">{communityName}</span> para acceder al chat grupal
+                        </motion.p>
+                        <motion.div 
+                          className="flex flex-col sm:flex-row gap-4 justify-center"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 }}
+                        >
+                          <motion.button
+                            onClick={() => window.open(`/communities/${communityId}`, '_blank')}
+                            className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            Ver comunidad
+                          </motion.button>
+                          <motion.button
+                            onClick={handleClose}
+                            className="px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            Cerrar
+                          </motion.button>
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  ) : communityChat ? (
+                    <motion.div
+                      key="chat"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                      className="h-full overflow-hidden"
+                    >
+                      <ChatRoom
+                        chatId={communityChat.id}
+                        chatName={communityName}
+                        chatType="community"
+                        onClose={handleClose}
+                        isModal={true}
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="error"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -30 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex items-center justify-center h-full bg-gradient-to-br from-red-50 to-pink-50/30 dark:from-red-900/10 dark:to-pink-900/10"
+                    >
+                      <div className="text-center p-8">
+                        <motion.div 
+                          className="relative mb-8 mx-auto w-24 h-24"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        >
+                          <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 rounded-full flex items-center justify-center shadow-xl">
+                            <ExclamationTriangleIcon className="h-12 w-12 text-red-600 dark:text-red-400" />
+                          </div>
+                          <motion.div 
+                            className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full border-2 border-white dark:border-gray-900"
+                            animate={{ scale: [1, 1.5, 1] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                          />
+                        </motion.div>
+                        <motion.h3 
+                          className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                        >
+                          Error al cargar el chat
+                        </motion.h3>
+                        <motion.p 
+                          className="text-gray-700 dark:text-gray-300 mb-8 leading-relaxed"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
+                        >
+                          No se pudo establecer la conexión con el chat de <span className="font-semibold text-purple-600 dark:text-purple-400">{communityName}</span>
+                        </motion.p>
+                        <motion.div 
+                          className="flex flex-col sm:flex-row gap-4 justify-center"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 }}
+                        >
+                          <motion.button
+                            onClick={() => window.location.reload()}
+                            className="px-8 py-3 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-bold rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            Reintentar
+                          </motion.button>
+                          <motion.button
+                            onClick={handleClose}
+                            className="px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            Cerrar
+                          </motion.button>
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            ) : communityChat ? (
-              <div className="h-full overflow-hidden">
-                <ChatRoom
-                  chatId={communityChat.id}
-                  chatName={communityName}
-                  chatType="community"
-                  onClose={handleClose}
-                  isModal={true}
-                />
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-full bg-gray-50 dark:bg-gray-900">
-                <div className="text-center p-8">
-                  <div className="w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <ExclamationTriangleIcon className="w-10 h-10 text-red-600 dark:text-red-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                    Error al cargar el chat
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6">
-                    No se pudo establecer la conexión con el chat de la comunidad
-                  </p>
-                  <button
-                    onClick={handleClose}
-                    className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all duration-200 hover-lift shadow-lg"
-                  >
-                    Cerrar
-                  </button>
-                </div>
-              </div>
-            )}
+            </motion.div>
           </div>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

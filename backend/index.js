@@ -93,19 +93,21 @@ const allyRoutes = require('./routes/allyRoutes');
 const communityStatsRoutes = require('./routes/communityStatsRoutes');
 const stripeRoutes = require('./routes/stripeRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const chatRoutes = require('./routes/chatRoutes'); // Nueva ruta
 
 // ✅ Rutas
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/posts', postRoutes);
 app.use('/api/communities', communitiesRoutes);
 app.use('/api/subscriptions', subscriptionsRoutes);
-app.use('/api/posts', postRoutes);
+app.use('/api/stripe', stripeRoutes);
+app.use('/api/upload', uploadRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/allies', allyRoutes);
 app.use('/api/community-stats', communityStatsRoutes);
 app.use('/api/notifications', require('./routes/notificationRoutes'));
-app.use('/api/stripe', stripeRoutes);
-app.use('/api/upload', uploadRoutes);
+app.use('/api/chats', chatRoutes); // Nueva ruta para chats
 
 // ✅ Middleware global de manejo de errores
 app.use((error, req, res, next) => {
