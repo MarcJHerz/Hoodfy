@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { ChatBubbleLeftIcon, UserGroupIcon, UserIcon, ExclamationTriangleIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import PrivateChatModal from '@/components/chat/PrivateChatModal';
 import { User } from '@/types/user';
+import { users } from '@/services/api';
 
 export default function MessagesPage() {
   const { user } = useAuthStore();
@@ -20,6 +21,32 @@ export default function MessagesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedUserForChat, setSelectedUserForChat] = useState<User | null>(null);
+  
+  // Cache local para información de usuarios
+  const [userCache, setUserCache] = useState<Map<string, { name: string; profilePicture?: string }>>(new Map());
+
+  // Función para obtener información de usuario con cache
+  const getUserInfo = async (userId: string) => {
+    // Verificar cache primero
+    if (userCache.has(userId)) {
+      return userCache.get(userId)!;
+    }
+
+    try {
+      const response = await users.getProfileById(userId);
+      const userInfo = {
+        name: response.data.name,
+        profilePicture: response.data.profilePicture
+      };
+      
+      // Actualizar cache
+      setUserCache(prev => new Map(prev.set(userId, userInfo)));
+      return userInfo;
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+      return { name: 'Usuario desconocido', profilePicture: undefined };
+    }
+  };
 
   useEffect(() => {
     if (!user?._id) return;
@@ -49,14 +76,23 @@ export default function MessagesPage() {
   }, [user?._id]);
 
   const handleChatClick = (chat: ChatRoom) => {
+    // Marcar el chat como leído cuando se hace clic
+    if (user?._id) {
+      chatService.markMessagesAsRead(chat.id, user._id);
+    }
+
     if (chat.type === 'private') {
       const privateChat = chat as any;
-      if (!privateChat.otherUserId) {
-        console.error('❌ Error: otherUserId es undefined para el chat:', chat.id);
+      // Identificar correctamente al otro usuario
+      const otherUserId = (privateChat.participants || []).find((id: string) => id !== user?._id);
+      
+      if (!otherUserId) {
+        console.error('❌ Error: No se pudo identificar al otro usuario en el chat:', chat.id);
         return;
       }
+      
       const userData: User = {
-        _id: privateChat.otherUserId,
+        _id: otherUserId,
         name: privateChat.otherUserName || 'Usuario desconocido',
         username: privateChat.otherUserName?.toLowerCase().replace(/\s+/g, '') || 'usuario',
         email: '',
@@ -92,39 +128,60 @@ export default function MessagesPage() {
       const communityChat = chat as any;
       return communityChat.communityName || chat.name;
     }
+    
     const privateChat = chat as any;
-    // LOG para depuración
-    console.log('DEBUG chat:', {
-      id: chat.id,
-      otherUserId: privateChat.otherUserId,
-      otherUserName: privateChat.otherUserName,
-      participants: privateChat.participants,
-      userId: user?._id
-    });
-    if (!privateChat.otherUserName || privateChat.otherUserId === user?._id) {
-      const otherId = (privateChat.participants || []).find((id: string) => id !== user?._id);
-      return otherId || 'Usuario';
+    // Identificar al otro usuario correctamente
+    const otherUserId = (privateChat.participants || []).find((id: string) => id !== user?._id);
+    
+    // Si tenemos información del otro usuario en el chat
+    if (privateChat.otherUserName && privateChat.otherUserId === otherUserId) {
+      return privateChat.otherUserName;
     }
-    return privateChat.otherUserName;
+    
+    // Si tenemos el ID pero no el nombre, intentar obtenerlo del cache
+    if (otherUserId && userCache.has(otherUserId)) {
+      return userCache.get(otherUserId)!.name;
+    }
+    
+    // Fallback: obtener información del usuario
+    if (otherUserId) {
+      getUserInfo(otherUserId).then(userInfo => {
+        // Esto causará un re-render cuando se obtenga la información
+      });
+      return 'Cargando...';
+    }
+    
+    return 'Usuario desconocido';
   };
 
   const getChatImage = (chat: ChatRoom) => {
     if (chat.type === 'community') {
       return '/images/defaults/default-community.png';
     }
+    
     const privateChat = chat as any;
-    // LOG para depuración
-    console.log('DEBUG chat IMG:', {
-      id: chat.id,
-      otherUserId: privateChat.otherUserId,
-      otherUserProfilePicture: privateChat.otherUserProfilePicture,
-      participants: privateChat.participants,
-      userId: user?._id
-    });
-    if (!privateChat.otherUserProfilePicture || privateChat.otherUserId === user?._id) {
-      return '/images/defaults/default-avatar.png';
+    // Identificar al otro usuario correctamente
+    const otherUserId = (privateChat.participants || []).find((id: string) => id !== user?._id);
+    
+    // Si tenemos información del otro usuario en el chat
+    if (privateChat.otherUserProfilePicture && privateChat.otherUserId === otherUserId) {
+      return privateChat.otherUserProfilePicture;
     }
-    return privateChat.otherUserProfilePicture;
+    
+    // Si tenemos el ID pero no la imagen, intentar obtenerlo del cache
+    if (otherUserId && userCache.has(otherUserId)) {
+      const cachedUser = userCache.get(otherUserId)!;
+      return cachedUser.profilePicture || '/images/defaults/default-avatar.png';
+    }
+    
+    // Fallback: obtener información del usuario
+    if (otherUserId) {
+      getUserInfo(otherUserId).then(userInfo => {
+        // Esto causará un re-render cuando se obtenga la información
+      });
+    }
+    
+    return '/images/defaults/default-avatar.png';
   };
 
   if (!user) {

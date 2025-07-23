@@ -50,6 +50,9 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     // Suscribirse a los mensajes del chat
     const unsubscribe = subscribeToMessages(chatId);
     
+    // Marcar mensajes como leídos cuando se abre el chat
+    chatService.markMessagesAsRead(chatId, user._id);
+    
     return () => {
       console.log('🔌 Desuscribiendo de mensajes del chat:', chatId);
       unsubscribe();

@@ -39,6 +39,7 @@ import CommentsModal from '@/components/CommentsModal';
 import PostCard from '@/components/PostCard';
 import { useImageUrl } from '@/utils/useImageUrl';
 import PrivateChatModal from '@/components/chat/PrivateChatModal';
+import SharedCommunitiesModal from '@/components/SharedCommunitiesModal';
 
 // Componente para manejar imágenes de comunidades individualmente
 const CommunityImage = ({ coverImage, name }: { coverImage?: string; name: string }) => {
@@ -138,6 +139,7 @@ export default function ProfilePage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isAlly, setIsAlly] = useState(false);
   const [allyCheckLoading, setAllyCheckLoading] = useState(true);
+  const [isSharedCommunitiesModalOpen, setIsSharedCommunitiesModalOpen] = useState(false);
   
 
   // Combinamos comunidades creadas y unidas
@@ -170,22 +172,15 @@ export default function ProfilePage() {
     }
   };
 
-  const handleAddAlly = async () => {
-    try {
-      if (!user?._id) return;
-      
-      const response = await api.post('/api/allies/add-ally', {
-        userId: user._id
-      });
-      
-      if (response.data) {
-        setIsAlly(true);
-        toast.success('¡Ahora son aliados!');
-      }
-    } catch (error: any) {
-      console.error('Error al agregar aliado:', error);
-      toast.error(error.response?.data?.error || 'Error al agregar aliado');
-    }
+  const handleAddAlly = () => {
+    // Abrir modal de comunidades compartidas en lugar de agregar directamente
+    setIsSharedCommunitiesModalOpen(true);
+  };
+
+  const handleAllyAdded = () => {
+    // Callback cuando se agrega exitosamente como aliado
+    setIsAlly(true);
+    // Recargar datos si es necesario
   };
 
   useEffect(() => {
@@ -953,6 +948,21 @@ export default function ProfilePage() {
               setUserPosts(newPosts);
             }
           }}
+        />
+      )}
+
+      {/* Modal de comunidades compartidas */}
+      {user && (
+        <SharedCommunitiesModal
+          isOpen={isSharedCommunitiesModalOpen}
+          onClose={() => setIsSharedCommunitiesModalOpen(false)}
+          targetUser={{
+            _id: user._id,
+            name: user.name,
+            username: user.username,
+            profilePicture: user.profilePicture
+          }}
+          onAllyAdded={handleAllyAdded}
         />
       )}
     </div>

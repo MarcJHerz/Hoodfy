@@ -583,6 +583,10 @@ class ChatService {
         throw new Error('Error marcando mensajes como leídos');
       }
 
+      // Actualizar el store local para reflejar que el chat fue leído
+      useChatStore.getState().markChatAsRead(chatId);
+      console.log('✅ Chat marcado como leído:', chatId);
+
     } catch (error) {
       console.error('Error marking messages as read:', error);
     }
