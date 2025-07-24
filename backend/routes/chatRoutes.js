@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/authMiddleware');
+const { verifyToken } = require('../middleware/authMiddleware');
 const admin = require('../config/firebase-admin');
 
 // Marcar mensajes como leídos
-router.post('/:chatId/read', authMiddleware, async (req, res) => {
+router.post('/:chatId/read', verifyToken, async (req, res) => {
   try {
     const { chatId } = req.params;
-    const userId = req.user._id;
+    const userId = req.userId; // Cambiar de req.user._id a req.userId
 
     console.log(`📖 Marcando mensajes como leídos para usuario ${userId} en chat ${chatId}`);
 

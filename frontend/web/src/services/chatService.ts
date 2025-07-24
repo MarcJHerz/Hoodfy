@@ -570,8 +570,16 @@ class ChatService {
         return;
       }
 
-      // Usar el endpoint del backend en lugar del local
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+      // Detectar la URL de la API dinámicamente
+      const currentDomain = window.location.hostname;
+      let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+      
+      if (currentDomain.includes('hoodfy.com')) {
+        apiUrl = process.env.NEXT_PUBLIC_API_URL_HOODFY || 'https://api.hoodfy.com';
+      }
+      
+      console.log('🌐 Usando API URL para chat:', apiUrl);
+
       const response = await fetch(`${apiUrl}/api/chats/${chatId}/read`, {
         method: 'POST',
         headers: {
