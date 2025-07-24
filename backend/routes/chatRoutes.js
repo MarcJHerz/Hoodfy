@@ -11,9 +11,18 @@ router.post('/:chatId/read', verifyToken, async (req, res) => {
 
     console.log(`📖 Marcando mensajes como leídos para usuario ${userId} en chat ${chatId}`);
 
-    // Obtener Firestore correctamente
+    // ✅ FIXED: Verificar que Firebase admin esté inicializado correctamente
+    if (!admin.apps.length) {
+      throw new Error('Firebase admin no está inicializado');
+    }
+
+    // Obtener Firestore correctamente y verificar conexión
     const db = admin.firestore();
     
+    if (!db) {
+      throw new Error('No se pudo obtener Firestore database');
+    }
+
     await db.collection('chats').doc(chatId).update({
       [`unreadCount.${userId}`]: 0,
     });

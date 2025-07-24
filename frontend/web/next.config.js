@@ -7,10 +7,10 @@ const nextConfig = {
   output: 'standalone',
   images: {
     domains: [
-      'localhost',
-      '127.0.0.1',
       'qahood.com',
       'api.qahood.com',
+      'hoodfy.com',
+      'api.hoodfy.com',
       'cdn.venngage.com',
       'miro.medium.com'
     ],
@@ -22,6 +22,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'api.qahood.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.hoodfy.com',
       },
       {
         protocol: 'https',

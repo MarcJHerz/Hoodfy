@@ -245,30 +245,6 @@ export default function LoginForm() {
             Regístrate aquí
           </a>
         </p>
-
-        {/* Botones de debug temporales */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mt-4 space-y-2 text-center">
-            <button
-              onClick={clearAuthData}
-              className="block w-full text-xs text-gray-500 hover:text-red-500 underline"
-            >
-              [DEBUG] Limpiar datos de autenticación
-            </button>
-            <button
-              onClick={debugAuthState}
-              className="block w-full text-xs text-gray-500 hover:text-blue-500 underline"
-            >
-              [DEBUG] Ver estado de autenticación
-            </button>
-            <button
-              onClick={simulateLogin}
-              className="block w-full text-xs text-gray-500 hover:text-green-500 underline"
-            >
-              [DEBUG] Simular login completo
-        </button>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -88,27 +88,30 @@ export const MediaGallery: React.FC<MediaGalleryProps> = React.memo(({
     }
   };
 
-  // Renderizado de grid/lista de media
+  // Renderizado de grid/lista de media mejorado para desktop
   const renderMediaGrid = () => {
     if (mediaItems.length === 1) {
       return (
         <div 
-          className="w-full cursor-pointer"
+          className="w-full cursor-pointer relative overflow-hidden rounded-lg"
           onClick={(e) => handleItemClick(0, e)}
         >
-          <MediaItem item={mediaItems[0]} index={0} onClick={handleItemClick} />
+          {/* ✅ FIXED: Contenedor con altura máxima responsiva */}
+          <div className="relative w-full h-full max-h-[400px] sm:max-h-[500px] md:max-h-[600px] lg:max-h-[550px] xl:max-h-[500px]">
+            <MediaItem item={mediaItems[0]} index={0} onClick={handleItemClick} />
+          </div>
         </div>
       );
     }
 
     if (mediaItems.length === 2) {
       return (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2 max-h-[400px] sm:max-h-[450px] md:max-h-[500px]">
           {mediaItems.map((item, index) => (
             <div 
               key={index}
               onClick={(e) => handleItemClick(index, e)}
-              className="aspect-square"
+              className="aspect-square overflow-hidden rounded-lg"
             >
               <MediaItem item={item} index={index} onClick={handleItemClick} />
             </div>
@@ -119,21 +122,21 @@ export const MediaGallery: React.FC<MediaGalleryProps> = React.memo(({
 
     if (mediaItems.length === 3) {
       return (
-        <div className="grid grid-cols-2 gap-2 h-64">
+        <div className="grid grid-cols-2 gap-2 h-64 sm:h-72 md:h-80 lg:h-[400px] max-h-[400px]">
           <div 
-            className="row-span-2 cursor-pointer"
+            className="row-span-2 cursor-pointer overflow-hidden rounded-lg"
             onClick={(e) => handleItemClick(0, e)}
           >
             <MediaItem item={mediaItems[0]} index={0} onClick={handleItemClick} />
           </div>
           <div 
-            className="cursor-pointer"
+            className="cursor-pointer overflow-hidden rounded-lg"
             onClick={(e) => handleItemClick(1, e)}
           >
             <MediaItem item={mediaItems[1]} index={1} onClick={handleItemClick} />
           </div>
           <div 
-            className="cursor-pointer"
+            className="cursor-pointer overflow-hidden rounded-lg"
             onClick={(e) => handleItemClick(2, e)}
           >
             <MediaItem item={mediaItems[2]} index={2} onClick={handleItemClick} />
@@ -144,18 +147,18 @@ export const MediaGallery: React.FC<MediaGalleryProps> = React.memo(({
 
     // Para 4 o más items
     return (
-      <div className="grid grid-cols-2 gap-2 h-64">
+      <div className="grid grid-cols-2 gap-2 h-64 sm:h-72 md:h-80 lg:h-[400px] max-h-[400px]">
         {mediaItems.slice(0, 3).map((item, index) => (
           <div 
             key={index}
-            className={`cursor-pointer ${index === 0 ? 'row-span-2' : ''}`}
+            className={`cursor-pointer overflow-hidden rounded-lg ${index === 0 ? 'row-span-2' : ''}`}
             onClick={(e) => handleItemClick(index, e)}
           >
             <MediaItem item={item} index={index} onClick={handleItemClick} />
           </div>
         ))}
         <div 
-          className="relative cursor-pointer"
+          className="relative cursor-pointer overflow-hidden rounded-lg"
           onClick={(e) => handleItemClick(3, e)}
         >
           <MediaItem item={mediaItems[3]} index={3} onClick={handleItemClick} />
@@ -172,7 +175,7 @@ export const MediaGallery: React.FC<MediaGalleryProps> = React.memo(({
   };
 
   return (
-    <div className={className}>
+    <div className={`${className} overflow-hidden`}>
       {renderMediaGrid()}
     </div>
   );

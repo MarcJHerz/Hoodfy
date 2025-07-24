@@ -306,6 +306,14 @@ class ChatService {
   // Obtener tokens FCM de usuarios
   private async getUserFCMTokens(userIds: string[]): Promise<string[]> {
     try {
+      // Obtener el token de Firebase Auth
+      const idToken = await auth.currentUser?.getIdToken();
+      
+      if (!idToken) {
+        console.error('❌ No se pudo obtener el token de autenticación para FCM tokens');
+        return [];
+      }
+
       // Detectar la URL de la API dinámicamente
       const currentDomain = window.location.hostname;
       let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
@@ -319,6 +327,7 @@ class ChatService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
         },
         body: JSON.stringify({ userIds }),
       });

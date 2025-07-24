@@ -18,14 +18,10 @@ app.use(cors({
     'https://www.qahood.com',
     'https://hoodfy.com',
     'https://www.hoodfy.com',
-    'http://localhost:3000',
-    'http://localhost:19006',
-    'exp://192.168.1.100:8081', // Para Expo en desarrollo
     /^https:\/\/.*\.qahood\.com$/, // Cualquier subdominio de qahood.com
     /^https:\/\/.*\.hoodfy\.com$/, // Cualquier subdominio de hoodfy.com
     /^https:\/\/.*\.amplifyapp\.com$/, // Para Amplify previews
     /^https:\/\/.*\.vercel\.app$/, // Para Vercel deployments
-    /^http:\/\/localhost:\d+$/, // Para desarrollo local con cualquier puerto
     /^https:\/\/.*\.ngrok\.io$/ // Para túneles ngrok
   ],
   credentials: true,
@@ -65,22 +61,6 @@ app.use((req, res, next) => {
   }
 });
 app.use(express.urlencoded({ extended: true, limit: '500mb' }));
-
-// Middleware para logging de requests (solo en desarrollo)
-if (process.env.NODE_ENV === 'development') {
-  app.use((req, res, next) => {
-    // Solo log básico sin información sensible
-    next();
-  });
-}
-
-// Middleware para logging de requests (solo en desarrollo)
-if (process.env.NODE_ENV === 'development') {
-  app.use((req, res, next) => {
-    // Solo log básico sin información sensible
-    next();
-  });
-}
 
 // ✅ Importar rutas
 const userRoutes = require('./routes/userRoutes');

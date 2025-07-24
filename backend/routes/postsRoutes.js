@@ -169,7 +169,7 @@ router.post('/:postId/like', rateLimiter, async (req, res) => {
       return res.status(404).json({ error: 'Post not found' });
     }
 
-    const userId = req.user._id;
+    const userId = req.userId; // ✅ FIXED: Cambiar req.user._id por req.userId
     if (post.likes.includes(userId)) {
       return res.status(400).json({ error: 'You have already liked this post' });
     }
@@ -177,7 +177,10 @@ router.post('/:postId/like', rateLimiter, async (req, res) => {
     post.likes.push(userId);
     await post.save();
 
-    res.json({ message: 'Like added successfully' });
+    res.json({ 
+      message: 'Like added successfully',
+      likesCount: post.likes.length 
+    });
   } catch (error) {
     console.error('Error liking post:', error);
     res.status(500).json({ error: 'Error liking the post' });
@@ -192,7 +195,7 @@ router.post('/:postId/unlike', rateLimiter, async (req, res) => {
       return res.status(404).json({ error: 'Post not found' });
     }
 
-    const userId = req.user._id;
+    const userId = req.userId; // ✅ FIXED: Cambiar req.user._id por req.userId
     if (!post.likes.includes(userId)) {
       return res.status(400).json({ error: 'You have not liked this post' });
     }
@@ -200,7 +203,10 @@ router.post('/:postId/unlike', rateLimiter, async (req, res) => {
     post.likes = post.likes.filter(id => id.toString() !== userId.toString());
     await post.save();
 
-    res.json({ message: 'Like removed successfully' });
+    res.json({ 
+      message: 'Like removed successfully',
+      likesCount: post.likes.length 
+    });
   } catch (error) {
     console.error('Error unliking post:', error);
     res.status(500).json({ error: 'Error unliking the post' });
@@ -222,7 +228,7 @@ router.post('/:postId/comment', rateLimiter, async (req, res) => {
 
     const comment = {
       content,
-      author: req.user._id,
+      author: req.userId, // ✅ FIXED: Cambiar req.user._id por req.userId
       createdAt: new Date()
     };
 
