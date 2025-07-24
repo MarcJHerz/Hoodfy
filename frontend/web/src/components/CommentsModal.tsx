@@ -8,11 +8,15 @@ import PostHeader from './PostHeader';
 import PostContent from './PostContent';
 import Comments from './Comments';
 import Image from 'next/image';
+import Link from 'next/link';
 import { comments } from '@/services/api';
 import { toast } from 'react-hot-toast';
 import { useImageUrl } from '@/utils/useImageUrl';
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
+import { UserAvatar } from './UserAvatar';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface CommentsModalProps {
   isOpen: boolean;
@@ -35,6 +39,7 @@ export default function CommentsModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { url: currentMediaUrl } = useImageUrl(post?.media?.[currentMediaIndex]?.url);
   const { url: thumbnailUrl } = useImageUrl(post?.media?.[currentMediaIndex]?.thumbnail);
+  const { url: authorImageUrl } = useImageUrl(post?.author?.profilePicture);
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,13 +111,13 @@ export default function CommentsModal({
       {isOpen && (
         <Dialog as="div" className="fixed inset-0 z-50 overflow-hidden" open={isOpen} onClose={onClose}>
           <div className="flex items-center justify-center min-h-screen px-4 text-center">
-            {/* Backdrop */}
+            {/* ✅ FIXED: Backdrop menos agresivo */}
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm" 
+              className="fixed inset-0 bg-black/50" 
               aria-hidden="true" 
             />
 
@@ -172,12 +177,76 @@ export default function CommentsModal({
 
                 {/* Contenido principal */}
                 <div className="flex-1 overflow-y-auto">
-                  {/* Post content con padding mejorado */}
+                  {/* ✅ FIXED: Post header con navegación al perfil */}
                   <div className="px-6 py-6 border-b border-gray-100 dark:border-gray-800">
-                    {post.author && (
-                      <PostHeader author={post.author} createdAt={post.createdAt} />
+                    {/* Header del autor */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <Link 
+                          href={`/profile/${post.author._id}`}
+                          className="flex-shrink-0 group-hover:scale-105 transition-transform duration-200"
+                          onClick={onClose} // Cerrar modal al navegar
+                        >
+                          <UserAvatar
+                            size={48}
+                            source={post.author.profilePicture}
+                            name={post.author.name}
+                          />
+                        </Link>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2">
+                            <Link 
+                              href={`/profile/${post.author._id}`}
+                              className="font-semibold text-gray-900 dark:text-gray-100 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 truncate"
+                              onClick={onClose} // Cerrar modal al navegar
+                            >
+                              {post.author.name}
+                            </Link>
+                            
+                            {/* Badge verificado (si aplica) */}
+                            {post.author.verified && (
+                              <div className="flex-shrink-0">
+                                <div className="w-4 h-4 bg-primary-500 rounded-full flex items-center justify-center">
+                                  <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                            <time dateTime={post.createdAt}>
+                              {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: es })}
+                            </time>
+                            
+                            {/* Mostrar comunidad si existe */}
+                            {post.community && (
+                              <>
+                                <span>•</span>
+                                <Link 
+                                  href={`/communities/${post.community._id}`}
+                                  className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200"
+                                  onClick={onClose} // Cerrar modal al navegar
+                                >
+                                  {post.community.name}
+                                </Link>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Contenido del post */}
+                    {post.content && (
+                      <div className="mb-6">
+                        <p className="text-gray-800 dark:text-gray-200 leading-relaxed text-base">
+                          {post.content}
+                        </p>
+                      </div>
                     )}
-                    <PostContent content={post.content} />
                     
                     {/* Media Gallery MEJORADA - Tamaño original */}
                     {post.media && post.media.length > 0 && (
