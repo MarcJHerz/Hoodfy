@@ -12,15 +12,22 @@ router.post('/:chatId/read', verifyToken, async (req, res) => {
     console.log(`📖 Marcando mensajes como leídos para usuario ${userId} en chat ${chatId}`);
 
     // ✅ FIXED: Verificar que Firebase admin esté inicializado correctamente
-    if (!admin.apps.length) {
+    if (!admin.apps || admin.apps.length === 0) {
+      console.error('❌ Firebase admin no está inicializado');
       throw new Error('Firebase admin no está inicializado');
     }
 
     // Obtener Firestore correctamente y verificar conexión
-    const db = admin.firestore();
-    
-    if (!db) {
-      throw new Error('No se pudo obtener Firestore database');
+    let db;
+    try {
+      db = admin.firestore();
+      
+      if (!db) {
+        throw new Error('No se pudo obtener Firestore database');
+      }
+    } catch (firestoreError) {
+      console.error('❌ Error obteniendo Firestore:', firestoreError);
+      throw new Error(`Error obteniendo Firestore: ${firestoreError.message}`);
     }
 
     await db.collection('chats').doc(chatId).update({

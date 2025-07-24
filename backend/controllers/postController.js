@@ -37,7 +37,7 @@ exports.createPost = async (req, res) => {
     
     console.log('📊 Media procesada:', { originalMedia: req.body.media, processedMedia: media, isArray: Array.isArray(media) });
     
-    const userId = (req.user && req.user._id) ? req.user._id : req.userId;
+    const userId = req.userId; // ✅ FIXED: Siempre usar req.userId del middleware
 
     // Logging para debugging
     console.log('🔍 Datos antes de validación:', {
@@ -215,7 +215,7 @@ exports.getCommunityPosts = async (req, res) => {
   try {
     const { communityId } = req.params;
     const { page = 1, limit = 10, sort = 'recent' } = req.query;
-    const userId = req.user._id;
+    const userId = req.userId;
 
     // Verificar que la comunidad existe
     const community = await Community.findById(communityId);
@@ -295,7 +295,7 @@ exports.getCommunityPosts = async (req, res) => {
 exports.likePost = async (req, res) => {
   try {
     const { postId } = req.params;
-    const userId = req.user._id;
+    const userId = req.userId;
 
     const post = await Post.findById(postId);
     if (!post) {
@@ -328,7 +328,7 @@ exports.commentPost = async (req, res) => {
   try {
     const { postId } = req.params;
     const { content } = req.body;
-    const userId = req.user._id;
+    const userId = req.userId;
 
     if (!content || content.trim().length === 0) {
       return res.status(400).json({ error: 'El contenido del comentario es requerido' });
@@ -370,7 +370,7 @@ exports.commentPost = async (req, res) => {
 exports.getPostById = async (req, res) => {
   try {
     const { postId } = req.params;
-    const userId = req.user._id;
+    const userId = req.userId;
 
     const post = await Post.findById(postId)
       .populate('author', 'name username profilePicture')
@@ -475,7 +475,7 @@ exports.getUserPosts = async (req, res) => {
 exports.unlikePost = async (req, res) => {
   try {
     const { postId } = req.params;
-    const userId = req.user._id;
+    const userId = req.userId;
 
     const post = await Post.findById(postId);
     if (!post) {
@@ -507,7 +507,7 @@ exports.unlikePost = async (req, res) => {
 exports.deleteComment = async (req, res) => {
   try {
     const { postId, commentId } = req.params;
-    const userId = req.user._id;
+    const userId = req.userId;
 
     const post = await Post.findById(postId);
     if (!post) {
@@ -545,7 +545,7 @@ exports.updatePost = async (req, res) => {
   try {
     const { postId } = req.params;
     const { content, tags, visibility } = req.body;
-    const userId = req.user._id;
+    const userId = req.userId; // ✅ FIXED: req.user._id -> req.userId
 
     const post = await Post.findById(postId);
     if (!post) {
@@ -581,7 +581,7 @@ exports.updatePost = async (req, res) => {
 exports.deletePost = async (req, res) => {
   try {
     const { postId } = req.params;
-    const userId = req.user._id;
+    const userId = req.userId;
 
     const post = await Post.findById(postId);
     if (!post) {
@@ -616,7 +616,7 @@ exports.deletePost = async (req, res) => {
 exports.togglePinPost = async (req, res) => {
   try {
     const { postId } = req.params;
-    const userId = req.userId;
+    const userId = req.userId; // ✅ FIXED: req.user._id -> req.userId
 
     const post = await Post.findById(postId).populate('community');
     if (!post) {
@@ -669,7 +669,7 @@ exports.getCommunityPostsFiltered = async (req, res) => {
   try {
     const { communityId } = req.params;
     const { page = 1, limit = 10, filter = 'creator' } = req.query; // 'creator' | 'community'
-    const userId = req.userId;
+    const userId = req.userId; // ✅ FIXED: req.user._id -> req.userId
 
     // Verificar que la comunidad existe
     const community = await Community.findById(communityId);

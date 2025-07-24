@@ -258,8 +258,8 @@ router.delete('/:postId', rateLimiter, async (req, res) => {
 
     // Verificar si el usuario es el autor o el creador de la comunidad
     const community = await Community.findById(post.community);
-    const isAuthor = post.author.toString() === req.user._id.toString();
-    const isCreator = community.creator.toString() === req.user._id.toString();
+    const isAuthor = post.author.toString() === req.userId.toString(); // ✅ FIXED: req.user._id -> req.userId
+    const isCreator = community.creator.toString() === req.userId.toString(); // ✅ FIXED: req.user._id -> req.userId
 
     if (!isAuthor && !isCreator) {
       return res.status(403).json({ error: 'You do not have permission to delete this post' });
