@@ -570,8 +570,9 @@ class ChatService {
         return;
       }
 
-      // Usar el endpoint del backend
-      const response = await fetch(`/api/chats/${chatId}/read`, {
+      // Usar el endpoint del backend en lugar del local
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+      const response = await fetch(`${apiUrl}/api/chats/${chatId}/read`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
