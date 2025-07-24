@@ -7,12 +7,12 @@ const admin = require('../config/firebase-admin');
 router.post('/:chatId/read', verifyToken, async (req, res) => {
   try {
     const { chatId } = req.params;
-    const userId = req.userId; // Cambiar de req.user._id a req.userId
+    const userId = req.userId;
 
     console.log(`📖 Marcando mensajes como leídos para usuario ${userId} en chat ${chatId}`);
 
-    // Actualizar el contador de mensajes no leídos en Firestore
-    const { db } = require('../config/firebase-admin');
+    // Obtener Firestore correctamente
+    const db = admin.firestore();
     
     await db.collection('chats').doc(chatId).update({
       [`unreadCount.${userId}`]: 0,

@@ -460,4 +460,100 @@ async function sendPushNotification(fcmToken, notification) {
     console.error('❌ Error enviando notificación push:', error);
     throw error;
   }
-} 
+}
+
+// 📤 Endpoint para enviar notificaciones push a múltiples tokens (para chat)
+exports.sendPushNotification = async (req, res) => {
+  try {
+    const { notification, tokens } = req.body;
+
+    if (!notification || !tokens || !Array.isArray(tokens) || tokens.length === 0) {
+      return res.status(400).json({ 
+        error: 'Datos requeridos: notification y tokens (array no vacío)' 
+      });
+    }
+
+    console.log(`📤 Enviando notificación push a ${tokens.length} tokens`);
+    console.log('📱 Notificación:', notification);
+
+    const admin = require('../config/firebase-admin');
+    const messaging = admin.messaging();
+
+    // Preparar mensaje para múltiples tokens
+    const message = {
+      notification: {
+        title: notification.title,
+        body: notification.body,
+      },
+      data: {
+        ...notification.data,
+        click_action: notification.data?.chatId ? `/messages` : '/dashboard',
+      },
+      android: {
+        notification: {
+          sound: 'default',
+          priority: 'high',
+          channelId: 'hoodfy-chat-notifications'
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: 'default',
+            badge: 1,
+          },
+        },
+      },
+      webpush: {
+        notification: {
+          icon: '/default-avatar.png',
+          badge: '/default-avatar.png',
+          actions: [
+            {
+              action: 'open',
+              title: 'Abrir Chat',
+            },
+            {
+              action: 'close',
+              title: 'Cerrar',
+            },
+          ],
+        },
+        fcm_options: {
+          link: notification.data?.chatId ? `/messages` : '/dashboard',
+        },
+      },
+    };
+
+    // Enviar a múltiples tokens
+    const results = [];
+    for (const token of tokens) {
+      try {
+        const response = await messaging.send({
+          ...message,
+          token: token
+        });
+        results.push({ token, success: true, messageId: response });
+      } catch (error) {
+        console.error(`❌ Error enviando a token ${token}:`, error);
+        results.push({ token, success: false, error: error.message });
+      }
+    }
+
+    const successCount = results.filter(r => r.success).length;
+    console.log(`✅ Notificaciones enviadas: ${successCount}/${tokens.length}`);
+
+    res.json({
+      success: true,
+      message: `Notificaciones enviadas: ${successCount}/${tokens.length}`,
+      results
+    });
+
+  } catch (error) {
+    console.error('❌ Error en endpoint sendPushNotification:', error);
+    res.status(500).json({ 
+      error: 'Error enviando notificaciones push',
+      details: error.message 
+    });
+  }
+}; 

@@ -10,7 +10,8 @@ const {
   deleteAllNotifications,
   createNotification,
   cleanupExpiredNotifications,
-  getNotificationStats
+  getNotificationStats,
+  sendPushNotification
 } = require('../controllers/notificationController');
 
 // 📋 Obtener todas las notificaciones del usuario
@@ -46,6 +47,11 @@ router.delete('/all', verifyToken, deleteAllNotifications);
 // POST /api/notifications
 // Body: { userId, type, communityId?, postId?, subscriptionId?, commentId?, customData? }
 router.post('/', verifyToken, createNotification);
+
+// 📤 Enviar notificación push a tokens FCM
+// POST /api/notifications/send
+// Body: { notification: { title, body, data }, tokens: string[] }
+router.post('/send', sendPushNotification);
 
 // 🧹 Limpiar notificaciones expiradas (endpoint para cron jobs)
 // POST /api/notifications/cleanup

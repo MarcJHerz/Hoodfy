@@ -266,11 +266,22 @@ class ChatService {
       const tokens = await this.getUserFCMTokens(recipients);
       
       if (tokens.length === 0) {
+        console.log('📱 No hay tokens FCM disponibles para enviar notificación');
         return;
       }
 
+      // Detectar la URL de la API dinámicamente
+      const currentDomain = window.location.hostname;
+      let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+      
+      if (currentDomain.includes('hoodfy.com')) {
+        apiUrl = process.env.NEXT_PUBLIC_API_URL_HOODFY || 'https://api.hoodfy.com';
+      }
+
+      console.log('📤 Enviando notificación de chat a:', apiUrl);
+
       // Enviar notificación a través del backend
-      const response = await fetch('/api/notifications/send', {
+      const response = await fetch(`${apiUrl}/api/notifications/send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -285,6 +296,8 @@ class ChatService {
         throw new Error('Error enviando notificación');
       }
 
+      console.log('✅ Notificación de chat enviada exitosamente');
+
     } catch (error) {
       console.error('Error enviando notificación a destinatarios:', error);
     }
@@ -293,26 +306,30 @@ class ChatService {
   // Obtener tokens FCM de usuarios
   private async getUserFCMTokens(userIds: string[]): Promise<string[]> {
     try {
-      const tokens: string[] = [];
+      // Detectar la URL de la API dinámicamente
+      const currentDomain = window.location.hostname;
+      let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
       
-      // Obtener tokens FCM de cada usuario
-      for (const userId of userIds) {
-        try {
-          const userRef = doc(db, 'users', userId);
-          const userDoc = await getDoc(userRef);
-          
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            if (userData.fcmTokens && Array.isArray(userData.fcmTokens)) {
-              tokens.push(...userData.fcmTokens);
-            }
-          }
-        } catch (error) {
-          console.error(`Error obteniendo tokens para usuario ${userId}:`, error);
-        }
+      if (currentDomain.includes('hoodfy.com')) {
+        apiUrl = process.env.NEXT_PUBLIC_API_URL_HOODFY || 'https://api.hoodfy.com';
       }
-      
-      return tokens;
+
+      // Obtener tokens FCM desde el backend
+      const response = await fetch(`${apiUrl}/api/users/fcm-tokens`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userIds }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error obteniendo tokens FCM');
+      }
+
+      const data = await response.json();
+      return data.tokens || [];
+
     } catch (error) {
       console.error('Error obteniendo tokens FCM:', error);
       return [];
