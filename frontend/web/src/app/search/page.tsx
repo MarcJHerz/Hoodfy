@@ -91,7 +91,7 @@ export default function SearchPage() {
                 <div
                   key={c._id}
                   className="flex items-center gap-4 bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition cursor-pointer"
-                  onClick={() => router.push(`/communities/${c._id}`)}
+                  onClick={() => router.push(`/dashboard/communities/${c._id}`)}
                 >
                   <img src={c.coverImage || '/images/defaults/default-community.svg'} alt={c.name} className="h-12 w-12 rounded-full object-cover bg-indigo-100" />
                   <div className="flex-1">
@@ -99,7 +99,7 @@ export default function SearchPage() {
                     <div className="text-xs text-gray-500 mb-1">{c.description}</div>
                     <div className="text-xs text-indigo-600 font-medium">{c.members?.length || 0} miembros</div>
                   </div>
-                  <button className="px-4 py-1.5 rounded-full bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition" onClick={e => { e.stopPropagation(); router.push(`/communities/${c._id}`); }}>Unirse</button>
+                  <button className="px-4 py-1.5 rounded-full bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition" onClick={e => { e.stopPropagation(); router.push(`/dashboard/communities/${c._id}`); }}>Unirse</button>
                 </div>
               ))}
             </div>
@@ -116,7 +116,7 @@ export default function SearchPage() {
                   <div
                     key={c._id}
                     className="flex items-center gap-4 bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition cursor-pointer"
-                    onClick={() => router.push(`/communities/${c._id}`)}
+                    onClick={() => router.push(`/dashboard/communities/${c._id}`)}
                   >
                     <img src={c.coverImage || '/images/defaults/default-community.svg'} alt={c.name} className="h-12 w-12 rounded-full object-cover bg-indigo-100" />
                     <div className="flex-1">
@@ -124,7 +124,7 @@ export default function SearchPage() {
                       <div className="text-xs text-gray-500 mb-1">{c.description}</div>
                       <div className="text-xs text-indigo-600 font-medium">{c.members?.length || 0} members</div>
                     </div>
-                    <button className="px-4 py-1.5 rounded-full bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition" onClick={e => { e.stopPropagation(); router.push(`/communities/${c._id}`); }}>Unirse</button>
+                    <button className="px-4 py-1.5 rounded-full bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition" onClick={e => { e.stopPropagation(); router.push(`/dashboard/communities/${c._id}`); }}>Unirse</button>
                   </div>
                 ))}
               </div>

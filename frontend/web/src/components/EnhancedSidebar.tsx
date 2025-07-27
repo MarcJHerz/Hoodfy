@@ -305,7 +305,7 @@ export default function EnhancedSidebar() {
                 {allUserCommunities.slice(0, 5).map((community, index) => (
                   <li key={community._id}>
                     <Link
-                      href={`/communities/${community._id}`}
+                      href={`/dashboard/communities/${community._id}`}
                       className="group bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg p-3 transition-all duration-200 hover:shadow-md flex items-center gap-3"
                     >
                       <div className={`w-8 h-8 bg-gradient-to-br ${getCommunityColor(index)} rounded-full flex items-center justify-center flex-shrink-0 shadow-sm`}>
@@ -355,7 +355,7 @@ export default function EnhancedSidebar() {
                 {suggestedCommunities.map((community, index) => (
                   <li key={community._id}>
                     <Link
-                      href={`/communities/${community._id}`}
+                      href={`/dashboard/communities/${community._id}`}
                       className="group bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg p-3 transition-all duration-200 hover:shadow-md flex items-center gap-3"
                     >
                       <div className={`w-8 h-8 bg-gradient-to-br ${getCommunityColor(index + 5)} rounded-full flex items-center justify-center flex-shrink-0 shadow-sm`}>

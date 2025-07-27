@@ -210,7 +210,7 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
   const handleCommunityClick = useCallback(async (community: Community) => {
     setNavigationLoading(true);
     try {
-      await router.push(`/communities/${community._id}`);
+              await router.push(`/dashboard/communities/${community._id}`);
       onClose();
     } catch (error) {
       console.error('Error navigating to community:', error);

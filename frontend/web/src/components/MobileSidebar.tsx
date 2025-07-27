@@ -370,7 +370,7 @@ export default function MobileSidebar() {
                     {allUserCommunities.slice(0, 4).map((community, index) => (
                       <Link
                         key={community._id}
-                        href={`/communities/${community._id}`}
+                        href={`/dashboard/communities/${community._id}`}
                         onClick={handleLinkClick}
                         className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
@@ -420,7 +420,7 @@ export default function MobileSidebar() {
                     {suggestedCommunities.map((community, index) => (
                       <Link
                         key={community._id}
-                        href={`/communities/${community._id}`}
+                        href={`/dashboard/communities/${community._id}`}
                         onClick={handleLinkClick}
                         className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
