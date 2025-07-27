@@ -304,13 +304,13 @@ export default function SubscriptionsPage() {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'active':
-        return 'Activa';
+        return 'Active';
       case 'payment_failed':
-        return 'Pago Fallido';
+        return 'Payment failed';
       case 'canceled':
-        return 'Cancelada';
+        return 'Canceled';
       case 'expired':
-        return 'Expirada';
+        return 'Expired';
       default:
         return status;
     }

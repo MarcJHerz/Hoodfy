@@ -111,20 +111,20 @@ export default function RegisterPage() {
 
     // Validación de contraseñas
     if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      setError('Passwords do not match');
       setLoading(false);
       return;
     }
 
     // Validación de fuerza de contraseña
     if (getPasswordStrength() < 3) {
-      setError('La contraseña debe ser más fuerte. Usa mayúsculas, minúsculas, números y símbolos.');
+      setError('The password must be stronger. Use uppercase, lowercase, numbers and symbols.');
       setLoading(false);
       return;
     }
 
     try {
-      console.log('Iniciando registro en Firebase...');
+      console.log('Starting registration in Firebase...');
       // 1. Registrar usuario en Firebase
       const userCredential = await createUserWithEmailAndPassword(
         firebaseAuth,
@@ -132,14 +132,14 @@ export default function RegisterPage() {
         formData.password
       );
       const { user } = userCredential;
-      console.log('Usuario registrado en Firebase:', user.uid);
+      console.log('User registered in Firebase:', user.uid);
 
       // 2. Obtener el token de Firebase
       const token = await user.getIdToken();
-      console.log('Token de Firebase obtenido');
+      console.log('Firebase token obtained');
 
       // 3. Registrar usuario en el backend
-      console.log('Registrando usuario en el backend...');
+      console.log('Registering user in the backend...');
       try {
         await auth.register({
           email: formData.email,
@@ -147,9 +147,9 @@ export default function RegisterPage() {
           firebaseUid: user.uid,
           username: formData.username,
         });
-        console.log('Usuario registrado en el backend exitosamente');
+        console.log('User registered in the backend successfully');
       } catch (backendError: any) {
-        console.error('Error al registrar en el backend:', backendError);
+        console.error('Error registering in the backend:', backendError);
         // Si falla el registro en el backend, eliminamos el usuario de Firebase
         await user.delete();
         throw new Error(backendError.response?.data?.message || 'Error al registrar en el backend');
@@ -163,22 +163,22 @@ export default function RegisterPage() {
       router.push('/dashboard');
       }, 2000);
     } catch (err: any) {
-      console.error('Error completo en el registro:', err);
+      console.error('Error in registration:', err);
       switch (err.code) {
         case 'auth/email-already-in-use':
-          setError('Este correo electrónico ya está registrado');
+          setError('This email is already registered');
           break;
         case 'auth/invalid-email':
-          setError('Correo electrónico inválido');
+          setError('Invalid email');
           break;
         case 'auth/weak-password':
-          setError('La contraseña debe tener al menos 6 caracteres');
+          setError('The password must be at least 6 characters');
           break;
         case 'auth/network-request-failed':
-          setError('Error de conexión. Verifica tu conexión a internet');
+          setError('Connection error. Check your internet connection');
           break;
         default:
-          setError(err.message || 'Error al registrar usuario');
+          setError(err.message || 'Error registering user');
       }
     } finally {
       setLoading(false);
@@ -214,7 +214,7 @@ export default function RegisterPage() {
         className="fixed top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border border-gray-200/50 dark:border-gray-700/50 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-all duration-200 shadow-lg hover:shadow-xl text-sm font-medium"
       >
         <ArrowRightIcon className="h-4 w-4 rotate-180" />
-        <span>Volver al inicio</span>
+        <span>Back to home</span>
       </Link>
 
       <div className="max-w-md w-full space-y-8">
@@ -226,10 +226,10 @@ export default function RegisterPage() {
           </div>
 
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            ¡Únete a Qahood!
+            Join Hoodfy!
           </h2>
           <p className="text-gray-600 dark:text-gray-300 text-lg mb-4">
-            Crea tu cuenta y encuentra tu comunidad perfecta
+            Create your account and find your perfect community
           </p>
 
           {/* Progress Bar */}
@@ -240,7 +240,7 @@ export default function RegisterPage() {
             ></div>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {completedFields} de {totalFields} campos completados
+            {completedFields} of {totalFields} fields completed
           </p>
         </div>
 
@@ -250,19 +250,19 @@ export default function RegisterPage() {
             <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
               <SparklesIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400">Gratis para siempre</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Free forever</p>
           </div>
           <div className="flex flex-col items-center gap-2">
             <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
               <ShieldCheckIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400">100% seguro</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">100% secure</p>
           </div>
           <div className="flex flex-col items-center gap-2">
             <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
               <UserIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400">Listo en 2 min</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Ready in 2 min</p>
           </div>
         </div>
 
@@ -272,7 +272,7 @@ export default function RegisterPage() {
             {/* Name Field */}
             <div className="space-y-2">
               <label htmlFor="name" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Nombre completo
+                Full name
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -285,7 +285,7 @@ export default function RegisterPage() {
                 required
                   disabled={loading}
                   className="w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 disabled:opacity-50"
-                  placeholder="Tu nombre completo"
+                  placeholder="Your full name"
                 value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                 />
@@ -300,14 +300,14 @@ export default function RegisterPage() {
                 </div>
               </div>
               {formData.name && !validations.name && (
-                <p className="text-xs text-red-500">Mínimo 2 caracteres</p>
+                <p className="text-xs text-red-500">Minimum 2 characters</p>
               )}
             </div>
 
             {/* Username Field */}
             <div className="space-y-2">
               <label htmlFor="username" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Nombre de usuario
+                Username
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -320,7 +320,7 @@ export default function RegisterPage() {
                 required
                   disabled={loading}
                   className="w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 disabled:opacity-50"
-                  placeholder="usuario123"
+                  placeholder="user123"
                 value={formData.username}
                   onChange={(e) => handleInputChange('username', e.target.value.toLowerCase())}
                 />
@@ -335,14 +335,14 @@ export default function RegisterPage() {
                 </div>
               </div>
               {formData.username && !validations.username && (
-                <p className="text-xs text-red-500">Mínimo 3 caracteres, solo letras, números y guión bajo</p>
+                <p className="text-xs text-red-500">Minimum 3 characters, only letters, numbers and underscore</p>
               )}
             </div>
 
             {/* Email Field */}
             <div className="space-y-2">
               <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Correo electrónico
+                Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -355,7 +355,7 @@ export default function RegisterPage() {
                 required
                   disabled={loading}
                   className="w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 disabled:opacity-50"
-                  placeholder="tu@ejemplo.com"
+                  placeholder="your@email.com"
                 value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                 />
@@ -370,14 +370,14 @@ export default function RegisterPage() {
                 </div>
               </div>
               {formData.email && !validations.email && (
-                <p className="text-xs text-red-500">Ingresa un email válido</p>
+                <p className="text-xs text-red-500">Enter a valid email</p>
               )}
             </div>
 
             {/* Password Field */}
             <div className="space-y-2">
               <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Contraseña
+                Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -390,7 +390,7 @@ export default function RegisterPage() {
                 required
                   disabled={loading}
                   className="w-full pl-10 pr-20 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 disabled:opacity-50"
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Minimum 6 characters"
                 value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
                 />
@@ -420,7 +420,7 @@ export default function RegisterPage() {
               {formData.password && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600 dark:text-gray-400">Fuerza de contraseña:</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Password strength:</span>
                     <span className={`text-xs font-medium ${getPasswordStrengthLabel().color}`}>
                       {getPasswordStrengthLabel().label}
                     </span>
@@ -448,7 +448,7 @@ export default function RegisterPage() {
             {/* Confirm Password Field */}
             <div className="space-y-2">
               <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Confirmar contraseña
+                Confirm password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -461,7 +461,7 @@ export default function RegisterPage() {
                 required
                   disabled={loading}
                   className="w-full pl-10 pr-20 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 disabled:opacity-50"
-                  placeholder="Repite tu contraseña"
+                  placeholder="Repeat your password"
                 value={formData.confirmPassword}
                   onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                 />
@@ -487,7 +487,7 @@ export default function RegisterPage() {
                 </div>
               </div>
               {formData.confirmPassword && !validations.confirmPassword && (
-                <p className="text-xs text-red-500">Las contraseñas no coinciden</p>
+                <p className="text-xs text-red-500">Passwords do not match</p>
               )}
             </div>
 
@@ -504,7 +504,7 @@ export default function RegisterPage() {
               <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl animate-fade-in">
                 <CheckCircleIcon className="h-5 w-5 text-green-500 flex-shrink-0" />
                 <p className="text-green-700 dark:text-green-300 text-sm font-medium">
-                  ¡Cuenta creada exitosamente! Bienvenido a Qahood...
+                  Account created successfully! Welcome to Hoodfy...
                 </p>
               </div>
             )}
@@ -518,16 +518,16 @@ export default function RegisterPage() {
               {loading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Creando cuenta...</span>
+                  <span>Creating account...</span>
                 </>
               ) : success ? (
                 <>
                   <CheckCircleIcon className="h-5 w-5" />
-                  <span>¡Cuenta creada!</span>
+                  <span>Account created!</span>
                 </>
               ) : (
                 <>
-                  <span>Crear mi cuenta</span>
+                  <span>Create my account</span>
                   <ArrowRightIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
                 </>
               )}
@@ -535,13 +535,13 @@ export default function RegisterPage() {
 
             {/* Terms */}
             <p className="text-xs text-center text-gray-500 dark:text-gray-400">
-              Al registrarte, aceptas nuestros{' '}
+              By registering, you accept our{' '}
               <Link href="/terms" className="text-blue-600 dark:text-blue-400 hover:underline">
-                Términos de Servicio
+                Terms of Service
               </Link>{' '}
               y{' '}
               <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">
-                Política de Privacidad
+                Privacy Policy
               </Link>
             </p>
           </form>
@@ -553,7 +553,7 @@ export default function RegisterPage() {
                 href="/login" 
                 className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-200"
               >
-                ¿Ya tienes una cuenta? <span className="underline">Inicia sesión aquí</span>
+                Already have an account? <span className="underline">Login here</span>
               </Link>
             </div>
           </div>
@@ -562,10 +562,10 @@ export default function RegisterPage() {
         {/* Additional Info */}
         <div className="text-center space-y-2">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            🔒 Tus datos están protegidos con encriptación de extremo a extremo
+            🔒 Your data is protected with end-to-end encryption
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            ✨ Más de 10,000 personas ya se han unido a Qahood
+            ✨ More than 10,000 people have already joined Hoodfy
           </p>
           </div>
       </div>

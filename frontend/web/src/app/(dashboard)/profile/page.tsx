@@ -361,7 +361,7 @@ export default function ProfilePage() {
                             ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
                             : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                         }`}
-                        title="Vista en cuadrícula"
+                        title="Grid view"
                       >
                         <Squares2X2Icon className="w-5 h-5" />
                       </button>
@@ -372,7 +372,7 @@ export default function ProfilePage() {
                             ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
                             : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                         }`}
-                        title="Vista en lista"
+                        title="List view"
                       >
                         <ViewColumnsIcon className="w-5 h-5" />
                       </button>
@@ -385,10 +385,10 @@ export default function ProfilePage() {
                         <Squares2X2Icon className="w-8 h-8 text-gray-400" />
                       </div>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                        No hay publicaciones
+                        No posts
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400">
-                        Comparte tu primera publicación con la comunidad
+                        Share your first post with the community
                       </p>
                     </div>
                   ) : viewMode === 'grid' ? (
@@ -514,10 +514,10 @@ export default function ProfilePage() {
                         <UsersIcon className="w-8 h-8 text-gray-400" />
                       </div>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                        No hay comunidades
+                        No communities
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400">
-                        Únete a comunidades o crea la tuya propia
+                        Join a communities or create your own
                       </p>
                     </div>
                   ) : (
@@ -593,10 +593,10 @@ export default function ProfilePage() {
                         <UserPlusIcon className="w-8 h-8 text-gray-400" />
                       </div>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                        No hay aliados
+                        No allies
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400">
-                        Únete a comunidades para conocer gente y hacer aliados
+                        Join a communities to meet people and make allies
                       </p>
                     </div>
                   ) : (
@@ -637,7 +637,7 @@ export default function ProfilePage() {
                     {user?.bio ? (
                       <div className="space-y-6">
                         <div>
-                          <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Biografía</h4>
+                          <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Biography</h4>
                           <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                             {user.bio}
                           </p>
@@ -673,10 +673,10 @@ export default function ProfilePage() {
                           <TagIcon className="w-8 h-8 text-gray-400" />
                       </div>
                         <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                          Sin información adicional
+                          No additional information
                         </h4>
                         <p className="text-gray-600 dark:text-gray-400">
-                          Agrega una biografía para que otros sepan más sobre ti
+                          Add a biography to let others know more about you
                         </p>
                       </div>
                     )}

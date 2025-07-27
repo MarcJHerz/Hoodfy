@@ -23,15 +23,15 @@ export default function CommunityFeed({ communityId, isCreator = false }: Commun
   const filterOptions = [
     { 
       value: 'creator', 
-      label: 'Del creador', 
+      label: 'By creator', 
       icon: UserIcon,
-      description: 'Posts del fundador de la comunidad'
+      description: 'Posts by the community founder'
     },
     { 
       value: 'community', 
-      label: 'De la comunidad', 
+      label: 'By community', 
       icon: UserGroupIcon,
-      description: 'Posts de todos los miembros'
+      description: 'Posts by all members'
     }
   ];
 
@@ -81,12 +81,12 @@ export default function CommunityFeed({ communityId, isCreator = false }: Commun
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-3">
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-            Posts de la comunidad
+            Community posts
           </h2>
           {filter === 'creator' && (
             <div className="flex items-center space-x-1 text-amber-600 dark:text-amber-400">
               <MapPinIcon className="w-4 h-4" />
-              <span className="text-sm font-medium">Destacados primero</span>
+              <span className="text-sm font-medium">Featured first</span>
             </div>
           )}
         </div>
@@ -176,12 +176,12 @@ export default function CommunityFeed({ communityId, isCreator = false }: Commun
               )}
             </div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-              No hay posts {filter === 'creator' ? 'del creador' : 'de la comunidad'} aún
+              No posts {filter === 'creator' ? 'by the creator' : 'by the community'} yet
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
               {filter === 'creator' 
-                ? 'El fundador aún no ha compartido contenido destacado'
-                : 'Los miembros aún no han comenzado a compartir contenido'
+                ? 'The founder has not shared any featured content yet'
+                : 'The members have not started sharing content yet'
               }
             </p>
           </div>

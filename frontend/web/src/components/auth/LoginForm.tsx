@@ -9,19 +9,19 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const router = useRouter();
   
-  // Usar el AuthStore de Zustand
+  // Use the AuthStore of Zustand
   const { login, isLoading, error, clearError } = useAuthStore();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    clearError(); // Limpiar errores previos
+    clearError(); // Clear previous errors
 
     try {
       await login(email, password);
-      // El AuthStore maneja la navegación automáticamente
+      // The AuthStore handles the navigation automatically
     } catch (err: any) {
-      // El error ya está manejado en el store
-      console.error('Error en login:', err);
+      // The error is already handled in the store
+      console.error('Error in login:', err);
     }
   };
 
@@ -99,7 +99,7 @@ export default function LoginForm() {
   // Función para simular login completo
   const simulateLogin = async () => {
     if (!email || !password) {
-      alert('Por favor ingresa email y contraseña primero');
+      alert('Please enter email and password first');
       return;
     }
 
@@ -120,21 +120,21 @@ export default function LoginForm() {
       const idToken = await cred.user.getIdToken();
       console.log('Token obtenido:', idToken.substring(0, 20) + '...');
       
-      // Login con backend
-      console.log('3. Login con backend...');
+      // Login with backend
+      console.log('3. Login with backend...');
       const { auth: apiAuth } = await import('@/services/api');
       const response = await apiAuth.login(idToken);
       console.log('Backend response:', response.data);
       
-      // Verificar estado final
-      console.log('4. Verificando estado final...');
+      // Verify final state
+      console.log('4. Verifying final state...');
       debugAuthState();
       
       console.log('=== LOGIN SIMULATION COMPLETE ===');
       return response.data;
     } catch (error) {
-      console.error('Error en simulación de login:', error);
-      alert('Error en simulación: ' + (error as any).message);
+      console.error('Error in login simulation:', error);
+      alert('Error in simulation: ' + (error as any).message);
     }
   };
 
@@ -142,7 +142,7 @@ export default function LoginForm() {
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-          Iniciar sesión
+          Login
         </h2>
       </div>
 
@@ -150,7 +150,7 @@ export default function LoginForm() {
         <form className="space-y-6" onSubmit={handleLogin}>
         <div>
             <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
-              Correo electrónico
+              Email
           </label>
             <div className="mt-2">
           <input
@@ -168,7 +168,7 @@ export default function LoginForm() {
 
         <div>
             <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
-            Contraseña
+            Password
           </label>
             <div className="mt-2">
           <input
@@ -196,7 +196,7 @@ export default function LoginForm() {
               disabled={isLoading}
               className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
         >
-              {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+              {isLoading ? 'Logging in...' : 'Login'}
         </button>
           </div>
         </form>
@@ -207,7 +207,7 @@ export default function LoginForm() {
               <div className="w-full border-t border-gray-300" />
             </div>
             <div className="relative flex justify-center text-sm font-medium leading-6">
-              <span className="bg-white px-6 text-gray-900">O continuar con</span>
+              <span className="bg-white px-6 text-gray-900">Or continue with</span>
             </div>
           </div>
 
@@ -240,9 +240,9 @@ export default function LoginForm() {
         </div>
 
         <p className="mt-10 text-center text-sm text-gray-500">
-          ¿No tienes una cuenta?{' '}
+          Don't have an account?{' '}
           <a href="/register" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
-            Regístrate aquí
+            Register here
           </a>
         </p>
       </div>

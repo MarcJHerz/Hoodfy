@@ -402,11 +402,11 @@ export default function ProfilePage() {
                         className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-secondary btn-sm sm:btn-lg shadow-soft hover:shadow-md text-sm sm:text-base"
                     >
                         <Cog6ToothIcon className="w-4 h-4" />
-                        Editar
+                        Edit
                     </Link>
                       <button className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-secondary btn-sm sm:btn-lg shadow-soft hover:shadow-md text-sm sm:text-base">
                         <ShareIcon className="w-4 h-4" />
-                        Compartir
+                        Share
                       </button>
                     </>
                   ) : (
@@ -417,7 +417,7 @@ export default function ProfilePage() {
                           className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-primary btn-sm sm:btn-lg shadow-glow hover:shadow-glow-accent text-sm sm:text-base"
                       >
                         <ChatBubbleLeftIcon className="w-4 h-4" />
-                          Mensaje
+                          Message
                         </button>
                       )}
                       {!isAlly && !allyCheckLoading && (
@@ -426,7 +426,7 @@ export default function ProfilePage() {
                           className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-primary btn-sm sm:btn-lg shadow-glow hover:shadow-glow-accent text-sm sm:text-base"
                         >
                           <UserPlusIcon className="w-4 h-4" />
-                          Agregar Aliado
+                          Add as ally
                         </button>
                       )}
                       {/* Menú móvil optimizado */}
@@ -445,11 +445,11 @@ export default function ProfilePage() {
                                 }`}
                                 onClick={() => {
                                   navigator.clipboard.writeText(window.location.href);
-                                  toast.success('Enlace copiado al portapapeles');
+                                  toast.success('Link copied to clipboard');
                                 }}
                               >
                                 <ShareIcon className="w-4 h-4" />
-                                Compartir perfil
+                                Share profile
                               </button>
                             )}
                           </Menu.Item>
@@ -543,17 +543,17 @@ export default function ProfilePage() {
                         <LockClosedIcon className="w-8 h-8 text-gray-400" />
                       </div>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                        Contenido privado
+                        Private content
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400 mb-4">
-                        Solo los aliados pueden ver las publicaciones de este usuario
+                        Only allies can see this user's posts
                       </p>
                       {!allyCheckLoading && (
                         <button
                           onClick={handleAddAlly}
                           className="btn-primary btn-md"
                         >
-                          Agregar como aliado
+                          Add as ally
                         </button>
                       )}
                     </div>
@@ -569,7 +569,7 @@ export default function ProfilePage() {
                                 ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
                                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                             }`}
-                            title="Vista en cuadrícula"
+                            title="Grid view"
                           >
                             <Squares2X2Icon className="w-5 h-5" />
                           </button>
@@ -580,7 +580,7 @@ export default function ProfilePage() {
                                 ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
                                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                             }`}
-                            title="Vista en lista"
+                            title="List view"
                           >
                             <ViewColumnsIcon className="w-5 h-5" />
                           </button>
@@ -593,12 +593,12 @@ export default function ProfilePage() {
                             <Squares2X2Icon className="w-8 h-8 text-gray-400" />
                           </div>
                           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                            No hay publicaciones
+                            No posts
                           </h3>
                           <p className="text-gray-600 dark:text-gray-400">
                             {isOwnProfile 
-                              ? 'Comparte tu primera publicación con la comunidad'
-                              : 'Este usuario aún no ha publicado nada'
+                              ? 'Share your first post with the community'
+                              : 'This user has not posted anything yet'
                             }
                           </p>
                         </div>
@@ -734,12 +734,12 @@ export default function ProfilePage() {
                         <UsersIcon className="w-8 h-8 text-gray-400" />
                       </div>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                        No hay comunidades
+                        No communities
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400">
                         {isOwnProfile 
-                          ? 'Únete a comunidades o crea la tuya propia'
-                          : 'Este usuario no es miembro de ninguna comunidad'
+                          ? 'Join a communities or create your own'
+                          : 'This user is not a member of any community'
                         }
                       </p>
                     </div>

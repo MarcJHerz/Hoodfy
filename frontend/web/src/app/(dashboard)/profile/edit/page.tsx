@@ -6,9 +6,12 @@ import Image from 'next/image';
 import { PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import { users } from '@/services/api';
+import { useImageUrl } from '@/utils/useImageUrl';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function EditMyProfilePage() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -19,19 +22,21 @@ export default function EditMyProfilePage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Hook para manejar la imagen de perfil actual
+  const currentProfilePictureKey = user?.profilePicture || '';
+  const { url: currentProfileImageUrl } = useImageUrl(currentProfilePictureKey);
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const response = await users.getProfile();
-        const user = response.data;
+        const userData = response.data;
         setFormData({
-          name: user.name,
-          username: user.username,
-          bio: user.bio || '',
+          name: userData.name,
+          username: userData.username,
+          bio: userData.bio || '',
         });
-        if (user.profilePicture) {
-          setPreviewUrl(user.profilePicture);
-        }
+        // No establecer previewUrl aquí, se manejará con useImageUrl
       } catch (error) {
         console.error('Error loading profile:', error);
         toast.error('Error loading profile');
@@ -98,21 +103,20 @@ export default function EditMyProfilePage() {
       if (profilePicture) {
         const photoFormData = new FormData();
         photoFormData.append('profilePicture', profilePicture);
-        await users.updateProfilePhoto(photoFormData);
+        await users.uploadProfilePicture(photoFormData);
       }
 
       // Luego actualizar el resto de la información
-      const profileFormData = new FormData();
-      profileFormData.append('name', formData.name);
-      profileFormData.append('username', formData.username);
-      profileFormData.append('bio', formData.bio);
-
-      await users.updateProfile(profileFormData);
+      await users.updateProfile({
+        name: formData.name,
+        username: formData.username,
+        bio: formData.bio
+      });
       
       toast.success('Profile updated successfully!');
       router.push('/dashboard/profile');
     } catch (error: any) {
-      console.error('Error al actualizar perfil:', error);
+      console.error('Error updating profile:', error);
       toast.error(error.response?.data?.message || 'Error updating profile');
     } finally {
       setLoading(false);
@@ -129,7 +133,14 @@ export default function EditMyProfilePage() {
               {previewUrl ? (
                 <Image
                   src={previewUrl}
-                  alt="Vista previa"
+                  alt="Preview"
+                  fill
+                  className="object-cover rounded-full border-4 border-white dark:border-gray-800 shadow-glow group-hover:shadow-glow-accent transition-all duration-300"
+                />
+              ) : currentProfileImageUrl ? (
+                <Image
+                  src={currentProfileImageUrl}
+                  alt="Current profile"
                   fill
                   className="object-cover rounded-full border-4 border-white dark:border-gray-800 shadow-glow group-hover:shadow-glow-accent transition-all duration-300"
                 />
@@ -138,7 +149,7 @@ export default function EditMyProfilePage() {
                   <PhotoIcon className="h-16 w-16 text-white/70" />
                 </div>
               )}
-              {previewUrl && (
+              {(previewUrl || currentProfileImageUrl) && (
                 <button
                   type="button"
                   onClick={removeImage}

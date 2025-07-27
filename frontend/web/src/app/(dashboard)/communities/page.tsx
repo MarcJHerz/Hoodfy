@@ -57,18 +57,18 @@ const CommunityCard = ({ community, type }: { community: Community; type: 'creat
           <div className="absolute top-4 right-4">
             {type === 'created' && (
               <span className="bg-gradient-to-r from-primary-600 to-accent-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-                Creador
+                Creator
               </span>
             )}
             {type === 'subscribed' && (
               <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center">
                 <StarIcon className="w-3 h-3 mr-1" />
-                Suscrito
+                Subscribed
               </span>
             )}
             {type === 'available' && (
               <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-                Disponible
+                Available
               </span>
             )}
           </div>
@@ -91,7 +91,7 @@ const CommunityCard = ({ community, type }: { community: Community; type: 'creat
             <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
               <div className="flex items-center">
                 <UserGroupIcon className="h-4 w-4 mr-1" />
-                {community.members?.length || 0} miembros
+                {community.members?.length || 0} members
               </div>
               {community.createdAt && type === 'created' && (
                 <div className="flex items-center">
@@ -106,12 +106,12 @@ const CommunityCard = ({ community, type }: { community: Community; type: 'creat
             </div>
             {type === 'subscribed' && (
               <div className="text-primary-600 dark:text-primary-400 text-sm font-medium">
-                Acceso completo
+                Full access
               </div>
             )}
             {type === 'available' && (
               <div className="text-blue-600 dark:text-blue-400 text-sm font-medium">
-                Ver detalles
+                View details
               </div>
             )}
           </div>
@@ -223,10 +223,10 @@ export default function CommunitiesPage() {
             </div>
           </div>
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Cargando comunidades
+            Loading communities
           </h3>
           <p className="text-gray-500 dark:text-gray-400">
-            Preparando tu experiencia comunitaria...
+            Preparing your community experience...
           </p>
         </div>
       </div>
@@ -245,10 +245,10 @@ export default function CommunitiesPage() {
               </div>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Tus Comunidades
+              Your Communities
             </h1>
             <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Conecta, aprende y crece junto a personas que comparten tus intereses
+              Connect, learn and grow with people who share your interests
             </p>
             
             {/* Stats Cards */}
@@ -258,28 +258,28 @@ export default function CommunitiesPage() {
                   <SparklesIcon className="w-6 h-6 text-white mr-2" />
                   <span className="text-2xl font-bold text-white">{stats.totalCommunities}</span>
                 </div>
-                <p className="text-white/80 text-sm">Comunidades totales</p>
+                <p className="text-white/80 text-sm">Total communities</p>
               </div>
               <div className="bg-white/10 dark:bg-black/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                 <div className="flex items-center justify-center mb-2">
                   <TrophyIcon className="w-6 h-6 text-white mr-2" />
                   <span className="text-2xl font-bold text-white">{stats.createdCommunities}</span>
                 </div>
-                <p className="text-white/80 text-sm">Creadas por ti</p>
+                <p className="text-white/80 text-sm">Created by you</p>
               </div>
               <div className="bg-white/10 dark:bg-black/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                 <div className="flex items-center justify-center mb-2">
                   <StarIcon className="w-6 h-6 text-white mr-2" />
                   <span className="text-2xl font-bold text-white">{stats.subscriptions}</span>
                 </div>
-                <p className="text-white/80 text-sm">Suscripciones</p>
+                <p className="text-white/80 text-sm">Subscriptions</p>
               </div>
               <div className="bg-white/10 dark:bg-black/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                 <div className="flex items-center justify-center mb-2">
                   <FireIcon className="w-6 h-6 text-white mr-2" />
                   <span className="text-2xl font-bold text-white">{stats.totalMembers}</span>
                 </div>
-                <p className="text-white/80 text-sm">Miembros totales</p>
+                <p className="text-white/80 text-sm">Total members</p>
               </div>
             </div>
           </div>
@@ -294,7 +294,7 @@ export default function CommunitiesPage() {
               <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
-                placeholder="Buscar comunidades por nombre o descripción..."
+                placeholder="Search communities by name or description..."
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
@@ -321,9 +321,9 @@ export default function CommunitiesPage() {
                   onChange={(e) => setSortBy(e.target.value as 'newest' | 'members' | 'name')}
                   className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
-                  <option value="newest">Más recientes</option>
-                  <option value="members">Más miembros</option>
-                  <option value="name">Nombre A-Z</option>
+                  <option value="newest">Newest</option>
+                  <option value="members">Most members</option>
+                  <option value="name">Name A-Z</option>
                 </select>
               </div>
             </div>
@@ -342,7 +342,7 @@ export default function CommunitiesPage() {
               }
             >
               <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
-              <span className="truncate">Mis Comunidades</span>
+              <span className="truncate">My Communities</span>
               {userCommunities.length > 0 && (
                 <span className={`ml-1 sm:ml-2 px-1.5 py-0.5 rounded-full text-xs ${
                   activeTab === 0 
@@ -363,7 +363,7 @@ export default function CommunitiesPage() {
               }
             >
               <StarIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
-              <span className="truncate">Suscripciones</span>
+              <span className="truncate">Subscriptions</span>
               {subscribedCommunities.length > 0 && (
                 <span className={`ml-1 sm:ml-2 px-1.5 py-0.5 rounded-full text-xs ${
                   activeTab === 1 
@@ -384,7 +384,7 @@ export default function CommunitiesPage() {
               }
             >
               <GlobeAltIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
-              <span className="truncate">Explorar</span>
+              <span className="truncate">Explore</span>
               {allCommunities.length > 0 && (
                 <span className={`ml-1 sm:ml-2 px-1.5 py-0.5 rounded-full text-xs ${
                   activeTab === 2 
@@ -412,17 +412,17 @@ export default function CommunitiesPage() {
                     <UserGroupIcon className="w-12 h-12 text-primary-600 dark:text-primary-400" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-                    ¡Crea tu primera comunidad!
+                    Create your first community!
                 </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
-                    Comienza tu viaje como creador de contenido y construye una comunidad increíble
+                    Start your journey as a content creator and build an incredible community
                 </p>
                   <Link
                     href="/communities/create"
                     className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover-lift"
                   >
                     <PlusIcon className="w-5 h-5 mr-2" />
-                    Crear comunidad
+                    Create community
                   </Link>
               </div>
             )}
@@ -442,17 +442,17 @@ export default function CommunitiesPage() {
                     <StarIcon className="w-12 h-12 text-amber-600 dark:text-amber-400" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-                    Descubre comunidades increíbles
+                    Discover incredible communities
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
-                    Únete a comunidades que te inspiren y te ayuden a crecer personal y profesionalmente
+                    Join communities that inspire you and help you grow personally and professionally
                   </p>
                   <button
                     onClick={() => setActiveTab(2)}
                     className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover-lift"
                   >
                     <GlobeAltIcon className="w-5 h-5 mr-2" />
-                    Explorar comunidades
+                    Explore communities
                   </button>
                 </div>
               )}
@@ -478,10 +478,10 @@ export default function CommunitiesPage() {
                     <GlobeAltIcon className="w-12 h-12 text-blue-600 dark:text-blue-400" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-                    No hay comunidades para explorar
+                    No communities to explore
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
-                    ¡Sé el primero en crear una comunidad y construir algo increíble!
+                    Be the first to create a community and build something incredible!
                   </p>
                 </div>
               )}
@@ -494,7 +494,7 @@ export default function CommunitiesPage() {
       <Link
         href="/communities/create"
         className="fixed bottom-8 right-8 inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 hover-lift group z-50"
-        title="Crear nueva comunidad"
+        title="Create new community"
       >
         <PlusIcon className="h-8 w-8 group-hover:scale-110 transition-transform duration-200" />
       </Link>

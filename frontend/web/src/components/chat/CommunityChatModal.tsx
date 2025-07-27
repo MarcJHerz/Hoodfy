@@ -147,7 +147,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  Autenticación requerida
+                  Authentication required
                 </motion.h3>
                 <motion.p 
                   className="text-gray-600 dark:text-gray-400 leading-relaxed"
@@ -155,7 +155,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                 >
-                  Debes iniciar sesión para acceder al chat de la comunidad
+                  You must login to access the community chat
                 </motion.p>
               </div>
             </div>
@@ -176,7 +176,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
           exit={{ opacity: 0 }}
         >
           <div className="flex items-center justify-center min-h-screen p-4">
-            {/* Backdrop mejorado con gradiente y blur */}
+            {/* Improved backdrop with gradient and blur */}
             <motion.div 
               className="fixed inset-0 bg-gradient-to-br from-black/40 via-gray-900/50 to-black/60 backdrop-blur-md transition-opacity" 
               initial={{ opacity: 0 }}
@@ -233,14 +233,14 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
                         animate={{ scale: [1, 1.3, 1] }}
                         transition={{ duration: 2, repeat: Infinity }}
                       />
-                      Chat de comunidad
+                      Community chat
                     </motion.p>
                   </div>
                 </div>
                 <motion.button
                   onClick={handleClose}
                   className="group p-3 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200"
-                  title="Cerrar chat"
+                  title="Close chat"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -287,7 +287,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.3 }}
                         >
-                          Verificando acceso
+                          Verifying access
                         </motion.h3>
                         <motion.p 
                           className="text-gray-600 dark:text-gray-400 max-w-sm mx-auto leading-relaxed"
@@ -295,7 +295,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.4 }}
                         >
-                          Comprobando permisos para acceder al chat de {communityName}...
+                          Checking permissions to access the chat of {communityName}...
                         </motion.p>
                         <motion.div 
                           className="mt-6 flex justify-center space-x-2"
@@ -349,7 +349,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.2 }}
                         >
-                          Acceso restringido
+                          Restricted access
                         </motion.h3>
                         <motion.p 
                           className="text-gray-700 dark:text-gray-300 mb-8 leading-relaxed"
@@ -357,7 +357,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.3 }}
                         >
-                          Debes estar suscrito a <span className="font-semibold text-purple-600 dark:text-purple-400">{communityName}</span> para acceder al chat grupal
+                          You must be subscribed to <span className="font-semibold text-purple-600 dark:text-purple-400">{communityName}</span> to access the community chat
                         </motion.p>
                         <motion.div 
                           className="flex flex-col sm:flex-row gap-4 justify-center"
@@ -371,7 +371,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                           >
-                            Ver comunidad
+                            View community
                           </motion.button>
                           <motion.button
                             onClick={handleClose}
@@ -379,7 +379,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                           >
-                            Cerrar
+                            Close
                           </motion.button>
                         </motion.div>
                       </div>
@@ -431,7 +431,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.2 }}
                         >
-                          Error al cargar el chat
+                          Error loading the chat
                         </motion.h3>
                         <motion.p 
                           className="text-gray-700 dark:text-gray-300 mb-8 leading-relaxed"
@@ -439,7 +439,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.3 }}
                         >
-                          No se pudo establecer la conexión con el chat de <span className="font-semibold text-purple-600 dark:text-purple-400">{communityName}</span>
+                          Could not establish connection with the chat of <span className="font-semibold text-purple-600 dark:text-purple-400">{communityName}</span>
                         </motion.p>
                         <motion.div 
                           className="flex flex-col sm:flex-row gap-4 justify-center"
@@ -453,7 +453,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                           >
-                            Reintentar
+                            Try again
                           </motion.button>
                           <motion.button
                             onClick={handleClose}
@@ -461,7 +461,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                           >
-                            Cerrar
+                            Close
                           </motion.button>
                         </motion.div>
                       </div>

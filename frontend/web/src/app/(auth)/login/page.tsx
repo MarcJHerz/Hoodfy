@@ -52,10 +52,10 @@ export default function LoginPage() {
         throw new Error('Demasiados intentos de inicio de sesión. Por favor, espera unos minutos.');
       }
 
-      console.log('Iniciando sesión...');
+      console.log('Logging in...');
       // Usar la función login del AuthStore que maneja Firebase y backend
       await login(formData.email, formData.password);
-      console.log('Sesión iniciada exitosamente');
+      console.log('Login successful');
 
       // Mostrar éxito brevemente antes de redirigir
       setSuccess(true);
@@ -65,9 +65,9 @@ export default function LoginPage() {
         router.push('/dashboard');
       }, 1000);
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'Error al iniciar sesión';
+      const errorMessage = err.response?.data?.message || err.message || 'Error in login';
       setError(errorMessage);
-      console.error('Error completo en el inicio de sesión:', err);
+      console.error('Error in login:', err);
       
       // Incrementar contador de intentos
       setLoginAttempts(prev => prev + 1);
@@ -98,7 +98,7 @@ export default function LoginPage() {
           <button
             onClick={toggleTheme}
             className="p-3 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border border-gray-200/50 dark:border-gray-700/50 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-all duration-200 shadow-lg hover:shadow-xl"
-            title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+            title={theme === 'dark' ? 'Change to light mode' : 'Change to dark mode'}
           >
             {theme === 'dark' ? (
               <SunIcon className="h-5 w-5" />
@@ -115,7 +115,7 @@ export default function LoginPage() {
         className="fixed top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border border-gray-200/50 dark:border-gray-700/50 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-all duration-200 shadow-lg hover:shadow-xl text-sm font-medium"
       >
         <ArrowRightIcon className="h-4 w-4 rotate-180" />
-        <span>Volver al inicio</span>
+        <span>Back to home</span>
       </Link>
 
       <div className="max-w-md w-full space-y-8">
@@ -127,10 +127,10 @@ export default function LoginPage() {
           </div>
 
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            ¡Bienvenido de vuelta!
+            Welcome back!
           </h2>
           <p className="text-gray-600 dark:text-gray-300 text-lg">
-            Inicia sesión para continuar con tu comunidad
+            Login to continue with your community
           </p>
         </div>
 
@@ -140,7 +140,7 @@ export default function LoginPage() {
             {/* Email Field */}
             <div className="space-y-2">
               <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Correo electrónico
+                Email
               </label>
               <div className="relative">
                 <input
@@ -150,7 +150,7 @@ export default function LoginPage() {
                   required
                   disabled={loginAttempts >= 3 || loading}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  placeholder="tu@ejemplo.com"
+                  placeholder="your@email.com"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                 />
@@ -160,7 +160,7 @@ export default function LoginPage() {
             {/* Password Field */}
             <div className="space-y-2">
               <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Contraseña
+                Password
               </label>
               <div className="relative">
                 <input
@@ -170,7 +170,7 @@ export default function LoginPage() {
                   required
                   disabled={loginAttempts >= 3 || loading}
                   className="w-full px-4 py-3 pr-12 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  placeholder="Tu contraseña"
+                  placeholder="Your password"
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
                 />
@@ -201,7 +201,7 @@ export default function LoginPage() {
               <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl animate-fade-in">
                 <CheckCircleIcon className="h-5 w-5 text-green-500 flex-shrink-0" />
                 <p className="text-green-700 dark:text-green-300 text-sm font-medium">
-                  ¡Sesión iniciada exitosamente! Redirigiendo...
+                  Login successful! Redirecting...
                 </p>
               </div>
             )}
@@ -215,7 +215,7 @@ export default function LoginPage() {
               {loading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Iniciando sesión...</span>
+                  <span>Logging in...</span>
                 </>
               ) : success ? (
                 <>
@@ -234,8 +234,8 @@ export default function LoginPage() {
             {loginAttempts > 0 && loginAttempts < 3 && (
               <div className="text-center">
                 <p className="text-yellow-600 dark:text-yellow-400 text-sm">
-                  {loginAttempts === 1 ? 'Primer intento fallido' : 'Segundo intento fallido'}
-                  {loginAttempts === 2 && ' - Un intento más y se bloqueará temporalmente'}
+                  {loginAttempts === 1 ? 'First failed attempt' : 'Second failed attempt'}
+                  {loginAttempts === 2 && ' - One more attempt and it will be temporarily blocked'}
                 </p>
               </div>
             )}
@@ -248,7 +248,7 @@ export default function LoginPage() {
                 href="/register" 
                 className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors duration-200"
               >
-                ¿No tienes una cuenta? <span className="underline">Regístrate aquí</span>
+                Don't have an account? <span className="underline">Register here</span>
               </Link>
             </div>
             <div className="text-center">
@@ -256,7 +256,7 @@ export default function LoginPage() {
                 href="/forgot-password" 
                 className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors duration-200"
               >
-                ¿Olvidaste tu contraseña?
+                Forgot your password?
               </Link>
             </div>
           </div>
@@ -265,7 +265,7 @@ export default function LoginPage() {
         {/* Additional Info */}
         <div className="text-center">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            🔒 Tu información está protegida con encriptación de extremo a extremo
+            🔒 Your information is protected with end-to-end encryption
           </p>
         </div>
       </div>

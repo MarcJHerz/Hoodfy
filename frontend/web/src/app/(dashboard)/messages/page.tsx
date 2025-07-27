@@ -45,7 +45,7 @@ export default function MessagesPage() {
       return userInfo;
     } catch (error) {
       console.error('Error fetching user info:', error);
-      return { name: 'Usuario desconocido', profilePicture: undefined };
+      return { name: 'Unknown user', profilePicture: undefined };
     }
   };
 
@@ -65,8 +65,8 @@ export default function MessagesPage() {
       }, 1000);
       
     } catch (error) {
-      console.error('❌ Error al cargar chats:', error);
-      setError('Error al cargar los chats. Inténtalo de nuevo.');
+      console.error('❌ Error loading chats:', error);
+      setError('Error loading chats. Try again.');
       setIsLoading(false);
     }
     
@@ -88,14 +88,14 @@ export default function MessagesPage() {
       const otherUserId = (privateChat.participants || []).find((id: string) => id !== user?._id);
       
       if (!otherUserId) {
-        console.error('❌ Error: No se pudo identificar al otro usuario en el chat:', chat.id);
+        console.error('❌ Error: Could not identify the other user in the chat:', chat.id);
         return;
       }
       
       const userData: User = {
         _id: otherUserId,
-        name: privateChat.otherUserName || 'Usuario desconocido',
-        username: privateChat.otherUserName?.toLowerCase().replace(/\s+/g, '') || 'usuario',
+        name: privateChat.otherUserName || 'Unknown user',
+        username: privateChat.otherUserName?.toLowerCase().replace(/\s+/g, '') || 'user',
         email: '',
         profilePicture: privateChat.otherUserProfilePicture || '',
         bio: '',
@@ -108,7 +108,7 @@ export default function MessagesPage() {
       if (communityChat.communityId) {
         window.open(`/communities/${communityChat.communityId}`, '_blank');
       } else {
-        console.error('❌ Error: communityId es undefined para el chat:', chat.id);
+        console.error('❌ Error: communityId is undefined for the chat:', chat.id);
       }
     }
   };
@@ -149,10 +149,10 @@ export default function MessagesPage() {
       getUserInfo(otherUserId).then(userInfo => {
         // Esto causará un re-render cuando se obtenga la información
       });
-      return 'Cargando...';
+      return 'Loading...';
     }
     
-    return 'Usuario desconocido';
+    return 'Unknown user';
   };
 
   const getChatImage = (chat: ChatRoom) => {
@@ -193,10 +193,10 @@ export default function MessagesPage() {
             <UserIcon className="w-10 h-10 text-gray-400 dark:text-gray-500" />
           </div>
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Autenticación requerida
+            Authentication required
           </h3>
           <p className="text-gray-500 dark:text-gray-400">
-            Debes iniciar sesión para ver tus mensajes
+            You must login to see your messages
           </p>
         </div>
       </div>
@@ -217,10 +217,10 @@ export default function MessagesPage() {
             </div>
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-700 dark:from-white dark:via-blue-300 dark:to-purple-400 bg-clip-text text-transparent">
-                Mensajes
+                Messages
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-2 font-medium">
-                Tus conversaciones privadas y chats de comunidad
+                Your private conversations and community chats
               </p>
             </div>
           </div>
@@ -241,7 +241,7 @@ export default function MessagesPage() {
               </div>
               <div className="mt-4 flex items-center text-xs text-blue-600 dark:text-blue-400">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
-                Activas ahora
+                Active now
               </div>
             </div>
             
@@ -254,12 +254,12 @@ export default function MessagesPage() {
                   <p className="text-3xl font-bold text-green-700 dark:text-green-300 group-hover:scale-105 transition-transform duration-300">
                     {chatRooms.filter(chat => chat.type === 'private').length}
                   </p>
-                  <p className="text-sm font-medium text-green-600 dark:text-green-400">Chats privados</p>
+                  <p className="text-sm font-medium text-green-600 dark:text-green-400">Private chats</p>
                 </div>
               </div>
               <div className="mt-4 flex items-center text-xs text-green-600 dark:text-green-400">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                Con aliados
+                With allies
               </div>
             </div>
             
@@ -277,7 +277,7 @@ export default function MessagesPage() {
               </div>
               <div className="mt-4 flex items-center text-xs text-purple-600 dark:text-purple-400">
                 <div className="w-2 h-2 bg-purple-500 rounded-full mr-2 animate-pulse"></div>
-                Grupos activos
+                Active groups
               </div>
             </div>
           </div>
@@ -296,10 +296,10 @@ export default function MessagesPage() {
                 </div>
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-                Cargando chats
+                Loading chats
               </h3>
               <p className="text-gray-600 dark:text-gray-400 max-w-sm mx-auto leading-relaxed">
-                Obteniendo tus conversaciones más recientes...
+                Getting your most recent conversations...
               </p>
               <div className="mt-6 flex justify-center space-x-2">
                 <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
@@ -317,7 +317,7 @@ export default function MessagesPage() {
               <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 animate-ping"></div>
             </div>
             <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Error al cargar chats
+              Error loading chats
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto leading-relaxed">
               {error}
@@ -327,13 +327,13 @@ export default function MessagesPage() {
                 onClick={() => window.location.reload()}
                 className="px-8 py-3 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
               >
-                Reintentar
+                Try again
               </button>
               <Link
                 href="/communities"
                 className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
               >
-                Explorar Comunidades
+                Explore communities
               </Link>
             </div>
           </div>
@@ -347,10 +347,10 @@ export default function MessagesPage() {
               <div className="absolute -bottom-2 -left-2 w-6 h-6 bg-gradient-to-r from-green-400 to-blue-500 rounded-full animate-pulse"></div>
             </div>
             <h3 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              ¡Tu bandeja está limpia!
+              Your inbox is clean!
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-lg mx-auto leading-relaxed text-lg">
-              No tienes chats aún. Inicia una conversación con tus aliados o únete a comunidades para comenzar a chatear.
+              You don't have any chats yet. Start a conversation with your allies or join communities to start chatting.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Link
@@ -358,14 +358,14 @@ export default function MessagesPage() {
                 className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white font-bold rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1 group"
               >
                 <UsersIcon className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
-                Explorar comunidades
+                Explore communities
               </Link>
               <Link
                 href={`/profile/${user._id}`}
                 className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 group"
               >
                 <UserIcon className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
-                Ver mi perfil
+                View my profile
               </Link>
             </div>
           </div>
@@ -423,7 +423,7 @@ export default function MessagesPage() {
                         <div className="flex items-center space-x-3">
                           {getChatIcon(chat)}
                           <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                            {chat.type === 'community' ? 'Chat de comunidad' : 'Chat privado'}
+                            {chat.type === 'community' ? 'Community chat' : 'Private chat'}
                           </span>
                           {(chat as any).unreadCount > 0 && (
                             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg animate-bounce">

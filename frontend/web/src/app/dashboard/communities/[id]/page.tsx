@@ -370,14 +370,14 @@ export default function CommunityPage() {
           <button
             onClick={handleShare}
             className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200 hover-lift"
-            title="Compartir comunidad"
+            title="Share community"
           >
             <ShareIcon className="h-5 w-5" />
           </button>
           <button
             onClick={handleReport}
             className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200 hover-lift"
-            title="Reportar comunidad"
+            title="Report community"
           >
             <FlagIcon className="h-5 w-5" />
           </button>
@@ -385,7 +385,7 @@ export default function CommunityPage() {
             <Link
                               href={`/dashboard/communities/${community._id}/edit`}
               className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200 hover-lift"
-              title="Editar comunidad"
+              title="Edit community"
             >
               <PencilIcon className="h-5 w-5" />
             </Link>
@@ -395,7 +395,7 @@ export default function CommunityPage() {
               <button
                 onClick={() => setIsOptionsMenuOpen(!isOptionsMenuOpen)}
                 className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200 hover-lift"
-                title="Opciones de suscripción"
+                title="Subscription options"
               >
                 <EllipsisVerticalIcon className="h-5 w-5" />
               </button>
@@ -408,7 +408,7 @@ export default function CommunityPage() {
                     className="w-full flex items-center space-x-3 px-4 py-3 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                   >
                     <XMarkIcon className="w-5 h-5" />
-                    <span className="font-medium">Cancelar suscripción</span>
+                    <span className="font-medium">Cancel subscription</span>
                   </button>
                 </div>
               )}
@@ -518,7 +518,7 @@ export default function CommunityPage() {
                     {/* 🔥 Mensaje de urgencia (solo si hay suficientes miembros) */}
                     {(community.members?.length || 0) > 3 && (
                       <p className="text-white/80 text-xs mb-2 font-medium">
-                        🔥 {Math.floor(Math.random() * 5) + 2} se unieron esta semana
+                        🔥 {Math.floor(Math.random() * 5) + 2} joined this week
                       </p>
                     )}
                     
@@ -527,14 +527,14 @@ export default function CommunityPage() {
                       className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-bold rounded-xl shadow-2xl hover:shadow-3xl transition-all duration-200 hover-lift text-base sm:text-lg group"
                     >
                       <span className="flex items-center justify-center">
-                        Únete ahora
+                        Join now
                         <SparklesIcon className="w-4 h-4 ml-2 group-hover:animate-spin" />
                       </span>
                     </button>
                     
                     {/* 💝 Valor agregado */}
                     <p className="text-white/70 text-xs mt-2 font-medium">
-                      ✨ Acceso instantáneo al contenido exclusivo
+                      ✨ Instant access to exclusive content
                     </p>
                   </div>
                 )}
@@ -573,7 +573,7 @@ export default function CommunityPage() {
                     href={`/profile/${community.creator._id}`}
                     className="inline-block bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 hover-lift"
                   >
-                    Ver perfil
+                    View profile
                   </Link>
                 </div>
               </div>
@@ -622,7 +622,7 @@ export default function CommunityPage() {
                     ? 'bg-white/20 group-hover:bg-white/30' 
                     : 'bg-white/10 group-hover:bg-white/20 border border-white/30'
                 }`}>
-                  {hasAccess ? 'Abrir chat 💬' : '🔓 Join conversation'}
+                  {hasAccess ? 'Open chat 💬' : '🔓 Join conversation'}
                 </div>
                 
                 {/* 🎯 FOMO indicator para no suscritos */}
@@ -880,7 +880,7 @@ export default function CommunityPage() {
                         </p>
                         {community.createdAt && (
                           <p className="text-sm text-gray-500 dark:text-gray-500">
-                            Miembro desde {new Date(community.createdAt).toLocaleDateString('es-ES')}</p>
+                            Member since {new Date(community.createdAt).toLocaleDateString('es-ES')}</p>
                         )}
                       </div>
                     </Link>
@@ -894,7 +894,7 @@ export default function CommunityPage() {
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center">
                     <UserGroupIcon className="w-7 h-7 mr-3 text-primary-600 dark:text-primary-400" />
-                    Miembros ({community.members?.length || 0})
+                    Members ({community.members?.length || 0})
                   </h2>
                 </div>
                 
@@ -920,7 +920,7 @@ export default function CommunityPage() {
                           </p>
                         {member._id === community.creator?._id && (
                             <span className="inline-block px-2 py-1 bg-gradient-to-r from-yellow-100 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 text-yellow-700 dark:text-yellow-400 text-xs font-medium rounded-full mt-1">
-                              Creador
+                              Creator
                             </span>
                         )}
                       </div>
@@ -933,7 +933,7 @@ export default function CommunityPage() {
                       <UserGroupIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
                     </div>
                     <p className="text-gray-500 dark:text-gray-400">
-                      No hay miembros aún en esta comunidad
+                      No members yet in this community
                     </p>
                   </div>
                 )}
@@ -949,8 +949,8 @@ export default function CommunityPage() {
         onClose={handleCloseModal}
         communityName={community.name}
         price={community.price || 0}
-        benefits={['Acceso a contenido exclusivo', 'Participación en el chat grupal', 'Conexión con otros miembros']}
-        rules={['Respetar a los miembros', 'No spam', 'Mantener conversaciones constructivas']}
+        benefits={['Access to exclusive content', 'Participation in the group chat', 'Connection with other members']}
+        rules={['Respect the members', 'No spam', 'Keep constructive conversations']}
         communityId={community._id}
         onSubscriptionSuccess={checkSubscription}
       />

@@ -54,7 +54,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     chatService.markMessagesAsRead(chatId, user._id);
     
     return () => {
-      console.log('🔌 Desuscribiendo de mensajes del chat:', chatId);
+      console.log('🔌 Unsubscribing from chat messages:', chatId);
       unsubscribe();
     };
   }, [chatId, user?._id, subscribeToMessages]);
@@ -78,8 +78,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
 
       await sendMessage(messageData);
     } catch (error) {
-      console.error('Error al enviar mensaje:', error);
-      // Aquí podrías mostrar un toast de error
+      console.error('Error sending message:', error);
+      // Here you could show an error toast
     } finally {
       setIsSending(false);
     }
@@ -93,7 +93,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
             <UserIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
           </div>
           <p className="text-gray-500 dark:text-gray-400 font-medium">
-            Debes iniciar sesión para usar el chat
+            You must login to use the chat
           </p>
         </div>
       </div>
@@ -102,11 +102,11 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
 
   return (
     <div className={`flex flex-col h-full bg-white dark:bg-gray-900 ${isModal ? 'rounded-lg shadow-xl border border-gray-200 dark:border-gray-700' : ''}`}>
-      {/* Header del chat mejorado - Solo mostrar si NO está en modal */}
+      {/* Header of the chat improved - Only show if NOT in modal */}
       {!isModal && (
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex-shrink-0">
           <div className="flex items-center space-x-3">
-            {/* Avatar/Icono mejorado */}
+            {/* Improved avatar/icon */}
             {chatType === 'private' && otherUserProfilePicture ? (
               <div className="relative">
                 <UserAvatar
@@ -134,19 +134,19 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
               <div className="flex items-center space-x-2">
                 <div className={`w-2 h-2 rounded-full ${isLoading ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'}`}></div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {chatType === 'community' ? 'Chat de comunidad' : 'Chat privado'}
-                  {isLoading && ' • Conectando...'}
+                  {chatType === 'community' ? 'Community chat' : 'Private chat'}
+                  {isLoading && ' • Connecting...'}
                 </p>
               </div>
             </div>
           </div>
           
-          {/* Botón de cerrar mejorado */}
+          {/* Improved close button */}
           {onClose && (
             <button
               onClick={onClose}
               className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all duration-200 hover-lift"
-              title="Cerrar chat"
+              title="Close chat"
             >
               <XMarkIcon className="w-5 h-5" />
             </button>
@@ -154,7 +154,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         </div>
       )}
 
-      {/* Lista de mensajes con mejor manejo de errores */}
+      {/* List of messages with improved error handling */}
       <div className="flex-1 overflow-hidden min-h-0">
         {error ? (
           <div className="flex-1 flex items-center justify-center p-8">
@@ -165,14 +165,14 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                Error al cargar el chat
+                Error loading the chat
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{error}</p>
               <button
                 onClick={() => window.location.reload()}
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200 hover-lift"
               >
-                Reintentar
+                Try again
               </button>
             </div>
           </div>
@@ -187,12 +187,12 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         )}
       </div>
 
-      {/* Input para enviar mensajes */}
+      {/* Input to send messages */}
       <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
         <MessageInput
           onSendMessage={handleSendMessage}
           isLoading={isSending}
-          placeholder={`Escribe un mensaje en ${chatName}...`}
+          placeholder={`Write a message in ${chatName}...`}
           disabled={isLoading || !!error}
         />
       </div>

@@ -1,6 +1,8 @@
 "use client";
 
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   CheckIcon, 
   StarIcon, 
@@ -20,8 +22,42 @@ import {
   HandRaisedIcon
 } from '@heroicons/react/24/outline';
 import LandingMenu from '@/components/LandingMenu';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function Home() {
+  const router = useRouter();
+  const { user, isInitialized } = useAuthStore();
+
+  // Redirección automática para usuarios autenticados
+  useEffect(() => {
+    if (isInitialized && user) {
+      console.log('🔄 Usuario autenticado detectado, redirigiendo al dashboard...');
+      router.replace('/dashboard');
+    }
+  }, [user, isInitialized, router]);
+
+  // Mostrar loading mientras se inicializa la autenticación
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-600 dark:border-primary-400 border-t-transparent mx-auto mb-6"></div>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            Cargando Hoodfy
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400">
+            Preparando tu experiencia...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Si el usuario está autenticado, no mostrar nada (ya se redirigió)
+  if (user) {
+    return null;
+  }
+
   const revolutionPoints = [
     {
       icon: UsersIcon,

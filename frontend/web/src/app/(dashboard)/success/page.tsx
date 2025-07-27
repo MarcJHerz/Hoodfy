@@ -48,7 +48,7 @@ export default function SuccessPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600 dark:text-gray-400">Procesando tu suscripción...</p>
+          <p className="text-gray-600 dark:text-gray-400">Processing your subscription...</p>
         </div>
       </div>
     );
@@ -67,10 +67,10 @@ export default function SuccessPage() {
               <CheckCircleIcon className="h-10 w-10 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-white mb-2">
-              ¡Suscripción Exitosa!
+              Subscription successful!
             </h1>
             <p className="text-green-100">
-              Ya formas parte de la comunidad
+              You are now a member of the community
             </p>
           </div>
 
@@ -80,10 +80,10 @@ export default function SuccessPage() {
             {/* Success Message */}
             <div className="text-center">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Bienvenido a tu nueva comunidad
+                Welcome to your new community
               </h2>
               <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Tu pago ha sido procesado exitosamente y ahora tienes acceso completo a todos los beneficios de la comunidad.
+                Your payment has been processed successfully and you now have full access to all the benefits of the community.
               </p>
             </div>
 
@@ -91,24 +91,24 @@ export default function SuccessPage() {
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
               <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
                 <SparklesIcon className="h-5 w-5" />
-                ¿Qué puedes hacer ahora?
+                What can you do now?
               </h3>
               <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
                 <li className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
-                  Participar en discusiones exclusivas
+                  Participate in exclusive discussions
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
-                  Acceder al chat grupal de la comunidad
+                  Access the community's group chat
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
-                  Conectar con otros miembros
+                  Connect with other members
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
-                  Crear y compartir contenido
+                  Create and share content
                 </li>
               </ul>
             </div>
@@ -146,9 +146,9 @@ export default function SuccessPage() {
         {/* Support Notice */}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            ¿Problemas con tu suscripción?{' '}
+            Problems with your subscription?{' '}
             <Link href="/support" className="text-blue-600 dark:text-blue-400 hover:underline">
-              Contacta soporte
+              Contact support
             </Link>
           </p>
         </div>
