@@ -42,7 +42,7 @@ const CommunityCard = ({ community, type }: { community: Community; type: 'creat
   
   return (
     <Link
-      href={`/communities/${community._id}`}
+                      href={`/dashboard/communities/${community._id}`}
       className="group block"
     >
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover-lift border border-gray-200 dark:border-gray-700">

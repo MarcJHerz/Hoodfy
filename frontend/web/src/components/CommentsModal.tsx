@@ -226,7 +226,7 @@ export default function CommentsModal({
                               <>
                                 <span>•</span>
                                 <Link 
-                                  href={`/communities/${post.community._id}`}
+                                  href={`/dashboard/communities/${post.community._id}`}
                                   className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200"
                                   onClick={onClose} // Cerrar modal al navegar
                                 >

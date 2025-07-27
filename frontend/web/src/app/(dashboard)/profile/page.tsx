@@ -525,7 +525,7 @@ export default function ProfilePage() {
                       {allCommunities.map((community) => (
                       <Link
                         key={community._id}
-                        href={`/communities/${community._id}`}
+                        href={`/dashboard/communities/${community._id}`}
                           className="group"
                         >
                           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 transition-all duration-200 hover-lift overflow-hidden">

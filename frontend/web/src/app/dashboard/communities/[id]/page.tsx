@@ -206,14 +206,18 @@ export default function CommunityPage() {
 
   const handleShare = async () => {
     try {
+      // Usar la URL pública para compartir (sin /dashboard)
+      const publicUrl = `${window.location.origin}/communities/${id}`;
       await navigator.share({
         title: community?.name,
         text: community?.description,
-        url: window.location.href
+        url: publicUrl
       });
     } catch (error) {
       console.error('Error al compartir:', error);
-      navigator.clipboard.writeText(window.location.href);
+      // Usar la URL pública para copiar al portapapeles
+      const publicUrl = `${window.location.origin}/communities/${id}`;
+      navigator.clipboard.writeText(publicUrl);
       toast.success('Enlace copiado al portapapeles');
     }
   };
@@ -379,7 +383,7 @@ export default function CommunityPage() {
           </button>
           {authUser && community.creator?._id === authUser._id && (
             <Link
-              href={`/communities/${community._id}/edit`}
+                              href={`/dashboard/communities/${community._id}/edit`}
               className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200 hover-lift"
               title="Editar comunidad"
             >
