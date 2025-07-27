@@ -5,8 +5,15 @@ export function middleware(request: NextRequest) {
   // Solo aplicar middleware a rutas específicas
   const path = request.nextUrl.pathname;
   
-  // Lista de rutas que NO necesitan middleware
-  const publicPaths = ['/', '/login', '/register', '/api'];
+  // Lista de rutas que NO necesitan middleware (públicas)
+  const publicPaths = [
+    '/', 
+    '/login', 
+    '/register', 
+    '/api',
+    '/communities' // ✅ Permitir acceso público a comunidades
+  ];
+  
   if (publicPaths.some(p => path.startsWith(p))) {
     return NextResponse.next();
   }

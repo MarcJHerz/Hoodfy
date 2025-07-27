@@ -1,261 +1,421 @@
 "use client";
 
 import Link from 'next/link';
-import { CheckIcon, StarIcon, UserGroupIcon, ChatBubbleLeftRightIcon, CalendarIcon, TrophyIcon, ChartBarIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { 
+  CheckIcon, 
+  StarIcon, 
+  UserGroupIcon, 
+  ChatBubbleLeftRightIcon, 
+  CalendarIcon, 
+  TrophyIcon, 
+  ChartBarIcon, 
+  HeartIcon,
+  ArrowRightIcon,
+  SparklesIcon,
+  UsersIcon,
+  LinkIcon,
+  RocketLaunchIcon,
+  GlobeAltIcon,
+  ExclamationTriangleIcon,
+  HandRaisedIcon
+} from '@heroicons/react/24/outline';
 import LandingMenu from '@/components/LandingMenu';
 
 export default function Home() {
-  const features = [
+  const revolutionPoints = [
     {
-      icon: UserGroupIcon,
-      title: "Instant Communities",
-      description: "Join like-minded communities and automatically make friends when you join."
+      icon: UsersIcon,
+      title: "Creator as Connector",
+      description: "No more followers. Creators become hosts who introduce people to each other.",
+      oldWay: "1 Creator → 1M Followers",
+      newWay: "1 Creator → Groups of Friends"
     },
     {
       icon: ChatBubbleLeftRightIcon,
-      title: "Group & Private Chat",
-      description: "Chat in groups with the entire community or privately with new friends."
+      title: "Peer-to-Peer Bonds",
+      description: "Members talk directly with each other, creating real friendships.",
+      oldWay: "Parasocial relationships",
+      newWay: "Real friendships form"
     },
     {
-      icon: CalendarIcon,
-      title: "Exclusive Events",
-      description: "Access unique events organized by your community."
-    },
-    {
-      icon: TrophyIcon,
-      title: "Automatic Contests",
-      description: "Automatically participate in contests by belonging to a community."
+      icon: SparklesIcon,
+      title: "Create Together",
+      description: "Friends collaborate on projects, events, and shared experiences.",
+      oldWay: "Consume content alone",
+      newWay: "Create things together"
     }
   ];
 
-  const stats = [
-    { label: "Private communities generate 10x more engagement than public networks.", value: "10x" },
-    { label: "United Community", value: "500+" },
-    { label: "Active Members", value: "50K+" },
-    { label: "Communities Created", value: "1000+" }
-  ];
-
-  const testimonials = [
+  const howItWorks = [
     {
-      name: "Sarah Johnson",
-      role: "Community Creator",
-      content: "My community has grown to 500 members and I generate $2,000 USD monthly. The platform is incredible.",
-      rating: 5
+      step: "01",
+      title: "Creator Sets the Vibe",
+      description: "Someone passionate creates a space and defines the community purpose",
+      icon: RocketLaunchIcon,
+      color: "from-blue-500 to-purple-600"
     },
     {
-      name: "Mike Chen",
-      role: "Community Member",
-      content: "I found my tribe here. The connections are real and the engagement is amazing.",
-      rating: 5
+      step: "02", 
+      title: "Members Become Friends",
+      description: "People join and immediately start connecting with each other, not just the creator",
+      icon: UsersIcon,
+      color: "from-purple-500 to-pink-600"
     },
     {
-      name: "Emma Rodriguez",
-      role: "Community Creator",
-      content: "Creating my community was the best decision. The tools are powerful and the support is excellent.",
-      rating: 5
+      step: "03",
+      title: "Friends Create Together", 
+      description: "Real relationships form. Friends collaborate, meet up, and build amazing things",
+      icon: SparklesIcon,
+      color: "from-pink-500 to-red-600"
     }
   ];
 
-  const communityExamples = [
-    {
-      name: "Tech Enthusiasts",
-      members: "1,200+",
-      description: "Share the latest in technology and innovation"
+  const visionStats = [
+    { 
+      label: "The First of Its Kind", 
+      value: "🌟",
+      description: "Revolutionary friendship platform"
     },
-    {
-      name: "Fitness & Wellness",
-      members: "800+",
-      description: "Support each other in health and fitness goals"
+    { 
+      label: "Join the Pioneer Community", 
+      value: "🚀",
+      description: "Shape the future of connection"
     },
-    {
-      name: "Creative Artists",
-      members: "650+",
-      description: "Showcase and collaborate on creative projects"
+    { 
+      label: "Limited Early Access", 
+      value: "💫",
+      description: "Be part of something groundbreaking"
     }
   ];
 
-  const benefits = [
-    "Connect with people who share your interests",
-    "Access exclusive content and events",
-    "Build meaningful relationships",
-    "Grow your personal and professional network",
-    "Participate in community challenges and contests",
-    "Get support and advice from like-minded people"
+  const exampleCommunities = [
+    {
+      name: "Book Lovers Circle",
+      purpose: "Where reading becomes social",
+      outcome: "Members forming reading groups & hosting book cafes",
+      members: "Coming Soon"
+    },
+    {
+      name: "Local Foodies",
+      purpose: "Transform solo dining", 
+      outcome: "Friends cooking together & hosting dinner parties",
+      members: "Coming Soon"
+    },
+    {
+      name: "Fitness Buddies",
+      purpose: "Make working out social",
+      outcome: "Workout partners in every city & group challenges", 
+      members: "Coming Soon"
+    }
+  ];
+
+  const problemPoints = [
+    "🔴 Following creators but never meeting people",
+    "🔴 Parasocial relationships that feel empty", 
+    "🔴 Consuming content alone in your room",
+    "🔴 Competing for creator attention",
+    "🔴 Surface-level interactions only"
+  ];
+
+  const solutionPoints = [
+    "✅ Making real friends through shared interests",
+    "✅ Authentic relationships between members",
+    "✅ Creating and building things together", 
+    "✅ Collaborating instead of competing",
+    "✅ Deep, meaningful connections"
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Landing Menu */}
       <LandingMenu />
 
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-left">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
-              Be part of a private community<br />
-              Make real connections
+      {/* Hero Section - Revolutionary */}
+      <section className="relative pt-20 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 dark:from-blue-400/5 dark:to-purple-400/5"></div>
+        
+        <div className="max-w-7xl mx-auto relative">
+          <div className="text-center max-w-5xl mx-auto">
+            {/* Coming Soon Badge */}
+            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full px-6 py-2 mb-8 border border-blue-200 dark:border-blue-800">
+              <SparklesIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">The Future of Social Connection</span>
+            </div>
+
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight tracking-tight">
+              Don't Just Follow.<br />
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Become Friends.
+              </span>
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl">
-            Join meaningful communities. Speak freely. Grow together
-            </p>
             
-            {/* Stats */}
-            <div className="flex flex-wrap justify-center gap-8 mb-12">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600">10x</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">More engagement</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600">500+</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Communities created</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">50K+</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Active members</div>
-              </div>
+            <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
+              The first platform where communities become friend groups.<br />
+              Where creators connect people, not collect followers.
+            </p>
+
+            {/* Vision Stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 mb-12 max-w-4xl mx-auto">
+              {visionStats.map((stat, index) => (
+                <div key={index} className="text-center p-6 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+                  <div className="text-4xl mb-3">{stat.value}</div>
+                  <div className="font-bold text-gray-900 dark:text-white mb-2">{stat.label}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">{stat.description}</div>
+                </div>
+              ))}
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
               <Link
                 href="/register"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg px-8 py-4 text-lg shadow-lg hover:scale-105 transition-transform duration-200"
+                className="group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-2xl px-8 py-4 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
               >
-                Join your community
+                <span className="flex items-center">
+                  🚀 Be a Founding Member
+                  <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                </span>
               </Link>
               <Link
-                href="/login"
-                className="border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-lg px-8 py-4 text-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
+                href="#vision"
+                className="border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-2xl px-8 py-4 text-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300"
               >
-                Sign in
+                See the Vision
               </Link>
+            </div>
+
+            {/* Early Access Notice */}
+            <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center space-x-2">
+              <HandRaisedIcon className="w-4 h-4" />
+              <span>Limited Early Access • Be First • Be Different</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Problem/Solution Section */}
+      <section id="vision" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+              Social Media is Broken.<br />
+              <span className="text-blue-600">We're Here to Fix It.</span>
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              Traditional platforms create loneliness. We create lasting friendships.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+            {/* The Problem */}
+            <div className="space-y-8">
+              <div className="text-center lg:text-left">
+                <div className="inline-flex items-center space-x-2 bg-red-100 dark:bg-red-900/20 rounded-full px-4 py-2 mb-4">
+                  <ExclamationTriangleIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
+                  <span className="text-sm font-semibold text-red-700 dark:text-red-300">The Problem</span>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6">
+                  Traditional Social Media
+                </h3>
+              </div>
+              
+              <div className="space-y-4">
+                {problemPoints.map((point, index) => (
+                  <div key={index} className="flex items-start space-x-3 p-4 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-200 dark:border-red-800">
+                    <div className="text-lg">{point}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* The Solution */}
+            <div className="space-y-8">
+              <div className="text-center lg:text-left">
+                <div className="inline-flex items-center space-x-2 bg-green-100 dark:bg-green-900/20 rounded-full px-4 py-2 mb-4">
+                  <CheckIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  <span className="text-sm font-semibold text-green-700 dark:text-green-300">The Solution</span>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6">
+                  The Hoodfy Way
+                </h3>
+              </div>
+              
+              <div className="space-y-4">
+                {solutionPoints.map((point, index) => (
+                  <div key={index} className="flex items-start space-x-3 p-4 bg-green-50 dark:bg-green-900/10 rounded-xl border border-green-200 dark:border-green-800">
+                    <div className="text-lg">{point}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800">
+      {/* How It Works - Revolutionary Process */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Everything you need to build amazing communities
+            <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+              How the Magic Happens
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300">
-              Discover all the tools and features that make Hoodfy the perfect platform for your community
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              Three simple steps that change everything about how people connect online
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="text-center p-6 rounded-xl bg-gray-50 dark:bg-gray-700 hover:shadow-lg transition-shadow duration-200">
-                <feature.icon className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  {feature.description}
-                </p>
+          <div className="space-y-12">
+            {howItWorks.map((step, index) => (
+              <div key={index} className={`flex flex-col lg:flex-row items-center gap-8 ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
+                <div className="flex-1 space-y-6">
+                  <div className="flex items-center space-x-4">
+                    <div className={`w-16 h-16 bg-gradient-to-r ${step.color} rounded-2xl flex items-center justify-center text-white font-bold text-xl`}>
+                      {step.step}
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{step.title}</h3>
+                    </div>
+                  </div>
+                  <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {step.description}
+                  </p>
+                </div>
+                
+                <div className="flex-1">
+                  <div className={`w-full h-64 bg-gradient-to-r ${step.color} rounded-3xl flex items-center justify-center shadow-2xl`}>
+                    <step.icon className="w-24 h-24 text-white" />
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-600">
+      {/* The Revolution */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+              A Complete Paradigm Shift
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              We're not improving social media. We're replacing it with something fundamentally better.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {revolutionPoints.map((point, index) => (
+              <div key={index} className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-700 dark:to-gray-600 rounded-3xl p-8 hover:shadow-xl transition-all duration-300">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <point.icon className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                    {point.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6">
+                    {point.description}
+                  </p>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="p-4 bg-red-100 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
+                    <div className="text-sm font-semibold text-red-700 dark:text-red-300 mb-1">OLD WAY</div>
+                    <div className="text-red-800 dark:text-red-200">{point.oldWay}</div>
+                  </div>
+                  <div className="p-4 bg-green-100 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
+                    <div className="text-sm font-semibold text-green-700 dark:text-green-300 mb-1">HOODFY WAY</div>
+                    <div className="text-green-800 dark:text-green-200">{point.newWay}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Future Communities */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-12">
-            Communities that are changing lives
+          <h2 className="text-3xl sm:text-5xl font-bold text-white mb-6">
+            Imagine Your Future Community
           </h2>
-          <p className="text-xl text-blue-100 mb-16">
-            See some examples of the most successful communities on our platform
+          <p className="text-xl text-blue-100 mb-16 max-w-3xl mx-auto">
+            See how communities become friend groups that create amazing things together
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {communityExamples.map((community, index) => (
-              <div key={index} className="bg-white/10 backdrop-blur-lg rounded-xl p-6 text-white">
-                <h3 className="text-xl font-semibold mb-2">{community.name}</h3>
-                <p className="text-blue-100 mb-4">{community.description}</p>
+            {exampleCommunities.map((community, index) => (
+              <div key={index} className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 text-white hover:bg-white/20 transition-all duration-300">
+                <h3 className="text-2xl font-bold mb-3">{community.name}</h3>
+                <p className="text-blue-100 mb-4 text-lg">{community.purpose}</p>
+                <div className="bg-white/20 rounded-xl p-4 mb-6">
+                  <div className="text-sm font-semibold text-blue-200 mb-2">REAL OUTCOMES</div>
+                  <div className="text-white">{community.outcome}</div>
+                </div>
                 <div className="text-2xl font-bold text-yellow-300">{community.members}</div>
-                <div className="text-sm text-blue-100">members</div>
+                <div className="text-sm text-blue-100">Ready for you</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
+      {/* Founder Story */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-6">
-            Want to create your own community?
-          </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-            Join thousands of community creators who are building meaningful connections and generating income
-          </p>
+          <div className="mb-12">
+            <div className="w-24 h-24 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <HeartIcon className="w-12 h-12 text-white" />
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+              From Vision to Reality
+            </h2>
+          </div>
+          
+          <blockquote className="text-xl sm:text-2xl text-gray-700 dark:text-gray-300 italic leading-relaxed mb-8">
+            "I believe the future isn't about following—it's about befriending. 
+            Social media should bring people together, not make them feel more alone. 
+            Join me in building the platform where real relationships grow."
+          </blockquote>
+          
+          <div className="text-gray-600 dark:text-gray-400 mb-8">
+            — The Hoodfy Team
+          </div>
+
           <Link
             href="/register"
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg px-8 py-4 text-lg shadow-lg hover:scale-105 transition-transform duration-200 inline-block"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-2xl px-8 py-4 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 inline-block"
           >
-            Create my community
+            Be Part of History
           </Link>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              What our users say
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300">
-              Real stories from real people who found their community on Hoodfy
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
-                <div className="flex items-center mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <StarIcon key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  "{testimonial.content}"
-                </p>
-                <div>
-                  <div className="font-semibold text-gray-900 dark:text-white">
-                    {testimonial.name}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    {testimonial.role}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-            Your community is waiting for you
+          <h2 className="text-3xl sm:text-5xl font-bold text-white mb-6">
+            Your Friend Group is Waiting
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Join thousands of people who have already found their perfect community
+          <p className="text-xl text-blue-100 mb-12 max-w-3xl mx-auto">
+            Be among the first to experience the future of social connection. 
+            Don't just follow. Become friends.
           </p>
-          <Link
-            href="/register"
-            className="bg-white text-blue-600 font-semibold rounded-lg px-8 py-4 text-lg shadow-lg hover:scale-105 transition-transform duration-200 inline-block"
-          >
-            Get started today
-          </Link>
+          
+          <div className="space-y-4">
+            <Link
+              href="/register"
+              className="bg-white text-blue-600 hover:bg-gray-100 font-bold rounded-2xl px-10 py-5 text-xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 inline-block mb-4"
+            >
+              🚀 Join the Revolution
+            </Link>
+            <p className="text-blue-200 text-sm">
+              ✨ Early access • No waiting list • Start making friends today
+            </p>
+          </div>
         </div>
       </section>
 
@@ -265,8 +425,9 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
               <h3 className="text-2xl font-bold mb-4">Hoodfy</h3>
-              <p className="text-gray-400 mb-4">
-                Connecting communities, creating real bonds.
+              <p className="text-gray-400 mb-4 max-w-md">
+                The first platform where communities become friend groups. 
+                Don't just follow. Become friends.
               </p>
               <div className="flex space-x-4">
                 <a href="#" className="text-gray-400 hover:text-white transition-colors">
@@ -284,26 +445,26 @@ export default function Home() {
             <div>
               <h4 className="font-semibold mb-4">Platform</h4>
               <ul className="space-y-2">
-                <li><Link href="/communities" className="hover:text-white transition-colors">Communities</Link></li>
-                <li><Link href="/how-it-works" className="hover:text-white transition-colors">How it works</Link></li>
-                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
-                <li><Link href="/features" className="hover:text-white transition-colors">Features</Link></li>
+                <li><Link href="/communities" className="text-gray-400 hover:text-white transition-colors">Communities</Link></li>
+                <li><Link href="#vision" className="text-gray-400 hover:text-white transition-colors">How it works</Link></li>
+                <li><Link href="/register" className="text-gray-400 hover:text-white transition-colors">Early Access</Link></li>
+                <li><Link href="#" className="text-gray-400 hover:text-white transition-colors">Vision</Link></li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-semibold mb-4">Support</h4>
               <ul className="space-y-2">
-                <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
-                <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
-                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link></li>
-                <li><Link href="/terms" className="hover:text-white transition-colors">Terms</Link></li>
+                <li><Link href="/help" className="text-gray-400 hover:text-white transition-colors">Help Center</Link></li>
+                <li><Link href="/contact" className="text-gray-400 hover:text-white transition-colors">Contact</Link></li>
+                <li><Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">Privacy</Link></li>
+                <li><Link href="/terms" className="text-gray-400 hover:text-white transition-colors">Terms</Link></li>
               </ul>
             </div>
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 Hoodfy. All rights reserved.</p>
+            <p>&copy; 2024 Hoodfy. All rights reserved. • The Future of Friendship</p>
           </div>
         </div>
       </footer>

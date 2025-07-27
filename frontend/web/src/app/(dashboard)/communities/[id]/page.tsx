@@ -97,6 +97,7 @@ export default function CommunityPage() {
   const [isLiked, setIsLiked] = useState(false);
   const [viewCount, setViewCount] = useState(0);
   const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
+  const [isChatTeaseModalOpen, setIsChatTeaseModalOpen] = useState(false);
   
   // Hook para manejar la cover image de la comunidad - asegurar consistencia
   const coverImageKey = community?.coverImage || '';
@@ -237,6 +238,14 @@ export default function CommunityPage() {
   const handleCancelSubscription = async () => {
     setIsOptionsMenuOpen(false);
     setIsCancelSubscriptionModalOpen(true);
+  };
+
+  const handleChatClick = () => {
+    if (hasAccess) {
+      setIsChatModalOpen(true);
+    } else {
+      setIsChatTeaseModalOpen(true);
+    }
   };
 
   const handleConfirmCancelSubscription = async () => {
@@ -566,26 +575,61 @@ export default function CommunityPage() {
               </div>
             )}
 
-            {/* Chat Grupal Card - Mejorado */}
-            {hasAccess && (
-              <div 
-                className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-2xl transition-all duration-300 hover-lift group"
-                onClick={() => setIsChatModalOpen(true)}
-              >
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white/30 transition-colors group-hover:scale-110 duration-300">
-                    <ChatBubbleLeftRightIcon className="w-8 h-8" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">Group Chat</h3>
-                  <p className="text-white/80 text-sm mb-4">
-                    Connect with {community.members?.length || 0} members
-                  </p>
-                  <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-sm font-medium group-hover:bg-white/30 transition-colors">
-                    Abrir chat 💬
+            {/* 🎯 Chat Grupal Card - Siempre Visible (FOMO Strategy) */}
+            <div 
+              className={`rounded-2xl p-6 text-white cursor-pointer hover:shadow-2xl transition-all duration-300 hover-lift group relative ${
+                hasAccess 
+                  ? 'bg-gradient-to-br from-blue-500 to-purple-600' 
+                  : 'bg-gradient-to-br from-gray-500 to-gray-600'
+              }`}
+              onClick={handleChatClick}
+            >
+              {/* 🔒 Lock Overlay para usuarios no suscritos */}
+              {!hasAccess && (
+                <div className="absolute inset-0 bg-black/20 rounded-2xl flex items-center justify-center backdrop-blur-[1px]">
+                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                    <LockClosedIcon className="w-6 h-6 text-white" />
                   </div>
                 </div>
+              )}
+              
+              <div className="text-center">
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 transition-colors group-hover:scale-110 duration-300 ${
+                  hasAccess 
+                    ? 'bg-white/20 group-hover:bg-white/30' 
+                    : 'bg-white/10 group-hover:bg-white/20'
+                }`}>
+                  <ChatBubbleLeftRightIcon className="w-8 h-8" />
+                </div>
+                
+                <h3 className="text-xl font-bold mb-2">
+                  {hasAccess ? 'Group Chat' : 'Live Community Chat'}
+                </h3>
+                
+                <p className="text-white/80 text-sm mb-4">
+                  {hasAccess 
+                    ? `Connect with ${community.members?.length || 0} members`
+                    : `${community.members?.length || 0} members are chatting live!`
+                  }
+                </p>
+                
+                <div className={`backdrop-blur-sm rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                  hasAccess 
+                    ? 'bg-white/20 group-hover:bg-white/30' 
+                    : 'bg-white/10 group-hover:bg-white/20 border border-white/30'
+                }`}>
+                  {hasAccess ? 'Abrir chat 💬' : '🔓 Join conversation'}
+                </div>
+                
+                {/* 🎯 FOMO indicator para no suscritos */}
+                {!hasAccess && (
+                  <div className="mt-3 flex items-center justify-center space-x-1">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-white/60">Live now</span>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
 
             {/* 🎯 NUEVO: Community Stats Modernos */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
@@ -922,6 +966,97 @@ export default function CommunityPage() {
         onConfirm={handleConfirmCancelSubscription}
         communityName={community.name}
       />
+
+      {/* 🎯 Chat Tease Modal - FOMO Strategy */}
+      {isChatTeaseModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-md w-full mx-auto overflow-hidden border border-gray-200 dark:border-gray-700">
+            {/* Header con gradiente */}
+            <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-8 text-white text-center relative">
+              <button
+                onClick={() => setIsChatTeaseModalOpen(false)}
+                className="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+              
+              <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <ChatBubbleLeftRightIcon className="w-10 h-10" />
+              </div>
+              
+              <h3 className="text-2xl font-bold mb-2">Join the Conversation!</h3>
+              <p className="text-blue-100">
+                {community.members?.length || 0} members are chatting live right now
+              </p>
+            </div>
+            
+            {/* Body */}
+            <div className="p-8">
+              <div className="space-y-4 mb-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                    <span className="text-green-600 dark:text-green-400 text-sm">💬</span>
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300">Chat in real-time with community members</p>
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+                    <span className="text-purple-600 dark:text-purple-400 text-sm">🤝</span>
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300">Make new friends and connections</p>
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 dark:text-blue-400 text-sm">⚡</span>
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300">Get instant access to exclusive content</p>
+                </div>
+              </div>
+              
+              {/* FOMO Element */}
+              <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
+                <div className="flex items-center space-x-2 mb-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                  <span className="text-red-600 dark:text-red-400 font-semibold text-sm">LIVE NOW</span>
+                </div>
+                <p className="text-red-700 dark:text-red-300 text-sm">
+                  🔥 Don't miss out! {Math.floor(Math.random() * 3) + 2} people joined the conversation in the last hour
+                </p>
+              </div>
+              
+              {/* CTA Buttons */}
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    setIsChatTeaseModalOpen(false);
+                    handleSubscribe();
+                  }}
+                  className="w-full px-6 py-4 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover-lift group"
+                >
+                  <span className="flex items-center justify-center">
+                    Join Community Now
+                    <SparklesIcon className="w-5 h-5 ml-2 group-hover:animate-spin" />
+                  </span>
+                </button>
+                
+                <button
+                  onClick={() => setIsChatTeaseModalOpen(false)}
+                  className="w-full px-6 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-xl transition-colors"
+                >
+                  Maybe later
+                </button>
+              </div>
+              
+              {/* Value proposition */}
+              <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-4">
+                ✨ Join now and start chatting instantly
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
