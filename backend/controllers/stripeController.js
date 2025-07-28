@@ -270,60 +270,60 @@ exports.createPortalSession = async (req, res) => {
 
 // Función para manejar checkout completado
 async function handleCheckoutCompleted(session) {
-  const { userId, communityId } = session.metadata;
-  
-  console.log('💳 Checkout completado:', {
-    sessionId: session.id,
-    userId,
-    communityId,
-    amountTotal: session.amount_total,
-    paymentStatus: session.payment_status
-  });
-  
-  // Verificar que tenemos los datos necesarios
-  if (!userId || !communityId) {
-    console.error('❌ Faltan datos en metadata:', { userId, communityId });
-    return;
-  }
-  
-  // Registrar suscripción activa
-  try {
-    // Validar que los IDs sean válidos
-    const mongoose = require('mongoose');
-    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(communityId)) {
-      console.error('❌ IDs inválidos:', { userId, communityId });
-      return;
-    }
-    
-    // Verificar que la comunidad existe
-    const community = await Community.findById(communityId);
-    if (!community) {
-      console.error('❌ Comunidad no encontrada:', communityId);
-      return;
-    }
-    
-    // Verificar que no exista una suscripción duplicada
-    const existing = await Subscription.findOne({ 
-      user: userId, 
-      community: communityId, 
-      status: 'active' 
-    });
-    
-    if (!existing) {
-      console.log('🆕 Creando nueva suscripción...');
+      const { userId, communityId } = session.metadata;
       
-      const newSubscription = await Subscription.create({
-        user: userId,
-        community: communityId,
-        status: 'active',
-        startDate: new Date(),
-        paymentMethod: 'stripe',
-        amount: session.amount_total ? session.amount_total / 100 : 0,
-        stripeSubscriptionId: session.subscription || null,
-        stripeCustomerId: session.customer || null,
+      console.log('💳 Checkout completado:', {
+        sessionId: session.id,
+        userId,
+        communityId,
+        amountTotal: session.amount_total,
+        paymentStatus: session.payment_status
       });
       
-      console.log('✅ Suscripción creada:', newSubscription._id);
+      // Verificar que tenemos los datos necesarios
+      if (!userId || !communityId) {
+        console.error('❌ Faltan datos en metadata:', { userId, communityId });
+    return;
+      }
+      
+      // Registrar suscripción activa
+      try {
+        // Validar que los IDs sean válidos
+        const mongoose = require('mongoose');
+        if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(communityId)) {
+          console.error('❌ IDs inválidos:', { userId, communityId });
+          return;
+        }
+        
+        // Verificar que la comunidad existe
+        const community = await Community.findById(communityId);
+        if (!community) {
+          console.error('❌ Comunidad no encontrada:', communityId);
+          return;
+        }
+        
+        // Verificar que no exista una suscripción duplicada
+        const existing = await Subscription.findOne({ 
+          user: userId, 
+          community: communityId, 
+          status: 'active' 
+        });
+        
+        if (!existing) {
+          console.log('🆕 Creando nueva suscripción...');
+          
+          const newSubscription = await Subscription.create({
+            user: userId,
+            community: communityId,
+            status: 'active',
+            startDate: new Date(),
+            paymentMethod: 'stripe',
+            amount: session.amount_total ? session.amount_total / 100 : 0,
+        stripeSubscriptionId: session.subscription || null,
+        stripeCustomerId: session.customer || null,
+          });
+          
+          console.log('✅ Suscripción creada:', newSubscription._id);
       
       // Crear notificación de suscripción exitosa
       try {
@@ -336,28 +336,28 @@ async function handleCheckoutCompleted(session) {
       } catch (notificationError) {
         console.error('❌ Error creando notificación de suscripción:', notificationError);
       }
-      
-      // Agregar usuario como miembro si no lo es ya
-      if (!community.members.includes(userId)) {
-        community.members.push(userId);
-        await community.save();
-        console.log('✅ Usuario agregado como miembro de la comunidad');
-        
-        // Crear relaciones de aliados - IMPORTANTE!
-        try {
-          await makeAllies(userId, communityId);
-          console.log('✅ Relaciones de aliados creadas');
-        } catch (allyError) {
-          console.error('❌ Error creando aliados:', allyError);
+          
+          // Agregar usuario como miembro si no lo es ya
+          if (!community.members.includes(userId)) {
+            community.members.push(userId);
+            await community.save();
+            console.log('✅ Usuario agregado como miembro de la comunidad');
+            
+            // Crear relaciones de aliados - IMPORTANTE!
+            try {
+              await makeAllies(userId, communityId);
+              console.log('✅ Relaciones de aliados creadas');
+            } catch (allyError) {
+              console.error('❌ Error creando aliados:', allyError);
+            }
+          } else {
+            console.log('ℹ️ Usuario ya era miembro de la comunidad');
+          }
+        } else {
+          console.log('ℹ️ Suscripción ya existe:', existing._id);
         }
-      } else {
-        console.log('ℹ️ Usuario ya era miembro de la comunidad');
-      }
-    } else {
-      console.log('ℹ️ Suscripción ya existe:', existing._id);
-    }
-  } catch (err) {
-    console.error('❌ Error registrando suscripción:', err);
+      } catch (err) {
+        console.error('❌ Error registrando suscripción:', err);
   }
 }
 

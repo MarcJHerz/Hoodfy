@@ -506,7 +506,6 @@ router.get('/:id/public', async (req, res) => {
       .select('name description coverImage price isFree isPrivate creator createdAt category rules')
       .populate('creator', 'name profilePicture')
       .populate('members', 'name profilePicture')
-      .populate('posts', 'title image createdAt')
       .lean();
 
     if (!community) {
@@ -526,7 +525,7 @@ router.get('/:id/public', async (req, res) => {
       createdAt: community.createdAt,
       creator: community.creator,
       members: community.members || [],
-      posts: community.posts || [],
+      // No incluir posts ya que no están populados en el schema
       // No incluir contenido privado como reglas, posts completos, etc.
     };
 

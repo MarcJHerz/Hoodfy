@@ -110,7 +110,7 @@ export const useNotifications = () => {
       }
 
       console.log('📤 Enviando token FCM al backend...');
-      
+
       const response = await fetch(`${getApiUrl()}/api/users/fcm-token`, {
         method: 'POST',
         headers: {
