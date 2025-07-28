@@ -73,7 +73,7 @@ export default function PublicCommunityPage() {
       const apiUrl = process.env.NODE_ENV === 'production' 
         ? 'https://api.hoodfy.com' 
         : 'http://localhost:5000';
-      const response = await fetch(`${apiUrl}/communities/${id}/public`);
+      const response = await fetch(`${apiUrl}/api/communities/${id}/public`);
       
       if (!response.ok) {
         throw new Error('Comunidad no encontrada');
