@@ -19,6 +19,18 @@ const getApiUrl = () => {
   return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
 };
 
+// Función para generar URL directa de S3 para imágenes públicas
+const getPublicS3Url = (key: string): string => {
+  const bucket = 'hoodfy-community-media';
+  const region = 'us-east-1';
+  return `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+};
+
+// Función para detectar si una imagen es pública
+const isPublicImage = (key: string): boolean => {
+  return key.startsWith('public/') || key.startsWith('logos/');
+};
+
 export function useImageUrl(keyOrUrl?: string) {
   const [url, setUrl] = useState<string>('/images/defaults/default-avatar.png');
   const [loading, setLoading] = useState<boolean>(true);
@@ -52,23 +64,14 @@ export function useImageUrl(keyOrUrl?: string) {
         return;
       }
       
-      // Si es un logo (empiece con 'logos/')
-      if (keyOrUrl.startsWith('logos/')) {
-        try {
-          const signedUrl = await getLogoSignedS3Url(keyOrUrl);
-          if (isMounted) {
-            setUrl(signedUrl);
-            setLoading(false);
-            // Cachear URL firmada
-            urlCache.set(keyOrUrl, signedUrl);
-          }
-        } catch (err) {
-          console.error('❌ Error getting signed URL for logo:', err);
-          if (isMounted) {
-            setError('No se pudo obtener la URL firmada del logo');
-            setUrl('/images/defaults/default-avatar.png');
-            setLoading(false);
-          }
+      // Si es una imagen pública (empiece con 'public/' o 'logos/')
+      if (isPublicImage(keyOrUrl)) {
+        const publicUrl = getPublicS3Url(keyOrUrl);
+        if (isMounted) {
+          setUrl(publicUrl);
+          setLoading(false);
+          // Cachear URL pública
+          urlCache.set(keyOrUrl, publicUrl);
         }
         return;
       }

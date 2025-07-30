@@ -6,7 +6,7 @@ const User = require('../models/User');
 const fs = require('fs');
 const { verifyToken } = require('../middleware/authMiddleware');
 const Community = require('../models/Community');
-const { uploadFileToS3 } = require('../utils/s3');
+const { uploadFileToS3, uploadPublicAvatar } = require('../utils/s3');
 
 // 📌 Asegurar que las carpetas de imágenes existen
 const profilePicturesPath = 'uploads/profile_pictures/';
@@ -105,13 +105,13 @@ const handleMulterError = (error, req, res, next) => {
   });
 };
 
-// ✅ Ruta para subir imagen de perfil a S3
+// ✅ Ruta para subir imagen de perfil a S3 (pública)
 router.put('/profile/photo', verifyToken, upload.single('profilePicture'), handleMulterError, async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No se subió ninguna imagen.' });
 
-    // Subir imagen a S3
-    const key = await uploadFileToS3(req.file.buffer, req.file.originalname, req.file.mimetype);
+    // Subir imagen a S3 en carpeta pública
+    const key = await uploadPublicAvatar(req.file.buffer, req.file.originalname, req.file.mimetype);
     
     // Actualizar usuario con el key de S3
     const user = await User.findByIdAndUpdate(req.userId, { profilePicture: key }, { new: true });

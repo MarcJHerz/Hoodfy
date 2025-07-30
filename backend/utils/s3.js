@@ -87,6 +87,98 @@ const uploadFileToS3 = async (buffer, originalname, mimetype) => {
   }
 };
 
+// Nueva función para subir avatares públicos
+const uploadPublicAvatar = async (buffer, originalname, mimetype) => {
+  try {
+    // Generar key único para avatar público
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 15);
+    const extension = path.extname(originalname);
+    const key = `public/avatars/${timestamp}-${randomString}${extension}`;
+
+    // Detectar MIME type real
+    let realMimeType = mimetype;
+    try {
+      const fileType = await FileType.fromBuffer(buffer);
+      if (fileType) {
+        realMimeType = fileType.mime;
+      }
+    } catch (error) {
+      console.log('⚠️ No se pudo detectar el tipo MIME, usando el original:', mimetype);
+    }
+
+    // Verificar tipo de archivo permitido (solo imágenes)
+    const allowedTypes = [
+      'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'
+    ];
+
+    if (!allowedTypes.includes(realMimeType)) {
+      throw new Error(`Tipo de archivo no permitido para avatar: ${realMimeType}`);
+    }
+
+    // Configurar parámetros de subida
+    const command = new PutObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: key,
+      Body: buffer,
+      ContentType: realMimeType
+    });
+
+    // Subir a S3
+    await s3.send(command);
+    return key;
+  } catch (error) {
+    console.error('Error uploading public avatar to S3:', error);
+    throw error;
+  }
+};
+
+// Nueva función para subir banners públicos
+const uploadPublicBanner = async (buffer, originalname, mimetype) => {
+  try {
+    // Generar key único para banner público
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 15);
+    const extension = path.extname(originalname);
+    const key = `public/banners/${timestamp}-${randomString}${extension}`;
+
+    // Detectar MIME type real
+    let realMimeType = mimetype;
+    try {
+      const fileType = await FileType.fromBuffer(buffer);
+      if (fileType) {
+        realMimeType = fileType.mime;
+      }
+    } catch (error) {
+      console.log('⚠️ No se pudo detectar el tipo MIME, usando el original:', mimetype);
+    }
+
+    // Verificar tipo de archivo permitido (solo imágenes)
+    const allowedTypes = [
+      'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'
+    ];
+
+    if (!allowedTypes.includes(realMimeType)) {
+      throw new Error(`Tipo de archivo no permitido para banner: ${realMimeType}`);
+    }
+
+    // Configurar parámetros de subida
+    const command = new PutObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: key,
+      Body: buffer,
+      ContentType: realMimeType
+    });
+
+    // Subir a S3
+    await s3.send(command);
+    return key;
+  } catch (error) {
+    console.error('Error uploading public banner to S3:', error);
+    throw error;
+  }
+};
+
 // Genera una URL firmada temporal para acceder al archivo
 async function getS3SignedUrl(key, expiresIn = 3600) {
   try {
@@ -105,5 +197,7 @@ async function getS3SignedUrl(key, expiresIn = 3600) {
 
 module.exports = {
   uploadFileToS3,
+  uploadPublicAvatar,
+  uploadPublicBanner,
   getS3SignedUrl,
 }; 

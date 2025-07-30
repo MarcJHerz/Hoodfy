@@ -20,6 +20,26 @@ const getApiUrl = () => {
 const API_BASE_URL = getApiUrl();
 
 /**
+ * Genera una URL directa de S3 para imágenes públicas
+ * @param key - El key del archivo en S3
+ * @returns string - La URL directa
+ */
+export function getPublicS3Url(key: string): string {
+  const bucket = 'hoodfy-community-media';
+  const region = 'us-east-1';
+  return `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+}
+
+/**
+ * Detecta si una imagen es pública (no necesita URL firmada)
+ * @param key - El key del archivo en S3
+ * @returns boolean - True si es imagen pública
+ */
+export function isPublicImage(key: string): boolean {
+  return key.startsWith('public/') || key.startsWith('logos/');
+}
+
+/**
  * Obtiene una URL firmada de S3 para un key específico
  * @param key - El key del archivo en S3
  * @returns Promise<string> - La URL firmada
