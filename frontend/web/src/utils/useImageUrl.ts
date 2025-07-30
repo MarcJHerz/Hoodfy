@@ -31,6 +31,13 @@ const isPublicImage = (key: string): boolean => {
   return key.startsWith('public/') || key.startsWith('logos/');
 };
 
+// Función para detectar si es un key de S3 válido
+const isValidS3Key = (key: string): boolean => {
+  return /\.(jpg|jpeg|png|webp|gif|jfif|mp4|mov|avi)$/i.test(key) && 
+         !key.startsWith('http://') && 
+         !key.startsWith('https://');
+};
+
 export function useImageUrl(keyOrUrl?: string) {
   const [url, setUrl] = useState<string>('/images/defaults/default-avatar.png');
   const [loading, setLoading] = useState<boolean>(true);
@@ -76,12 +83,8 @@ export function useImageUrl(keyOrUrl?: string) {
         return;
       }
       
-      // Si parece un key de S3 (contiene extensión de imagen y no es una URL)
-      const isS3Key = /\.(jpg|jpeg|png|webp|gif|jfif|mp4|mov|avi)$/i.test(keyOrUrl) && 
-                     !keyOrUrl.startsWith('http://') && 
-                     !keyOrUrl.startsWith('https://');
-      
-      if (isS3Key) {
+      // Si es un key de S3 válido (contiene extensión de imagen)
+      if (isValidS3Key(keyOrUrl)) {
         try {
           const signedUrl = await getSignedS3Url(keyOrUrl);
           if (isMounted) {
