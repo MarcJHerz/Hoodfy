@@ -20,7 +20,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { toast } from 'react-hot-toast';
-import { useImageUrl } from '@/utils/useImageUrl';
+
 import { useAuthStore } from '@/stores/authStore';
 
 interface Community {
@@ -54,13 +54,30 @@ export default function PublicCommunityPage() {
   const [isChatTeaseModalOpen, setIsChatTeaseModalOpen] = useState(false);
   const { user } = useAuthStore();
 
-  // Hook para manejar la cover image de la comunidad
-  const coverImageKey = community?.coverImage || '';
-  const { url: communityCoverImageUrl } = useImageUrl(coverImageKey);
+  // Función para obtener URLs de imágenes públicas sin autenticación
+  const getPublicImageUrl = (imageKey?: string): string => {
+    if (!imageKey) return '/images/defaults/default-avatar.png';
+    
+    // Si ya es una URL completa, usarla
+    if (imageKey.startsWith('http://') || imageKey.startsWith('https://')) {
+      return imageKey;
+    }
+    
+    // Si empieza con 'public/', usar URL directa de S3
+    if (imageKey.startsWith('public/')) {
+      return `https://hoodfy-community-media.s3.us-east-1.amazonaws.com/${imageKey}`;
+    }
+    
+    // Para otras imágenes, usar URL directa del backend (sin autenticación)
+    const apiUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://api.hoodfy.com' 
+      : 'http://localhost:5000';
+    return `${apiUrl}/uploads/${imageKey}`;
+  };
   
-  // Hook para manejar la imagen del perfil del creador
-  const creatorProfilePictureKey = community?.creator?.profilePicture || '';
-  const { url: creatorProfileImageUrl } = useImageUrl(creatorProfilePictureKey);
+  // URLs para imágenes públicas
+  const communityCoverImageUrl = getPublicImageUrl(community?.coverImage);
+  const creatorProfileImageUrl = getPublicImageUrl(community?.creator?.profilePicture);
 
   useEffect(() => {
     loadCommunity();

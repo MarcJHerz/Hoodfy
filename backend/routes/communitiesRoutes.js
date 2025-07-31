@@ -186,9 +186,9 @@ router.post('/create', verifyToken, upload.single('coverImage'), handleMulterErr
     let coverImage = '';
     if (req.file) {
       try {
-        const { uploadFileToS3 } = require('../utils/s3');
+        const { uploadPublicBanner } = require('../utils/s3');
         const { buffer, originalname, mimetype } = req.file;
-        coverImage = await uploadFileToS3(buffer, originalname, mimetype);
+        coverImage = await uploadPublicBanner(buffer, originalname, mimetype);
       } catch (error) {
         console.error('Error al subir imagen a S3:', error);
         return res.status(500).json({ error: 'Error al subir la imagen de portada' });
@@ -412,9 +412,9 @@ router.put('/:id/update', verifyToken, upload.single('coverImage'), handleMulter
     // Procesar nueva imagen de portada - MIGRAR A S3
     if (req.file) {
       try {
-        const { uploadFileToS3 } = require('../utils/s3');
+        const { uploadPublicBanner } = require('../utils/s3');
         const { buffer, originalname, mimetype } = req.file;
-        community.coverImage = await uploadFileToS3(buffer, originalname, mimetype);
+        community.coverImage = await uploadPublicBanner(buffer, originalname, mimetype);
       } catch (error) {
         console.error('Error al subir imagen a S3:', error);
         return res.status(500).json({ error: 'Error al subir la imagen de portada' });

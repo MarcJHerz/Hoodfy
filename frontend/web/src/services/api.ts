@@ -201,7 +201,7 @@ export const users = {
   getProfile: () => api.get('/api/users/profile'),
   getProfileById: (id: string) => api.get(`/api/users/profile/${id}`),
   updateProfile: (data: any) => api.put('/api/users/profile', data),
-  uploadProfilePicture: (data: any) => api.post('/api/users/profile/picture', data),
+      uploadProfilePicture: (data: any) => api.post('/api/users/profile/photo', data),
   search: async (query: string) => {
     return api.get(`/api/users/search?query=${encodeURIComponent(query)}`);
   },
