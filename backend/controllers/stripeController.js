@@ -1,8 +1,10 @@
 const stripe = require('../config/stripe');
 const stripePrices = require('../config/stripePrices');
+const stripeConnect = require('../config/stripeConnect');
 const Community = require('../models/Community');
 const Subscription = require('../models/Subscription');
 const User = require('../models/User');
+const Payout = require('../models/Payout');
 const { makeAllies } = require('../routes/communitiesRoutes');
 const { notificationHelpers } = require('./notificationController');
 
@@ -86,7 +88,8 @@ exports.createCheckoutSession = async (req, res) => {
     
     console.log('🌐 URL del frontend detectada:', frontendUrl);
     
-    const session = await stripe.checkout.sessions.create({
+    // Configuración de la sesión de checkout
+    const sessionConfig = {
       payment_method_types: ['card'],
       mode: 'subscription',
       customer_email: user.email,
@@ -94,7 +97,32 @@ exports.createCheckoutSession = async (req, res) => {
       metadata: { userId: userId.toString(), communityId: communityId.toString() },
       success_url: frontendUrl + '/success?session_id={CHECKOUT_SESSION_ID}',
       cancel_url: frontendUrl + '/cancel',
-    });
+    };
+
+    // Si la comunidad tiene Stripe Connect configurado, agregar split payments
+    if (community.stripeConnectAccountId && community.stripeConnectStatus === 'active') {
+      console.log('💳 Comunidad con Stripe Connect activo, configurando split payments...');
+      
+      // Calcular el split de pagos (90.9% creador, 9.1% plataforma)
+      const paymentSplit = stripeConnect.calculatePaymentSplit(community.price);
+      
+      sessionConfig.subscription_data = {
+        application_fee_percent: community.platformFeePercentage,
+        transfer_data: {
+          destination: community.stripeConnectAccountId,
+        },
+      };
+      
+      console.log('💰 Split de pagos configurado:', {
+        total: paymentSplit.total,
+        platformFee: paymentSplit.platformFee,
+        creatorAmount: paymentSplit.creatorAmount
+      });
+    } else {
+      console.log('ℹ️ Comunidad sin Stripe Connect, usando flujo normal');
+    }
+    
+    const session = await stripe.checkout.sessions.create(sessionConfig);
     
     console.log('✅ Sesión creada exitosamente:', session.url);
     res.json({ url: session.url });
@@ -319,11 +347,44 @@ async function handleCheckoutCompleted(session) {
             startDate: new Date(),
             paymentMethod: 'stripe',
             amount: session.amount_total ? session.amount_total / 100 : 0,
-        stripeSubscriptionId: session.subscription || null,
-        stripeCustomerId: session.customer || null,
+            stripeSubscriptionId: session.subscription || null,
+            stripeCustomerId: session.customer || null,
           });
           
           console.log('✅ Suscripción creada:', newSubscription._id);
+          
+          // Si la comunidad tiene Stripe Connect activo, crear registro de Payout
+          if (community.stripeConnectAccountId && community.stripeConnectStatus === 'active') {
+            try {
+              const paymentSplit = stripeConnect.calculatePaymentSplit(community.price);
+              
+              const payout = await Payout.create({
+                creator: community.creator,
+                community: communityId,
+                subscription: newSubscription._id,
+                stripeConnectAccountId: community.stripeConnectAccountId,
+                paymentDetails: {
+                  totalAmount: paymentSplit.total,
+                  platformFee: paymentSplit.platformFee,
+                  creatorAmount: paymentSplit.creatorAmount,
+                  platformFeePercentage: community.platformFeePercentage,
+                  creatorFeePercentage: community.creatorFeePercentage
+                },
+                status: 'pending',
+                metadata: {
+                  stripeInvoiceId: session.invoice || null,
+                  stripeSubscriptionId: session.subscription || null,
+                  stripeCustomerId: session.customer || null,
+                  currency: 'usd',
+                  description: `Suscripción a ${community.name}`
+                }
+              });
+              
+              console.log('✅ Registro de Payout creado:', payout._id);
+            } catch (payoutError) {
+              console.error('❌ Error creando registro de Payout:', payoutError);
+            }
+          }
       
       // Crear notificación de suscripción exitosa
       try {

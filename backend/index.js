@@ -72,6 +72,7 @@ const commentRoutes = require('./routes/commentRoutes');
 const allyRoutes = require('./routes/allyRoutes');
 const communityStatsRoutes = require('./routes/communityStatsRoutes');
 const stripeRoutes = require('./routes/stripeRoutes');
+const stripeConnectRoutes = require('./routes/stripeConnectRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const chatRoutes = require('./routes/chatRoutes'); // Nueva ruta
 
@@ -82,6 +83,7 @@ app.use('/api/posts', postRoutes);
 app.use('/api/communities', communitiesRoutes);
 app.use('/api/subscriptions', subscriptionsRoutes);
 app.use('/api/stripe', stripeRoutes);
+app.use('/api/stripe-connect', stripeConnectRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/allies', allyRoutes);

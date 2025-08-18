@@ -7,7 +7,10 @@
     "dev": "nodemon index.js",
     "test": "jest --detectOpenHandles",
     "test:watch": "jest --watch",
-    "setup-s3-cors": "node scripts/setup-s3-cors.js"
+    "setup-s3-cors": "node scripts/setup-s3-cors.js",
+    "migrate:stripe-connect": "node scripts/migrateStripeConnect.js migrate",
+    "check:migration": "node scripts/migrateStripeConnect.js check",
+    "reset:stripe-connect": "node scripts/migrateStripeConnect.js reset"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.842.0",

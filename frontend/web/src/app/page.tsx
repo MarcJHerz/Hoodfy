@@ -180,14 +180,14 @@ export default function Home() {
             </div>
 
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight tracking-tight">
-              Don't Just Follow.<br />
+              Feel the Magic of connection.<br />
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Become Friends.
+                Join a social club.
               </span>
             </h1>
             
             <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
-              The first platform where communities become friend groups.<br />
+              Social media gives you followers. Hoodfy gives you friends.<br />
               Where creators connect people, not collect followers.
             </p>
 

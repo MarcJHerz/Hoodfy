@@ -33,6 +33,7 @@ import { formatImageUrl } from '@/utils/imageUtils';
 import { useImageUrl } from '@/utils/useImageUrl';
 import { useAuthStore } from '@/stores/authStore';
 import CommunityChatModal from '@/components/chat/CommunityChatModal';
+import CreatorPaymentsDashboard from '@/components/community/CreatorPaymentsDashboard';
 
 // Componente para manejar imágenes de miembros individualmente
 const MemberImage = ({ profilePicture, name, isCreator }: { profilePicture?: string; name: string; isCreator: boolean }) => {
@@ -75,6 +76,11 @@ interface Community {
   rules?: string[];
   category?: string;
   isPrivate?: boolean;
+  // Stripe Connect fields
+  stripeConnectAccountId?: string;
+  stripeConnectStatus?: 'pending' | 'active' | 'restricted' | 'disabled';
+  platformFeePercentage?: number;
+  creatorFeePercentage?: number;
 }
 
 export default function CommunityPage() {
@@ -715,6 +721,16 @@ export default function CommunityPage() {
                 )}
               </div>
             </div>
+
+            {/* 🎯 NUEVO: Dashboard de Pagos para Creadores */}
+            {isCreator && (
+              <CreatorPaymentsDashboard
+                communityId={id as string}
+                isCreator={isCreator}
+                stripeConnectStatus={community?.stripeConnectStatus || 'pending'}
+                stripeConnectAccountId={community?.stripeConnectAccountId || ''}
+              />
+            )}
 
             {/* Navigation Tabs - Mejorados */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-2">
