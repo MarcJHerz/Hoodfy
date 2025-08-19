@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useCommunitiesStore } from '@/stores/communitiesStore';
 import { formatImageUrl } from '@/utils/imageUtils';
+import { useIsCreator } from '@/hooks/useIsCreator';
 import {
   HomeIcon,
   PlusIcon,
@@ -57,6 +58,9 @@ export default function EnhancedSidebar() {
     loadSubscribedCommunities 
   } = useCommunitiesStore();
   
+  // Hook para verificar si el usuario es creador
+  const { isCreator } = useIsCreator();
+  
   const [userStats, setUserStats] = useState<UserStats>({
     totalPosts: 0,
     totalCommunities: 0,
@@ -105,6 +109,18 @@ export default function EnhancedSidebar() {
       description: 'Discover new communities'
     }
   ];
+
+  // Agregar Creator Dashboard si el usuario es creador
+  if (isCreator) {
+    quickActions.push({
+      name: 'Creator Dashboard',
+      href: '/creator-dashboard',
+      icon: Cog6ToothIcon,
+      solidIcon: Cog6ToothIcon,
+      color: 'from-indigo-500 to-purple-500',
+      description: 'Manage your communities and payments'
+    });
+  }
 
   // Cargar datos del usuario y comunidades
   useEffect(() => {

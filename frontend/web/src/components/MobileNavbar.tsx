@@ -21,6 +21,7 @@ import { useNotificationStore } from '@/stores/notificationStore';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
 import Logo from './Logo';
+import { useIsCreator } from '@/hooks/useIsCreator';
 
 const SearchModal = dynamic(() => import('./SearchModal'), { ssr: false });
 const NotificationDropdown = dynamic(() => import('./notifications/NotificationDropdown'), { ssr: false });
@@ -65,6 +66,9 @@ export default function MobileNavbar() {
     setProfileMenuOpen
   } = useUIStore();
   const { unreadCount } = useNotificationStore();
+  
+  // Hook para verificar si el usuario es creador
+  const { isCreator } = useIsCreator();
 
   const isProfilePage = pathname === '/profile';
   const isUserProfilePage = pathname.startsWith('/profile/') && pathname !== '/profile';
@@ -257,6 +261,19 @@ export default function MobileNavbar() {
                       <QuestionMarkCircleIcon className="h-5 w-5 text-gray-400" />
                         <span className="text-gray-700 dark:text-gray-300">Ayuda y soporte</span>
                     </button>
+                    
+                    {/* Creator Dashboard - Solo mostrar si es creador */}
+                    {isCreator && (
+                      <button
+                        className="w-full text-left py-3 px-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center gap-3"
+                        onClick={() => handleGoTo('/creator-dashboard')}
+                      >
+                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                        </svg>
+                        <span className="text-gray-700 dark:text-gray-300">Creator Dashboard</span>
+                      </button>
+                    )}
                     
                     <button
                       onClick={(e) => {
