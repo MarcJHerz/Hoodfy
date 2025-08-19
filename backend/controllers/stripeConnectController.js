@@ -55,12 +55,10 @@ exports.createConnectAccount = async (req, res) => {
       capabilities: {
         card_payments: { requested: true },
         transfers: { requested: true }
-      },
-      tos_acceptance: {
-        date: Math.floor(Date.now() / 1000),
-        ip: req.ip || '127.0.0.1'
       }
     };
+
+    console.log('📋 Datos de cuenta a enviar a Stripe:', JSON.stringify(accountData, null, 2));
 
     const account = await stripe.accounts.create(accountData);
     

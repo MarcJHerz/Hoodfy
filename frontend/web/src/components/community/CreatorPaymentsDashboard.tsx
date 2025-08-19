@@ -90,11 +90,20 @@ export default function CreatorPaymentsDashboard({
     setIsLoading(true);
     try {
       const authToken = getAuthToken();
+      console.log('🔑 Token obtenido:', authToken ? 'SÍ' : 'NO');
+      console.log('🔑 Token completo:', authToken);
+      
       if (!authToken) {
         console.error('No se pudo obtener el token de autenticación');
         return;
       }
 
+      console.log('📤 Enviando petición a:', `https://api.hoodfy.com/api/stripe-connect/accounts`);
+      console.log('📤 Headers:', {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken ? authToken.substring(0, 20) + '...' : 'NO TOKEN'}`
+      });
+      
       const response = await fetch(`https://api.hoodfy.com/api/stripe-connect/accounts`, {
         method: 'POST',
         headers: {

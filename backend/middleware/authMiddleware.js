@@ -4,8 +4,12 @@ const User = require('../models/User');
 
 const verifyToken = async (req, res, next) => {
   try {
+    console.log('🔍 Headers recibidos:', Object.keys(req.headers));
+    console.log('🔑 Authorization header:', req.headers.authorization);
+    
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
+      console.log('❌ No se encontró token en Authorization header');
       return res.status(401).json({ 
         error: 'No autorizado',
         details: { token: 'Token no proporcionado' }
