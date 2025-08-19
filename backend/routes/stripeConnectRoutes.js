@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authMiddleware } = require('../middleware/authMiddleware');
+const { verifyToken } = require('../middleware/authMiddleware');
 const {
   createConnectAccount,
   getConnectAccountStatus,
@@ -11,7 +11,7 @@ const {
 } = require('../controllers/stripeConnectController');
 
 // Todas las rutas requieren autenticación
-router.use(authMiddleware);
+router.use(verifyToken);
 
 // Crear cuenta de Stripe Connect para una comunidad
 router.post('/accounts', createConnectAccount);
