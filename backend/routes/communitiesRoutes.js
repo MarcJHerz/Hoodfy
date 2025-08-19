@@ -261,7 +261,39 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ✅ Obtener una comunidad específica
+// 🧠 Obtener comunidades creadas por usuario (DEBE IR ANTES de /:id)
+router.get('/created-by/:userId', async (req, res) => {
+  try {
+    const communities = await Community.find({ creator: req.params.userId })
+      .populate('creator', 'name profilePicture')
+      .populate('members', 'name profilePicture');
+
+    res.json(communities);
+  } catch (error) {
+    console.error('❌ Error al obtener comunidades creadas:', error);
+    res.status(500).json({ error: 'Error al obtener comunidades creadas' });
+  }
+});
+
+// 🧠 Obtener comunidades creadas por el usuario autenticado
+router.get('/user-created', verifyToken, async (req, res) => {
+  try {
+    console.log('🔍 Buscando comunidades creadas por usuario:', req.userId);
+    
+    const communities = await Community.find({ creator: req.userId })
+      .populate('creator', 'name profilePicture')
+      .populate('members', 'name profilePicture')
+      .select('name description profilePicture memberCount postCount stripeConnectStatus stripeConnectAccountId createdAt');
+
+    console.log('✅ Comunidades encontradas:', communities.length);
+    res.json(communities);
+  } catch (error) {
+    console.error('❌ Error al obtener comunidades del usuario:', error);
+    res.status(500).json({ error: 'Error al obtener comunidades del usuario' });
+  }
+});
+
+// ✅ Obtener una comunidad específica (DEBE IR DESPUÉS de las rutas específicas)
 router.get('/:id', verifyToken, async (req, res) => {
   try {
     const community = await Community.findById(req.params.id)
@@ -287,20 +319,6 @@ router.get('/:id', verifyToken, async (req, res) => {
   } catch (error) {
     console.error('Error al obtener comunidad:', error);
     res.status(500).json({ error: 'Error al obtener la comunidad' });
-  }
-});
-
-// 🧠 Obtener comunidades creadas por usuario
-router.get('/created-by/:userId', async (req, res) => {
-  try {
-    const communities = await Community.find({ creator: req.params.userId })
-      .populate('creator', 'name profilePicture')
-      .populate('members', 'name profilePicture');
-
-    res.json(communities);
-  } catch (error) {
-    console.error('❌ Error al obtener comunidades creadas:', error);
-    res.status(500).json({ error: 'Error al obtener comunidades creadas' });
   }
 });
 
