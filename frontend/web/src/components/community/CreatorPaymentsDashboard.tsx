@@ -49,32 +49,32 @@ export default function CreatorPaymentsDashboard({
           color: 'text-green-600',
           bgColor: 'bg-green-50',
           icon: CheckCircleIcon,
-          text: 'Cuenta activa - Puedes recibir pagos',
-          description: 'Tu cuenta de Stripe Connect está activa y puedes recibir pagos directamente.'
+          text: 'Active Account - You can receive payments',
+          description: 'Your Stripe Connect account is active and you can receive payments directly.'
         };
       case 'pending':
         return {
           color: 'text-yellow-600',
           bgColor: 'bg-yellow-50',
           icon: ClockIcon,
-          text: 'Pendiente de activación',
-          description: 'Completa el onboarding para activar tu cuenta de pagos.'
+          text: 'Pending Activation',
+          description: 'Complete the onboarding to activate your payment account.'
         };
       case 'restricted':
         return {
           color: 'text-red-600',
           bgColor: 'bg-red-50',
           icon: ExclamationTriangleIcon,
-          text: 'Cuenta restringida',
-          description: 'Tu cuenta tiene restricciones. Contacta soporte para resolver.'
+          text: 'Restricted Account',
+          description: 'Your account has restrictions. Contact support to resolve.'
         };
       default:
         return {
           color: 'text-gray-600',
           bgColor: 'bg-gray-50',
           icon: CogIcon,
-          text: 'No configurada',
-          description: 'Configura tu cuenta de Stripe Connect para recibir pagos.'
+          text: 'Not Configured',
+          description: 'Configure your Stripe Connect account to receive payments.'
         };
     }
   };
@@ -82,7 +82,7 @@ export default function CreatorPaymentsDashboard({
   const handleSetupStripeConnect = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/stripe-connect/accounts`, {
+      const response = await fetch(`https://api.hoodfy.com/api/stripe-connect/accounts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ export default function CreatorPaymentsDashboard({
     if (!stripeConnectAccountId) return;
     
     try {
-      const response = await fetch(`/api/stripe-connect/accounts/${communityId}/login`, {
+      const response = await fetch(`https://api.hoodfy.com/api/stripe-connect/accounts/${communityId}/login`, {
         method: 'POST',
       });
 
@@ -132,7 +132,7 @@ export default function CreatorPaymentsDashboard({
     if (!stripeConnectAccountId) return;
     
     try {
-      const response = await fetch(`/api/stripe-connect/accounts/${communityId}/onboarding`, {
+      const response = await fetch(`https://api.hoodfy.com/api/stripe-connect/accounts/${communityId}/onboarding`, {
         method: 'POST',
       });
 
@@ -151,11 +151,11 @@ export default function CreatorPaymentsDashboard({
   const StatusIcon = statusInfo.icon;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-xl font-bold text-gray-900">Dashboard de Pagos</h3>
-          <p className="text-gray-600 mt-1">Gestiona tus ganancias y configuración de pagos</p>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Payments Dashboard</h3>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your earnings and payment configuration</p>
         </div>
         <div className="flex items-center space-x-2">
           <BanknotesIcon className="w-6 h-6 text-green-600" />
@@ -168,7 +168,7 @@ export default function CreatorPaymentsDashboard({
           <StatusIcon className={`w-6 h-6 ${statusInfo.color}`} />
           <div>
             <h4 className={`font-semibold ${statusInfo.color}`}>{statusInfo.text}</h4>
-            <p className="text-gray-600 text-sm mt-1">{statusInfo.description}</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{statusInfo.description}</p>
           </div>
         </div>
       </div>
@@ -186,7 +186,7 @@ export default function CreatorPaymentsDashboard({
             ) : (
               <>
                 <CreditCardIcon className="w-5 h-5" />
-                <span>Configurar Cuenta de Pagos</span>
+                <span>Setup Payment Account</span>
               </>
             )}
           </button>
@@ -196,7 +196,7 @@ export default function CreatorPaymentsDashboard({
             className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold py-3 px-4 rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 flex items-center justify-center space-x-2"
           >
             <CogIcon className="w-5 h-5" />
-            <span>Completar Onboarding</span>
+            <span>Complete Onboarding</span>
           </button>
         ) : stripeConnectStatus === 'active' ? (
           <button
@@ -204,7 +204,7 @@ export default function CreatorPaymentsDashboard({
             className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 flex items-center justify-center space-x-2"
           >
             <ArrowTopRightOnSquareIcon className="w-5 h-5" />
-            <span>Acceder al Dashboard de Stripe</span>
+            <span>Access Stripe Dashboard</span>
           </button>
         ) : null}
       </div>
@@ -215,7 +215,7 @@ export default function CreatorPaymentsDashboard({
           <div className="bg-gray-50 rounded-xl p-4">
             <div className="flex items-center space-x-2 mb-2">
               <ChartBarIcon className="w-5 h-5 text-green-600" />
-              <span className="text-sm font-medium text-gray-600">Ganancias Totales</span>
+              <span className="text-sm font-medium text-gray-600">Total Earnings</span>
             </div>
             <p className="text-2xl font-bold text-gray-900">
               ${earningsData.totalEarnings.toFixed(2)}
@@ -225,7 +225,7 @@ export default function CreatorPaymentsDashboard({
           <div className="bg-gray-50 rounded-xl p-4">
             <div className="flex items-center space-x-2 mb-2">
               <BanknotesIcon className="w-5 h-5 text-blue-600" />
-              <span className="text-sm font-medium text-gray-600">Payouts Completados</span>
+              <span className="text-sm font-medium text-gray-600">Completed Payouts</span>
             </div>
             <p className="text-2xl font-bold text-gray-900">
               ${earningsData.totalPayouts.toFixed(2)}
@@ -235,7 +235,7 @@ export default function CreatorPaymentsDashboard({
           <div className="bg-gray-50 rounded-xl p-4">
             <div className="flex items-center space-x-2 mb-2">
               <ClockIcon className="w-5 h-5 text-yellow-600" />
-              <span className="text-sm font-medium text-gray-600">Balance Pendiente</span>
+              <span className="text-sm font-medium text-gray-600">Pending Balance</span>
             </div>
             <p className="text-2xl font-bold text-gray-900">
               ${earningsData.pendingBalance.toFixed(2)}
@@ -253,10 +253,10 @@ export default function CreatorPaymentsDashboard({
             </div>
           </div>
           <div>
-            <h4 className="text-sm font-medium text-blue-900">¿Cómo funciona?</h4>
+            <h4 className="text-sm font-medium text-blue-900">How does it work?</h4>
             <p className="text-sm text-blue-700 mt-1">
-              Con Stripe Connect, recibirás el 90.9% de cada suscripción directamente en tu cuenta de Stripe. 
-              La plataforma se queda con el 9.1% restante para cubrir costos operativos.
+              With Stripe Connect, you will receive 90.9% of each subscription directly in your Stripe account. 
+              The platform keeps the remaining 9.1% for operational costs.
             </p>
           </div>
         </div>
