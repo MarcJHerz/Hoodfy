@@ -69,15 +69,15 @@ exports.createConnectAccount = async (req, res) => {
     // Actualizar la comunidad con la información de Stripe Connect
     community.stripeConnectAccountId = account.id;
     community.stripeConnectStatus = 'pending';
-    community.platformFeePercentage = 12;
-    community.creatorFeePercentage = 88;
+    community.platformFeePercentage = 9.1;
+    community.creatorFeePercentage = 90.9;
     await community.save();
 
     console.log('✅ Comunidad actualizada con cuenta de Stripe Connect');
 
     // Crear link de onboarding
-    const returnUrl = `${process.env.FRONTEND_URL || 'https://www.qahood.com'}/dashboard/communities/${communityId}/payments`;
-    const refreshUrl = `${process.env.FRONTEND_URL || 'https://www.qahood.com'}/dashboard/communities/${communityId}/payments`;
+    const returnUrl = `${process.env.FRONTEND_URL_HOODFY || 'https://www.hoodfy.com'}/dashboard/communities/${communityId}/payments`;
+    const refreshUrl = `${process.env.FRONTEND_URL_HOODFY || 'https://www.hoodfy.com'}/dashboard/communities/${communityId}/payments`;
     
     const onboardingLink = await stripe.accountLinks.create({
       account: account.id,
@@ -219,8 +219,8 @@ exports.createOnboardingLink = async (req, res) => {
     }
 
     // Crear link de onboarding
-    const returnUrl = `${process.env.FRONTEND_URL || 'https://www.qahood.com'}/dashboard/communities/${communityId}/payments`;
-    const refreshUrl = `${process.env.FRONTEND_URL || 'https://www.qahood.com'}/dashboard/communities/${communityId}/payments`;
+    const returnUrl = `${process.env.FRONTEND_URL_HOODFY || 'https://www.hoodfy.com'}/dashboard/communities/${communityId}/payments`;
+    const refreshUrl = `${process.env.FRONTEND_URL_HOODFY || 'https://www.hoodfy.com'}/dashboard/communities/${communityId}/payments`;
     
     const onboardingLink = await stripe.accountLinks.create({
       account: community.stripeConnectAccountId,
