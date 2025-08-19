@@ -11,6 +11,7 @@ import {
   ExclamationTriangleIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
+import { useAuthStore } from '@/stores/authStore';
 
 interface CreatorPaymentsDashboardProps {
   communityId: string;
@@ -36,11 +37,17 @@ export default function CreatorPaymentsDashboard({
   const [isLoading, setIsLoading] = useState(false);
   const [onboardingUrl, setOnboardingUrl] = useState('');
   const [loginUrl, setLoginUrl] = useState('');
+  const { user, token } = useAuthStore();
 
   // Solo mostrar si es el creador
   if (!isCreator) {
     return null;
   }
+
+  // Función para obtener el token JWT del store
+  const getAuthToken = () => {
+    return token;
+  };
 
   const getStatusInfo = () => {
     switch (stripeConnectStatus) {
@@ -82,10 +89,17 @@ export default function CreatorPaymentsDashboard({
   const handleSetupStripeConnect = async () => {
     setIsLoading(true);
     try {
+      const authToken = getAuthToken();
+      if (!authToken) {
+        console.error('No se pudo obtener el token de autenticación');
+        return;
+      }
+
       const response = await fetch(`https://api.hoodfy.com/api/stripe-connect/accounts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           communityId,
@@ -113,8 +127,17 @@ export default function CreatorPaymentsDashboard({
     if (!stripeConnectAccountId) return;
     
     try {
+      const authToken = getAuthToken();
+      if (!authToken) {
+        console.error('No se pudo obtener el token de autenticación');
+        return;
+      }
+
       const response = await fetch(`https://api.hoodfy.com/api/stripe-connect/accounts/${communityId}/login`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
       });
 
       if (response.ok) {
@@ -132,8 +155,17 @@ export default function CreatorPaymentsDashboard({
     if (!stripeConnectAccountId) return;
     
     try {
+      const authToken = getAuthToken();
+      if (!authToken) {
+        console.error('No se pudo obtener el token de autenticación');
+        return;
+      }
+
       const response = await fetch(`https://api.hoodfy.com/api/stripe-connect/accounts/${communityId}/onboarding`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
       });
 
       if (response.ok) {
