@@ -33,7 +33,6 @@ import { formatImageUrl } from '@/utils/imageUtils';
 import { useImageUrl } from '@/utils/useImageUrl';
 import { useAuthStore } from '@/stores/authStore';
 import CommunityChatModal from '@/components/chat/CommunityChatModal';
-import CreatorPaymentsDashboard from '@/components/community/CreatorPaymentsDashboard';
 
 // Componente para manejar imágenes de miembros individualmente
 const MemberImage = ({ profilePicture, name, isCreator }: { profilePicture?: string; name: string; isCreator: boolean }) => {
@@ -76,11 +75,6 @@ interface Community {
   rules?: string[];
   category?: string;
   isPrivate?: boolean;
-  // Stripe Connect fields
-  stripeConnectAccountId?: string;
-  stripeConnectStatus?: 'pending' | 'active' | 'restricted' | 'disabled';
-  platformFeePercentage?: number;
-  creatorFeePercentage?: number;
 }
 
 export default function CommunityPage() {
@@ -722,14 +716,27 @@ export default function CommunityPage() {
               </div>
             </div>
 
-            {/* 🎯 NUEVO: Dashboard de Pagos para Creadores */}
+            {/* 🎯 Botón para acceder al Creator Dashboard General */}
             {isCreator && (
-              <CreatorPaymentsDashboard
-                communityId={id as string}
-                isCreator={isCreator}
-                stripeConnectStatus={community?.stripeConnectStatus || 'pending'}
-                stripeConnectAccountId={community?.stripeConnectAccountId || ''}
-              />
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                      Creator Tools
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                      Manage your communities and payments
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => router.push('/creator-dashboard')}
+                    className="bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center gap-2"
+                  >
+                    <SparklesIcon className="w-5 h-5" />
+                    Creator Dashboard
+                  </button>
+                </div>
+              </div>
             )}
 
             {/* Navigation Tabs - Mejorados */}

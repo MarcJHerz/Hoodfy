@@ -89,6 +89,17 @@ const userSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
+  },
+  // Stripe Connect - ID de la cuenta del usuario creador
+  stripeConnectAccountId: {
+    type: String,
+    default: ''
+  },
+  // Estado de la cuenta de Stripe Connect
+  stripeConnectStatus: {
+    type: String,
+    enum: ['pending', 'active', 'restricted', 'disabled'],
+    default: 'pending'
   }
 });
 

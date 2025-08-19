@@ -33,27 +33,8 @@ const CommunitySchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  // Stripe Connect - ID de la cuenta del creador
-  stripeConnectAccountId: {
-    type: String,
-    default: ''
-  },
-  // Estado de la cuenta de Stripe Connect
-  stripeConnectStatus: {
-    type: String,
-    enum: ['pending', 'active', 'restricted', 'disabled'],
-    default: 'pending'
-  },
-  // Porcentaje de comisión de la plataforma
-  platformFeePercentage: {
-    type: Number,
-    default: 9.1
-  },
-  // Porcentaje que recibe el creador
-  creatorFeePercentage: {
-    type: Number,
-    default: 90.9
-  },
+  // Los campos de Stripe Connect ahora están en el modelo User
+  // Los fees son globales: Platform 9.1%, Creator 90.9%
   creator: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

@@ -14,10 +14,7 @@ import {
 import { useAuthStore } from '@/stores/authStore';
 
 interface CreatorPaymentsDashboardProps {
-  communityId: string;
   isCreator: boolean;
-  stripeConnectStatus?: string;
-  stripeConnectAccountId?: string;
 }
 
 interface EarningsData {
@@ -28,16 +25,40 @@ interface EarningsData {
 }
 
 export default function CreatorPaymentsDashboard({ 
-  communityId, 
-  isCreator, 
-  stripeConnectStatus = 'pending',
-  stripeConnectAccountId = ''
+  isCreator
 }: CreatorPaymentsDashboardProps) {
   const [earningsData, setEarningsData] = useState<EarningsData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [onboardingUrl, setOnboardingUrl] = useState('');
   const [loginUrl, setLoginUrl] = useState('');
+  const [stripeConnectStatus, setStripeConnectStatus] = useState<string>('pending');
+  const [stripeConnectAccountId, setStripeConnectAccountId] = useState<string>('');
   const { user, token } = useAuthStore();
+
+  // Cargar estado de Stripe Connect del usuario
+  useEffect(() => {
+    const loadStripeStatus = async () => {
+      if (!token || !user) return;
+      
+      try {
+        const response = await fetch('https://api.hoodfy.com/api/user/stripe-connect/status', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setStripeConnectStatus(data.status);
+          setStripeConnectAccountId(data.accountId);
+        }
+      } catch (error) {
+        console.error('Error loading Stripe status:', error);
+      }
+    };
+
+    loadStripeStatus();
+  }, [token, user]);
 
   // Solo mostrar si es el creador
   if (!isCreator) {
@@ -96,14 +117,13 @@ export default function CreatorPaymentsDashboard({
         return;
       }
       
-      const response = await fetch(`https://api.hoodfy.com/api/stripe-connect/accounts`, {
+      const response = await fetch(`https://api.hoodfy.com/api/user/stripe-connect/account`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${authToken}`,
         },
         body: JSON.stringify({
-          communityId,
           accountType: 'express',
           country: 'US'
         }),
@@ -134,7 +154,7 @@ export default function CreatorPaymentsDashboard({
         return;
       }
 
-      const response = await fetch(`https://api.hoodfy.com/api/stripe-connect/accounts/${communityId}/login`, {
+      const response = await fetch(`https://api.hoodfy.com/api/user/stripe-connect/login`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -162,7 +182,7 @@ export default function CreatorPaymentsDashboard({
         return;
       }
 
-      const response = await fetch(`https://api.hoodfy.com/api/stripe-connect/accounts/${communityId}/onboarding`, {
+      const response = await fetch(`https://api.hoodfy.com/api/user/stripe-connect/onboarding`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,

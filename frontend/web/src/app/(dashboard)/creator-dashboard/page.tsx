@@ -288,19 +288,14 @@ export default function CreatorDashboardPage() {
         </div>
 
         {/* Payments Dashboard */}
-        {communities.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-              Payments Overview
-            </h2>
-            <CreatorPaymentsDashboard
-              communityId={communities[0]._id}
-              isCreator={true}
-              stripeConnectStatus={communities[0].stripeConnectStatus}
-              stripeConnectAccountId={communities[0].stripeConnectAccountId}
-            />
-          </div>
-        )}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+            Payments Overview
+          </h2>
+          <CreatorPaymentsDashboard
+            isCreator={true}
+          />
+        </div>
       </div>
     </div>
   );
