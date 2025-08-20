@@ -2,10 +2,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 // Conectar a MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/hoodfy', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/hoodfy');
 
 const Community = require('../models/Community');
 const User = require('../models/User');

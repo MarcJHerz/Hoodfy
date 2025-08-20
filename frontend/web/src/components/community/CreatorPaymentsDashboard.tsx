@@ -41,7 +41,7 @@ export default function CreatorPaymentsDashboard({
       if (!token || !user) return;
       
       try {
-        const response = await fetch('https://api.hoodfy.com/api/user/stripe-connect/status', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_HOODFY || 'https://api.hoodfy.com'}/api/user/stripe-connect/status`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -93,8 +93,8 @@ export default function CreatorPaymentsDashboard({
           color: 'text-red-600',
           bgColor: 'bg-red-50',
           icon: ExclamationTriangleIcon,
-          text: 'Restricted Account',
-          description: 'Your account has restrictions. Contact support to resolve.'
+          text: 'Onboarding Incomplete',
+          description: 'Your Stripe Connect setup was interrupted. Click "Continue Onboarding" to complete the process.'
         };
       default:
         return {
@@ -117,7 +117,7 @@ export default function CreatorPaymentsDashboard({
         return;
       }
       
-      const response = await fetch(`https://api.hoodfy.com/api/user/stripe-connect/account`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_HOODFY || 'https://api.hoodfy.com'}/api/user/stripe-connect/account`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -154,7 +154,7 @@ export default function CreatorPaymentsDashboard({
         return;
       }
 
-      const response = await fetch(`https://api.hoodfy.com/api/user/stripe-connect/login`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_HOODFY || 'https://api.hoodfy.com'}/api/user/stripe-connect/login`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -182,7 +182,7 @@ export default function CreatorPaymentsDashboard({
         return;
       }
 
-      const response = await fetch(`https://api.hoodfy.com/api/user/stripe-connect/onboarding`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_HOODFY || 'https://api.hoodfy.com'}/api/user/stripe-connect/onboarding`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -228,38 +228,79 @@ export default function CreatorPaymentsDashboard({
 
       {/* Acciones principales */}
       <div className="space-y-4 mb-6">
-        {!stripeConnectAccountId ? (
-          <button
-            onClick={handleSetupStripeConnect}
-            disabled={isLoading}
-            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50"
-          >
-            {isLoading ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <>
-                <CreditCardIcon className="w-5 h-5" />
-                <span>Setup Payment Account</span>
-              </>
-            )}
-          </button>
-        ) : stripeConnectStatus === 'pending' ? (
-          <button
-            onClick={handleContinueOnboarding}
-            className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold py-3 px-4 rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 flex items-center justify-center space-x-2"
-          >
-            <CogIcon className="w-5 h-5" />
-            <span>Complete Onboarding</span>
-          </button>
-        ) : stripeConnectStatus === 'active' ? (
-          <button
-            onClick={handleAccessStripeDashboard}
-            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 flex items-center justify-center space-x-2"
-          >
-            <ArrowTopRightOnSquareIcon className="w-5 h-5" />
-            <span>Access Stripe Dashboard</span>
-          </button>
-        ) : null}
+        {(() => {
+          if (!stripeConnectAccountId) {
+            return (
+              <button
+                onClick={handleSetupStripeConnect}
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <CreditCardIcon className="w-5 h-5" />
+                    <span>Setup Payment Account</span>
+                  </>
+                )}
+              </button>
+            );
+          }
+
+          switch (stripeConnectStatus) {
+            case 'pending':
+              return (
+                <button
+                  onClick={handleContinueOnboarding}
+                  className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold py-3 px-4 rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <CogIcon className="w-5 h-5" />
+                  <span>Complete Onboarding</span>
+                </button>
+              );
+            
+            case 'active':
+              return (
+                <button
+                  onClick={handleAccessStripeDashboard}
+                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <ArrowTopRightOnSquareIcon className="w-5 h-5" />
+                  <span>Access Stripe Dashboard</span>
+                </button>
+              );
+            
+            case 'restricted':
+              return (
+                <button
+                  onClick={handleContinueOnboarding}
+                  className="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white font-semibold py-3 px-4 rounded-xl hover:from-red-600 hover:to-pink-600 transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <CogIcon className="w-5 h-5" />
+                  <span>Continue Onboarding</span>
+                </button>
+              );
+            
+            default:
+              return (
+                <button
+                  onClick={handleSetupStripeConnect}
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-white font-semibold py-3 px-4 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50"
+                >
+                  {isLoading ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <CreditCardIcon className="w-5 h-5" />
+                      <span>Setup Payment Account</span>
+                    </>
+                  )}
+                </button>
+              );
+          }
+        })()}
       </div>
 
       {/* Información de ganancias */}

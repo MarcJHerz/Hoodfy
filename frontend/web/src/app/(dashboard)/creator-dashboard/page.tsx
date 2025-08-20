@@ -14,6 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useIsCreator } from '@/hooks/useIsCreator';
 import CreatorPaymentsDashboard from '@/components/community/CreatorPaymentsDashboard';
+import EarningsOverview from '@/components/community/EarningsOverview';
 
 interface Community {
   _id: string;
@@ -293,6 +294,17 @@ export default function CreatorDashboardPage() {
             Payments Overview
           </h2>
           <CreatorPaymentsDashboard
+            isCreator={true}
+          />
+        </div>
+
+        {/* Earnings Overview */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+            Earnings by Community
+          </h2>
+          <EarningsOverview
+            communityId=""
             isCreator={true}
           />
         </div>
