@@ -7,6 +7,7 @@ const User = require('../models/User');
 const Payout = require('../models/Payout');
 const { makeAllies } = require('../routes/communitiesRoutes');
 const { notificationHelpers } = require('./notificationController');
+const PriceValidationService = require('../services/priceValidationService');
 
 // Crear Price y Product en Stripe para precio personalizado
 exports.createStripeProductAndPrice = async (req, res) => {
@@ -73,8 +74,46 @@ exports.createCheckoutSession = async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado.' });
     }
     
-    console.log('✅ Datos validados, creando sesión con Stripe...');
-    console.log('💰 PriceId:', priceId);
+    console.log('✅ Datos validados, validando priceId...');
+    console.log('💰 PriceId recibido:', priceId);
+    
+    // 🔍 VALIDAR QUE EL PRECIO EXISTA EN STRIPE
+    const priceValidation = await PriceValidationService.validatePriceId(priceId);
+    if (!priceValidation.isValid) {
+      console.error('❌ PriceId inválido:', priceValidation.error);
+      
+      // Intentar encontrar un precio válido para esta comunidad
+      if (community.price > 0) {
+        console.log('🔄 Buscando precio válido para monto:', community.price);
+        const validPrice = await PriceValidationService.findValidPriceForAmount(community.price);
+        
+        if (validPrice) {
+          console.log('✅ Precio válido encontrado:', validPrice.priceId);
+          
+          // Actualizar la comunidad con el precio válido
+          community.stripePriceId = validPrice.priceId;
+          await community.save();
+          
+          // Usar el precio válido
+          priceId = validPrice.priceId;
+          console.log('🔄 Usando precio válido actualizado:', priceId);
+        } else {
+          console.error('❌ No se pudo encontrar un precio válido para:', community.price);
+          return res.status(400).json({ 
+            error: 'Precio de suscripción no válido',
+            details: 'El precio configurado para esta comunidad no es válido en Stripe'
+          });
+        }
+      } else {
+        return res.status(400).json({ 
+          error: 'Precio de suscripción no válido',
+          details: priceValidation.error
+        });
+      }
+    } else {
+      console.log('✅ PriceId válido confirmado:', priceId);
+    }
+    
     console.log('📧 Email del usuario:', user.email);
     console.log('🌐 Frontend URL:', process.env.FRONTEND_URL);
     
