@@ -100,6 +100,18 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['pending', 'active', 'restricted', 'disabled'],
     default: 'pending'
+  },
+  // Rol del usuario en el sistema
+  role: {
+    type: String,
+    enum: ['user', 'moderator', 'admin'],
+    default: 'user'
+  },
+  // Estado de la cuenta del usuario
+  status: {
+    type: String,
+    enum: ['active', 'suspended', 'banned'],
+    default: 'active'
   }
 });
 
