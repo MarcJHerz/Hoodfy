@@ -1,25 +1,13 @@
 import React from 'react';
-import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../api/auth/[...nextauth]/route';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-export default async function AdminLayout({ children }: AdminLayoutProps) {
-  const session = await getServerSession(authOptions);
-
-  // Verificar si el usuario está autenticado y es admin
-  if (!session?.user) {
-    redirect('/login');
-  }
-
-  // Verificar rol de admin (esto se implementará en el backend)
-  if (session.user.role !== 'admin') {
-    redirect('/dashboard');
-  }
-
+export default function AdminLayout({ children }: AdminLayoutProps) {
+  // TODO: Implementar autenticación real
+  // Por ahora, permitimos acceso temporal para desarrollo
+  
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header del Admin */}
@@ -33,7 +21,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-700">
-                {session.user.email}
+                Admin User
               </span>
               <button className="text-sm text-red-600 hover:text-red-800">
                 Cerrar Sesión

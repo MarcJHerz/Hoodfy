@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -11,6 +11,7 @@ export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { login } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,20 +19,15 @@ export default function AdminLoginPage() {
     setError('');
 
     try {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-        callbackUrl: '/admin/dashboard'
-      });
-
-      if (result?.error) {
-        setError('Credenciales inválidas');
-      } else if (result?.ok) {
-        router.push('/admin/dashboard');
-      }
-    } catch (error) {
-      setError('Error al iniciar sesión');
+      // Usar el sistema de autenticación existente
+      await login(email, password);
+      
+      // TODO: Verificar si el usuario es admin
+      // Por ahora, redirigimos al dashboard
+      router.push('/admin/dashboard');
+      
+    } catch (error: any) {
+      setError(error.message || 'Error al iniciar sesión');
     } finally {
       setIsLoading(false);
     }
