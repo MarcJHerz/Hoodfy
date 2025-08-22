@@ -4,9 +4,41 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-export default function AdminLayout({ children }: AdminLayoutProps) {
-  // TODO: Implementar autenticación real
-  // Por ahora, permitimos acceso temporal para desarrollo
+export default async function AdminLayout({ children }: AdminLayoutProps) {
+  // Verificar autenticación y rol de admin
+  const cookieStore = await import('next/headers').then(m => m.cookies());
+  const token = cookieStore.get('token')?.value;
+
+  if (!token) {
+    const { redirect } = await import('next/navigation');
+    redirect('/login');
+  }
+
+  // Verificar si el usuario es admin
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/verify-admin`, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const { redirect } = await import('next/navigation');
+      redirect('/dashboard');
+    }
+
+    const adminData = await response.json();
+    
+    if (!adminData.isAdmin) {
+      const { redirect } = await import('next/navigation');
+      redirect('/dashboard');
+    }
+  } catch (error) {
+    console.error('Error verificando admin:', error);
+    const { redirect } = await import('next/navigation');
+    redirect('/login');
+  }
   
   return (
     <div className="min-h-screen bg-gray-50">

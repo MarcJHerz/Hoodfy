@@ -207,4 +207,32 @@ router.post('/logout', (req, res) => {
   res.json({ message: 'Logout exitoso' });
 });
 
+// Endpoint para verificar si un usuario es admin
+router.get('/verify-admin', verifyToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    if (user.role !== 'admin') {
+      return res.status(403).json({ message: 'Acceso denegado. Se requieren permisos de administrador.' });
+    }
+
+    res.json({ 
+      isAdmin: true, 
+      user: {
+        id: user._id,
+        email: user.email,
+        username: user.username,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Error verificando admin:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+});
+
 module.exports = router; 

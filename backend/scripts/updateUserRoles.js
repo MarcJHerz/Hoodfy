@@ -26,9 +26,9 @@ async function updateUserRoles() {
     if (existingAdmin) {
       console.log('✅ Ya existe un usuario admin:', existingAdmin.email);
     } else {
-      // 3. Crear el primer usuario admin (marc@oodfy.com)
+      // 3. Crear el primer usuario admin (marcelo.sbd@hotmail.com)
       const adminUser = await User.findOneAndUpdate(
-        { email: 'marc@oodfy.com' },
+        { email: 'marcelo.sbd@hotmail.com' },
         { 
           role: 'admin',
           status: 'active'
@@ -37,13 +37,13 @@ async function updateUserRoles() {
       );
 
       if (adminUser) {
-        console.log('✅ Usuario marc@oodfy.com promovido a ADMIN');
+        console.log('✅ Usuario marcelo.sbd@hotmail.com promovido a ADMIN');
         console.log('📧 Email:', adminUser.email);
         console.log('👤 Username:', adminUser.username);
         console.log('🔑 Rol:', adminUser.role);
         console.log('📊 Estado:', adminUser.status);
       } else {
-        console.log('❌ Usuario marc@oodfy.com no encontrado');
+        console.log('❌ Usuario marcelo.sbd@hotmail.com no encontrado');
         console.log('💡 Asegúrate de que el usuario exista antes de ejecutar este script');
       }
     }
@@ -78,7 +78,7 @@ async function updateUserRoles() {
     });
 
     console.log('\n🎉 Script ejecutado exitosamente!');
-    console.log('💡 Ahora puedes acceder al panel admin con marc@oodfy.com');
+    console.log('💡 Ahora puedes acceder al panel admin con marcelo.sbd@hotmail.com');
 
   } catch (error) {
     console.error('❌ Error:', error);
