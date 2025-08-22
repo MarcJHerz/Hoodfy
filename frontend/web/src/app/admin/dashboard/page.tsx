@@ -1,46 +1,40 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
-
-interface DashboardStats {
-  totalUsers: number;
-  totalCommunities: number;
-  totalPosts: number;
-  activeSubscriptions: number;
-  monthlyRevenue: number;
-  newUsersThisMonth: number;
-  newCommunitiesThisMonth: number;
-}
+import { useMetrics } from '@/hooks/useMetrics';
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    totalCommunities: 0,
-    totalPosts: 0,
-    activeSubscriptions: 0,
-    monthlyRevenue: 0,
-    newUsersThisMonth: 0,
-    newCommunitiesThisMonth: 0
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  const { dashboardMetrics, isLoading, error } = useMetrics();
 
-  useEffect(() => {
-    // TODO: Implementar llamada a API para obtener estadísticas
-    // Por ahora usamos datos mock
-    setTimeout(() => {
-      setStats({
-        totalUsers: 1247,
-        totalCommunities: 89,
-        totalPosts: 5678,
-        activeSubscriptions: 234,
-        monthlyRevenue: 12450.00,
-        newUsersThisMonth: 156,
-        newCommunitiesThisMonth: 12
-      });
-      setIsLoading(false);
-    }, 1000);
-  }, []);
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="text-red-600 text-xl mb-2">❌ Error</div>
+          <div className="text-gray-600">{error}</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!dashboardMetrics) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="text-gray-600">No hay datos disponibles</div>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -78,7 +72,7 @@ export default function AdminDashboardPage() {
                     Total Usuarios
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {stats.totalUsers.toLocaleString()}
+                    {dashboardMetrics.users.total.toLocaleString()}
                   </dd>
                 </dl>
               </div>
@@ -107,7 +101,7 @@ export default function AdminDashboardPage() {
                     Total Comunidades
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {stats.totalCommunities.toLocaleString()}
+                    {dashboardMetrics.communities.total.toLocaleString()}
                   </dd>
                 </dl>
               </div>
@@ -136,7 +130,7 @@ export default function AdminDashboardPage() {
                     Total Posts
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {stats.totalPosts.toLocaleString()}
+                    {dashboardMetrics.posts.total.toLocaleString()}
                   </dd>
                 </dl>
               </div>
@@ -165,7 +159,7 @@ export default function AdminDashboardPage() {
                     Ingresos Mensuales
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    ${stats.monthlyRevenue.toLocaleString()}
+                    ${dashboardMetrics.revenue.monthly.toLocaleString()}
                   </dd>
                 </dl>
               </div>
@@ -176,6 +170,75 @@ export default function AdminDashboardPage() {
               <Link href="/admin/metrics" className="font-medium text-indigo-700 hover:text-indigo-900">
                 Ver métricas detalladas
               </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Métricas adicionales */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Usuarios Activos
+                  </dt>
+                  <dd className="text-lg font-medium text-gray-900">
+                    {dashboardMetrics.users.active.toLocaleString()}
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg className="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Comunidades Activas
+                  </dt>
+                  <dd className="text-lg font-medium text-gray-900">
+                    {dashboardMetrics.communities.active.toLocaleString()}
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg className="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Ingresos Totales
+                  </dt>
+                  <dd className="text-lg font-medium text-gray-900">
+                    ${dashboardMetrics.revenue.total.toLocaleString()}
+                  </dd>
+                </dl>
+              </div>
             </div>
           </div>
         </div>
@@ -265,10 +328,10 @@ export default function AdminDashboardPage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900">
-                {stats.newUsersThisMonth} nuevos usuarios este mes
+                {dashboardMetrics.users.newThisMonth} nuevos usuarios este mes
               </p>
               <p className="text-sm text-gray-500">
-                Crecimiento del {Math.round((stats.newUsersThisMonth / stats.totalUsers) * 100)}%
+                Crecimiento del {dashboardMetrics.users.growthRate.toFixed(1)}%
               </p>
             </div>
           </div>
@@ -283,7 +346,7 @@ export default function AdminDashboardPage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900">
-                {stats.newCommunitiesThisMonth} nuevas comunidades este mes
+                {dashboardMetrics.communities.newThisMonth} nuevas comunidades este mes
               </p>
               <p className="text-sm text-gray-500">
                 Expansión continua de la plataforma
@@ -301,10 +364,10 @@ export default function AdminDashboardPage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900">
-                ${stats.monthlyRevenue.toLocaleString()} en ingresos este mes
+                ${dashboardMetrics.revenue.monthly.toLocaleString()} en ingresos este mes
               </p>
               <p className="text-sm text-gray-500">
-                {stats.activeSubscriptions} suscripciones activas
+                {dashboardMetrics.subscriptions.active} suscripciones activas
               </p>
             </div>
           </div>

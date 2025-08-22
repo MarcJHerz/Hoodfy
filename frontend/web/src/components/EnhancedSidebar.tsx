@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useCommunitiesStore } from '@/stores/communitiesStore';
 import { formatImageUrl } from '@/utils/imageUtils';
 import { useIsCreator } from '@/hooks/useIsCreator';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import {
   HomeIcon,
   PlusIcon,
@@ -60,6 +61,8 @@ export default function EnhancedSidebar() {
   
   // Hook para verificar si el usuario es creador
   const { isCreator } = useIsCreator();
+  // Hook para verificar si el usuario es admin
+  const { isAdmin } = useIsAdmin();
   
   const [userStats, setUserStats] = useState<UserStats>({
     totalPosts: 0,
@@ -119,6 +122,18 @@ export default function EnhancedSidebar() {
       solidIcon: Cog6ToothIcon,
       color: 'from-indigo-500 to-purple-500',
       description: 'Manage your communities and payments'
+    });
+  }
+
+  // Agregar Admin Dashboard si el usuario es admin
+  if (isAdmin) {
+    quickActions.push({
+      name: 'Admin Dashboard',
+      href: '/admin',
+      icon: Cog6ToothIcon,
+      solidIcon: Cog6ToothIcon,
+      color: 'from-red-500 to-pink-500',
+      description: 'Platform administration and analytics'
     });
   }
 
