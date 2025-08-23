@@ -1,5 +1,19 @@
 import { useState, useEffect } from 'react';
-import { getApiUrl } from '../utils/getApiUrl';
+
+// Función para detectar automáticamente qué API usar según el dominio
+const getApiUrl = () => {
+  if (typeof window === 'undefined') {
+    return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+  }
+  
+  const currentDomain = window.location.hostname;
+  
+  if (currentDomain === 'hoodfy.com' || currentDomain === 'www.hoodfy.com') {
+    return process.env.NEXT_PUBLIC_API_URL_HOODFY || 'https://api.hoodfy.com';
+  }
+  
+  return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+};
 
 export interface AdminUser {
   id: string;
