@@ -67,8 +67,8 @@ exports.createConnectAccount = async (req, res) => {
     // Actualizar la comunidad con la información de Stripe Connect
     community.stripeConnectAccountId = account.id;
     community.stripeConnectStatus = 'pending';
-    community.platformFeePercentage = 9.1;
-    community.creatorFeePercentage = 90.9;
+    community.platformFeePercentage = 12;
+    community.creatorFeePercentage = 88;
     await community.save();
 
     console.log('✅ Comunidad actualizada con cuenta de Stripe Connect');

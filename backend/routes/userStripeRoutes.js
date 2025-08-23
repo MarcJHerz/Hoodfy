@@ -147,8 +147,8 @@ router.get('/stripe-connect/status', async (req, res) => {
       businessType: account.business_type,
       country: account.country,
       email: account.email,
-      platformFee: 9.1, // Fee global de la plataforma
-      creatorFee: 90.9  // Fee global del creador
+      platformFee: 12, // Fee global de la plataforma
+      creatorFee: 88  // Fee global del creador
     });
 
   } catch (error) {

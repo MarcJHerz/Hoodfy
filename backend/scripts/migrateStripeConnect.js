@@ -32,8 +32,8 @@ async function migrateCommunitiesToStripeConnect() {
         // Agregar campos de Stripe Connect con valores por defecto
         community.stripeConnectAccountId = '';
         community.stripeConnectStatus = 'pending';
-        community.platformFeePercentage = 9.1;
-        community.creatorFeePercentage = 90.9;
+        community.platformFeePercentage = 12;
+        community.creatorFeePercentage = 88;
         
         await community.save();
         

@@ -142,7 +142,7 @@ exports.createCheckoutSession = async (req, res) => {
     if (community.stripeConnectAccountId && community.stripeConnectStatus === 'active') {
       console.log('💳 Comunidad con Stripe Connect activo, configurando split payments...');
       
-      // Calcular el split de pagos (90.9% creador, 9.1% plataforma)
+      // Calcular el split de pagos (88% creador, 12% plataforma)
       const paymentSplit = stripeConnect.calculatePaymentSplit(community.price);
       
       sessionConfig.subscription_data = {

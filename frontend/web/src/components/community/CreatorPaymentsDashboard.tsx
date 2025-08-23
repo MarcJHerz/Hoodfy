@@ -369,8 +369,8 @@ export default function CreatorPaymentsDashboard({
           <div>
             <h4 className="text-sm font-medium text-blue-900">How does it work?</h4>
             <p className="text-sm text-blue-700 mt-1">
-              With Stripe Connect, you will receive 90.9% of each subscription directly in your Stripe account. 
-              The platform keeps the remaining 9.1% for operational costs.
+              With Stripe Connect, you will receive 88% of each subscription directly in your Stripe account. 
+              The platform keeps the remaining 12% for operational costs.
             </p>
           </div>
         </div>

@@ -2,11 +2,11 @@ const stripe = require('./stripe');
 
 // Configuración de Stripe Connect
 const STRIPE_CONNECT_CONFIG = {
-  // Porcentaje que se queda la plataforma (9.1% - incluye fee de Stripe)
-  PLATFORM_FEE_PERCENTAGE: process.env.STRIPE_PLATFORM_FEE_PERCENTAGE || 9.1,
+  // Porcentaje que se queda la plataforma (12% - incluye fee de Stripe)
+  PLATFORM_FEE_PERCENTAGE: process.env.STRIPE_PLATFORM_FEE_PERCENTAGE || 12,
   
-  // Porcentaje que se queda el creador (90.9% - neto después de fees)
-  CREATOR_FEE_PERCENTAGE: 100 - (process.env.STRIPE_PLATFORM_FEE_PERCENTAGE || 9.1),
+  // Porcentaje que se queda el creador (88% - neto después de fees)
+  CREATOR_FEE_PERCENTAGE: 100 - (process.env.STRIPE_PLATFORM_FEE_PERCENTAGE || 12),
   
   // Tipos de cuenta soportados
   ACCOUNT_TYPES: ['express', 'standard'],

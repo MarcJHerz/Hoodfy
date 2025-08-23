@@ -34,7 +34,7 @@ const CommunitySchema = new mongoose.Schema({
     default: false
   },
   // Los campos de Stripe Connect ahora están en el modelo User
-  // Los fees son globales: Platform 9.1%, Creator 90.9%
+  // Los fees son globales: Platform 12%, Creator 88%
   creator: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
