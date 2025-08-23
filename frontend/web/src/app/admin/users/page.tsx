@@ -2,83 +2,61 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-
-interface User {
-  id: string;
-  email: string;
-  username: string;
-  role: 'user' | 'admin' | 'moderator';
-  status: 'active' | 'banned' | 'suspended';
-  createdAt: string;
-  lastLogin: string;
-  communitiesCount: number;
-  postsCount: number;
-}
+import { useUsers, AdminUser } from '../../../hooks/useUsers';
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const { 
+    users, 
+    userStats, 
+    isLoading, 
+    error, 
+    refetch, 
+    updateUserRole, 
+    updateUserStatus 
+  } = useUsers();
+  
+  const [filteredUsers, setFilteredUsers] = useState<AdminUser[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [roleFilter, setRoleFilter] = useState<string>('all');
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
-  useEffect(() => {
-    // TODO: Implementar llamada a API para obtener usuarios
-    // Por ahora usamos datos mock
-    setTimeout(() => {
-      const mockUsers: User[] = [
-        {
-          id: '1',
-          email: 'admin@hoodfy.com',
-          username: 'admin',
-          role: 'admin',
-          status: 'active',
-          createdAt: '2024-01-15',
-          lastLogin: '2024-08-21',
-          communitiesCount: 5,
-          postsCount: 25
-        },
-        {
-          id: '2',
-          email: 'moderator@hoodfy.com',
-          username: 'moderator',
-          role: 'moderator',
-          status: 'active',
-          createdAt: '2024-02-20',
-          lastLogin: '2024-08-20',
-          communitiesCount: 3,
-          postsCount: 15
-        },
-        {
-          id: '3',
-          email: 'user1@example.com',
-          username: 'user1',
-          role: 'user',
-          status: 'active',
-          createdAt: '2024-03-10',
-          lastLogin: '2024-08-19',
-          communitiesCount: 2,
-          postsCount: 8
-        },
-        {
-          id: '4',
-          email: 'user2@example.com',
-          username: 'user2',
-          role: 'user',
-          status: 'banned',
-          createdAt: '2024-04-05',
-          lastLogin: '2024-08-15',
-          communitiesCount: 0,
-          postsCount: 0
-        }
-      ];
-      setUsers(mockUsers);
-      setFilteredUsers(mockUsers);
-      setIsLoading(false);
-    }, 1000);
-  }, []);
+  // Función para manejar cambio de rol
+  const handleRoleChange = async (userId: string, newRole: string) => {
+    setIsUpdating(userId);
+    try {
+      const success = await updateUserRole(userId, newRole);
+      if (success) {
+        // El hook ya actualiza el estado local
+        console.log(`✅ Rol actualizado exitosamente a ${newRole}`);
+      } else {
+        console.error('❌ Error actualizando rol');
+      }
+    } catch (error) {
+      console.error('❌ Error en handleRoleChange:', error);
+    } finally {
+      setIsUpdating(null);
+    }
+  };
+
+  // Función para manejar cambio de estado
+  const handleStatusChange = async (userId: string, newStatus: string) => {
+    setIsUpdating(userId);
+    try {
+      const success = await updateUserStatus(userId, newStatus);
+      if (success) {
+        // El hook ya actualiza el estado local
+        console.log(`✅ Estado actualizado exitosamente a ${newStatus}`);
+      } else {
+        console.error('❌ Error actualizando estado');
+      }
+    } catch (error) {
+      console.error('❌ Error en handleStatusChange:', error);
+    } finally {
+      setIsUpdating(null);
+    }
+  };
 
   useEffect(() => {
     let filtered = users;
@@ -105,17 +83,20 @@ export default function AdminUsersPage() {
   }, [users, searchTerm, statusFilter, roleFilter]);
 
   const handleUserAction = async (userId: string, action: string) => {
-    // TODO: Implementar acciones de administración
     console.log(`Acción ${action} para usuario ${userId}`);
     
-    // Actualizar estado local
-    setUsers(prevUsers =>
-      prevUsers.map(user =>
-        user.id === userId
-          ? { ...user, status: action === 'ban' ? 'banned' : 'active' }
-          : user
-      )
-    );
+    try {
+      if (action === 'ban') {
+        await handleStatusChange(userId, 'banned');
+      } else if (action === 'activate') {
+        await handleStatusChange(userId, 'active');
+      } else if (action === 'edit') {
+        // TODO: Implementar modal de edición
+        console.log('Editar usuario:', userId);
+      }
+    } catch (error) {
+      console.error('❌ Error en handleUserAction:', error);
+    }
   };
 
   const handleBulkAction = async (action: string) => {
@@ -177,13 +158,51 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="bg-white shadow rounded-lg p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Gestión de Usuarios
-        </h1>
-        <p className="text-gray-600">
-          Administra usuarios, roles y estados de la plataforma
-        </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Gestión de Usuarios
+            </h1>
+            <p className="text-gray-600">
+              Administra usuarios, roles y estados de la plataforma
+            </p>
+          </div>
+          <button
+            onClick={refetch}
+            disabled={isLoading}
+            className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? 'Cargando...' : '🔄 Recargar'}
+          </button>
+        </div>
       </div>
+
+      {/* Mensaje de error */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Error cargando usuarios</h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>{error}</p>
+              </div>
+              <div className="mt-4">
+                <button
+                  onClick={refetch}
+                  className="bg-red-100 text-red-800 px-3 py-2 rounded-md text-sm font-medium hover:bg-red-200"
+                >
+                  Reintentar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filtros y búsqueda */}
       <div className="bg-white shadow rounded-lg p-6">
@@ -364,28 +383,44 @@ export default function AdminUsersPage() {
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      {user.status === 'active' ? (
-                        <button
-                          onClick={() => handleUserAction(user.id, 'ban')}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Banear
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleUserAction(user.id, 'activate')}
-                          className="text-green-600 hover:text-green-900"
-                        >
-                          Activar
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleUserAction(user.id, 'edit')}
-                        className="text-indigo-600 hover:text-indigo-900"
+                    <div className="flex flex-col space-y-2">
+                      {/* Selector de rol */}
+                      <select
+                        value={user.role}
+                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                        disabled={isUpdating === user.id}
+                        className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
                       >
-                        Editar
-                      </button>
+                        <option value="user">Usuario</option>
+                        <option value="moderator">Moderador</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                      
+                      {/* Botones de estado */}
+                      <div className="flex space-x-1">
+                        {user.status === 'active' ? (
+                          <button
+                            onClick={() => handleUserAction(user.id, 'ban')}
+                            disabled={isUpdating === user.id}
+                            className="text-xs text-red-600 hover:text-red-900 disabled:opacity-50"
+                          >
+                            Banear
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleUserAction(user.id, 'activate')}
+                            disabled={isUpdating === user.id}
+                            className="text-xs text-green-600 hover:text-green-900 disabled:opacity-50"
+                          >
+                            Activar
+                          </button>
+                        )}
+                      </div>
+                      
+                      {/* Indicador de carga */}
+                      {isUpdating === user.id && (
+                        <div className="text-xs text-gray-500">Actualizando...</div>
+                      )}
                     </div>
                   </td>
                 </tr>

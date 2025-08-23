@@ -77,6 +77,7 @@ const userStripeRoutes = require('./routes/userStripeRoutes');
 const metricsRoutes = require('./routes/metricsRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const chatRoutes = require('./routes/chatRoutes'); // Nueva ruta
+const adminRoutes = require('./routes/adminRoutes'); // Rutas de admin
 
 // ✅ Rutas
 app.use('/api/users', userRoutes);
@@ -94,6 +95,7 @@ app.use('/api/allies', allyRoutes);
 app.use('/api/community-stats', communityStatsRoutes);
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/chats', chatRoutes); // Nueva ruta para chats
+app.use('/api/admin', adminRoutes); // Rutas de admin
 
 // ✅ Middleware global de manejo de errores
 app.use((error, req, res, next) => {

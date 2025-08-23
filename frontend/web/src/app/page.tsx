@@ -106,23 +106,7 @@ export default function Home() {
     }
   ];
 
-  const visionStats = [
-    { 
-      label: "The First of Its Kind", 
-      value: "🌟",
-      description: "Revolutionary friendship platform"
-    },
-    { 
-      label: "Join the Pioneer Community", 
-      value: "🚀",
-      description: "Shape the future of connection"
-    },
-    { 
-      label: "Limited Early Access", 
-      value: "💫",
-      description: "Be part of something groundbreaking"
-    }
-  ];
+
 
   const exampleCommunities = [
     {
@@ -186,24 +170,15 @@ export default function Home() {
               </span>
             </h1>
             
-            <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
               Social media gives you followers. Hoodfy gives you friends.<br />
               Where creators connect people, not collect followers.
             </p>
 
-            {/* Vision Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 mb-12 max-w-4xl mx-auto">
-              {visionStats.map((stat, index) => (
-                <div key={index} className="text-center p-6 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
-                  <div className="text-4xl mb-3">{stat.value}</div>
-                  <div className="font-bold text-gray-900 dark:text-white mb-2">{stat.label}</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">{stat.description}</div>
-                </div>
-              ))}
-            </div>
+
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
               <Link
                 href="/register"
                 className="group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-2xl px-8 py-4 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"

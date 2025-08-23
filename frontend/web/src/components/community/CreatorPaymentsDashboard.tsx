@@ -35,6 +35,26 @@ export default function CreatorPaymentsDashboard({
   const [stripeConnectAccountId, setStripeConnectAccountId] = useState<string>('');
   const { user, token } = useAuthStore();
 
+  // Función inteligente para abrir URLs de Stripe (compatible con iOS)
+  const openStripeUrl = (url: string, action: string) => {
+    try {
+      // Intentar window.open primero (funciona en PC/Android)
+      const newWindow = window.open(url, '_blank');
+      
+      // Verificar si la ventana se abrió correctamente
+      if (newWindow && !newWindow.closed && typeof newWindow.closed !== 'undefined') {
+        // window.open funcionó correctamente
+        return;
+      }
+      
+      // Si window.open falló (iOS), usar redirección directa
+      window.location.href = url;
+    } catch (error) {
+      // En caso de error, usar redirección directa como fallback
+      window.location.href = url;
+    }
+  };
+
   // Cargar estado de Stripe Connect del usuario
   useEffect(() => {
     const loadStripeStatus = async () => {
@@ -132,8 +152,8 @@ export default function CreatorPaymentsDashboard({
       if (response.ok) {
         const data = await response.json();
         setOnboardingUrl(data.onboardingUrl);
-        // Redirigir al onboarding
-        window.open(data.onboardingUrl, '_blank');
+        // Abrir onboarding con función compatible con iOS
+        openStripeUrl(data.onboardingUrl, 'onboarding');
       } else {
         console.error('Error setting up Stripe Connect');
       }
@@ -164,8 +184,8 @@ export default function CreatorPaymentsDashboard({
       if (response.ok) {
         const data = await response.json();
         setLoginUrl(data.loginUrl);
-        // Redirigir al dashboard de Stripe
-        window.open(data.loginUrl, '_blank');
+        // Abrir dashboard con función compatible con iOS
+        openStripeUrl(data.loginUrl, 'dashboard');
       }
     } catch (error) {
       console.error('Error accessing Stripe dashboard:', error);
@@ -192,8 +212,8 @@ export default function CreatorPaymentsDashboard({
       if (response.ok) {
         const data = await response.json();
         setOnboardingUrl(data.onboardingUrl);
-        // Redirigir al onboarding
-        window.open(data.onboardingUrl, '_blank');
+        // Continuar onboarding con función compatible con iOS
+        openStripeUrl(data.onboardingUrl, 'continue-onboarding');
       }
     } catch (error) {
       console.error('Error continuing onboarding:', error);

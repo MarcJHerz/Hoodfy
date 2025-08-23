@@ -204,41 +204,24 @@ export default function MobileNavbar() {
                   </div>
                   
                   {/* Opciones del menú */}
-                    <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {isProfilePage ? (
-                      <>
-                        <button
-                            className="w-full text-left py-3 px-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center gap-3"
-                          onClick={() => handleGoTo('/profile')}
-                        >
-                          <UserCircleIcon className="h-5 w-5 text-gray-400" />
-                            <span className="text-gray-700 dark:text-gray-300">Ver perfil</span>
-                        </button>
-                        <button
-                            className="w-full text-left py-3 px-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center gap-3"
-                          onClick={() => handleGoTo('/profile/edit')}
-                        >
-                          <Cog6ToothIcon className="h-5 w-5 text-gray-400" />
-                            <span className="text-gray-700 dark:text-gray-300">Editar perfil</span>
-                        </button>
-                      </>
-                    ) : isUserProfilePage ? (
-                      <button
-                          className="w-full text-left py-3 px-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center gap-3"
-                        onClick={() => handleGoTo('/profile')}
-                      >
-                        <UserCircleIcon className="h-5 w-5 text-gray-400" />
-                          <span className="text-gray-700 dark:text-gray-300">Ver mi perfil</span>
-                      </button>
-                    ) : (
-                      <button
-                          className="w-full text-left py-3 px-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center gap-3"
-                        onClick={() => handleGoTo(`/profile/${user._id}`)}
-                      >
-                        <UserCircleIcon className="h-5 w-5 text-gray-400" />
-                          <span className="text-gray-700 dark:text-gray-300">Ver perfil</span>
-                      </button>
-                    )}
+                  <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                    {/* Ver perfil - Siempre primero */}
+                    <button
+                      className="w-full text-left py-3 px-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center gap-3"
+                      onClick={() => handleGoTo(`/profile/${user._id}`)}
+                    >
+                      <UserCircleIcon className="h-5 w-5 text-gray-400" />
+                      <span className="text-gray-700 dark:text-gray-300">Ver perfil</span>
+                    </button>
+                    
+                    {/* Editar perfil */}
+                    <button
+                      className="w-full text-left py-3 px-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center gap-3"
+                      onClick={() => handleGoTo('/profile/edit')}
+                    >
+                      <Cog6ToothIcon className="h-5 w-5 text-gray-400" />
+                      <span className="text-gray-700 dark:text-gray-300">Editar perfil</span>
+                    </button>
                     
                     {/* Toggle tema */}
                     {mounted && (
