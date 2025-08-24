@@ -14,6 +14,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   
   // Ocultar navbar en login, register y landing
   const hideNavbar = pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/register');
+  
+  // Ocultar AuthInitializer en páginas públicas
+  const hideAuthInitializer = pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/explore');
 
   // Inicializar el AuthStore globalmente
   useEffect(() => {
@@ -24,7 +27,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <AuthInitializer />
+      {!hideAuthInitializer && <AuthInitializer />}
       {!hideNavbar && <Navbar />}
       <main className={!hideNavbar ? 'pt-16' : ''}>
         {children}
