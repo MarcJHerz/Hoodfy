@@ -230,15 +230,16 @@ export default function ExplorePage() {
         {filteredAndSortedCommunities.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredAndSortedCommunities.map((community) => (
-              <div
-                key={community._id}
-                className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden group"
-              >
+                             <Link
+                 key={community._id}
+                 href={`/communities/${community._id}`}
+                 className="block bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden group cursor-pointer"
+               >
                 {/* Community Cover Image */}
                 <div className="relative h-48 overflow-hidden">
                   {community.coverImage ? (
                     <Image
-                      src={community.coverImage.startsWith('http') ? community.coverImage : `/api/images/${community.coverImage}`}
+                      src={community.coverImage.startsWith('http') ? community.coverImage : `https://hoodfy-community-media.s3.us-east-1.amazonaws.com/${community.coverImage}`}
                       alt={community.name}
                       fill
                       className="object-cover group-hover:scale-110 transition-transform duration-300"
@@ -304,7 +305,7 @@ export default function ExplorePage() {
                       <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
                         {community.creator.profilePicture ? (
                           <Image
-                            src={community.creator.profilePicture.startsWith('http') ? community.creator.profilePicture : `/api/images/${community.creator.profilePicture}`}
+                            src={community.creator.profilePicture.startsWith('http') ? community.creator.profilePicture : `https://hoodfy-community-media.s3.us-east-1.amazonaws.com/${community.creator.profilePicture}`}
                             alt={community.creator.name}
                             width={32}
                             height={32}
@@ -327,20 +328,9 @@ export default function ExplorePage() {
                     </div>
                   )}
 
-                  {/* Action Buttons */}
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/communities/${community._id}`}
-                      className="flex-1 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-center"
-                    >
-                      View Community
-                    </Link>
-                    <button className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 p-2 rounded-lg transition-colors duration-200">
-                      <EyeIcon className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
+                                     {/* Community Info - No action buttons needed since entire card is clickable */}
+                 </div>
+               </Link>
             ))}
           </div>
         ) : (
