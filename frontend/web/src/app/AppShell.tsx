@@ -17,6 +17,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   
   // Ocultar AuthInitializer en páginas públicas
   const hideAuthInitializer = pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/explore');
+  
+  // Ocultar sidebar en páginas públicas
+  const hideSidebar = pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/explore');
 
   // Inicializar el AuthStore globalmente
   useEffect(() => {
