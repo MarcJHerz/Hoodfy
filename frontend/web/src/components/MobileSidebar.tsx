@@ -6,8 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useCommunitiesStore } from '@/stores/communitiesStore';
 import { useUIStore } from '@/stores/uiStore';
-import { useIsCreator } from '@/hooks/useIsCreator';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+
 import Logo from './Logo';
 import { Transition } from '@headlessui/react';
 import {
@@ -21,10 +20,6 @@ import {
   EyeIcon,
   HeartIcon,
   DocumentTextIcon,
-  UserIcon,
-  CogIcon,
-  ShieldCheckIcon,
-  CreditCardIcon,
 } from '@heroicons/react/24/outline';
 import {
   HomeIcon as HomeSolid,
@@ -62,10 +57,7 @@ export default function MobileSidebar() {
   } = useCommunitiesStore();
   const { mobileSidebarOpen, setMobileSidebarOpen } = useUIStore();
   
-  // Hook para verificar si el usuario es creador
-  const { isCreator } = useIsCreator();
-  // Hook para verificar si el usuario es admin
-  const { isAdmin } = useIsAdmin();
+
   
   const sidebarRef = useRef<HTMLDivElement>(null);
   
@@ -265,39 +257,6 @@ export default function MobileSidebar() {
 
             {/* Content */}
             <div className="flex-1 px-6 py-4 space-y-6">
-              {/* Perfil del Usuario */}
-              <div className="bg-gradient-to-r from-primary-500 to-accent-500 rounded-xl p-4 text-white">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                    <UserIcon className="h-6 w-6" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-semibold text-lg">{user?.name || 'Usuario'}</div>
-                    <div className="text-sm text-white/80">{user?.email}</div>
-                  </div>
-                </div>
-                
-                {/* Acciones rápidas del perfil */}
-                <div className="grid grid-cols-2 gap-2">
-                  <Link
-                    href="/profile"
-                    onClick={handleLinkClick}
-                    className="flex items-center gap-2 p-2 bg-white/20 rounded-lg text-sm font-medium hover:bg-white/30 transition-colors"
-                  >
-                    <UserIcon className="h-4 w-4" />
-                    See Profile
-                  </Link>
-                  <Link
-                    href="/profile/edit"
-                    onClick={handleLinkClick}
-                    className="flex items-center gap-2 p-2 bg-white/20 rounded-lg text-sm font-medium hover:bg-white/30 transition-colors"
-                  >
-                    <CogIcon className="h-4 w-4" />
-                    Edit Profile
-                  </Link>
-                </div>
-              </div>
-
               {/* Dashboard Personal */}
               <div>
                 <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
@@ -380,72 +339,7 @@ export default function MobileSidebar() {
                 </div>
               </div>
 
-              {/* Creator Dashboard - Solo para creadores */}
-              {isCreator && (
-                <div>
-                  <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
-                    🎯 Creator Dashboard
-                  </h2>
-                  <div className="space-y-2">
-                    <Link
-                      href="/dashboard/creator"
-                      onClick={handleLinkClick}
-                      className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md hover:shadow-lg transition-all duration-200"
-                    >
-                      <CogIcon className="h-5 w-5" />
-                      <div className="flex-1">
-                        <div className="font-medium">Manage Communities</div>
-                        <div className="text-xs text-white/80">Manage your communities and payments</div>
-                      </div>
-                      <ChevronRightIcon className="h-4 w-4 text-white/80" />
-                    </Link>
-                  </div>
-                </div>
-              )}
 
-              {/* Admin Dashboard - Solo para administradores */}
-              {isAdmin && (
-                <div>
-                  <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
-                    🛡️ Admin Dashboard
-                  </h2>
-                  <div className="space-y-2">
-                    <Link
-                      href="/admin"
-                      onClick={handleLinkClick}
-                      className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md hover:shadow-lg transition-all duration-200"
-                    >
-                      <ShieldCheckIcon className="h-5 w-5" />
-                      <div className="flex-1">
-                        <div className="font-medium">Admin Dashboard</div>
-                        <div className="text-xs text-white/80">Manage platform and analytics</div>
-                      </div>
-                      <ChevronRightIcon className="h-4 w-4 text-white/80" />
-                    </Link>
-                  </div>
-                </div>
-              )}
-
-              {/* Mis Suscripciones */}
-              <div>
-                <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
-                  💳 My Subscriptions
-                </h2>
-                <div className="space-y-2">
-                  <Link
-                    href="/subscriptions"
-                    onClick={handleLinkClick}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    <CreditCardIcon className="h-5 w-5 text-primary-600 dark:text-primary-400" />
-                    <div className="flex-1">
-                      <div className="font-medium">Manage Subscriptions</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">View and manage your plans</div>
-                    </div>
-                    <ChevronRightIcon className="h-4 w-4 text-gray-400" />
-                  </Link>
-                </div>
-              </div>
 
               {/* Mis Comunidades */}
               <div>
