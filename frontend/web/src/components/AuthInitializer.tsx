@@ -23,7 +23,7 @@ export default function AuthInitializer() {
     // Solo navegar si ya está inicializado y no está cargando
     if (isInitialized && !isLoading && !hasNavigated) {
       const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register');
-      const isPublicPage = pathname === '/' || pathname.startsWith('/communities');
+      const isPublicPage = pathname === '/' || pathname.startsWith('/communities') || pathname.startsWith('/explore');
 
       if (user) {
         // Usuario autenticado
