@@ -456,7 +456,7 @@ export default function Home() {
             <div>
               <h4 className="font-semibold mb-4">Platform</h4>
               <ul className="space-y-2">
-                <li><Link href="/communities" className="text-gray-400 hover:text-white transition-colors">Communities</Link></li>
+                <li><Link href="/explore" className="text-gray-400 hover:text-white transition-colors">Explore Communities</Link></li>
                 <li><Link href="#vision" className="text-gray-400 hover:text-white transition-colors">How it works</Link></li>
                 <li><Link href="/register" className="text-gray-400 hover:text-white transition-colors">Early Access</Link></li>
                 <li><Link href="#" className="text-gray-400 hover:text-white transition-colors">Vision</Link></li>

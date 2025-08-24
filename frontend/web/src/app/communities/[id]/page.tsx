@@ -2,26 +2,36 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { communities, users, subscriptions } from '@/services/api';
 import Image from 'next/image';
-import Link from 'next/link';
 import { 
   UserGroupIcon, 
   ShareIcon, 
-  StarIcon,
-  LockClosedIcon,
+  FlagIcon, 
+  PencilIcon, 
+  ChatBubbleLeftRightIcon,
+  HeartIcon,
   EyeIcon,
   CalendarIcon,
+  StarIcon,
   SparklesIcon,
-  ArrowRightIcon,
-  HeartIcon,
-  ChatBubbleLeftRightIcon,
+  LockClosedIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  EllipsisVerticalIcon,
   XMarkIcon,
-  ExclamationTriangleIcon
+  ChatBubbleLeftIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import CommunityFeed from '@/components/community/CommunityFeed';
+import { CreatePostForm } from '@/components/community/CreatePostForm';
 import { toast } from 'react-hot-toast';
-
+import Link from 'next/link';
+import SubscriptionModal from '@/components/SubscriptionModal';
+import CancelSubscriptionModal from '@/components/CancelSubscriptionModal';
+import { useImageUrl } from '@/utils/useImageUrl';
 import { useAuthStore } from '@/stores/authStore';
+import CommunityChatModal from '@/components/chat/CommunityChatModal';
 
 interface Community {
   _id: string;
@@ -43,50 +53,62 @@ interface Community {
   isPrivate?: boolean;
 }
 
-export default function PublicCommunityPage() {
+export default function UnifiedCommunityPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { user: authUser } = useAuthStore();
+  
+  // Estado principal
   const [community, setCommunity] = useState<Community | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<{ _id: string; name: string; profilePicture?: string } | null>(null);
+  const [refreshFeed, setRefreshFeed] = useState(0);
+  const [activeTab, setActiveTab] = useState<'posts' | 'about' | 'members'>('posts');
+  const [isCreator, setIsCreator] = useState(false);
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [isCancelSubscriptionModalOpen, setIsCancelSubscriptionModalOpen] = useState(false);
+  const [subscribers, setSubscribers] = useState<any[]>([]);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [communityChat, setCommunityChat] = useState<any | null>(null);
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [viewCount, setViewCount] = useState(0);
+  const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
   const [isChatTeaseModalOpen, setIsChatTeaseModalOpen] = useState(false);
-  const { user } = useAuthStore();
-
-  // Función para obtener URLs de imágenes públicas sin autenticación
-  const getPublicImageUrl = (imageKey?: string): string => {
-    if (!imageKey) return '/images/defaults/default-avatar.png';
-    
-    // Si ya es una URL completa, usarla
-    if (imageKey.startsWith('http://') || imageKey.startsWith('https://')) {
-      return imageKey;
-    }
-    
-    // Si empieza con 'public/', usar URL directa de S3
-    if (imageKey.startsWith('public/')) {
-      return `https://hoodfy-community-media.s3.us-east-1.amazonaws.com/${imageKey}`;
-    }
-    
-    // Para otras imágenes, usar URL directa del backend (sin autenticación)
-    const apiUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://api.hoodfy.com' 
-      : 'http://localhost:5000';
-    return `${apiUrl}/uploads/${imageKey}`;
-  };
   
-  // URLs para imágenes públicas
-  const communityCoverImageUrl = getPublicImageUrl(community?.coverImage);
-  const creatorProfileImageUrl = getPublicImageUrl(community?.creator?.profilePicture);
+  // Hooks para imágenes
+  const coverImageKey = community?.coverImage || '';
+  const { url: communityCoverImageUrl } = useImageUrl(coverImageKey);
+  const creatorProfilePictureKey = community?.creator?.profilePicture || '';
+  const { url: creatorProfileImageUrl } = useImageUrl(creatorProfilePictureKey);
 
+  // Inicialización
   useEffect(() => {
-    loadCommunity();
-  }, [id]);
+    const initializeData = async () => {
+      try {
+        if (authUser) {
+          // Usuario autenticado - cargar datos completos
+          await loadUser();
+          await loadCommunity();
+          await loadSubscribers();
+          await checkSubscription();
+        } else {
+          // Usuario no autenticado - cargar solo datos públicos
+          await loadPublicCommunity();
+        }
+      } catch (error) {
+        console.error('Error al inicializar datos:', error);
+      }
+    };
 
-  const loadCommunity = async () => {
+    initializeData();
+  }, [id, authUser]);
+
+  // Cargar comunidad pública (sin autenticación)
+  const loadPublicCommunity = async () => {
     try {
       setLoading(true);
-      // Usar la API pública (sin autenticación)
       const apiUrl = process.env.NODE_ENV === 'production' 
         ? 'https://api.hoodfy.com' 
         : 'http://localhost:5000';
@@ -98,33 +120,101 @@ export default function PublicCommunityPage() {
       
       const data = await response.json();
       setCommunity(data);
-      
-      // Simular conteo de vistas
       setViewCount(Math.floor(Math.random() * 1000) + 100);
     } catch (error: any) {
-      console.error('Error al cargar la comunidad:', error);
+      console.error('Error al cargar la comunidad pública:', error);
       setError(error.message || 'Error al cargar la comunidad');
     } finally {
       setLoading(false);
     }
   };
 
+  // Cargar comunidad completa (con autenticación)
+  const loadCommunity = async () => {
+    try {
+      setLoading(true);
+      const response = await communities.getById(id as string);
+      setCommunity(response.data);
+      setViewCount(Math.floor(Math.random() * 1000) + 100);
+      
+      if (user) {
+        const isUserCreator = user._id === response.data.creator?._id;
+        setIsCreator(isUserCreator);
+      }
+    } catch (error: any) {
+      console.error('Error al cargar la comunidad:', error);
+      setError(error.response?.data?.error || 'Error al cargar la comunidad');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Cargar usuario autenticado
+  const loadUser = async () => {
+    try {
+      const res = await users.getProfile();
+      const userData = res.data.user || res.data;
+      setUser(userData);
+      return userData;
+    } catch (err) {
+      console.error('Error al cargar usuario:', err);
+      setUser(null);
+      throw err;
+    }
+  };
+
+  // Cargar suscriptores
+  const loadSubscribers = async () => {
+    try {
+      const response = await communities.getSubscribers(id as string);
+      setSubscribers(response.data);
+    } catch (error) {
+      console.error('Error al cargar suscriptores:', error);
+    }
+  };
+
+  // Verificar suscripción
+  const checkSubscription = async () => {
+    try {
+      const response = await communities.getSubscribedCommunities();
+      const isSubscribedToCommunity = response.data.some((sub: any) => {
+        return sub.community && sub.community._id === id;
+      });
+      setIsSubscribed(isSubscribedToCommunity);
+      return isSubscribedToCommunity;
+    } catch (error) {
+      console.error('Error al verificar suscripción:', error);
+      return false;
+    }
+  };
+
+  // Handlers
   const handleShare = async () => {
     try {
-      // Usar la URL pública específica
-      const shareUrl = `${window.location.origin}/communities/${id}`;
-      
+      const publicUrl = `${window.location.origin}/communities/${id}`;
       await navigator.share({
         title: community?.name,
         text: community?.description,
-        url: shareUrl
+        url: publicUrl
       });
     } catch (error) {
       console.error('Error al compartir:', error);
-      const shareUrl = `${window.location.origin}/communities/${id}`;
-      navigator.clipboard.writeText(shareUrl);
+      const publicUrl = `${window.location.origin}/communities/${id}`;
+      navigator.clipboard.writeText(publicUrl);
       toast.success('Enlace copiado al portapapeles');
     }
+  };
+
+  const handleSubscribe = () => {
+    if (!authUser) {
+      router.push('/register');
+      return;
+    }
+    setIsSubscriptionModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsSubscriptionModalOpen(false);
   };
 
   const handleLike = () => {
@@ -132,20 +222,23 @@ export default function PublicCommunityPage() {
     toast.success(isLiked ? 'Quitado de favoritos' : 'Agregado a favoritos');
   };
 
-  const handleJoinNow = () => {
-    if (user) {
-      // Usuario registrado - ir a la página privada
-      router.push(`/dashboard/communities/${id}`);
-    } else {
-      // Usuario no registrado - ir a registro
+  const handleChatClick = () => {
+    if (!authUser) {
       router.push('/register');
+      return;
+    }
+    
+    if (hasAccess) {
+      setIsChatModalOpen(true);
+    } else {
+      setIsChatTeaseModalOpen(true);
     }
   };
 
-  const handleChatClick = () => {
-    setIsChatTeaseModalOpen(true);
-  };
+  // Variables computadas
+  const hasAccess = authUser && (isCreator || isSubscribed);
 
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -167,6 +260,7 @@ export default function PublicCommunityPage() {
     );
   }
 
+  // Error state
   if (error || !community) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -175,10 +269,10 @@ export default function PublicCommunityPage() {
             <ExclamationTriangleIcon className="w-10 h-10 text-red-600 dark:text-red-400" />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-            Comunidad privada
+            Comunidad no encontrada
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Esta comunidad es privada o no existe
+            {error || 'Esta comunidad no existe o ha sido eliminada'}
           </p>
           <Link
             href="/communities"
@@ -234,6 +328,15 @@ export default function PublicCommunityPage() {
           >
             <ShareIcon className="h-5 w-5" />
           </button>
+          {authUser && community.creator?._id === authUser._id && (
+            <Link
+              href={`/dashboard/communities/${community._id}/edit`}
+              className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200 hover-lift"
+              title="Editar comunidad"
+            >
+              <PencilIcon className="h-5 w-5" />
+            </Link>
+          )}
         </div>
 
         {/* Community Info Overlay */}
@@ -243,6 +346,18 @@ export default function PublicCommunityPage() {
               <div className="flex-1 w-full sm:w-auto">
                 {/* Status Badges */}
                 <div className="flex flex-wrap items-center gap-2 mb-3">
+                  {isCreator && (
+                    <span className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center shadow-lg">
+                      <StarIcon className="w-3 h-3 mr-1.5" />
+                      Creator
+                    </span>
+                  )}
+                  {isSubscribed && (
+                    <span className="bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center shadow-lg">
+                      <CheckCircleIcon className="w-3 h-3 mr-1.5" />
+                      Subscribed
+                    </span>
+                  )}
                   {community.isPrivate && (
                     <span className="bg-purple-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center shadow-lg">
                       <LockClosedIcon className="w-3 h-3 mr-1.5" />
@@ -253,13 +368,6 @@ export default function PublicCommunityPage() {
                     <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center shadow-lg animate-pulse">
                       🔥 Trending
                     </span>
-                  )}
-                  
-                  {/* 🆓 Comunidad gratuita */}
-                  {community.isFree && (
-                    <div className="flex items-center space-x-1.5 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 backdrop-blur-sm rounded-full px-3 py-1.5 border border-blue-400/30">
-                      <span className="text-blue-300 font-bold text-sm">FREE</span>
-                    </div>
                   )}
                 </div>
                 
@@ -294,31 +402,25 @@ export default function PublicCommunityPage() {
                 </div>
               </div>
 
-              {/* 🎯 CTA Mejorado con Urgencia */}
+              {/* CTA Button */}
               <div className="w-full sm:w-auto sm:ml-8">
-                <div className="text-center sm:text-right">
-                  {/* 🔥 Mensaje de urgencia (solo si hay suficientes miembros) */}
-                  {(community.members?.length || 0) > 3 && (
-                    <p className="text-white/80 text-xs mb-2 font-medium">
-                      🔥 {Math.floor(Math.random() * 5) + 2} se unieron esta semana
+                {!isCreator && !isSubscribed && (
+                  <div className="text-center sm:text-right">
+                    <button
+                      onClick={handleSubscribe}
+                      className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-bold rounded-xl shadow-2xl hover:shadow-3xl transition-all duration-200 hover-lift text-base sm:text-lg group"
+                    >
+                      <span className="flex items-center justify-center">
+                        {authUser ? 'Unirse ahora' : 'Registrarse y unirse'}
+                        <SparklesIcon className="w-4 h-4 ml-2 group-hover:animate-spin" />
+                      </span>
+                    </button>
+                    
+                    <p className="text-white/70 text-xs mt-2 font-medium">
+                      ✨ Acceso instantáneo al contenido exclusivo
                     </p>
-                  )}
-                  
-                  <button
-                    onClick={handleJoinNow}
-                    className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-bold rounded-xl shadow-2xl hover:shadow-3xl transition-all duration-200 hover-lift text-base sm:text-lg group"
-                  >
-                    <span className="flex items-center justify-center">
-                      {user ? 'Acceder ahora' : 'Únete ahora'}
-                      <SparklesIcon className="w-4 h-4 ml-2 group-hover:animate-spin" />
-                    </span>
-                  </button>
-                  
-                  {/* 💝 Valor agregado */}
-                  <p className="text-white/70 text-xs mt-2 font-medium">
-                    ✨ Acceso instantáneo al contenido exclusivo
-                  </p>
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -330,7 +432,7 @@ export default function PublicCommunityPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
-            {/* 🎯 Creator Spotlight */}
+            {/* Creator Spotlight */}
             {community.creator && (
               <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 text-white shadow-xl">
                 <div className="text-center">
@@ -361,66 +463,58 @@ export default function PublicCommunityPage() {
               </div>
             )}
 
-            {/* 🎯 Chat Grupal Card - FOMO Strategy */}
+            {/* Chat Card */}
             <div 
-              className="rounded-2xl p-6 text-white cursor-pointer hover:shadow-2xl transition-all duration-300 hover-lift group relative bg-gradient-to-br from-gray-500 to-gray-600"
+              className={`rounded-2xl p-6 text-white cursor-pointer hover:shadow-2xl transition-all duration-300 hover-lift group relative ${
+                hasAccess 
+                  ? 'bg-gradient-to-br from-blue-500 to-purple-600' 
+                  : 'bg-gradient-to-br from-gray-500 to-gray-600'
+              }`}
               onClick={handleChatClick}
             >
-              {/* 🔒 Lock Overlay para usuarios no suscritos */}
-              <div className="absolute inset-0 bg-black/20 rounded-2xl flex items-center justify-center backdrop-blur-[1px]">
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                  <LockClosedIcon className="w-6 h-6 text-white" />
+              {!hasAccess && (
+                <div className="absolute inset-0 bg-black/20 rounded-2xl flex items-center justify-center backdrop-blur-[1px]">
+                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                    <LockClosedIcon className="w-6 h-6 text-white" />
+                  </div>
                 </div>
-              </div>
+              )}
               
               <div className="text-center">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 transition-colors group-hover:scale-110 duration-300 bg-white/10 group-hover:bg-white/20">
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 transition-colors group-hover:scale-110 duration-300 ${
+                  hasAccess 
+                    ? 'bg-white/20 group-hover:bg-white/30' 
+                    : 'bg-white/10 group-hover:bg-white/20'
+                }`}>
                   <ChatBubbleLeftRightIcon className="w-8 h-8" />
                 </div>
                 
-                <h3 className="text-lg font-bold mb-2">Chat en vivo</h3>
-                <p className="text-white/80 text-sm mb-3">
-                  Conecta con {community.members?.length || 0} miembros
+                <h3 className="text-xl font-bold mb-2">
+                  {hasAccess ? 'Group Chat' : 'Live Community Chat'}
+                </h3>
+                
+                <p className="text-white/80 text-sm mb-4">
+                  {hasAccess 
+                    ? `Connect with ${community.members?.length || 0} members`
+                    : `${community.members?.length || 0} members are chatting live!`
+                  }
                 </p>
                 
-                <div className="text-xs text-white/60">
-                  🔒 Únete para acceder
+                <div className={`backdrop-blur-sm rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                  hasAccess 
+                    ? 'bg-white/20 group-hover:bg-white/30' 
+                    : 'bg-white/10 group-hover:bg-white/20 border border-white/30'
+                }`}>
+                  {hasAccess ? 'Open chat 💬' : '🔓 Join conversation'}
                 </div>
               </div>
-            </div>
-
-            {/* Pricing Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Únete a la comunidad
-              </h3>
-              
-              <div className="text-center mb-6">
-                <div className="text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">
-                  {community.isFree ? 'Gratis' : `$${community.price}`}
-                </div>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {community.isFree ? 'Acceso completo' : 'por mes'}
-                </p>
-              </div>
-
-              <button
-                onClick={handleJoinNow}
-                className="w-full px-6 py-3 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover-lift"
-              >
-                {user ? 'Acceder ahora' : 'Registrarse y unirse'}
-              </button>
-
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-3">
-                Acceso inmediato a todo el contenido
-              </p>
             </div>
 
             {/* Community Stats */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
               <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
                 <SparklesIcon className="w-5 h-5 mr-2 text-primary-600 dark:text-primary-400" />
-                Estadísticas
+                Community Stats
               </h3>
               
               <div className="space-y-4">
@@ -444,44 +538,264 @@ export default function PublicCommunityPage() {
                 </div>
               </div>
             </div>
+
+            {/* Navigation Tabs */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-2">
+              <nav className="space-y-1">
+                <button
+                  onClick={() => setActiveTab('posts')}
+                  className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center space-x-3 ${
+                    activeTab === 'posts'
+                      ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-lg'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                >
+                  <ChatBubbleLeftIcon className="w-5 h-5" />
+                  <span>Posts</span>
+                  <span className={`ml-auto text-xs px-2 py-1 rounded-full ${
+                    activeTab === 'posts' ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-600'
+                  }`}>
+                    {community.posts?.length || 0}
+                  </span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('about')}
+                  className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center space-x-3 ${
+                    activeTab === 'about'
+                      ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-lg'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                >
+                  <SparklesIcon className="w-5 h-5" />
+                  <span>About</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('members')}
+                  className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center space-x-3 ${
+                    activeTab === 'members'
+                      ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white shadow-lg'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                >
+                  <UserGroupIcon className="w-5 h-5" />
+                  <span>Members</span>
+                  <span className={`ml-auto text-xs px-2 py-1 rounded-full ${
+                    activeTab === 'members' ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-600'
+                  }`}>
+                    {community.members?.length || 0}
+                  </span>
+                </button>
+              </nav>
+            </div>
           </div>
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {/* Preview Content */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
-                <SparklesIcon className="w-6 h-6 mr-3 text-primary-600 dark:text-primary-400" />
-                Vista previa del contenido
-              </h2>
-              
-              <div className="text-center py-12">
-                <div className="w-24 h-24 bg-gradient-to-br from-primary-100 to-accent-100 dark:from-primary-900/20 dark:to-accent-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <LockClosedIcon className="w-12 h-12 text-primary-600 dark:text-primary-400" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-                  Contenido exclusivo
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                  Únete a esta comunidad para acceder a posts exclusivos, conectar con otros miembros y participar en conversaciones privadas.
-                </p>
-                <button
-                  onClick={handleJoinNow}
-                  className="px-8 py-3 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover-lift"
-                >
-                  {user ? 'Acceder al contenido' : 'Registrarse y unirse'}
-                </button>
+            {activeTab === 'posts' && (
+              <div className="space-y-6">
+                {/* Create Post Form - Solo para usuarios autenticados con acceso */}
+                {authUser && hasAccess && (
+                  <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                    <CreatePostForm
+                      communityId={id as string}
+                      onPostCreated={() => {
+                        setRefreshFeed(prev => prev + 1);
+                      }}
+                    />
+                  </div>
+                )}
+                
+                {/* Posts Feed o Vista Pública */}
+                {hasAccess ? (
+                  <CommunityFeed 
+                    communityId={id as string} 
+                    isCreator={isCreator}
+                    key={refreshFeed}
+                  />
+                ) : (
+                  <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-12">
+                    <div className="text-center max-w-md mx-auto">
+                      <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <LockClosedIcon className="w-10 h-10 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+                        Contenido exclusivo
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+                        Únete a esta comunidad para acceder a posts exclusivos y conectar con otros miembros
+                      </p>
+                      <button
+                        onClick={handleSubscribe}
+                        className="px-8 py-4 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover-lift"
+                      >
+                        {authUser ? 'Unirse ahora' : 'Registrarse y unirse'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
+
+            {activeTab === 'about' && (
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
+                  <SparklesIcon className="w-8 h-8 mr-3 text-primary-600 dark:text-primary-400" />
+                  About {community.name}
+                </h2>
+                
+                <div className="prose prose-lg dark:prose-invert max-w-none">
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-8">
+                    {community.description}
+                  </p>
+                </div>
+
+                {/* Community Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 p-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-xl">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-2">
+                      {community.members?.length || 0}
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 font-medium">Miembros activos</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
+                      {community.posts?.length || 0}
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 font-medium">Posts publicados</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                      {viewCount}
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 font-medium">Vistas totales</p>
+                  </div>
+                </div>
+
+                {/* Creator Info */}
+                {community.creator && (
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+                      Created by
+                    </h3>
+                    <Link
+                      href={`/profile/${community.creator._id}`}
+                      className="flex items-center space-x-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group"
+                    >
+                      <div className="relative">
+                        <Image
+                          src={creatorProfileImageUrl}
+                          alt={community.creator.name}
+                          width={64}
+                          height={64}
+                          className="rounded-xl object-cover ring-2 ring-primary-200 dark:ring-primary-700 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all"
+                          unoptimized
+                        />
+                        <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full flex items-center justify-center">
+                          <StarIcon className="w-3 h-3 text-white" />
+                        </div>
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                          {community.creator.name}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-400">
+                          Community founder
+                        </p>
+                        {community.createdAt && (
+                          <p className="text-sm text-gray-500 dark:text-gray-500">
+                            Member since {new Date(community.createdAt).toLocaleDateString('es-ES')}</p>
+                        )}
+                      </div>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'members' && (
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center">
+                    <UserGroupIcon className="w-7 h-7 mr-3 text-primary-600 dark:text-primary-400" />
+                    Members ({community.members?.length || 0})
+                  </h2>
+                </div>
+                
+                {community.members && community.members.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {community.members.map((member) => (
+                      <Link 
+                        key={member._id} 
+                        href={`/profile/${member._id}`} 
+                        className="flex items-center space-x-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover-lift group border border-gray-200 dark:border-gray-600"
+                      >
+                        <div className="relative">
+                          <Image
+                            src={member.profilePicture || '/images/defaults/default-avatar.png'}
+                            alt={member.name}
+                            width={48}
+                            height={48}
+                            className="rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all"
+                            unoptimized
+                          />
+                          {member._id === community.creator?._id && (
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full flex items-center justify-center">
+                              <StarIcon className="w-2.5 h-2.5 text-white" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
+                            {member.name}
+                          </p>
+                          {member._id === community.creator?._id && (
+                            <span className="inline-block px-2 py-1 bg-gradient-to-r from-yellow-100 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 text-yellow-700 dark:text-yellow-400 text-xs font-medium rounded-full mt-1">
+                              Creator
+                            </span>
+                          )}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <UserGroupIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                    </div>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      No members yet in this community
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* 🎯 Chat Tease Modal - FOMO Strategy */}
+      {/* Modals */}
+      <SubscriptionModal
+        isOpen={isSubscriptionModalOpen}
+        onClose={handleCloseModal}
+        communityName={community.name}
+        price={community.price || 0}
+        benefits={['Access to exclusive content', 'Participation in the group chat', 'Connection with other members']}
+        rules={['Respect the members', 'No spam', 'Keep constructive conversations']}
+        communityId={community._id}
+        onSubscriptionSuccess={checkSubscription}
+      />
+
+      <CommunityChatModal
+        isOpen={isChatModalOpen}
+        onClose={() => setIsChatModalOpen(false)}
+        communityId={id as string}
+        communityName={community.name}
+      />
+
+      {/* Chat Tease Modal */}
       {isChatTeaseModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-md w-full mx-auto overflow-hidden border border-gray-200 dark:border-gray-700">
-            {/* Header con gradiente */}
             <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-8 text-white text-center relative">
               <button
                 onClick={() => setIsChatTeaseModalOpen(false)}
@@ -500,7 +814,6 @@ export default function PublicCommunityPage() {
               </p>
             </div>
             
-            {/* Body */}
             <div className="p-8">
               <div className="space-y-4 mb-6">
                 <div className="flex items-center space-x-3">
@@ -518,30 +831,18 @@ export default function PublicCommunityPage() {
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-100 rounded-full flex items-center justify-center">
                     <span className="text-blue-600 dark:text-blue-400 text-sm">⚡</span>
                   </div>
                   <p className="text-gray-700 dark:text-gray-300">Get instant access to exclusive content</p>
                 </div>
               </div>
               
-              {/* FOMO Element */}
-              <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
-                <div className="flex items-center space-x-2 mb-2">
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                  <span className="text-red-600 dark:text-red-400 font-semibold text-sm">LIVE NOW</span>
-                </div>
-                <p className="text-red-700 dark:text-red-300 text-sm">
-                  🔥 Don't miss out! {Math.floor(Math.random() * 3) + 2} people joined the conversation in the last hour
-                </p>
-              </div>
-              
-              {/* CTA Buttons */}
               <div className="space-y-3">
                 <button
                   onClick={() => {
                     setIsChatTeaseModalOpen(false);
-                    handleJoinNow();
+                    handleSubscribe();
                   }}
                   className="w-full px-6 py-4 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover-lift group"
                 >
@@ -558,15 +859,10 @@ export default function PublicCommunityPage() {
                   Maybe later
                 </button>
               </div>
-              
-              {/* Value proposition */}
-              <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-4">
-                ✨ Join now and start chatting instantly
-              </p>
             </div>
           </div>
         </div>
       )}
     </div>
   );
-} 
+}

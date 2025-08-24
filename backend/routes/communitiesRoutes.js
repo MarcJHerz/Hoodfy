@@ -515,6 +515,37 @@ router.post('/:id/join-free', verifyToken, async (req, res) => {
   }
 });
 
+// ✅ Endpoint público para obtener todas las comunidades públicas
+router.get('/public', async (req, res) => {
+  try {
+    const communities = await Community.find({ isPrivate: { $ne: true } })
+      .select('name description coverImage price isFree isPrivate creator createdAt category')
+      .populate('creator', 'name profilePicture')
+      .populate('members', 'name profilePicture')
+      .lean();
+
+    // Formatear las comunidades para mostrar solo información pública
+    const publicCommunities = communities.map(community => ({
+      _id: community._id,
+      name: community.name,
+      description: community.description,
+      coverImage: community.coverImage,
+      price: community.price,
+      isFree: community.isFree,
+      isPrivate: community.isPrivate,
+      category: community.category,
+      createdAt: community.createdAt,
+      creator: community.creator,
+      members: community.members || [],
+    }));
+
+    res.json({ communities: publicCommunities });
+  } catch (error) {
+    console.error('Error al obtener comunidades públicas:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 // ✅ Endpoint público para información básica de comunidad
 router.get('/:id/public', async (req, res) => {
   try {
