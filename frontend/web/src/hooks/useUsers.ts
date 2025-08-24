@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuthStore } from '@/stores/authStore';
 
 // Función para detectar automáticamente qué API usar según el dominio
 const getApiUrl = () => {
@@ -71,6 +72,7 @@ interface UseUsersReturn {
 }
 
 export const useUsers = (): UseUsersReturn => {
+  const { token } = useAuthStore();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -81,7 +83,6 @@ export const useUsers = (): UseUsersReturn => {
       setIsLoading(true);
       setError(null);
 
-      const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
       if (!token) {
         throw new Error('No hay token de autenticación');
       }
@@ -120,7 +121,6 @@ export const useUsers = (): UseUsersReturn => {
 
   const fetchUserStats = async () => {
     try {
-      const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
       if (!token) {
         throw new Error('No hay token de autenticación');
       }
@@ -157,7 +157,6 @@ export const useUsers = (): UseUsersReturn => {
 
   const updateUserRole = async (userId: string, newRole: string): Promise<boolean> => {
     try {
-      const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
       if (!token) {
         throw new Error('No hay token de autenticación');
       }
@@ -204,7 +203,6 @@ export const useUsers = (): UseUsersReturn => {
 
   const updateUserStatus = async (userId: string, newStatus: string): Promise<boolean> => {
     try {
-      const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
       if (!token) {
         throw new Error('No hay token de autenticación');
       }
@@ -254,8 +252,10 @@ export const useUsers = (): UseUsersReturn => {
   };
 
   useEffect(() => {
-    refetch();
-  }, []);
+    if (token) {
+      refetch();
+    }
+  }, [token]);
 
   return {
     users,

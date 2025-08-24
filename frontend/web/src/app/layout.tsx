@@ -39,8 +39,7 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
-        <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-        <script>eruda.init();</script>
+        {/* Eruda removed for production */}
       </head>
       <body className={inter.className}>
         <Providers>
