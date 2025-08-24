@@ -189,10 +189,10 @@ export default function Home() {
                 </span>
               </Link>
               <Link
-                href="#vision"
+                href="/login"
                 className="border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-2xl px-8 py-4 text-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300"
               >
-                See the Vision
+                Sign In
               </Link>
             </div>
 

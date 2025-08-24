@@ -457,11 +457,11 @@ const Navbar = React.memo(() => {
                       </button>
                     </div>
 
-                    {/* Creator Dashboard - Solo para creadores */}
+                    {/* Creator Dashboard - Solo mostrar si es creador */}
                     {isCreator && (
                       <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                         <button
-                          onClick={() => handleGoTo('/dashboard/creator')}
+                          onClick={() => handleGoTo('/creator-dashboard')}
                           className="w-full px-4 py-2 text-left text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors duration-150 flex items-center gap-3"
                         >
                           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -472,7 +472,7 @@ const Navbar = React.memo(() => {
                       </div>
                     )}
 
-                    {/* Admin Dashboard - Solo para administradores */}
+                      {/* Admin Dashboard - Solo para administradores */}
                     {isAdmin && (
                       <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                         <button
@@ -487,7 +487,7 @@ const Navbar = React.memo(() => {
                       </div>
                     )}
 
-                    {/* Mis Suscripciones */}
+                    {/* My Subscriptions */}
                     <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                       <button
                         onClick={() => handleGoTo('/subscriptions')}
@@ -496,7 +496,7 @@ const Navbar = React.memo(() => {
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                         </svg>
-                        Mis Suscripciones
+                        My Subscriptions
                       </button>
                     </div>
                       

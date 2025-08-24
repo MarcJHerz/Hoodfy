@@ -25,12 +25,12 @@ const NotificationSchema = new mongoose.Schema({
   title: { 
     type: String, 
     required: true,
-    maxlength: [100, 'El título no puede exceder los 100 caracteres.']
+    maxlength: [100, 'The title cannot exceed 100 characters.']
   },
   message: { 
     type: String, 
     required: true,
-    maxlength: [500, 'El mensaje no puede exceder los 500 caracteres.']
+    maxlength: [500, 'The message cannot exceed 500 characters.']
   },
   read: { 
     type: Boolean, 
@@ -109,56 +109,56 @@ NotificationSchema.statics.createNotification = async function(notificationData)
   switch(type) {
     case 'subscription_success':
       const community = await mongoose.model('Community').findById(communityId);
-      title = '🎉 Suscripción exitosa';
-      message = `Te has suscrito exitosamente a ${community?.name || 'la comunidad'}`;
+      title = '🎉 Subscription successful';
+      message = `You have successfully subscribed to ${community?.name || 'the community'}`;
       actionUrl = `/communities/${communityId}`;
       break;
       
     case 'new_post':
       const postCommunity = await mongoose.model('Community').findById(communityId);
-      title = '📝 Nuevo post';
-      message = `Se ha publicado un nuevo post en ${postCommunity?.name || 'tu comunidad'}`;
+      title = '📝 New post';
+      message = `A new post has been published in ${postCommunity?.name || 'your community'}`;
       actionUrl = `/posts/${postId}`;
       break;
       
     case 'new_comment':
-      title = '💬 Nuevo comentario';
-      message = 'Tienes un nuevo comentario en tu post';
+      title = '💬 New comment';
+      message = 'You have a new comment on your post';
       actionUrl = `/posts/${postId}#comment-${commentId}`;
       break;
       
     case 'subscription_expiring':
       const expCommunity = await mongoose.model('Community').findById(communityId);
       const days = customData?.daysUntilExpiration || 3;
-      title = '⚠️ Suscripción por expirar';
-      message = `Tu suscripción a ${expCommunity?.name || 'la comunidad'} expira en ${days} día${days > 1 ? 's' : ''}`;
+      title = '⚠️ Subscription expiring';
+      message = `Your subscription to ${expCommunity?.name || 'the community'} expires in ${days} day${days > 1 ? 's' : ''}`;
       actionUrl = `/communities/${communityId}`;
       break;
       
     case 'payment_failed':
       const failCommunity = await mongoose.model('Community').findById(communityId);
-      title = '💳 Pago fallido';
-      message = `No se pudo procesar el pago para ${failCommunity?.name || 'tu suscripción'}. Actualiza tu método de pago`;
+      title = '💳 Payment failed';
+      message = `The payment could not be processed for ${failCommunity?.name || 'your subscription'}. Update your payment method`;
       actionUrl = '/dashboard/subscriptions';
       break;
       
     case 'payment_success':
       const succCommunity = await mongoose.model('Community').findById(communityId);
-      title = '✅ Pago exitoso';
-      message = `Pago exitoso. Tu suscripción a ${succCommunity?.name || 'la comunidad'} está activa`;
+      title = '✅ Payment successful';
+      message = `Payment successful. Your subscription to ${succCommunity?.name || 'the community'} is active`;
       actionUrl = `/communities/${communityId}`;
       break;
       
     case 'subscription_canceled':
       const canCommunity = await mongoose.model('Community').findById(communityId);
-      title = '❌ Suscripción cancelada';
-      message = `Tu suscripción a ${canCommunity?.name || 'la comunidad'} ha sido cancelada`;
+      title = '❌ Subscription canceled';
+      message = `Your subscription to ${canCommunity?.name || 'the community'} has been canceled`;
       actionUrl = '/dashboard';
       break;
       
     default:
-      title = customData?.title || 'Notificación';
-      message = customData?.message || 'Tienes una nueva notificación';
+              title = customData?.title || 'Notification';
+              message = customData?.message || 'You have a new notification';
       actionUrl = customData?.actionUrl || '/dashboard';
   }
   

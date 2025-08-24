@@ -63,10 +63,10 @@ export const NotificationPrompt = () => {
           
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-              ¿Quieres recibir notificaciones?
+              Want to receive notifications?
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-              Te avisaremos cuando recibas nuevos mensajes y actualizaciones importantes.
+              We'll notify you when you receive new messages and important updates.
             </p>
             
             <div className="flex gap-2">
@@ -75,7 +75,7 @@ export const NotificationPrompt = () => {
                 disabled={isRequesting}
                 className="flex-1 bg-blue-600 text-white text-sm font-medium px-3 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-manipulation"
               >
-                {isRequesting ? 'Solicitando...' : 'Permitir'}
+                {isRequesting ? 'Requesting...' : 'Allow'}
               </button>
               
               <button

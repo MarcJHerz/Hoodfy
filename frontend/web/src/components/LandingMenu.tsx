@@ -30,9 +30,6 @@ export default function LandingMenu() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex gap-6 items-center">
-            <Link href="/how-it-works" className="text-gray-900 dark:text-white font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-150">
-              How it works
-            </Link>
             <Link href="/contact" className="text-gray-900 dark:text-white font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-150">
               Contact
             </Link>
@@ -98,13 +95,6 @@ export default function LandingMenu() {
               {/* Menu Items */}
               <div className="flex-1 p-6">
                 <div className="space-y-6">
-                  <Link 
-                    href="/how-it-works" 
-                    onClick={closeMenu}
-                    className="block text-lg font-medium text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-150 py-2"
-                  >
-                    How it works
-                  </Link>
                   <Link 
                     href="/contact" 
                     onClick={closeMenu}

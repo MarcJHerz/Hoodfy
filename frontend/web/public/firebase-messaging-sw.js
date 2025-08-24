@@ -40,11 +40,11 @@ const messaging = firebase.messaging();
 
 // Manejar mensajes en segundo plano
 messaging.onBackgroundMessage((payload) => {
-  console.log('📨 Mensaje recibido en segundo plano:', payload);
+  console.log('📨 Message received in background:', payload);
 
-  const notificationTitle = payload.notification?.title || 'Nueva notificación';
+  const notificationTitle = payload.notification?.title || 'New notification';
   const notificationOptions = {
-    body: payload.notification?.body || 'Tienes un nuevo mensaje',
+    body: payload.notification?.body || 'You have a new message',
     icon: '/default-avatar.png', // Usar ícono existente
     badge: '/default-avatar.png', // Usar ícono existente  
     tag: payload.data?.chatId || 'default', // Evitar notificaciones duplicadas

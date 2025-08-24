@@ -22,7 +22,7 @@ export const useChatNotifications = ({
       try {
         // Verificar si el navegador soporta notificaciones
         if (!('Notification' in window)) {
-          console.log('Este navegador no soporta notificaciones');
+          console.log('This browser does not support notifications');
           return;
         }
 
@@ -30,7 +30,7 @@ export const useChatNotifications = ({
         if (Notification.permission === 'default') {
           const permission = await Notification.requestPermission();
           if (permission !== 'granted') {
-            console.log('Permisos de notificación denegados');
+            console.log('Notification permissions denied');
             return;
           }
         }
@@ -45,22 +45,22 @@ export const useChatNotifications = ({
         });
 
         if (token) {
-          console.log('Token de notificación obtenido:', token);
+          console.log('Notification token obtained:', token);
           // Aquí podrías enviar el token al backend para guardarlo
           // await api.post('/api/users/notification-token', { token });
         }
 
         // Escuchar mensajes en primer plano
         const unsubscribe = onMessage(messaging, (payload) => {
-          console.log('Mensaje recibido en primer plano:', payload);
+          console.log('Message received in foreground:', payload);
           
           const { notification, data } = payload;
           
           if (notification) {
             // Mostrar notificación toast
             const message = notification.body 
-              ? `${notification.title || 'Nuevo mensaje'}: ${notification.body}`
-              : notification.title || 'Nuevo mensaje';
+              ? `${notification.title || 'New message'}: ${notification.body}`
+              : notification.title || 'New message';
             
             toast.success(message, {
               duration: 5000,
@@ -75,7 +75,7 @@ export const useChatNotifications = ({
 
         return unsubscribe;
       } catch (error) {
-        console.error('Error al inicializar notificaciones:', error);
+        console.error('Error initializing notifications:', error);
       }
     };
 
@@ -90,17 +90,17 @@ export const useChatNotifications = ({
 
   const requestPermission = async () => {
     if (!('Notification' in window)) {
-      toast.error('Tu navegador no soporta notificaciones');
+      toast.error('Your browser does not support notifications');
       return false;
     }
 
     const permission = await Notification.requestPermission();
     
     if (permission === 'granted') {
-      toast.success('Notificaciones habilitadas');
+      toast.success('Notifications enabled');
       return true;
     } else {
-      toast.error('Permisos de notificación denegados');
+      toast.error('Notification permissions denied');
       return false;
     }
   };
