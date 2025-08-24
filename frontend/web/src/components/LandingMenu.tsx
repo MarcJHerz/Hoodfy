@@ -41,8 +41,11 @@ export default function LandingMenu() {
             </Link>
           </div>
 
-          {/* Mobile Auth Buttons + Hamburger */}
+          {/* Mobile Menu */}
           <div className="md:hidden flex items-center gap-3">
+            <Link href="/explore" className="text-gray-900 dark:text-white font-medium text-sm hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-150">
+              Explore
+            </Link>
             <Link href="/login" className="text-gray-900 dark:text-white font-medium text-sm">
               Sign in
             </Link>
@@ -97,8 +100,30 @@ export default function LandingMenu() {
                     onClick={closeMenu}
                     className="block text-lg font-medium text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-150 py-2"
                   >
-                    Explore
+                    Explore Communities
                   </Link>
+                  <Link 
+                    href="/login" 
+                    onClick={closeMenu}
+                    className="block text-lg font-medium text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-150 py-2"
+                  >
+                    Sign In
+                  </Link>
+                  <Link 
+                    href="/register" 
+                    onClick={closeMenu}
+                    className="block text-lg font-medium text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-150 py-2"
+                  >
+                    Sign Up
+                  </Link>
+                  <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
+                      About Hoodfy
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                      The private social network for communities. Where creators connect people, not collect followers.
+                    </p>
+                  </div>
                 </div>
               </div>
 
