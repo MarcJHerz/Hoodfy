@@ -4,21 +4,14 @@ import Link from 'next/link';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  CheckIcon, 
-  StarIcon, 
   UserGroupIcon, 
   ChatBubbleLeftRightIcon, 
-  CalendarIcon, 
-  TrophyIcon, 
-  ChartBarIcon, 
   HeartIcon,
   ArrowRightIcon,
   SparklesIcon,
   UsersIcon,
-  LinkIcon,
   RocketLaunchIcon,
   GlobeAltIcon,
-  ExclamationTriangleIcon,
   HandRaisedIcon
 } from '@heroicons/react/24/outline';
 import LandingMenu from '@/components/LandingMenu';
@@ -129,21 +122,7 @@ export default function Home() {
     }
   ];
 
-  const problemPoints = [
-    "🔴 Following creators but never meeting people",
-    "🔴 Parasocial relationships that feel empty", 
-    "🔴 Consuming content alone in your room",
-    "🔴 Competing for creator attention",
-    "🔴 Surface-level interactions only"
-  ];
 
-  const solutionPoints = [
-    "✅ Making real friends through shared interests",
-    "✅ Authentic relationships between members",
-    "✅ Creating and building things together", 
-    "✅ Collaborating instead of competing",
-    "✅ Deep, meaningful connections"
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -205,60 +184,62 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Problem/Solution Section */}
-      <section id="vision" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+      {/* Discover Communities Section */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800">
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="mb-16">
+            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full px-6 py-3 mb-6 border border-blue-200 dark:border-blue-800">
+              <GlobeAltIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">Discover Amazing Communities</span>
+            </div>
             <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-              Social Media is Broken.<br />
-              <span className="text-blue-600">We're Here to Fix It.</span>
+              See What's Already Happening
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Traditional platforms create loneliness. We create lasting friendships.
+              Real communities are forming right now. Join the movement and find your people.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-            {/* The Problem */}
-            <div className="space-y-8">
-              <div className="text-center lg:text-left">
-                <div className="inline-flex items-center space-x-2 bg-red-100 dark:bg-red-900/20 rounded-full px-4 py-2 mb-4">
-                  <ExclamationTriangleIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
-                  <span className="text-sm font-semibold text-red-700 dark:text-red-300">The Problem</span>
-                </div>
-                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                  Traditional Social Media
-                </h3>
-              </div>
-              
-              <div className="space-y-4">
-                {problemPoints.map((point, index) => (
-                  <div key={index} className="flex items-start space-x-3 p-4 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-200 dark:border-red-800">
-                    <div className="text-lg">{point}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="mb-12">
+            <Link
+              href="/explore"
+              className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-2xl px-8 py-4 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+            >
+              <GlobeAltIcon className="w-6 h-6" />
+              <span>Explore Communities Now</span>
+              <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
 
-            {/* The Solution */}
-            <div className="space-y-8">
-              <div className="text-center lg:text-left">
-                <div className="inline-flex items-center space-x-2 bg-green-100 dark:bg-green-900/20 rounded-full px-4 py-2 mb-4">
-                  <CheckIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
-                  <span className="text-sm font-semibold text-green-700 dark:text-green-300">The Solution</span>
-                </div>
-                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                  The Hoodfy Way
-                </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-3xl p-8 border border-blue-200 dark:border-blue-800">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <UsersIcon className="w-8 h-8 text-white" />
               </div>
-              
-              <div className="space-y-4">
-                {solutionPoints.map((point, index) => (
-                  <div key={index} className="flex items-start space-x-3 p-4 bg-green-50 dark:bg-green-900/10 rounded-xl border border-green-200 dark:border-green-800">
-                    <div className="text-lg">{point}</div>
-                  </div>
-                ))}
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Active Communities</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                See real people building real connections in communities that matter.
+              </p>
+            </div>
+            
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-3xl p-8 border border-purple-200 dark:border-purple-800">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <ChatBubbleLeftRightIcon className="w-8 h-8 text-white" />
               </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Real Conversations</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                Join discussions that go beyond likes and comments.
+              </p>
+            </div>
+            
+            <div className="bg-gradient-to-br from-pink-50 to-red-50 dark:from-pink-900/20 dark:to-red-900/20 rounded-3xl p-8 border border-pink-200 dark:border-pink-800">
+              <div className="w-16 h-16 bg-gradient-to-r from-pink-600 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <SparklesIcon className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Create Together</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                Build projects, events, and experiences with new friends.
+              </p>
             </div>
           </div>
         </div>
@@ -271,9 +252,17 @@ export default function Home() {
             <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
               How the Magic Happens
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
               Three simple steps that change everything about how people connect online
             </p>
+            <Link
+              href="/explore"
+              className="inline-flex items-center space-x-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold text-lg transition-colors duration-200"
+            >
+              <GlobeAltIcon className="w-5 h-5" />
+              <span>See Communities in Action</span>
+              <ArrowRightIcon className="w-4 h-4" />
+            </Link>
           </div>
 
           <div className="space-y-12">
@@ -357,7 +346,7 @@ export default function Home() {
             See how communities become friend groups that create amazing things together
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             {exampleCommunities.map((community, index) => (
               <div key={index} className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 text-white hover:bg-white/20 transition-all duration-300">
                 <h3 className="text-2xl font-bold mb-3">{community.name}</h3>
@@ -371,6 +360,15 @@ export default function Home() {
               </div>
             ))}
           </div>
+          
+          <Link
+            href="/explore"
+            className="inline-flex items-center space-x-3 bg-white/20 hover:bg-white/30 text-white font-bold rounded-2xl px-8 py-4 text-lg backdrop-blur-lg border border-white/30 transition-all duration-300 hover:scale-105"
+          >
+            <GlobeAltIcon className="w-6 h-6" />
+            <span>Explore All Communities</span>
+            <ArrowRightIcon className="w-5 h-5" />
+          </Link>
         </div>
       </section>
 

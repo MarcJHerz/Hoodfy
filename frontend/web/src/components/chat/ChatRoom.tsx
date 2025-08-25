@@ -7,7 +7,7 @@ import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import { chatService } from '@/services/chatService';
 import { Message } from '@/types/chat';
-import { XMarkIcon, UserGroupIcon, UserIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, UserGroupIcon, UserIcon, SignalIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { UserAvatar } from '@/components/UserAvatar';
 
@@ -41,6 +41,29 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   } = useChatStore();
 
   const [isSending, setIsSending] = useState(false);
+
+  // Generar colores únicos por usuario para el header
+  const getHeaderColor = (userId?: string) => {
+    if (!userId) return 'from-blue-500 to-purple-500';
+    
+    const colors = [
+      'from-pink-500 to-rose-500',
+      'from-purple-500 to-indigo-500',
+      'from-blue-500 to-cyan-500',
+      'from-teal-500 to-emerald-500',
+      'from-yellow-500 to-orange-500',
+      'from-red-500 to-pink-500',
+      'from-indigo-500 to-purple-500',
+      'from-cyan-500 to-blue-500'
+    ];
+    
+    const hash = userId.split('').reduce((a, b) => {
+      a = ((a << 5) - a + b.charCodeAt(0)) & 0xffffffff;
+      return a;
+    }, 0);
+    
+    return colors[Math.abs(hash) % colors.length];
+  };
 
   useEffect(() => {
     if (!user?._id || !chatId) return;
@@ -89,11 +112,16 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center p-8">
-          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <UserIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
           </div>
-          <p className="text-gray-500 dark:text-gray-400 font-medium">
-            You must login to use the chat
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            Error de autenticación
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Debes iniciar sesión para acceder al chat.
           </p>
         </div>
       </div>
@@ -102,77 +130,93 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
 
   return (
     <div className={`flex flex-col h-full bg-white dark:bg-gray-900 ${isModal ? 'rounded-lg shadow-xl border border-gray-200 dark:border-gray-700' : ''}`}>
-      {/* Header of the chat improved - Only show if NOT in modal */}
+      {/* Header del chat completamente renovado */}
       {!isModal && (
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex-shrink-0">
-          <div className="flex items-center space-x-3">
-            {/* Improved avatar/icon */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 flex-shrink-0 shadow-sm">
+          <div className="flex items-center space-x-4">
+            {/* Avatar/Icono mejorado con colores únicos */}
             {chatType === 'private' && otherUserProfilePicture ? (
-              <div className="relative">
-                <UserAvatar
-                  source={otherUserProfilePicture}
-                  name={chatName}
-                  size={40}
-                />
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full"></div>
+              <div className="relative group">
+                <div className="w-14 h-14 rounded-2xl overflow-hidden ring-4 ring-white dark:ring-gray-800 shadow-xl group-hover:ring-4 group-hover:ring-primary-300/50 dark:group-hover:ring-primary-600/50 transition-all duration-300 group-hover:scale-110">
+                  <UserAvatar
+                    source={otherUserProfilePicture}
+                    name={chatName}
+                    size={56}
+                  />
+                </div>
+                {/* Indicador de estado online mejorado */}
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-4 border-white dark:border-gray-800 rounded-full shadow-lg animate-pulse ring-2 ring-green-400/50"></div>
               </div>
             ) : (
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center shadow-lg hover-lift">
+              <div className={`w-14 h-14 bg-gradient-to-r ${getHeaderColor(otherUserId)} rounded-2xl flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110`}>
                 {chatType === 'community' ? (
-                  <UserGroupIcon className="w-5 h-5 text-white" />
+                  <UserGroupIcon className="w-7 h-7 text-white" />
                 ) : (
-                  <UserIcon className="w-5 h-5 text-white" />
+                  <UserIcon className="w-7 h-7 text-white" />
                 )}
               </div>
             )}
             
-            {/* Información del chat */}
+            {/* Información del chat con mejor diseño */}
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg truncate">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 text-xl truncate mb-1">
                 {chatName}
               </h3>
-              <div className="flex items-center space-x-2">
-                <div className={`w-2 h-2 rounded-full ${isLoading ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'}`}></div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {chatType === 'community' ? 'Community chat' : 'Private chat'}
-                  {isLoading && ' • Connecting...'}
-                </p>
+              <div className="flex items-center space-x-3">
+                {/* Indicador de estado de conexión */}
+                <div className="flex items-center space-x-2">
+                  <div className={`w-3 h-3 rounded-full ${isLoading ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'} shadow-sm`}></div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    {isLoading ? 'Conectando...' : 'En línea'}
+                  </p>
+                </div>
+                
+                {/* Separador */}
+                <div className="w-1 h-1 bg-gray-400 dark:bg-gray-500 rounded-full"></div>
+                
+                {/* Tipo de chat */}
+                <div className="flex items-center space-x-2">
+                  <SignalIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    {chatType === 'community' ? 'Chat de Comunidad' : 'Chat Privado'}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
           
-          {/* Improved close button */}
+          {/* Botón de cerrar mejorado */}
           {onClose && (
             <button
               onClick={onClose}
-              className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all duration-200 hover-lift"
-              title="Close chat"
+              className="p-3 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-2xl transition-all duration-300 hover:scale-110 hover:shadow-lg"
+              title="Cerrar chat"
             >
-              <XMarkIcon className="w-5 h-5" />
+              <XMarkIcon className="w-6 h-6" />
             </button>
           )}
         </div>
       )}
 
-      {/* List of messages with improved error handling */}
+      {/* Lista de mensajes con manejo de errores mejorado */}
       <div className="flex-1 overflow-hidden min-h-0">
         {error ? (
           <div className="flex-1 flex items-center justify-center p-8">
             <div className="text-center max-w-md">
-              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-20 h-20 bg-gradient-to-r from-red-100 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <svg className="w-10 h-10 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                Error loading the chat
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+                Error al cargar el chat
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{error}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{error}</p>
               <button
                 onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200 hover-lift"
+                className="px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold rounded-2xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
               >
-                Try again
+                Intentar de nuevo
               </button>
             </div>
           </div>
@@ -187,12 +231,12 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         )}
       </div>
 
-      {/* Input to send messages */}
-      <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
+      {/* Input para enviar mensajes */}
+      <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <MessageInput
           onSendMessage={handleSendMessage}
           isLoading={isSending}
-          placeholder={`Write a message in ${chatName}...`}
+          placeholder={`Escribe un mensaje en ${chatName}...`}
           disabled={isLoading || !!error}
         />
       </div>

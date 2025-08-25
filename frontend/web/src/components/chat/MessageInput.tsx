@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { PaperAirplaneIcon, PaperClipIcon, PhotoIcon, DocumentIcon } from '@heroicons/react/24/outline';
+import { PaperAirplaneIcon, PaperClipIcon, PhotoIcon, DocumentIcon, FaceSmileIcon } from '@heroicons/react/24/outline';
 import { useAuthStore } from '@/stores/authStore';
 // Importación dinámica para evitar errores de SSR
 let heic2any: any = null;
@@ -100,7 +100,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit(e);
+      handleSubmit(e as any);
     }
   };
 
@@ -138,8 +138,11 @@ const MessageInput: React.FC<MessageInputProps> = ({
     // Convertir HEIC si es necesario
     const convertedFile = await convertHeicToJpeg(file);
 
-    onSendMessage(convertedFile.name, 'image', convertedFile);
+    // Crear un mensaje con la imagen convertida
+    const fileName = convertedFile.name;
+    onSendMessage(fileName, 'image', convertedFile);
     
+    // Limpiar el input
     if (imageInputRef.current) {
       imageInputRef.current.value = '';
     }
@@ -151,55 +154,65 @@ const MessageInput: React.FC<MessageInputProps> = ({
     setIsTyping(e.target.value.length > 0);
   };
 
-  const openFileSelector = () => {
-    fileInputRef.current?.click();
-    setShowFileMenu(false);
-  };
-
-  const openImageSelector = () => {
-    imageInputRef.current?.click();  
-    setShowFileMenu(false);
-  };
-
   return (
-    <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
-      <form onSubmit={handleSubmit} className="flex items-end space-x-3">
-        {/* Botón para adjuntar archivos con menú desplegable */}
-        <div className="relative flex-shrink-0">
-          <button
-            type="button"
-            onClick={() => setShowFileMenu(!showFileMenu)}
-            disabled={isLoading || disabled}
-            className="p-3 text-gray-400 dark:text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:hover:bg-transparent transition-all duration-200 rounded-full hover-lift"
-            title="Adjuntar archivo"
-          >
-            <PaperClipIcon className="h-5 w-5" />
-          </button>
-
-          {/* Menú desplegable de archivos */}
-          {showFileMenu && (
-            <div className="absolute bottom-full left-0 mb-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-2 min-w-[150px] z-10">
-              <button
-                type="button"
-                onClick={openImageSelector}
-                className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2 transition-colors"
-              >
-                <PhotoIcon className="h-4 w-4" />
-                <span>Imagen</span>
-              </button>
-              <button
-                type="button"
-                onClick={openFileSelector}
-                className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2 transition-colors"
-              >
-                <DocumentIcon className="h-4 w-4" />
-                <span>Archivo</span>
-              </button>
-            </div>
-          )}
+    <div className="p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+      {/* Menú de archivos mejorado */}
+      {showFileMenu && (
+        <div className="mb-4 p-4 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-blue-900/20 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              Adjuntar archivo
+            </h4>
+            <button
+              onClick={() => setShowFileMenu(false)}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            >
+              ×
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => imageInputRef.current?.click()}
+              className="flex flex-col items-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 hover:scale-105 hover:shadow-md"
+            >
+              <PhotoIcon className="w-8 h-8 text-blue-500 dark:text-blue-400 mb-2" />
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Imagen</span>
+            </button>
+            
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex flex-col items-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 hover:scale-105 hover:shadow-md"
+            >
+              <DocumentIcon className="w-8 h-8 text-purple-500 dark:text-purple-400 mb-2" />
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Archivo</span>
+            </button>
+          </div>
         </div>
+      )}
 
-        {/* Input de texto mejorado */}
+      {/* Formulario de mensaje completamente renovado */}
+      <form onSubmit={handleSubmit} className="flex items-end space-x-3">
+        {/* Botón de archivos mejorado */}
+        <button
+          type="button"
+          onClick={() => setShowFileMenu(!showFileMenu)}
+          className="flex-shrink-0 p-3 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-2xl transition-all duration-200 hover:scale-110 hover:shadow-md"
+          title="Adjuntar archivo"
+        >
+          <PaperClipIcon className="w-5 h-5" />
+        </button>
+
+        {/* Botón de emojis (placeholder para futuras implementaciones) */}
+        <button
+          type="button"
+          className="flex-shrink-0 p-3 text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-2xl transition-all duration-200 hover:scale-110 hover:shadow-md"
+          title="Emojis (próximamente)"
+        >
+          <FaceSmileIcon className="w-5 h-5" />
+        </button>
+
+        {/* Textarea mejorado con diseño moderno */}
         <div className="flex-1 relative">
           <textarea
             ref={textareaRef}
@@ -207,83 +220,49 @@ const MessageInput: React.FC<MessageInputProps> = ({
             onChange={handleTyping}
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
-            disabled={isLoading || disabled}
-            className="w-full resize-none border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 pr-12 
-                     bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 
-                     placeholder-gray-500 dark:placeholder-gray-400
-                     focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent 
-                     disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:text-gray-500 dark:disabled:text-gray-400
-                     transition-all duration-200"
-            rows={1}
+            disabled={disabled || isLoading}
+            className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl resize-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ minHeight: '48px', maxHeight: '120px' }}
+            rows={1}
           />
           
-          {/* Indicador de caracteres */}
-          {message.length > 100 && (
-            <div className="absolute bottom-1 right-12 text-xs text-gray-400 dark:text-gray-500">
-              {message.length}/500
+          {/* Indicador de escritura */}
+          {isTyping && (
+            <div className="absolute -top-2 left-4 bg-blue-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
+              Escribiendo...
             </div>
           )}
         </div>
 
-        {/* Botón de enviar mejorado */}
+        {/* Botón de enviar completamente renovado */}
         <button
           type="submit"
           disabled={!message.trim() || isLoading || disabled}
-          className="flex-shrink-0 p-3 bg-gradient-to-r from-primary-600 to-accent-600 
-                   hover:from-primary-700 hover:to-accent-700 
-                   disabled:from-gray-300 disabled:to-gray-400 dark:disabled:from-gray-600 dark:disabled:to-gray-700
-                   text-white font-medium rounded-xl 
-                   disabled:text-gray-500 dark:disabled:text-gray-400
-                   transition-all duration-200 hover-lift shadow-lg hover:shadow-xl
-                   disabled:shadow-none disabled:transform-none"
-          title={message.trim() ? "Enviar mensaje" : "Escribe algo primero"}
+          className="flex-shrink-0 p-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-2xl transition-all duration-300 hover:scale-110 hover:shadow-xl disabled:scale-100 disabled:shadow-none disabled:cursor-not-allowed group"
+          title="Enviar mensaje"
         >
           {isLoading ? (
-            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
           ) : (
-            <PaperAirplaneIcon className="h-5 w-5" />
+            <PaperAirplaneIcon className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200" />
           )}
         </button>
       </form>
 
       {/* Inputs ocultos para archivos */}
       <input
-        ref={fileInputRef}
+        ref={imageInputRef}
         type="file"
-        onChange={handleFileSelect}
-        accept=".pdf,.doc,.docx,.txt,.zip,.rar"
+        accept="image/*"
+        onChange={handleImageSelect}
         className="hidden"
       />
       <input
-        ref={imageInputRef}
+        ref={fileInputRef}
         type="file"
-        onChange={handleImageSelect}
-        accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm,.avi,.m4v,.3gp,.heic,.heif"
+        onChange={handleFileSelect}
         className="hidden"
       />
-
-      {/* Indicador de escritura mejorado */}
-      {isTyping && (
-        <div className="mt-3 px-2">
-          <div className="flex items-center space-x-2 text-xs text-primary-600 dark:text-primary-400">
-            <div className="flex space-x-1">
-              <div className="w-1 h-1 bg-current rounded-full animate-bounce"></div>
-              <div className="w-1 h-1 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-              <div className="w-1 h-1 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-            </div>
-            <span className="font-medium">Escribiendo...</span>
-          </div>
-        </div>
-      )}
-
-      {/* Overlay para cerrar menú */}
-      {showFileMenu && (
-        <div 
-          className="fixed inset-0 z-0" 
-          onClick={() => setShowFileMenu(false)}
-        />
-      )}
     </div>
   );
 };
