@@ -21,7 +21,7 @@ interface MessageInputProps {
 const MessageInput: React.FC<MessageInputProps> = ({
   onSendMessage,
   isLoading = false,
-  placeholder = "Escribe un mensaje...",
+  placeholder = "Write a message...",
   disabled = false
 }) => {
   const [message, setMessage] = useState('');
@@ -161,7 +161,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         <div className="mb-4 p-4 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-blue-900/20 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg">
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              Adjuntar archivo
+              Attach file
             </h4>
             <button
               onClick={() => setShowFileMenu(false)}
@@ -177,7 +177,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
               className="flex flex-col items-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 hover:scale-105 hover:shadow-md"
             >
               <PhotoIcon className="w-8 h-8 text-blue-500 dark:text-blue-400 mb-2" />
-              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Imagen</span>
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Image</span>
             </button>
             
             <button
@@ -185,7 +185,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
               className="flex flex-col items-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 hover:scale-105 hover:shadow-md"
             >
               <DocumentIcon className="w-8 h-8 text-purple-500 dark:text-purple-400 mb-2" />
-              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Archivo</span>
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">File</span>
             </button>
           </div>
         </div>
@@ -193,26 +193,26 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
       {/* Formulario de mensaje completamente renovado */}
       <form onSubmit={handleSubmit} className="flex items-end space-x-3">
-        {/* Botón de archivos mejorado */}
+        {/* Improved file button */}
         <button
           type="button"
           onClick={() => setShowFileMenu(!showFileMenu)}
           className="flex-shrink-0 p-3 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-2xl transition-all duration-200 hover:scale-110 hover:shadow-md"
-          title="Adjuntar archivo"
+          title="Attach file"
         >
           <PaperClipIcon className="w-5 h-5" />
         </button>
 
-        {/* Botón de emojis (placeholder para futuras implementaciones) */}
+        {/* Emoji button (placeholder for future implementations) */}
         <button
           type="button"
           className="flex-shrink-0 p-3 text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-2xl transition-all duration-200 hover:scale-110 hover:shadow-md"
-          title="Emojis (próximamente)"
+          title="Emojis (coming soon)"
         >
           <FaceSmileIcon className="w-5 h-5" />
         </button>
 
-        {/* Textarea mejorado con diseño moderno */}
+        {/* Improved textarea with modern design */}
         <div className="flex-1 relative">
           <textarea
             ref={textareaRef}
@@ -226,7 +226,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
             rows={1}
           />
           
-          {/* Indicador de escritura */}
+          {/* Typing indicator */}
           {isTyping && (
             <div className="absolute -top-2 left-4 bg-blue-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
               Escribiendo...

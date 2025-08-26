@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Message } from '@/types/chat';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format, isToday, isYesterday, isThisWeek, isThisYear } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useImageUrl } from '@/utils/useImageUrl';
 import Image from 'next/image';
@@ -58,6 +58,74 @@ const MessageList: React.FC<MessageListProps> = ({
     }, 0);
     
     return colors[Math.abs(hash) % colors.length];
+  };
+
+  // Función inteligente para determinar cuándo mostrar timestamp
+  const shouldShowTimestamp = (message: Message, index: number) => {
+    if (index === messages.length - 1) return true; // Último mensaje siempre
+    
+    const nextMessage = messages[index + 1];
+    if (!nextMessage) return true;
+    
+    const currentTime = new Date(message.timestamp);
+    const nextTime = new Date(nextMessage.timestamp);
+    const timeDiff = nextTime.getTime() - currentTime.getTime();
+    
+    // Cambio de usuario → siempre mostrar
+    if (message.senderId !== nextMessage.senderId) return true;
+    
+    // Cambio de día → siempre mostrar
+    if (!isToday(currentTime) && isToday(nextTime)) return true;
+    if (isYesterday(currentTime) && !isYesterday(nextTime)) return true;
+    
+    // Cambio de semana → siempre mostrar
+    if (!isThisWeek(currentTime) && isThisWeek(nextTime)) return true;
+    
+    // Cambio de año → siempre mostrar
+    if (!isThisYear(currentTime) && isThisYear(nextTime)) return true;
+    
+    // Más de 5 minutos de diferencia → mostrar
+    if (timeDiff > 300000) return true;
+    
+    return false;
+  };
+
+  // Función para formatear timestamp de manera inteligente
+  const formatTimestamp = (timestamp: Date) => {
+    if (isToday(timestamp)) {
+      return format(timestamp, 'HH:mm');
+    } else if (isYesterday(timestamp)) {
+      return 'Yesterday';
+    } else if (isThisWeek(timestamp)) {
+      return format(timestamp, 'EEEE'); // Day name
+    } else if (isThisYear(timestamp)) {
+      return format(timestamp, 'MMM d'); // Month day
+    } else {
+      return format(timestamp, 'MMM d, yyyy'); // Full date
+    }
+  };
+
+  // Función para mostrar separador de tiempo cuando sea necesario
+  const shouldShowTimeSeparator = (message: Message, index: number) => {
+    if (index === 0) return true; // Primer mensaje siempre
+    
+    const prevMessage = messages[index - 1];
+    if (!prevMessage) return true;
+    
+    const currentTime = new Date(message.timestamp);
+    const prevTime = new Date(prevMessage.timestamp);
+    
+    // Cambio de día
+    if (!isToday(currentTime) && isToday(prevTime)) return true;
+    if (isYesterday(currentTime) && !isYesterday(prevTime)) return true;
+    
+    // Cambio de semana
+    if (!isThisWeek(currentTime) && isThisWeek(prevTime)) return true;
+    
+    // Cambio de año
+    if (!isThisYear(currentTime) && isThisYear(prevTime)) return true;
+    
+    return false;
   };
 
   const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
@@ -145,7 +213,7 @@ const MessageList: React.FC<MessageListProps> = ({
             <div className="relative group">
               <Image
                 src={message.mediaUrl || ''}
-                alt={message.mediaName || 'Imagen'}
+                alt={message.mediaName || 'Image'}
                 width={300}
                 height={200}
                 className="rounded-lg max-w-full h-auto object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
@@ -174,7 +242,7 @@ const MessageList: React.FC<MessageListProps> = ({
               preload="metadata"
             >
               <source src={message.mediaUrl} type={message.mediaType} />
-              Tu navegador no soporta el elemento de video.
+              Your browser does not support the video element.
             </video>
             {message.mediaName && (
               <p className="text-sm text-gray-600 dark:text-gray-400 break-words">
@@ -195,7 +263,7 @@ const MessageList: React.FC<MessageListProps> = ({
                 {message.mediaName || message.content}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {message.mediaType || 'Archivo'}
+                {message.mediaType || 'File'}
               </p>
             </div>
             {message.mediaUrl && (
@@ -203,7 +271,7 @@ const MessageList: React.FC<MessageListProps> = ({
                 href={message.mediaUrl}
                 download={message.mediaName}
                 className="flex-shrink-0 p-1 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
-                title="Descargar archivo"
+                title="Download file"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -228,7 +296,7 @@ const MessageList: React.FC<MessageListProps> = ({
         <div className="text-center p-8">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-600 dark:border-primary-400 border-t-transparent mx-auto mb-4"></div>
           <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-            Cargando mensajes...
+            Loading messages...
           </p>
         </div>
       </div>
@@ -243,14 +311,14 @@ const MessageList: React.FC<MessageListProps> = ({
             <ChatBubbleLeftIcon className="w-10 h-10 text-primary-600 dark:text-primary-400" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            ¡Inicia la conversación!
+            Start the conversation!
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-4">
-            No hay mensajes aún. Sé el primero en enviar un mensaje y romper el hielo.
+            No messages yet. Be the first to send a message and break the ice.
           </p>
           <div className="flex items-center justify-center space-x-2 text-xs text-gray-400 dark:text-gray-500">
             <div className="w-2 h-2 bg-current rounded-full animate-pulse"></div>
-            <span>Esperando tu primer mensaje...</span>
+            <span>Waiting for your first message...</span>
           </div>
         </div>
       </div>
@@ -271,86 +339,94 @@ const MessageList: React.FC<MessageListProps> = ({
         {messages.map((message, index) => {
           const isOwnMessage = message.senderId === currentUserId;
           const showAvatar = index === 0 || messages[index - 1].senderId !== message.senderId;
-          const showTimestamp = index === messages.length - 1 || 
-            messages[index + 1].senderId !== message.senderId ||
-            (new Date(messages[index + 1].timestamp).getTime() - new Date(message.timestamp).getTime()) > 300000; // 5 minutos
+          const showTimestamp = shouldShowTimestamp(message, index);
+          const showTimeSeparator = shouldShowTimeSeparator(message, index);
           
           return (
-            <div
-              key={message.id}
-              className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} group animate-fade-in`}
-              onClick={() => onMessageClick?.(message)}
-            >
-              <div className={`flex max-w-[85%] ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'} space-x-4`}>
-                {/* Avatar mejorado con colores únicos por usuario */}
-                {!isOwnMessage && (
-                  <div className={`flex-shrink-0 ${showAvatar ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                    <button
-                      onClick={(e) => handleUserProfileClick(e, message.senderId)}
-                      onContextMenu={(e) => handleUserContextMenu(e, message.senderId, message.senderName)}
-                      className="w-12 h-12 rounded-2xl overflow-hidden hover:ring-4 hover:ring-primary-300/50 dark:hover:ring-primary-600/50 hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary-500/50 dark:focus:ring-primary-400/50 shadow-lg"
-                      title={`Ver perfil de ${message.senderName}`}
-                    >
-                      <UserAvatar
-                        source={message.senderProfilePicture}
-                        name={message.senderName}
-                        size={48}
-                      />
-                    </button>
+            <div key={message.id}>
+              {/* Time separator when needed */}
+              {showTimeSeparator && (
+                <div className="flex justify-center my-6">
+                  <div className="bg-white/80 dark:bg-gray-800/80 px-4 py-2 rounded-full text-xs font-medium text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 shadow-sm">
+                    {formatTimestamp(message.timestamp)}
                   </div>
-                )}
-
-                {/* Mensaje con diseño completamente renovado */}
-                <div className={`flex flex-col min-w-0 ${isOwnMessage ? 'items-end' : 'items-start'}`}>
-                  {/* Nombre del remitente con colores únicos */}
-                  {!isOwnMessage && showAvatar && (
-                    <button
-                      onClick={(e) => handleUserProfileClick(e, message.senderId)}
-                      onContextMenu={(e) => handleUserContextMenu(e, message.senderId, message.senderName)}
-                      className={`text-sm font-semibold mb-2 px-3 py-1 rounded-full transition-all duration-200 hover:scale-105 focus:outline-none bg-gradient-to-r ${getUserColor(message.senderId)} text-white shadow-md hover:shadow-lg`}
-                      title={`Ver perfil de ${message.senderName}`}
-                    >
-                      {message.senderName}
-                    </button>
+                </div>
+              )}
+              
+              <div
+                className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} group animate-fade-in`}
+                onClick={() => onMessageClick?.(message)}
+              >
+                <div className={`flex max-w-[85%] ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'} space-x-4`}>
+                  {/* Avatar mejorado con colores únicos por usuario */}
+                  {!isOwnMessage && (
+                    <div className={`flex-shrink-0 ${showAvatar ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                      <button
+                        onClick={(e) => handleUserProfileClick(e, message.senderId)}
+                        onContextMenu={(e) => handleUserContextMenu(e, message.senderId, message.senderName)}
+                        className="w-12 h-12 rounded-2xl overflow-hidden hover:ring-4 hover:ring-primary-300/50 dark:hover:ring-primary-600/50 hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary-500/50 dark:focus:ring-primary-400/50 shadow-lg"
+                        title={`See profile of ${message.senderName}`}
+                      >
+                        <UserAvatar
+                          source={message.senderProfilePicture}
+                          name={message.senderName}
+                          size={48}
+                        />
+                      </button>
+                    </div>
                   )}
 
-                  {/* Contenido del mensaje con burbujas modernas */}
-                  <div
-                    className={`px-6 py-4 rounded-3xl max-w-full transition-all duration-300 hover:shadow-xl word-wrap break-words ${
-                      isOwnMessage
-                        ? 'bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white shadow-lg hover:shadow-2xl transform hover:scale-[1.02]'
-                        : `bg-gradient-to-r ${getUserColor(message.senderId)} text-white shadow-lg hover:shadow-2xl transform hover:scale-[1.02]`
-                    } ${message.type !== 'text' ? 'p-4' : ''}`}
-                    style={{
-                      filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1))'
-                    }}
-                  >
-                    {renderMessageContent(message)}
-                  </div>
-
-                  {/* Timestamp y estado de mensaje siempre visibles */}
-                  <div className={`flex items-center mt-3 space-x-3 transition-all duration-200 ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'}`}>
-                    {/* Timestamp */}
-                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium bg-white/80 dark:bg-gray-800/80 px-2 py-1 rounded-full">
-                      {formatDistanceToNow(message.timestamp, { 
-                        addSuffix: true, 
-                        locale: es 
-                      })}
-                    </span>
-                    
-                    {/* Estado del mensaje para mensajes propios */}
-                    {isOwnMessage && (
-                      <div className="flex items-center space-x-1 text-blue-400">
-                        <CheckIcon className="w-3 h-3" />
-                        <span className="text-xs">Enviado</span>
-                      </div>
+                  {/* Mensaje con diseño completamente renovado */}
+                  <div className={`flex flex-col min-w-0 ${isOwnMessage ? 'items-end' : 'items-start'}`}>
+                    {/* Nombre del remitente con colores únicos */}
+                    {!isOwnMessage && showAvatar && (
+                      <button
+                        onClick={(e) => handleUserProfileClick(e, message.senderId)}
+                        onContextMenu={(e) => handleUserContextMenu(e, message.senderId, message.senderName)}
+                        className={`text-sm font-semibold mb-2 px-3 py-1 rounded-full transition-all duration-200 hover:scale-105 focus:outline-none bg-gradient-to-r ${getUserColor(message.senderId)} text-white shadow-md hover:shadow-lg`}
+                        title={`See profile of ${message.senderName}`}
+                      >
+                        {message.senderName}
+                      </button>
                     )}
-                    
-                    {/* Indicador de edición */}
-                    {message.isEdited && (
-                      <span className="text-xs text-gray-400 dark:text-gray-500 italic bg-white/80 dark:bg-gray-800/80 px-2 py-1 rounded-full">
-                        (editado)
-                      </span>
+
+                    {/* Contenido del mensaje con burbujas modernas */}
+                    <div
+                      className={`px-6 py-4 rounded-3xl max-w-full transition-all duration-300 hover:shadow-xl word-wrap break-words ${
+                        isOwnMessage
+                          ? 'bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white shadow-lg hover:shadow-2xl transform hover:scale-[1.02]'
+                          : `bg-gradient-to-r ${getUserColor(message.senderId)} text-white shadow-lg hover:shadow-2xl transform hover:scale-[1.02]`
+                      } ${message.type !== 'text' ? 'p-4' : ''}`}
+                      style={{
+                        filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1))'
+                      }}
+                    >
+                      {renderMessageContent(message)}
+                    </div>
+
+                    {/* Timestamp y estado de mensaje solo cuando sea necesario */}
+                    {showTimestamp && (
+                      <div className={`flex items-center mt-3 space-x-3 transition-all duration-200 ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'}`}>
+                        {/* Timestamp inteligente */}
+                        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium bg-white/80 dark:bg-gray-800/80 px-2 py-1 rounded-full">
+                          {formatTimestamp(message.timestamp)}
+                        </span>
+                        
+                        {/* Estado del mensaje para mensajes propios */}
+                        {isOwnMessage && (
+                          <div className="flex items-center space-x-1 text-blue-400">
+                            <CheckIcon className="w-3 h-3" />
+                            <span className="text-xs">Sent</span>
+                          </div>
+                        )}
+                        
+                        {/* Indicador de edición */}
+                        {message.isEdited && (
+                          <span className="text-xs text-gray-400 dark:text-gray-500 italic bg-white/80 dark:bg-gray-800/80 px-2 py-1 rounded-full">
+                            (edited)
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -366,7 +442,7 @@ const MessageList: React.FC<MessageListProps> = ({
         <button
           onClick={() => scrollToBottom('smooth')}
           className="absolute bottom-8 right-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-full p-4 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-110 z-10 group"
-          title="Ir al último mensaje"
+          title="Go to last message"
         >
           <ChevronDownIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
         </button>
@@ -388,7 +464,7 @@ const MessageList: React.FC<MessageListProps> = ({
               {contextMenu.userName}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Opciones de usuario
+              User options
             </p>
           </div>
           
@@ -397,7 +473,7 @@ const MessageList: React.FC<MessageListProps> = ({
             className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20 flex items-center space-x-3 transition-all duration-200"
           >
             <UserIcon className="h-4 w-4 text-primary-600 dark:text-primary-400" />
-            <span>Ver perfil</span>
+            <span>View profile</span>
           </button>
           
           {contextMenu.userId !== currentUserId && (
@@ -406,7 +482,7 @@ const MessageList: React.FC<MessageListProps> = ({
               className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 dark:hover:from-green-900/20 dark:hover:to-emerald-900/20 flex items-center space-x-3 transition-all duration-200"
             >
               <ChatBubbleLeftIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
-              <span>Iniciar chat privado</span>
+              <span>Start private chat</span>
             </button>
           )}
         </div>

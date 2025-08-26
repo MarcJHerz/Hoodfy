@@ -118,10 +118,10 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
             </svg>
           </div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Error de autenticación
+            Authentication Error
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Debes iniciar sesión para acceder al chat.
+            You must be logged in to access the chat.
           </p>
         </div>
       </div>
@@ -130,11 +130,11 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
 
   return (
     <div className={`flex flex-col h-full bg-white dark:bg-gray-900 ${isModal ? 'rounded-lg shadow-xl border border-gray-200 dark:border-gray-700' : ''}`}>
-      {/* Header del chat completamente renovado */}
+      {/* Completely renovated chat header */}
       {!isModal && (
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 flex-shrink-0 shadow-sm">
           <div className="flex items-center space-x-4">
-            {/* Avatar/Icono mejorado con colores únicos */}
+            {/* Improved avatar/icon with unique colors */}
             {chatType === 'private' && otherUserProfilePicture ? (
               <div className="relative group">
                 <div className="w-14 h-14 rounded-2xl overflow-hidden ring-4 ring-white dark:ring-gray-800 shadow-xl group-hover:ring-4 group-hover:ring-primary-300/50 dark:group-hover:ring-primary-600/50 transition-all duration-300 group-hover:scale-110">
@@ -144,7 +144,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
                     size={56}
                   />
                 </div>
-                {/* Indicador de estado online mejorado */}
+                {/* Improved online status indicator */}
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-4 border-white dark:border-gray-800 rounded-full shadow-lg animate-pulse ring-2 ring-green-400/50"></div>
               </div>
             ) : (
@@ -157,40 +157,40 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
               </div>
             )}
             
-            {/* Información del chat con mejor diseño */}
+            {/* Chat information with better design */}
             <div className="flex-1 min-w-0">
               <h3 className="font-bold text-gray-900 dark:text-gray-100 text-xl truncate mb-1">
                 {chatName}
               </h3>
               <div className="flex items-center space-x-3">
-                {/* Indicador de estado de conexión */}
+                {/* Connection status indicator */}
                 <div className="flex items-center space-x-2">
                   <div className={`w-3 h-3 rounded-full ${isLoading ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'} shadow-sm`}></div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    {isLoading ? 'Conectando...' : 'En línea'}
+                    {isLoading ? 'Connecting...' : 'Online'}
                   </p>
                 </div>
                 
-                {/* Separador */}
+                {/* Separator */}
                 <div className="w-1 h-1 bg-gray-400 dark:bg-gray-500 rounded-full"></div>
                 
-                {/* Tipo de chat */}
+                {/* Chat type */}
                 <div className="flex items-center space-x-2">
                   <SignalIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    {chatType === 'community' ? 'Chat de Comunidad' : 'Chat Privado'}
+                    {chatType === 'community' ? 'Community Chat' : 'Private Chat'}
                   </p>
                 </div>
               </div>
             </div>
           </div>
           
-          {/* Botón de cerrar mejorado */}
+          {/* Improved close button */}
           {onClose && (
             <button
               onClick={onClose}
               className="p-3 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-2xl transition-all duration-300 hover:scale-110 hover:shadow-lg"
-              title="Cerrar chat"
+              title="Close chat"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
@@ -198,7 +198,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         </div>
       )}
 
-      {/* Lista de mensajes con manejo de errores mejorado */}
+      {/* Message list with improved error handling */}
       <div className="flex-1 overflow-hidden min-h-0">
         {error ? (
           <div className="flex-1 flex items-center justify-center p-8">
@@ -209,14 +209,14 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-                Error al cargar el chat
+                Error loading chat
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{error}</p>
               <button
                 onClick={() => window.location.reload()}
                 className="px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold rounded-2xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
               >
-                Intentar de nuevo
+                Try again
               </button>
             </div>
           </div>
@@ -231,12 +231,12 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         )}
       </div>
 
-      {/* Input para enviar mensajes */}
+      {/* Input to send messages */}
       <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <MessageInput
           onSendMessage={handleSendMessage}
           isLoading={isSending}
-          placeholder={`Escribe un mensaje en ${chatName}...`}
+          placeholder={`Write a message in ${chatName}...`}
           disabled={isLoading || !!error}
         />
       </div>
