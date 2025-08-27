@@ -9,7 +9,6 @@ exports.getNotifications = async (req, res) => {
     const userId = req.userId;
     const { page = 1, limit = 20, unreadOnly = false } = req.query;
     
-    console.log('📋 Obteniendo notificaciones para usuario:', userId);
     
     // Construir query
     const query = { user: userId };
@@ -32,7 +31,6 @@ exports.getNotifications = async (req, res) => {
     const total = await Notification.countDocuments(query);
     const totalPages = Math.ceil(total / parseInt(limit));
     
-    console.log(`✅ Encontradas ${notifications.length} notificaciones (página ${page}/${totalPages})`);
     
     res.json({
       notifications,
@@ -45,7 +43,7 @@ exports.getNotifications = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('❌ Error obteniendo notificaciones:', error);
+    
     res.status(500).json({ error: 'Error obteniendo notificaciones' });
   }
 };
@@ -57,11 +55,10 @@ exports.getUnreadCount = async (req, res) => {
     
     const unreadCount = await Notification.getUnreadCount(userId);
     
-    console.log(`🔢 Usuario ${userId} tiene ${unreadCount} notificaciones no leídas`);
     
     res.json({ unreadCount });
   } catch (error) {
-    console.error('❌ Error obteniendo conteo no leídas:', error);
+    
     res.status(500).json({ error: 'Error obteniendo conteo de notificaciones' });
   }
 };
@@ -72,7 +69,6 @@ exports.markAsRead = async (req, res) => {
     const { notificationId } = req.params;
     const userId = req.userId;
     
-    console.log('✅ Marcando como leída notificación:', notificationId);
     
     if (!mongoose.Types.ObjectId.isValid(notificationId)) {
       return res.status(400).json({ error: 'ID de notificación inválido' });
@@ -89,12 +85,11 @@ exports.markAsRead = async (req, res) => {
     
     if (!notification.read) {
       await notification.markAsRead();
-      console.log('✅ Notificación marcada como leída');
     }
     
     res.json({ message: 'Notificación marcada como leída', notification });
   } catch (error) {
-    console.error('❌ Error marcando notificación como leída:', error);
+    
     res.status(500).json({ error: 'Error actualizando notificación' });
   }
 };
@@ -104,18 +99,16 @@ exports.markAllAsRead = async (req, res) => {
   try {
     const userId = req.userId;
     
-    console.log('✅ Marcando todas las notificaciones como leídas para usuario:', userId);
     
     const result = await Notification.markAllAsRead(userId);
     
-    console.log(`✅ ${result.modifiedCount} notificaciones marcadas como leídas`);
     
     res.json({ 
       message: 'Todas las notificaciones marcadas como leídas',
       updated: result.modifiedCount
     });
   } catch (error) {
-    console.error('❌ Error marcando todas como leídas:', error);
+    
     res.status(500).json({ error: 'Error actualizando notificaciones' });
   }
 };
@@ -126,7 +119,6 @@ exports.deleteNotification = async (req, res) => {
     const { notificationId } = req.params;
     const userId = req.userId;
     
-    console.log('🗑️ Eliminando notificación:', notificationId);
     
     if (!mongoose.Types.ObjectId.isValid(notificationId)) {
       return res.status(400).json({ error: 'ID de notificación inválido' });
@@ -141,11 +133,10 @@ exports.deleteNotification = async (req, res) => {
       return res.status(404).json({ error: 'Notificación no encontrada' });
     }
     
-    console.log('✅ Notificación eliminada exitosamente');
     
     res.json({ message: 'Notificación eliminada exitosamente' });
   } catch (error) {
-    console.error('❌ Error eliminando notificación:', error);
+    
     res.status(500).json({ error: 'Error eliminando notificación' });
   }
 };
@@ -155,18 +146,16 @@ exports.deleteAllNotifications = async (req, res) => {
   try {
     const userId = req.userId;
     
-    console.log('🗑️ Eliminando todas las notificaciones para usuario:', userId);
     
     const result = await Notification.deleteMany({ user: userId });
     
-    console.log(`✅ ${result.deletedCount} notificaciones eliminadas`);
     
     res.json({ 
       message: 'Todas las notificaciones eliminadas',
       deleted: result.deletedCount
     });
   } catch (error) {
-    console.error('❌ Error eliminando todas las notificaciones:', error);
+    
     res.status(500).json({ error: 'Error eliminando notificaciones' });
   }
 };
@@ -176,7 +165,6 @@ exports.createNotification = async (req, res) => {
   try {
     const { userId, type, communityId, postId, subscriptionId, commentId, customData } = req.body;
     
-    console.log('📝 Creando notificación:', { userId, type });
     
     // Validar userId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -200,19 +188,16 @@ exports.createNotification = async (req, res) => {
       customData
     });
     
-    console.log('✅ Notificación creada:', notification._id);
     
     // Enviar notificación push si el usuario tiene token FCM
     if (user.fcmToken) {
       try {
         await sendPushNotification(user.fcmToken, notification);
-        console.log('📱 Notificación push enviada al usuario:', userId);
       } catch (pushError) {
         console.error('❌ Error enviando notificación push:', pushError);
         // No fallar la creación de notificación si falla el push
       }
     } else {
-      console.log('📱 Usuario no tiene token FCM, saltando notificación push');
     }
     
     res.status(201).json({ 
@@ -220,7 +205,7 @@ exports.createNotification = async (req, res) => {
       notification
     });
   } catch (error) {
-    console.error('❌ Error creando notificación:', error);
+    
     res.status(500).json({ error: 'Error creando notificación' });
   }
 };
@@ -228,20 +213,19 @@ exports.createNotification = async (req, res) => {
 // 🧹 Limpiar notificaciones expiradas (uso interno/cron)
 exports.cleanupExpiredNotifications = async (req, res) => {
   try {
-    console.log('🧹 Iniciando limpieza de notificaciones expiradas...');
-    
+
     const result = await Notification.deleteMany({
       expiresAt: { $lt: new Date() }
     });
     
-    console.log(`✅ ${result.deletedCount} notificaciones expiradas eliminadas`);
+    
     
     res.json({ 
       message: 'Limpieza completada',
       deleted: result.deletedCount
     });
   } catch (error) {
-    console.error('❌ Error en limpieza de notificaciones:', error);
+    
     res.status(500).json({ error: 'Error en limpieza de notificaciones' });
   }
 };
@@ -272,7 +256,7 @@ exports.getNotificationStats = async (req, res) => {
       byType: stats
     });
   } catch (error) {
-    console.error('❌ Error obteniendo estadísticas:', error);
+    
     res.status(500).json({ error: 'Error obteniendo estadísticas' });
   }
 };
@@ -454,10 +438,10 @@ async function sendPushNotification(fcmToken, notification) {
     };
 
     const response = await messaging.send(message);
-    console.log('✅ Notificación push enviada exitosamente:', response);
+    
     return response;
   } catch (error) {
-    console.error('❌ Error enviando notificación push:', error);
+    
     throw error;
   }
 }
@@ -473,8 +457,7 @@ exports.sendPushNotification = async (req, res) => {
       });
     }
 
-    console.log(`📤 Enviando notificación push a ${tokens.length} tokens`);
-    console.log('📱 Notificación:', notification);
+    
 
     const admin = require('../config/firebase-admin');
     const messaging = admin.messaging();
@@ -535,13 +518,13 @@ exports.sendPushNotification = async (req, res) => {
         });
         results.push({ token, success: true, messageId: response });
       } catch (error) {
-        console.error(`❌ Error enviando a token ${token}:`, error);
+        
         results.push({ token, success: false, error: error.message });
       }
     }
 
     const successCount = results.filter(r => r.success).length;
-    console.log(`✅ Notificaciones enviadas: ${successCount}/${tokens.length}`);
+    
 
     res.json({
       success: true,
@@ -550,7 +533,7 @@ exports.sendPushNotification = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error en endpoint sendPushNotification:', error);
+    
     res.status(500).json({ 
       error: 'Error enviando notificaciones push',
       details: error.message 

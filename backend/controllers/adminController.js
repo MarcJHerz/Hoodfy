@@ -9,7 +9,6 @@ const Subscription = require('../models/Subscription');
  */
 const getAllUsers = async (req, res) => {
   try {
-    console.log('🔍 Admin solicitando lista de usuarios');
     
     // Verificar que el usuario sea admin
     if (req.user.role !== 'admin') {
@@ -24,7 +23,6 @@ const getAllUsers = async (req, res) => {
       .select('email username displayName role status createdAt lastLogin')
       .sort({ createdAt: -1 });
 
-    console.log(`📊 Encontrados ${users.length} usuarios`);
 
     // Obtener estadísticas para cada usuario
     const usersWithStats = await Promise.all(
@@ -79,7 +77,6 @@ const getAllUsers = async (req, res) => {
             )
           };
         } catch (error) {
-          console.error(`❌ Error obteniendo estadísticas para usuario ${user._id}:`, error);
           // Retornar usuario con estadísticas básicas en caso de error
           return {
             id: user._id,
@@ -103,7 +100,6 @@ const getAllUsers = async (req, res) => {
       })
     );
 
-    console.log(`✅ Estadísticas calculadas para ${usersWithStats.length} usuarios`);
 
     res.json({
       success: true,
@@ -113,7 +109,6 @@ const getAllUsers = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error obteniendo usuarios para admin:', error);
     res.status(500).json({ 
       error: 'Error interno del servidor',
       message: 'No se pudieron obtener los usuarios'
@@ -126,7 +121,6 @@ const getAllUsers = async (req, res) => {
  */
 const getUserStats = async (req, res) => {
   try {
-    console.log('📊 Admin solicitando estadísticas de usuarios');
     
     // Verificar que el usuario sea admin
     if (req.user.role !== 'admin') {
@@ -197,7 +191,6 @@ const getUserStats = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error obteniendo estadísticas de usuarios:', error);
     res.status(500).json({ 
       error: 'Error interno del servidor',
       message: 'No se pudieron obtener las estadísticas'
@@ -256,7 +249,6 @@ const updateUserRole = async (req, res) => {
       });
     }
 
-    console.log(`✅ Rol de usuario ${user.email} cambiado a ${newRole}`);
 
     res.json({
       success: true,
@@ -271,7 +263,6 @@ const updateUserRole = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error actualizando rol de usuario:', error);
     res.status(500).json({ 
       error: 'Error interno del servidor',
       message: 'No se pudo actualizar el rol del usuario'
@@ -330,7 +321,6 @@ const updateUserStatus = async (req, res) => {
       });
     }
 
-    console.log(`✅ Estado de usuario ${user.email} cambiado a ${newStatus}`);
 
     res.json({
       success: true,
@@ -345,7 +335,6 @@ const updateUserStatus = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error actualizando estado de usuario:', error);
     res.status(500).json({ 
       error: 'Error interno del servidor',
       message: 'No se pudo actualizar el estado del usuario'

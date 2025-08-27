@@ -60,7 +60,6 @@ router.post('/subscribe', verifyToken, async (req, res) => {
       subscription: newSubscription 
     });
   } catch (error) {
-    console.error('❌ Error al suscribirse:', error);
     res.status(500).json({ error: 'Error al procesar la suscripción' });
   }
 });
@@ -109,7 +108,6 @@ router.post('/cancel', verifyToken, async (req, res) => {
       subscription 
     });
   } catch (error) {
-    console.error('❌ Error al cancelar suscripción:', error);
     res.status(500).json({ error: 'Error al cancelar suscripción' });
   }
 });
@@ -120,7 +118,6 @@ router.get('/my-subscriptions', verifyToken, async (req, res) => {
     // Verificar que el usuario existe
     const user = await User.findById(req.userId);
     if (!user) {
-      console.error('❌ Usuario no encontrado:', req.userId);
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
     
@@ -134,7 +131,6 @@ router.get('/my-subscriptions', verifyToken, async (req, res) => {
     
     res.json(filtered);
   } catch (err) {
-    console.error('❌ Error al obtener suscripciones:', err);
     res.status(500).json({ error: 'Error al obtener suscripciones' });
   }
 });
@@ -173,7 +169,6 @@ router.get('/by-user', verifyToken, async (req, res) => {
     
     res.json(formattedCommunities);
   } catch (error) {
-    console.error('❌ Error al obtener comunidades suscritas:', error);
     res.status(500).json({ error: 'Error al obtener comunidades suscritas' });
   }
 });
@@ -225,7 +220,6 @@ router.post('/:id/join', verifyToken, async (req, res) => {
       subscription
     });
   } catch (error) {
-    console.error('❌ Error al unirse a la comunidad:', error);
     res.status(500).json({ error: 'Error al procesar la solicitud' });
   }
 });
@@ -247,7 +241,6 @@ router.get('/check/:communityId', verifyToken, async (req, res) => {
       subscription: subscription
     });
   } catch (error) {
-    console.error('❌ Error al verificar suscripción:', error);
     res.status(500).json({ error: 'Error al verificar suscripción' });
   }
 });
@@ -288,7 +281,6 @@ router.get('/debug-subscriptions', verifyToken, async (req, res) => {
     });
     
   } catch (error) {
-    console.error('❌ Error en diagnóstico de suscripciones:', error);
     res.status(500).json({ error: 'Error en diagnóstico de suscripciones' });
   }
 });
@@ -319,7 +311,6 @@ router.get('/community/:communityId/subscribers', async (req, res) => {
 
     res.json(subscribers);
   } catch (error) {
-    console.error('❌ Error al obtener suscriptores:', error);
     res.status(500).json({ error: 'Error al obtener suscriptores' });
   }
 });
@@ -357,7 +348,6 @@ router.get('/diagnostic', verifyToken, async (req, res) => {
     
     res.json(diagnostic);
   } catch (error) {
-    console.error('❌ Error en diagnóstico:', error);
     res.status(500).json({ error: 'Error en diagnóstico' });
   }
 });

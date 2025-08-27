@@ -78,7 +78,6 @@ router.post('/register', validateRegistration, validateResult, async (req, res) 
       token
     });
   } catch (error) {
-    console.error('❌ Error en registro:', error);
     res.status(500).json({ 
       error: 'Error al registrar usuario',
       message: error.message 
@@ -140,7 +139,6 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error en login:', error);
     res.status(401).json({ error: 'Token inválido' });
   }
 });
@@ -177,7 +175,6 @@ router.post('/refresh-token', async (req, res) => {
       token: newToken
     });
   } catch (error) {
-    console.error('❌ Error al refrescar token:', error);
     res.status(401).json({
       error: 'Token inválido',
       details: { token: 'El refresh token no es válido' }
@@ -197,7 +194,6 @@ router.get('/me', verifyToken, async (req, res) => {
 
     res.json(user);
   } catch (error) {
-    console.error('Error al obtener perfil:', error);
     res.status(500).json({ error: 'Error al obtener el perfil' });
   }
 });
@@ -230,7 +226,6 @@ router.get('/verify-admin', verifyToken, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error verificando admin:', error);
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 });

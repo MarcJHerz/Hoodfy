@@ -41,7 +41,6 @@ router.get('/my-allies', verifyToken, async (req, res) => {
       allies: formattedAllies
     });
   } catch (error) {
-    console.error('❌ Error al obtener aliados:', error);
     res.status(500).json({ 
       error: 'Error al obtener aliados',
       message: error.message 
@@ -111,7 +110,6 @@ router.post('/add-ally', verifyToken, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('❌ Error al agregar aliado:', error);
     
     if (error.code === 11000) {
       return res.status(400).json({ 
@@ -157,7 +155,6 @@ router.delete('/remove-ally/:userId', verifyToken, async (req, res) => {
       message: 'Aliado eliminado con éxito'
     });
   } catch (error) {
-    console.error('❌ Error al eliminar aliado:', error);
     res.status(500).json({ 
       error: 'Error al eliminar aliado',
       message: error.message 
@@ -181,7 +178,6 @@ router.get('/check/:targetUserId', verifyToken, async (req, res) => {
       isAlly: !!ally
     });
   } catch (error) {
-    console.error('❌ Error al verificar aliado:', error);
     res.status(500).json({ 
       error: 'Error al verificar aliado',
       message: error.message 
@@ -219,7 +215,6 @@ router.get('/of/:userId', verifyToken, async (req, res) => {
       allies: formattedAllies
     });
   } catch (error) {
-    console.error('❌ Error al obtener aliados de usuario:', error);
     res.status(500).json({
       error: 'Error al obtener aliados de usuario',
       message: error.message

@@ -70,7 +70,7 @@ router.post('/stripe-connect/account', async (req, res) => {
       type: 'account_onboarding'
     });
 
-    console.log('✅ Link de onboarding creado');
+    
 
     res.json({
       success: true,
@@ -92,7 +92,6 @@ router.post('/stripe-connect/account', async (req, res) => {
 // Obtener estado de la cuenta de Stripe Connect del usuario
 router.get('/stripe-connect/status', async (req, res) => {
   try {
-    console.log('🔍 Obteniendo estado de cuenta de Stripe Connect del usuario...');
     
     if (!stripe) {
       return res.status(503).json({ error: 'Stripe no está configurado' });

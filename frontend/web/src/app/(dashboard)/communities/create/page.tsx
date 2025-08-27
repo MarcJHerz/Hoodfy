@@ -100,11 +100,36 @@ export default function CreateCommunityPage() {
 
     try {
       setLoading(true);
+      
+      let customPriceData = null;
+      
+      // Si es precio personalizado, crear producto y precio en Stripe primero
+      if (formData.priceType === 'custom') {
+        try {
+          console.log('💰 Creando producto y precio personalizado en Stripe...');
+          const response = await api.post('/api/stripe/create-product-price', {
+            communityName: formData.name,
+            price: formData.price
+          });
+          customPriceData = response.data;
+          console.log('✅ Producto y precio creados:', customPriceData);
+        } catch (error: any) {
+          console.error('❌ Error creando producto/precio en Stripe:', error);
+          toast.error('Error creating custom price in Stripe. Please try again.');
+          return;
+        }
+      }
+      
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
       formDataToSend.append('description', formData.description);
       formDataToSend.append('priceType', formData.priceType);
       formDataToSend.append('price', formData.price.toString());
+      
+      // Agregar datos del precio personalizado si existe
+      if (customPriceData) {
+        formDataToSend.append('customPriceData', JSON.stringify(customPriceData));
+      }
       
       if (coverImage) {
         formDataToSend.append('coverImage', coverImage);

@@ -75,7 +75,6 @@ router.post('/:postId', verifyToken, async (req, res) => {
           postId,
           newComment._id
         );
-        console.log('✅ Notificación de nuevo comentario creada para el autor del post');
       }
 
       // Si es una respuesta, notificar también al autor del comentario padre
@@ -89,11 +88,9 @@ router.post('/:postId', verifyToken, async (req, res) => {
             postId,
             newComment._id
           );
-          console.log('✅ Notificación de respuesta creada para el autor del comentario padre');
         }
       }
     } catch (notificationError) {
-      console.error('❌ Error creando notificaciones de comentario:', notificationError);
       // No fallar el comentario si las notificaciones fallan
     }
 
@@ -102,7 +99,6 @@ router.post('/:postId', verifyToken, async (req, res) => {
       comment: populatedComment
     });
   } catch (error) {
-    console.error('❌ Error al agregar comentario:', error);
     res.status(500).json({ 
       error: 'Error al agregar comentario',
       message: error.message 
@@ -154,7 +150,6 @@ router.get('/post/:postId', async (req, res) => {
 
     res.json(commentsWithReplies);
   } catch (error) {
-    console.error('Error al obtener comentarios:', error);
     res.status(500).json({ error: 'Error al obtener comentarios' });
   }
 });
@@ -188,7 +183,6 @@ router.post('/:commentId/like', verifyToken, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('❌ Error al dar like:', error);
     res.status(500).json({ 
       error: 'Error al dar like',
       message: error.message 
@@ -225,7 +219,6 @@ router.post('/:commentId/unlike', verifyToken, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('❌ Error al quitar like:', error);
     res.status(500).json({ 
       error: 'Error al quitar like',
       message: error.message 
@@ -260,7 +253,6 @@ router.delete('/:commentId', verifyToken, async (req, res) => {
     await Comment.findByIdAndDelete(req.params.commentId);
     res.json({ message: 'Comentario eliminado con éxito' });
   } catch (error) {
-    console.error('❌ Error al eliminar comentario:', error);
     res.status(500).json({ 
       error: 'Error al eliminar comentario',
       message: error.message 

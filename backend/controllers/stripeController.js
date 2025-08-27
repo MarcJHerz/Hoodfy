@@ -125,8 +125,6 @@ exports.createCheckoutSession = async (req, res) => {
       frontendUrl = 'https://www.hoodfy.com';
     }
     
-    console.log('🌐 URL del frontend detectada:', frontendUrl);
-    
     // Configuración de la sesión de checkout
     const sessionConfig = {
       payment_method_types: ['card'],
@@ -140,8 +138,6 @@ exports.createCheckoutSession = async (req, res) => {
 
     // Si la comunidad tiene Stripe Connect configurado, agregar split payments
     if (community.stripeConnectAccountId && community.stripeConnectStatus === 'active') {
-      console.log('💳 Comunidad con Stripe Connect activo, configurando split payments...');
-      
       // Calcular el split de pagos (88% creador, 12% plataforma)
       const paymentSplit = stripeConnect.calculatePaymentSplit(community.price);
       
@@ -151,19 +147,10 @@ exports.createCheckoutSession = async (req, res) => {
           destination: community.stripeConnectAccountId,
         },
       };
-      
-      console.log('💰 Split de pagos configurado:', {
-        total: paymentSplit.total,
-        platformFee: paymentSplit.platformFee,
-        creatorAmount: paymentSplit.creatorAmount
-      });
-    } else {
-      console.log('ℹ️ Comunidad sin Stripe Connect, usando flujo normal');
     }
     
     const session = await stripe.checkout.sessions.create(sessionConfig);
     
-    console.log('✅ Sesión creada exitosamente:', session.url);
     res.json({ url: session.url });
   } catch (error) {
     console.error('❌ Error detallado creando sesión de checkout:', {
@@ -182,10 +169,7 @@ exports.createCheckoutSession = async (req, res) => {
 // Webhook de Stripe
 exports.stripeWebhook = async (req, res) => {
   try {
-    console.log('📨 Webhook recibido de Stripe');
-    
     if (!stripe) {
-      console.error('❌ Stripe no está configurado en webhook');
       return res.status(503).json({ error: 'Stripe no está configurado' });
     }
 
@@ -198,23 +182,14 @@ exports.stripeWebhook = async (req, res) => {
     
     if (host && host.includes('hoodfy.com')) {
       webhookSecret = process.env.STRIPE_WEBHOOK_SECRET_HOODFY;
-      console.log('🌐 Usando webhook secret de Hoodfy.com');
-    } else {
-      console.log('🌐 Usando webhook secret de Qahood.com');
     }
     
     try {
       event = stripe.webhooks.constructEvent(req.rawBody, sig, webhookSecret);
-      console.log('✅ Webhook verificado exitosamente');
     } catch (err) {
-      console.error('❌ Error de verificación de webhook:', err.message);
-      console.error('🔍 Host detectado:', host);
-      console.error('🔑 Webhook secret usado:', webhookSecret ? 'Presente' : 'No encontrado');
+      console.error('Error de verificación de webhook:', err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
-    
-    console.log('🔍 Tipo de evento:', event.type);
-    console.log('📋 Datos del evento:', event.data.object);
     
     // Manejar diferentes tipos de eventos de Stripe
     switch (event.type) {
@@ -237,14 +212,11 @@ exports.stripeWebhook = async (req, res) => {
       case 'invoice.payment_succeeded':
         await handlePaymentSucceeded(event.data.object);
         break;
-        
-      default:
-        console.log('ℹ️ Evento no manejado:', event.type);
     }
     
     res.json({ received: true });
   } catch (error) {
-    console.error('❌ Error en webhook de Stripe:', error);
+    console.error('Error en webhook de Stripe:', error);
     res.status(500).json({ error: 'Error procesando webhook' });
   }
 };

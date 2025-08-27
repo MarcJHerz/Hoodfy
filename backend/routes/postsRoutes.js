@@ -156,7 +156,6 @@ router.get('/community/:communityId', rateLimiter, async (req, res) => {
 
     res.json(posts);
   } catch (error) {
-    console.error('Error getting posts:', error);
     res.status(500).json({ error: 'Error getting posts' });
   }
 });
@@ -182,7 +181,6 @@ router.post('/:postId/like', rateLimiter, async (req, res) => {
       likesCount: post.likes.length 
     });
   } catch (error) {
-    console.error('Error liking post:', error);
     res.status(500).json({ error: 'Error liking the post' });
   }
 });
@@ -208,7 +206,6 @@ router.post('/:postId/unlike', rateLimiter, async (req, res) => {
       likesCount: post.likes.length 
     });
   } catch (error) {
-    console.error('Error unliking post:', error);
     res.status(500).json({ error: 'Error unliking the post' });
   }
 });
@@ -243,7 +240,6 @@ router.post('/:postId/comment', rateLimiter, async (req, res) => {
       comment: post.comments[post.comments.length - 1]
     });
   } catch (error) {
-    console.error('Error commenting:', error);
     res.status(500).json({ error: 'Error adding the comment' });
   }
 });
@@ -274,7 +270,6 @@ router.delete('/:postId', rateLimiter, async (req, res) => {
 
     res.json({ message: 'Post deleted successfully' });
   } catch (error) {
-    console.error('Error deleting post:', error);
     res.status(500).json({ error: 'Error deleting the post' });
   }
 });
@@ -380,7 +375,6 @@ router.get('/home/:userId', async (req, res) => {
 
     res.json(processedPosts);
   } catch (error) {
-    console.error('❌ Error al obtener posts para HomeScreen:', error);
     res.status(500).json({ 
       error: 'Error al obtener los posts',
       details: error.message 
@@ -454,7 +448,6 @@ router.post('/:postId/comments', rateLimiter, async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Error adding comment:', error);
     res.status(500).json({ error: 'Error adding the comment' });
   }
 });
@@ -489,7 +482,6 @@ router.get('/:postId/comments', rateLimiter, async (req, res) => {
 
     res.json(comments);
   } catch (error) {
-    console.error('Error getting comments:', error);
     res.status(500).json({ error: 'Error getting comments' });
   }
 });
@@ -520,7 +512,6 @@ router.post('/create', upload.array('media', 10), async (req, res) => {
         });
         }
       } catch (error) {
-        console.error('Error uploading files to S3:', error);
         return res.status(500).json({ error: 'Error uploading files' });
       }
     }
@@ -537,7 +528,6 @@ router.post('/create', upload.array('media', 10), async (req, res) => {
     await post.save();
     res.status(201).json(post);
   } catch (error) {
-    console.error('Error creating post:', error);
     res.status(500).json({ 
       error: 'Error creating the post',
       details: error.message 

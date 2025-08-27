@@ -43,16 +43,8 @@ const upload = multer({
     fieldNameSize: 100 // Tamaño máximo del nombre del campo
   },
   fileFilter: (req, file, cb) => {
-    console.log('🔍 Archivo recibido en userRoutes:', {
-      originalname: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size,
-      sizeInMB: (file.size / (1024 * 1024)).toFixed(2) + ' MB'
-    });
-    
     // Detectar el tipo MIME real basado en la extensión
     const realMimeType = detectMimeType(file);
-    console.log('📋 Tipo MIME detectado:', realMimeType);
     
     const allowedTypes = [
       'image/jpeg', 'image/png', 'image/gif', 'image/webp', 
@@ -60,10 +52,8 @@ const upload = multer({
     ];
     
     if (allowedTypes.includes(realMimeType)) {
-      console.log('✅ Archivo aceptado en userRoutes');
       cb(null, true);
     } else {
-      console.log('❌ Archivo rechazado en userRoutes - tipo no permitido:', realMimeType);
       cb(new Error(`Tipo de archivo no soportado: ${realMimeType}. Solo se permiten imágenes (JPEG, PNG, GIF, WebP, HEIC, HEIF)`));
     }
   }
@@ -71,13 +61,6 @@ const upload = multer({
 
 // Middleware para manejar errores de multer
 const handleMulterError = (error, req, res, next) => {
-  console.log('🚨 Error de multer detectado en userRoutes:', {
-    message: error.message,
-    code: error.code,
-    field: error.field,
-    file: error.file
-  });
-  
   if (error.code === 'LIMIT_FILE_SIZE') {
     return res.status(413).json({
       error: 'Archivo demasiado grande',
@@ -123,7 +106,6 @@ router.put('/profile/photo', verifyToken, upload.single('profilePicture'), handl
       profilePicture: key 
     });
   } catch (error) {
-    console.error('❌ Error al actualizar la foto de perfil:', error);
     res.status(500).json({ error: 'Error al actualizar la foto de perfil' });
   }
 });
@@ -162,7 +144,6 @@ router.get('/profile', verifyToken, async (req, res) => {
       mainBadgeIcon
     });
   } catch (error) {
-    console.error('❌ Error al obtener el perfil:', error);
     res.status(500).json({ 
       error: 'Error al obtener el perfil',
       message: error.message 
@@ -215,7 +196,6 @@ router.get('/profile/:userId', verifyToken, async (req, res) => {
       mainBadgeIcon
     });
   } catch (error) {
-    console.error('❌ Error al obtener perfil de usuario:', error);
     if (error.name === 'CastError') {
       return res.status(400).json({ error: 'ID de usuario inválido' });
     }
@@ -255,7 +235,6 @@ router.put('/profile/update', verifyToken, upload.none(), async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('❌ Error al actualizar perfil:', error);
     res.status(500).json({ error: 'Error al actualizar perfil' });
   }
 });
@@ -266,7 +245,6 @@ router.get('/recommended', async (req, res) => {
     const users = await User.find().limit(10).select('_id name profilePicture bio');
     res.json(users);
   } catch (error) {
-    console.error('❌ Error al obtener usuarios recomendados:', error);
     res.status(500).json({ error: 'Error al obtener usuarios recomendados' });
   }
 });
@@ -288,7 +266,6 @@ router.get('/search', async (req, res) => {
 
     res.json(users);
   } catch (error) {
-    console.error('❌ Error en la búsqueda de usuarios:', error);
     res.status(500).json({ error: 'Error en la búsqueda de usuarios' });
   }
 });
@@ -313,7 +290,6 @@ router.put('/profile/blocks', verifyToken, async (req, res) => {
 
     res.json({ message: 'Bloques de perfil actualizados', profileBlocks: updatedUser.profileBlocks });
   } catch (error) {
-    console.error('❌ Error al actualizar bloques de perfil:', error);
     res.status(500).json({ error: 'Error al actualizar bloques de perfil' });
   }
 });
@@ -331,7 +307,6 @@ router.post('/fcm-token', verifyToken, async (req, res) => {
     
     res.json({ message: 'Token FCM guardado exitosamente' });
   } catch (error) {
-    console.error('Error guardando token FCM:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -356,7 +331,6 @@ router.post('/fcm-tokens', verifyToken, async (req, res) => {
     
     res.json({ tokens });
   } catch (error) {
-    console.error('Error obteniendo tokens FCM:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -420,7 +394,6 @@ router.post('/notifications/send', verifyToken, async (req, res) => {
     
     res.json({ success: true, response });
   } catch (error) {
-    console.error('Error enviando notificación:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

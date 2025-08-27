@@ -35,16 +35,8 @@ const upload = multer({
     fieldNameSize: 100 // Tamaño máximo del nombre del campo
   },
   fileFilter: (req, file, cb) => {
-    console.log('🔍 Archivo recibido en uploadRoutes:', {
-      originalname: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size,
-      sizeInMB: (file.size / (1024 * 1024)).toFixed(2) + ' MB'
-    });
-    
     // Detectar el tipo MIME real basado en la extensión
     const realMimeType = detectMimeType(file);
-    console.log('📋 Tipo MIME detectado:', realMimeType);
     
     const allowedTypes = [
       'image/jpeg', 'image/png', 'image/gif', 'image/webp', 
@@ -52,10 +44,8 @@ const upload = multer({
     ];
     
     if (allowedTypes.includes(realMimeType)) {
-      console.log('✅ Archivo aceptado en uploadRoutes');
       cb(null, true);
     } else {
-      console.log('❌ Archivo rechazado en uploadRoutes - tipo no permitido:', realMimeType);
       cb(new Error(`Tipo de archivo no soportado: ${realMimeType}. Solo se permiten imágenes (JPEG, PNG, GIF, WebP, HEIC, HEIF)`));
     }
   }
@@ -63,12 +53,6 @@ const upload = multer({
 
 // Middleware para manejar errores de multer
 const handleMulterError = (error, req, res, next) => {
-  console.log('🚨 Error de multer detectado en uploadRoutes:', {
-    message: error.message,
-    code: error.code,
-    field: error.field,
-    file: error.file
-  });
   
   if (error.code === 'LIMIT_FILE_SIZE') {
     return res.status(413).json({
