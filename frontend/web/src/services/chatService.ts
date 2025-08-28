@@ -37,6 +37,22 @@ interface FirestoreMessage {
   mediaName?: string;
   isEdited?: boolean;
   editedAt?: Timestamp;
+  // Campos para reacciones y respuestas
+  reactions?: Array<{
+    emoji: string;
+    users: string[];
+    count: number;
+  }>;
+  replyTo?: {
+    id: string;
+    content: string;
+    senderId: string;
+    senderName: string;
+    senderProfilePicture?: string;
+    timestamp: Timestamp;
+    type: 'text' | 'image' | 'video' | 'file';
+  };
+  status?: 'sent' | 'delivered' | 'read';
 }
 
 interface FirestoreChatRoom {
@@ -97,6 +113,18 @@ const firestoreMessageToMessage = (doc: any): Message | null => {
       mediaName: data.mediaName,
       isEdited: data.isEdited || false,
       editedAt: data.editedAt ? timestampToDate(data.editedAt) : undefined,
+      // Agregar campos de reacciones y respuestas
+      reactions: data.reactions || [],
+      replyTo: data.replyTo ? {
+        id: data.replyTo.id,
+        content: data.replyTo.content,
+        senderId: data.replyTo.senderId,
+        senderName: data.replyTo.senderName,
+        senderProfilePicture: data.replyTo.senderProfilePicture,
+        timestamp: timestampToDate(data.replyTo.timestamp),
+        type: data.replyTo.type
+      } : undefined,
+      status: data.status || 'sent'
     };
   } catch (error) {
     console.error('Error convirtiendo mensaje de Firestore:', error, data);
@@ -118,9 +146,21 @@ const messageToFirestore = (message: Omit<Message, 'id'>): Omit<FirestoreMessage
     mediaName: message.mediaName,
     isEdited: message.isEdited,
     editedAt: message.editedAt ? dateToTimestamp(message.editedAt) : undefined,
+    // Agregar campos de reacciones y respuestas
+    reactions: message.reactions || [],
+    replyTo: message.replyTo ? {
+      id: message.replyTo.id,
+      content: message.replyTo.content,
+      senderId: message.replyTo.senderId,
+      senderName: message.replyTo.senderName,
+      senderProfilePicture: message.replyTo.senderProfilePicture,
+      timestamp: dateToTimestamp(message.replyTo.timestamp),
+      type: message.replyTo.type
+    } : undefined,
+    status: message.status || 'sent'
   };
   // Elimina los campos undefined SOLO de los opcionales
-  ['senderProfilePicture','mediaUrl','mediaType','mediaName','isEdited','editedAt'].forEach((key) => data[key] === undefined && delete data[key]);
+  ['senderProfilePicture','mediaUrl','mediaType','mediaName','isEdited','editedAt','reactions','replyTo','status'].forEach((key) => data[key] === undefined && delete data[key]);
   return data;
 };
 

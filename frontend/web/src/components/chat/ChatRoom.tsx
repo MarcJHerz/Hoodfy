@@ -83,47 +83,34 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     };
   }, [chatId, user?._id, subscribeToMessages]);
 
-  // Efecto para preservar reacciones locales cuando Firebase actualiza mensajes
+  // Efecto para sincronizar reacciones entre Firebase y estado local
   useEffect(() => {
     if (messages.length > 0) {
       console.log('📊 Mensajes recibidos de Firebase:', messages.length);
       
-      // Restaurar reacciones desde localStorage
-      const reactionsKey = `chat_reactions_${chatId}`;
-      const savedReactions = localStorage.getItem(reactionsKey);
+      // Verificar si hay mensajes con reacciones de Firebase
+      const messagesWithFirebaseReactions = messages.filter(msg => 
+        msg.reactions && msg.reactions.length > 0
+      );
       
-      if (savedReactions) {
-        try {
-          const reactionsData = JSON.parse(savedReactions);
-          console.log('🔄 Restaurando reacciones desde localStorage:', reactionsData.length);
-          
-          // Aplicar reacciones guardadas a los mensajes
-          const updatedMessages = messages.map(msg => {
-            const savedReaction = reactionsData.find((r: any) => r.id === msg.id);
-            if (savedReaction && savedReaction.reactions) {
-              return { ...msg, reactions: savedReaction.reactions };
-            }
-            return msg;
-          });
-          
-          // Solo actualizar si hay cambios
-          const hasChanges = updatedMessages.some((msg, index) => 
-            JSON.stringify(msg.reactions) !== JSON.stringify(messages[index].reactions)
-          );
-          
-          if (hasChanges) {
-            useChatStore.getState().setMessages(updatedMessages);
-            console.log('✅ Reacciones restauradas desde localStorage');
-          }
-        } catch (error) {
-          console.error('❌ Error restaurando reacciones:', error);
-        }
+      if (messagesWithFirebaseReactions.length > 0) {
+        console.log('🎯 Mensajes con reacciones de Firebase:', messagesWithFirebaseReactions.length);
+        
+        // Actualizar localStorage con las reacciones de Firebase
+        const reactionsKey = `chat_reactions_${chatId}`;
+        const reactionsData = messagesWithFirebaseReactions.map(msg => ({
+          id: msg.id,
+          reactions: msg.reactions
+        }));
+        
+        localStorage.setItem(reactionsKey, JSON.stringify(reactionsData));
+        console.log('💾 Reacciones de Firebase guardadas en localStorage');
       }
       
-      // Verificar si hay mensajes con reacciones
-      const messagesWithReactions = messages.filter(msg => msg.reactions && msg.reactions.length > 0);
-      if (messagesWithReactions.length > 0) {
-        console.log('🎯 Mensajes con reacciones activas:', messagesWithReactions.length);
+      // Verificar si hay mensajes con respuestas
+      const messagesWithReplies = messages.filter(msg => msg.replyTo);
+      if (messagesWithReplies.length > 0) {
+        console.log('💬 Mensajes con respuestas:', messagesWithReplies.length);
       }
     }
   }, [messages, chatId]);
@@ -187,8 +174,10 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
       console.log('Adding reaction:', { messageId, emoji, userId: user._id });
       await chatService.addReaction(messageId, emoji, user._id);
       
-      // Forzar actualización local del estado
-      console.log('🔄 Forzando actualización local después de agregar reacción');
+      // Firebase se encargará de sincronizar las reacciones automáticamente
+      console.log('🔄 Reacción enviada a Firebase, esperando sincronización...');
+      
+      // Opcional: Actualización optimista local para mejor UX
       const updatedMessages = messages.map(msg => {
         if (msg.id === messageId) {
           const existingReactions = msg.reactions || [];
@@ -215,17 +204,9 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         return msg;
       });
       
-      // Actualizar el estado local y persistir en localStorage
+      // Actualización optimista local
       useChatStore.getState().setMessages(updatedMessages);
-      
-      // Guardar reacciones en localStorage para persistencia
-      const reactionsKey = `chat_reactions_${chatId}`;
-      const reactionsData = updatedMessages
-        .filter(msg => msg.reactions && msg.reactions.length > 0)
-        .map(msg => ({ id: msg.id, reactions: msg.reactions }));
-      
-      localStorage.setItem(reactionsKey, JSON.stringify(reactionsData));
-      console.log('✅ Estado local actualizado y reacciones persistidas');
+      console.log('✅ Actualización optimista local aplicada');
       
     } catch (error) {
       console.error('Error adding reaction:', error);
@@ -238,8 +219,10 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
       console.log('Removing reaction:', { messageId, emoji, userId: user._id });
       await chatService.removeReaction(messageId, emoji, user._id);
       
-      // Forzar actualización local del estado
-      console.log('🔄 Forzando actualización local después de remover reacción');
+      // Firebase se encargará de sincronizar las reacciones automáticamente
+      console.log('🔄 Reacción removida de Firebase, esperando sincronización...');
+      
+      // Opcional: Actualización optimista local para mejor UX
       const updatedMessages = messages.map(msg => {
         if (msg.id === messageId) {
           const existingReactions = msg.reactions || [];
@@ -260,17 +243,9 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         return msg;
       });
       
-      // Actualizar el estado local y persistir en localStorage
+      // Actualización optimista local
       useChatStore.getState().setMessages(updatedMessages);
-      
-      // Guardar reacciones actualizadas en localStorage
-      const reactionsKey = `chat_reactions_${chatId}`;
-      const reactionsData = updatedMessages
-        .filter(msg => msg.reactions && msg.reactions.length > 0)
-        .map(msg => ({ id: msg.id, reactions: msg.reactions }));
-      
-      localStorage.setItem(reactionsKey, JSON.stringify(reactionsData));
-      console.log('✅ Estado local actualizado y reacciones persistidas');
+      console.log('✅ Actualización optimista local aplicada');
       
     } catch (error) {
       console.error('Error removing reaction:', error);

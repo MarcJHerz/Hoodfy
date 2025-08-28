@@ -382,20 +382,11 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
            const showAvatar = index === 0 || messages[index - 1].senderId !== message.senderId;
            const showTimestamp = shouldShowTimestamp(message, index);
            
-           // Debugging solo para mensajes con reacciones o respuestas
-           if (message.reactions && message.reactions.length > 0) {
-             console.log('🎯 Mensaje con reacciones:', {
+           // Debugging solo para mensajes con reacciones o respuestas (reducido)
+           if (message.reactions && message.reactions.length > 0 && message.reactions.length > 1) {
+             console.log('🎯 Mensaje con múltiples reacciones:', {
                messageId: message.id,
-               reactions: message.reactions,
-               content: message.content?.substring(0, 50)
-             });
-           }
-           
-           if (message.replyTo) {
-             console.log('💬 Mensaje con respuesta:', {
-               messageId: message.id,
-               replyTo: message.replyTo,
-               content: message.content?.substring(0, 50)
+               reactionCount: message.reactions.length
              });
            }
           
@@ -452,22 +443,43 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
                         style={isOwnMessage ? { borderBottomRightRadius: '8px' } : { borderBottomLeftRadius: '8px' }}
                         onClick={() => onMessageClick?.(message)}
                       >
-                                                 {/* Respuesta al mensaje original */}
-                         {message.replyTo && (
-                           <div className="mb-3 p-3 bg-black/10 dark:bg-white/10 rounded-lg border-l-4 border-blue-500 hover:bg-black/20 dark:hover:bg-white/20 transition-colors duration-200">
-                             <div className="flex items-center space-x-2 mb-2">
-                               <svg className="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                               </svg>
-                               <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                                 Respondiendo a {message.replyTo.senderName}
-                               </p>
-                             </div>
-                             <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                               {message.replyTo.content || `${message.replyTo.type === 'image' ? '📷' : message.replyTo.type === 'video' ? '🎥' : '📄'} Archivo multimedia`}
-                             </p>
-                           </div>
-                         )}
+                                                                          {/* Respuesta al mensaje original - Estilo WhatsApp */}
+                          {message.replyTo && (
+                            <div className="mb-3 p-3 bg-black/20 dark:bg-white/20 rounded-lg border-l-4 border-blue-500 hover:bg-black/30 dark:hover:bg-white/30 transition-colors duration-200 cursor-pointer group/reply">
+                              <div className="flex items-center space-x-2 mb-2">
+                                <svg className="w-3 h-3 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                                </svg>
+                                <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 truncate">
+                                  Respondiendo a {message.replyTo.senderName}
+                                </p>
+                              </div>
+                              <div className="flex items-start space-x-2">
+                                {/* Icono del tipo de mensaje */}
+                                <div className="flex-shrink-0 mt-1">
+                                  {message.replyTo.type === 'image' ? (
+                                    <span className="text-lg">📷</span>
+                                  ) : message.replyTo.type === 'video' ? (
+                                    <span className="text-lg">🎥</span>
+                                  ) : message.replyTo.type === 'file' ? (
+                                    <span className="text-lg">📄</span>
+                                  ) : (
+                                    <span className="text-lg">💬</span>
+                                  )}
+                                </div>
+                                {/* Contenido de la respuesta */}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed font-medium">
+                                    {message.replyTo.content || 'Archivo multimedia'}
+                                  </p>
+                                  {/* Timestamp de la respuesta */}
+                                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1 opacity-75">
+                                    {formatTimestamp(new Date(message.replyTo.timestamp))}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
 
                         <MediaContent message={message} />
                         
