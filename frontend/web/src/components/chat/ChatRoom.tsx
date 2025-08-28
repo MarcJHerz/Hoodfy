@@ -83,7 +83,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     };
   }, [chatId, user?._id, subscribeToMessages]);
 
-  const handleSendMessage = async (content: string, type: 'text' | 'image' | 'video' | 'file', file?: File) => {
+  const handleSendMessage = async (content: string, type: 'text' | 'image' | 'video' | 'file', file?: File, replyTo?: Message) => {
     if (!user?._id || !content.trim()) return;
 
     setIsSending(true);
@@ -98,6 +98,16 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         mediaUrl: file ? URL.createObjectURL(file) : undefined,
         mediaType: file?.type,
         mediaName: file?.name,
+        // Agregar información de respuesta si existe
+        replyTo: replyTo ? {
+          id: replyTo.id,
+          content: replyTo.content,
+          senderId: replyTo.senderId,
+          senderName: replyTo.senderName,
+          senderProfilePicture: replyTo.senderProfilePicture,
+          timestamp: replyTo.timestamp,
+          type: replyTo.type
+        } : undefined,
       };
 
       await sendMessage(messageData);

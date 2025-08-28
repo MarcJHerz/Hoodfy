@@ -13,7 +13,7 @@ export interface MessageReply {
   senderName: string;
   senderProfilePicture?: string;
   timestamp: Date;
-  type: 'text' | 'image' | 'video' | 'file';
+  type: 'text' | 'image' | 'video' | 'file' | 'audio';
 }
 
 export interface Message {

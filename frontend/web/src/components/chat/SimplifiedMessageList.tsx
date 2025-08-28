@@ -25,6 +25,122 @@ interface SimplifiedMessageListProps {
   onReplyToMessage?: (message: Message) => void;
 }
 
+// Componente para opciones de mensaje mejorado
+const MessageOptionsButton: React.FC<{
+  message: Message;
+  onReplyToMessage?: (message: Message) => void;
+  onAddReaction?: (messageId: string, emoji: string) => void;
+  onRemoveReaction?: (messageId: string, emoji: string) => void;
+  currentUserId: string;
+}> = ({ message, onReplyToMessage, onAddReaction, onRemoveReaction, currentUserId }) => {
+  const [showOptions, setShowOptions] = useState(false);
+  const [isLongPress, setIsLongPress] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout>();
+
+  const handleMouseDown = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsLongPress(true);
+      setShowOptions(true);
+    }, 500); // 500ms para long press
+  };
+
+  const handleMouseUp = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    if (!isLongPress) {
+      // Click normal - toggle options
+      setShowOptions(!showOptions);
+    }
+    setIsLongPress(false);
+  };
+
+  const handleTouchStart = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsLongPress(true);
+      setShowOptions(true);
+    }, 800); // 800ms para mobile long press
+  };
+
+  const handleTouchEnd = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    if (!isLongPress) {
+      setShowOptions(!showOptions);
+    }
+    setIsLongPress(false);
+  };
+
+  return (
+    <div className="relative">
+      {/* Botón principal */}
+      <button
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className="p-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hover:scale-110 transition-all duration-150"
+        title="Opciones del mensaje"
+      >
+        <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+        </svg>
+      </button>
+
+      {/* Menú de opciones */}
+      {showOptions && (
+        <div className="absolute top-0 right-12 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-2 flex items-center space-x-1 animate-scale-in z-50">
+          {/* Botón de respuesta */}
+          <button
+            onClick={() => {
+              onReplyToMessage?.(message);
+              setShowOptions(false);
+            }}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
+            title="Responder"
+          >
+            <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+            </svg>
+          </button>
+          
+          {/* Emojis de reacción */}
+          {['❤️', '👍', '😂', '😮', '😢', '🔥'].map((emoji) => (
+            <button
+              key={emoji}
+              onClick={() => {
+                const existingReaction = message.reactions?.find(r => r.emoji === emoji);
+                if (existingReaction?.users.includes(currentUserId)) {
+                  onRemoveReaction?.(message.id, emoji);
+                } else {
+                  onAddReaction?.(message.id, emoji);
+                }
+                setShowOptions(false);
+              }}
+              className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-150 hover:scale-110"
+              title={`Reaccionar con ${emoji}`}
+            >
+              <span className="text-lg">{emoji}</span>
+            </button>
+          ))}
+
+          {/* Botón para cerrar */}
+          <button
+            onClick={() => setShowOptions(false)}
+            className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 ml-2"
+            title="Cerrar"
+          >
+            <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
   messages,
   isLoading,
@@ -291,6 +407,18 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
                         style={isOwnMessage ? { borderBottomRightRadius: '8px' } : { borderBottomLeftRadius: '8px' }}
                         onClick={() => onMessageClick?.(message)}
                       >
+                        {/* Respuesta al mensaje original */}
+                        {message.replyTo && (
+                          <div className="mb-3 p-2 bg-black/10 dark:bg-white/10 rounded-lg border-l-2 border-blue-500">
+                            <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">
+                              Respondiendo a {message.replyTo.senderName}
+                            </p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                              {message.replyTo.content || `${message.replyTo.type === 'image' ? '📷' : message.replyTo.type === 'video' ? '🎥' : '📄'} Archivo multimedia`}
+                            </p>
+                          </div>
+                        )}
+
                         <MediaContent message={message} />
                         
                         {/* Estado del mensaje y timestamp */}
@@ -332,39 +460,15 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
                         </div>
                       )}
 
-                      {/* Botones de acción al hover */}
-                      <div className="absolute top-0 right-0 transform translate-x-1 -translate-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <div className="flex items-center space-x-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-lg p-1">
-                          {/* Botón de respuesta */}
-                          <button
-                            onClick={() => onReplyToMessage?.(message)}
-                            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
-                            title="Responder"
-                          >
-                            <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                            </svg>
-                          </button>
-                          
-                          {/* Botones de reacción rápida */}
-                          {['❤️', '👍', '😂', '😮'].map((emoji) => (
-                            <button
-                              key={emoji}
-                              onClick={() => {
-                                const existingReaction = message.reactions?.find(r => r.emoji === emoji);
-                                if (existingReaction?.users.includes(currentUserId)) {
-                                  onRemoveReaction?.(message.id, emoji);
-                                } else {
-                                  onAddReaction?.(message.id, emoji);
-                                }
-                              }}
-                              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-150 hover:scale-110"
-                              title={`Reaccionar con ${emoji}`}
-                            >
-                              <span className="text-sm">{emoji}</span>
-                            </button>
-                          ))}
-                        </div>
+                      {/* Botón de opciones de mensaje */}
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <MessageOptionsButton 
+                          message={message}
+                          onReplyToMessage={onReplyToMessage}
+                          onAddReaction={onAddReaction}
+                          onRemoveReaction={onRemoveReaction}
+                          currentUserId={currentUserId}
+                        />
                       </div>
                     </div>
                   </div>
