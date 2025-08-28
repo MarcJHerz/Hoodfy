@@ -41,7 +41,10 @@ const MessageOptionsButton: React.FC<{
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
   const handleInteractionStart = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
+    // Solo prevenir comportamiento por defecto en touch
+    if (e.type === 'touchstart') {
+      e.preventDefault();
+    }
     e.stopPropagation();
     
     if (timeoutRef.current) {
@@ -61,7 +64,10 @@ const MessageOptionsButton: React.FC<{
   };
 
   const handleInteractionEnd = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
+    // Solo prevenir comportamiento por defecto en touch
+    if (e.type === 'touchend') {
+      e.preventDefault();
+    }
     e.stopPropagation();
     
     if (timeoutRef.current) {
@@ -80,8 +86,8 @@ const MessageOptionsButton: React.FC<{
     };
 
     if (showOptions) {
-      document.addEventListener('click', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
+      document.addEventListener('click', handleClickOutside, { passive: false });
+      document.addEventListener('touchstart', handleClickOutside, { passive: false });
     }
 
     return () => {

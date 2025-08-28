@@ -108,14 +108,31 @@ const ImprovedMessageInput: React.FC<ImprovedMessageInputProps> = ({
     try {
       // Subir archivo a S3
       console.log('📎 Subiendo archivo a S3:', file.name);
+      console.log('🔍 Detalles del archivo:', {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        chatId: chatId || 'unknown-chat'
+      });
       
       const formData = new FormData();
       formData.append('file', file);
       formData.append('chatId', chatId || 'unknown-chat');
       
       const token = await auth.currentUser?.getIdToken();
+      console.log('🔑 Token obtenido:', token ? '✅' : '❌');
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload/chat`, {
+      // Usar el mismo patrón que el resto del proyecto
+      const API_URL = typeof window !== 'undefined' ? 
+        (window.location.hostname === 'hoodfy.com' || window.location.hostname === 'www.hoodfy.com' 
+          ? 'https://api.hoodfy.com' 
+          : 'https://api.qahood.com') 
+        : 'https://api.qahood.com';
+
+      console.log('🌐 API URL:', API_URL);
+      console.log('📤 FormData entries:', Array.from(formData.entries()));
+
+      const response = await fetch(`${API_URL}/api/upload/chat`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
