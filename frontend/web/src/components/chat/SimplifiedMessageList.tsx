@@ -37,60 +37,86 @@ const MessageOptionsButton: React.FC<{
   const [isLongPress, setIsLongPress] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
-  const handleMouseDown = () => {
-    timeoutRef.current = setTimeout(() => {
-      setIsLongPress(true);
-      setShowOptions(true);
-    }, 500); // 500ms para long press
-  };
+  // Detectar si es dispositivo móvil
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-  const handleMouseUp = () => {
+  const handleInteractionStart = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    if (!isLongPress) {
-      // Click normal - toggle options
+
+    if (isMobile) {
+      // En mobile: solo long press
+      timeoutRef.current = setTimeout(() => {
+        setIsLongPress(true);
+        setShowOptions(true);
+      }, 600); // 600ms para mobile
+    } else {
+      // En desktop: click directo
       setShowOptions(!showOptions);
     }
-    setIsLongPress(false);
   };
 
-  const handleTouchStart = () => {
-    timeoutRef.current = setTimeout(() => {
-      setIsLongPress(true);
-      setShowOptions(true);
-    }, 800); // 800ms para mobile long press
-  };
-
-  const handleTouchEnd = () => {
+  const handleInteractionEnd = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    if (!isLongPress) {
-      setShowOptions(!showOptions);
+    
+    if (isMobile && isLongPress) {
+      setIsLongPress(false);
     }
-    setIsLongPress(false);
   };
+
+  // Cerrar opciones cuando se toca fuera
+  React.useEffect(() => {
+    const handleClickOutside = () => {
+      setShowOptions(false);
+    };
+
+    if (showOptions) {
+      document.addEventListener('click', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [showOptions]);
 
   return (
     <div className="relative">
       {/* Botón principal */}
       <button
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
+        onMouseDown={handleInteractionStart}
+        onMouseUp={handleInteractionEnd}
+        onTouchStart={handleInteractionStart}
+        onTouchEnd={handleInteractionEnd}
         className="p-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hover:scale-110 transition-all duration-150"
-        title="Opciones del mensaje"
+        title={isMobile ? "Mantén presionado para opciones" : "Opciones del mensaje"}
       >
         <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
         </svg>
       </button>
 
-      {/* Menú de opciones */}
+      {/* Menú de opciones con posicionamiento inteligente */}
       {showOptions && (
-        <div className="absolute top-0 right-12 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-2 flex items-center space-x-1 animate-scale-in z-50">
+        <div 
+          className="fixed bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-2 flex items-center space-x-1 animate-scale-in z-50"
+          style={{
+            // Posicionamiento inteligente para evitar salirse de pantalla
+            top: '10px',
+            right: message.senderId === currentUserId ? '10px' : 'auto',
+            left: message.senderId !== currentUserId ? '10px' : 'auto',
+          }}
+        >
           {/* Botón de respuesta */}
           <button
             onClick={() => {

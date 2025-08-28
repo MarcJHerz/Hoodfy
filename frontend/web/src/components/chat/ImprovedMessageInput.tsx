@@ -13,14 +13,16 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuthStore } from '@/stores/authStore';
 import { Message } from '@/types/chat';
+import { auth } from '@/config/firebase';
 
 interface ImprovedMessageInputProps {
-  onSendMessage: (content: string, type: 'text' | 'image' | 'video' | 'file', file?: File, replyTo?: Message) => void;
+  onSendMessage: (content: string, type: 'text' | 'image' | 'video' | 'file', file?: File, replyTo?: Message, s3Key?: string, s3Url?: string) => void;
   isLoading?: boolean;
   placeholder?: string;
   disabled?: boolean;
   replyingTo?: Message | null;
   onCancelReply?: () => void;
+  chatId?: string; // Añadir chatId
 }
 
 const QUICK_EMOJIS = [
@@ -33,7 +35,8 @@ const ImprovedMessageInput: React.FC<ImprovedMessageInputProps> = ({
   placeholder = "Escribe un mensaje...",
   disabled = false,
   replyingTo,
-  onCancelReply
+  onCancelReply,
+  chatId
 }) => {
   const { user } = useAuthStore();
   const [message, setMessage] = useState('');
@@ -102,7 +105,39 @@ const ImprovedMessageInput: React.FC<ImprovedMessageInputProps> = ({
       messageType = 'video';
     }
 
-    onSendMessage(file.name, messageType, file, replyingTo || undefined);
+    try {
+      // Subir archivo a S3
+      console.log('📎 Subiendo archivo a S3:', file.name);
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('chatId', chatId || 'unknown-chat');
+      
+      const token = await auth.currentUser?.getIdToken();
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload/chat`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Error uploading file');
+      }
+
+      const uploadResult = await response.json();
+      console.log('✅ Archivo subido a S3:', uploadResult);
+
+      // Enviar mensaje con URL de S3
+      onSendMessage(file.name, messageType, file, replyingTo || undefined, uploadResult.key, uploadResult.url);
+      
+    } catch (error) {
+      console.error('❌ Error subiendo archivo:', error);
+      // Fallback: enviar sin S3
+      onSendMessage(file.name, messageType, file, replyingTo || undefined);
+    }
     
     // Limpiar respuesta después de enviar archivo
     if (replyingTo && onCancelReply) {

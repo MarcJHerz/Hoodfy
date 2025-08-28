@@ -703,6 +703,83 @@ class ChatService {
       return null;
     }
   }
+
+  // Añadir reacción a un mensaje
+  async addReaction(messageId: string, emoji: string, userId: string): Promise<void> {
+    try {
+      const messageRef = doc(db, 'messages', messageId);
+      const messageDoc = await getDoc(messageRef);
+      
+      if (!messageDoc.exists()) {
+        throw new Error('Message not found');
+      }
+
+      const messageData = messageDoc.data();
+      const reactions = messageData.reactions || [];
+      
+      // Buscar si ya existe una reacción con este emoji
+      const existingReactionIndex = reactions.findIndex((r: any) => r.emoji === emoji);
+      
+      if (existingReactionIndex >= 0) {
+        // Si existe, añadir usuario si no está ya
+        const existingReaction = reactions[existingReactionIndex];
+        if (!existingReaction.users.includes(userId)) {
+          existingReaction.users.push(userId);
+          existingReaction.count = existingReaction.users.length;
+        }
+      } else {
+        // Si no existe, crear nueva reacción
+        reactions.push({
+          emoji,
+          users: [userId],
+          count: 1
+        });
+      }
+
+      await updateDoc(messageRef, { reactions });
+      console.log(`✅ Reacción ${emoji} añadida al mensaje ${messageId}`);
+    } catch (error) {
+      console.error('❌ Error añadiendo reacción:', error);
+      throw error;
+    }
+  }
+
+  // Remover reacción de un mensaje
+  async removeReaction(messageId: string, emoji: string, userId: string): Promise<void> {
+    try {
+      const messageRef = doc(db, 'messages', messageId);
+      const messageDoc = await getDoc(messageRef);
+      
+      if (!messageDoc.exists()) {
+        throw new Error('Message not found');
+      }
+
+      const messageData = messageDoc.data();
+      let reactions = messageData.reactions || [];
+      
+      // Buscar la reacción con este emoji
+      const reactionIndex = reactions.findIndex((r: any) => r.emoji === emoji);
+      
+      if (reactionIndex >= 0) {
+        const reaction = reactions[reactionIndex];
+        
+        // Remover usuario de la reacción
+        reaction.users = reaction.users.filter((id: string) => id !== userId);
+        reaction.count = reaction.users.length;
+        
+        // Si no quedan usuarios, remover la reacción completamente
+        if (reaction.count === 0) {
+          reactions = reactions.filter((_: any, index: number) => index !== reactionIndex);
+        }
+        
+        await updateDoc(messageRef, { reactions });
+        console.log(`✅ Reacción ${emoji} removida del mensaje ${messageId}`);
+      }
+    } catch (error) {
+      console.error('❌ Error removiendo reacción:', error);
+      throw error;
+    }
+  }
 }
 
 export const chatService = new ChatService();

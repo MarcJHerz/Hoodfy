@@ -83,7 +83,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     };
   }, [chatId, user?._id, subscribeToMessages]);
 
-  const handleSendMessage = async (content: string, type: 'text' | 'image' | 'video' | 'file', file?: File, replyTo?: Message) => {
+  const handleSendMessage = async (content: string, type: 'text' | 'image' | 'video' | 'file', file?: File, replyTo?: Message, s3Key?: string, s3Url?: string) => {
     if (!user?._id || !content.trim()) return;
 
     setIsSending(true);
@@ -95,7 +95,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         senderName: user.name,
         senderProfilePicture: user.profilePicture,
         type,
-        mediaUrl: file ? URL.createObjectURL(file) : undefined,
+        mediaUrl: s3Url || (file ? URL.createObjectURL(file) : undefined),
         mediaType: file?.type,
         mediaName: file?.name,
         // Agregar información de respuesta si existe
@@ -123,9 +123,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   const handleAddReaction = async (messageId: string, emoji: string) => {
     if (!user?._id) return;
     try {
-      // TODO: Implementar en chatService
       console.log('Adding reaction:', { messageId, emoji, userId: user._id });
-      // await chatService.addReaction(messageId, emoji, user._id);
+      await chatService.addReaction(messageId, emoji, user._id);
     } catch (error) {
       console.error('Error adding reaction:', error);
     }
@@ -134,9 +133,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   const handleRemoveReaction = async (messageId: string, emoji: string) => {
     if (!user?._id) return;
     try {
-      // TODO: Implementar en chatService
       console.log('Removing reaction:', { messageId, emoji, userId: user._id });
-      // await chatService.removeReaction(messageId, emoji, user._id);
+      await chatService.removeReaction(messageId, emoji, user._id);
     } catch (error) {
       console.error('Error removing reaction:', error);
     }
@@ -286,6 +284,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
           disabled={isLoading || !!error}
           replyingTo={replyingTo}
           onCancelReply={handleCancelReply}
+          chatId={chatId}
         />
       </div>
     </div>
