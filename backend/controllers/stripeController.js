@@ -20,20 +20,44 @@ exports.createStripeProductAndPrice = async (req, res) => {
     if (!communityName || typeof price !== 'number' || price < 1) {
       return res.status(400).json({ error: 'Nombre y precio válido requerido (mínimo 1 USD).' });
     }
+
+    console.log('💰 Creando producto y precio en Stripe:', {
+      communityName,
+      price,
+      priceInCents: Math.round(price * 100),
+      priceInDollars: (Math.round(price * 100) / 100).toFixed(2)
+    });
+
     // Crear Product
     const product = await stripe.products.create({
       name: communityName,
     });
-    // Crear Price
+
+    console.log('✅ Producto creado en Stripe:', product.id);
+
+    // Crear Price - CORREGIR: usar Math.floor para evitar redondeo incorrecto
+    const priceInCents = Math.floor(price * 100);
     const stripePrice = await stripe.prices.create({
-      unit_amount: Math.round(price * 100),
+      unit_amount: priceInCents,
       currency: 'usd',
       recurring: { interval: 'month' },
       product: product.id,
     });
-    res.json({ stripeProductId: product.id, stripePriceId: stripePrice.id });
+
+    console.log('✅ Precio creado en Stripe:', {
+      priceId: stripePrice.id,
+      unitAmount: stripePrice.unit_amount,
+      unitAmountInDollars: (stripePrice.unit_amount / 100).toFixed(2)
+    });
+
+    res.json({ 
+      stripeProductId: product.id, 
+      stripePriceId: stripePrice.id,
+      priceInCents,
+      priceInDollars: (priceInCents / 100).toFixed(2)
+    });
   } catch (error) {
-    console.error('Error creando producto/price en Stripe:', error);
+    console.error('❌ Error creando producto/price en Stripe:', error);
     res.status(500).json({ error: 'Error creando producto/price en Stripe' });
   }
 };

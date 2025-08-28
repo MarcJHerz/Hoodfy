@@ -1,5 +1,21 @@
 import { User } from './user';
 
+export interface MessageReaction {
+  emoji: string;
+  users: string[];
+  count: number;
+}
+
+export interface MessageReply {
+  id: string;
+  content: string;
+  senderId: string;
+  senderName: string;
+  senderProfilePicture?: string;
+  timestamp: Date;
+  type: 'text' | 'image' | 'video' | 'file';
+}
+
 export interface Message {
   id: string;
   chatId: string;
@@ -8,12 +24,15 @@ export interface Message {
   senderName: string;
   senderProfilePicture?: string;
   timestamp: Date;
-  type: 'text' | 'image' | 'video' | 'file';
+  type: 'text' | 'image' | 'video' | 'file' | 'audio';
   mediaUrl?: string;
   mediaType?: string;
   mediaName?: string;
   isEdited?: boolean;
   editedAt?: Date;
+  reactions?: MessageReaction[];
+  replyTo?: MessageReply;
+  status?: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
 }
 
 export interface ChatRoom {
