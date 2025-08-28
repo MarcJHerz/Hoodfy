@@ -117,14 +117,18 @@ const ImprovedMessageList: React.FC<ImprovedMessageListProps> = ({
   const shouldShowTimestamp = (message: Message, index: number) => {
     if (index === 0) return true;
     const prevMessage = messages[index - 1];
-    const timeDiff = message.timestamp.getTime() - prevMessage.timestamp.getTime();
+    const currentTime = new Date(message.timestamp);
+    const prevTime = new Date(prevMessage.timestamp);
+    const timeDiff = currentTime.getTime() - prevTime.getTime();
     return timeDiff > 5 * 60 * 1000; // 5 minutos
   };
 
   const shouldShowTimeSeparator = (message: Message, index: number) => {
     if (index === 0) return true;
     const prevMessage = messages[index - 1];
-    const timeDiff = message.timestamp.getTime() - prevMessage.timestamp.getTime();
+    const currentTime = new Date(message.timestamp);
+    const prevTime = new Date(prevMessage.timestamp);
+    const timeDiff = currentTime.getTime() - prevTime.getTime();
     return timeDiff > 60 * 60 * 1000; // 1 hora
   };
 
@@ -353,7 +357,7 @@ const ImprovedMessageList: React.FC<ImprovedMessageListProps> = ({
               {showTimeSeparator && (
                 <div className="flex justify-center my-8">
                   <div className="glass px-4 py-2 rounded-full text-xs font-semibold text-gray-600 dark:text-gray-400 shadow-lg">
-                    {formatTimestamp(message.timestamp)}
+                    {formatTimestamp(new Date(message.timestamp))}
                   </div>
                 </div>
               )}
@@ -405,7 +409,7 @@ const ImprovedMessageList: React.FC<ImprovedMessageListProps> = ({
                         {/* Estado del mensaje y timestamp */}
                         <div className="flex items-center justify-end mt-2 space-x-1">
                           <span className={`text-xs ${isOwnMessage ? 'text-white/70' : 'text-gray-500 dark:text-gray-400'}`}>
-                            {formatTimestamp(message.timestamp)}
+                            {formatTimestamp(new Date(message.timestamp))}
                           </span>
                           {isOwnMessage && (
                             <CheckIcon className="w-3 h-3 text-white/70" />
