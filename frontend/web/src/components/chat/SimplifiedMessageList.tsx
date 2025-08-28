@@ -193,10 +193,21 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
     return colors[Math.abs(hash) % colors.length];
   };
 
-  // Auto-scroll
+  // Auto-scroll optimizado para evitar saltos extraños
   useEffect(() => {
     if (shouldAutoScroll && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      // Usar scroll suave solo si no hay cambios importantes
+      const hasReactions = messages.some(msg => msg.reactions && msg.reactions.length > 0);
+      const hasReplies = messages.some(msg => msg.replyTo);
+      
+      // Si hay reacciones o respuestas, usar scroll instantáneo para evitar saltos
+      const behavior = (hasReactions || hasReplies) ? 'auto' : 'smooth';
+      
+      messagesEndRef.current.scrollIntoView({ 
+        behavior,
+        block: 'end',
+        inline: 'nearest'
+      });
     }
   }, [messages, shouldAutoScroll]);
 
