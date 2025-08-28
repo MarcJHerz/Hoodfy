@@ -217,9 +217,11 @@ const ImprovedMessageList: React.FC<ImprovedMessageListProps> = ({
     );
   };
 
-  // Renderizar contenido multimedia usando el sistema existente
-  const renderMediaContent = (message: Message) => {
-    const { url: imageUrl, loading: imageLoading, error: imageError } = useImageUrl(message.mediaUrl);
+  // Componente para contenido multimedia
+  const MediaContent: React.FC<{ message: Message }> = ({ message }) => {
+    // Solo usar useImageUrl para tipos que realmente necesitan media
+    const needsMedia = message.type === 'image' || message.type === 'video' || message.type === 'file';
+    const { url: imageUrl, loading: imageLoading, error: imageError } = useImageUrl(needsMedia ? message.mediaUrl : undefined);
 
     switch (message.type) {
       case 'image':
@@ -404,7 +406,7 @@ const ImprovedMessageList: React.FC<ImprovedMessageListProps> = ({
                         style={isOwnMessage ? { borderBottomRightRadius: '8px' } : { borderBottomLeftRadius: '8px' }}
                         onClick={() => onMessageClick?.(message)}
                       >
-                        {renderMediaContent(message)}
+                        <MediaContent message={message} />
                         
                         {/* Estado del mensaje y timestamp */}
                         <div className="flex items-center justify-end mt-2 space-x-1">
