@@ -26,6 +26,7 @@ function detectMimeType(file) {
   return mimeMap[ext] || file.mimetype;
 }
 
+// Upload para imágenes generales (posts, perfiles, etc)
 const upload = multer({ 
   storage,
   limits: {
@@ -47,6 +48,59 @@ const upload = multer({
       cb(null, true);
     } else {
       cb(new Error(`Tipo de archivo no soportado: ${realMimeType}. Solo se permiten imágenes (JPEG, PNG, GIF, WebP, HEIC, HEIF)`));
+    }
+  }
+});
+
+// Upload específico para chat (acepta más tipos de archivos)
+const uploadChat = multer({ 
+  storage,
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100MB para archivos de chat
+    files: 1,
+    fieldSize: 100 * 1024 * 1024,
+    fieldNameSize: 100
+  },
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    
+    // Mapeo más completo para chat
+    const chatMimeMap = {
+      // Imágenes
+      '.heic': 'image/heic', '.heif': 'image/heif',
+      '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+      '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp',
+      // Videos
+      '.mp4': 'video/mp4', '.mov': 'video/quicktime', 
+      '.avi': 'video/x-msvideo', '.webm': 'video/webm',
+      // Audio
+      '.mp3': 'audio/mpeg', '.wav': 'audio/wav', 
+      '.aac': 'audio/aac', '.m4a': 'audio/m4a', '.ogg': 'audio/ogg',
+      // Documentos
+      '.pdf': 'application/pdf', '.txt': 'text/plain',
+      '.doc': 'application/msword', '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      '.xls': 'application/vnd.ms-excel', '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    };
+    
+    const realMimeType = chatMimeMap[ext] || file.mimetype;
+    
+    const allowedChatTypes = [
+      // Imágenes
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif',
+      // Videos
+      'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm',
+      // Audio
+      'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/aac', 'audio/m4a',
+      // Documentos
+      'application/pdf', 'text/plain', 'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ];
+    
+    if (allowedChatTypes.includes(realMimeType)) {
+      cb(null, true);
+    } else {
+      cb(new Error(`Tipo de archivo no soportado en chat: ${realMimeType}`));
     }
   }
 });
@@ -81,10 +135,15 @@ const handleMulterError = (error, req, res, next) => {
   });
 };
 
-// Subir imagen a S3
+// Subir imagen a S3 (general)
 router.post('/', verifyToken, upload.single('file'), handleMulterError, uploadController.uploadImage);
+
+// Subir archivo de chat a S3 (específico para chat)
+router.post('/chat', verifyToken, uploadChat.single('file'), handleMulterError, uploadController.uploadChatFile);
+
 // Obtener URL firmada (requiere autenticación)
 router.get('/signed-url/:key', verifyToken, uploadController.getSignedUrl);
+
 // Obtener URL firmada de logo (público, sin autenticación)
 router.get('/logo/:key', uploadController.getLogoSignedUrl);
 

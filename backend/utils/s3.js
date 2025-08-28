@@ -195,9 +195,84 @@ async function getS3SignedUrl(key, expiresIn = 3600) {
   }
 }
 
+// Nueva función para subir archivos de chat organizados por tipo y chatId
+const uploadChatFile = async (buffer, originalname, mimetype, chatId) => {
+  try {
+    // Generar key único
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 15);
+    const extension = path.extname(originalname);
+
+    // Detectar MIME type real
+    let realMimeType = mimetype;
+    try {
+      const fileType = await FileType.fromBuffer(buffer);
+      if (fileType) {
+        realMimeType = fileType.mime;
+      }
+    } catch (error) {
+      console.log('⚠️ No se pudo detectar el tipo MIME, usando el original:', mimetype);
+    }
+
+    // Determinar la carpeta basada en el tipo de archivo
+    let folder = 'documents'; // Por defecto
+    if (realMimeType.startsWith('image/')) {
+      folder = 'images';
+    } else if (realMimeType.startsWith('video/')) {
+      folder = 'videos';
+    } else if (realMimeType.startsWith('audio/')) {
+      folder = 'audio';
+    }
+
+    // Generar la ruta del archivo: chats/{tipo}/{chatId}/{timestamp}-{uuid}.{ext}
+    const key = `chats/${folder}/${chatId}/${timestamp}-${randomString}${extension}`;
+
+    // Verificar tipos de archivo permitidos
+    const allowedTypes = [
+      // Imágenes
+      'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif',
+      // Videos
+      'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm',
+      // Audio
+      'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/aac', 'audio/m4a',
+      // Documentos
+      'application/pdf', 'text/plain', 'application/msword', 
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ];
+
+    if (!allowedTypes.includes(realMimeType)) {
+      throw new Error(`Tipo de archivo no permitido en chat: ${realMimeType}`);
+    }
+
+    // Configurar parámetros de subida
+    const command = new PutObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: key,
+      Body: buffer,
+      ContentType: realMimeType,
+      Metadata: {
+        'original-name': originalname,
+        'chat-id': chatId,
+        'upload-timestamp': timestamp.toString()
+      }
+    });
+
+    // Subir a S3
+    await s3.send(command);
+    console.log(`📁 Archivo de chat subido: ${key}`);
+    return key;
+  } catch (error) {
+    console.error('Error uploading chat file to S3:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   uploadFileToS3,
   uploadPublicAvatar,
   uploadPublicBanner,
+  uploadChatFile,
   getS3SignedUrl,
 }; 

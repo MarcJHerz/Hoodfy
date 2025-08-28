@@ -41,6 +41,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   } = useChatStore();
 
   const [isSending, setIsSending] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
 
   // Generar colores únicos por usuario para el header
   const getHeaderColor = (userId?: string) => {
@@ -106,6 +107,38 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     } finally {
       setIsSending(false);
     }
+  };
+
+  // Funciones para manejar reacciones
+  const handleAddReaction = async (messageId: string, emoji: string) => {
+    if (!user?._id) return;
+    try {
+      // TODO: Implementar en chatService
+      console.log('Adding reaction:', { messageId, emoji, userId: user._id });
+      // await chatService.addReaction(messageId, emoji, user._id);
+    } catch (error) {
+      console.error('Error adding reaction:', error);
+    }
+  };
+
+  const handleRemoveReaction = async (messageId: string, emoji: string) => {
+    if (!user?._id) return;
+    try {
+      // TODO: Implementar en chatService
+      console.log('Removing reaction:', { messageId, emoji, userId: user._id });
+      // await chatService.removeReaction(messageId, emoji, user._id);
+    } catch (error) {
+      console.error('Error removing reaction:', error);
+    }
+  };
+
+  // Función para manejar respuestas
+  const handleReplyToMessage = (message: Message) => {
+    setReplyingTo(message);
+  };
+
+  const handleCancelReply = () => {
+    setReplyingTo(null);
   };
 
   if (!user?._id) {
@@ -226,6 +259,9 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
               messages={messages}
               isLoading={isLoading}
               currentUserId={user._id}
+              onAddReaction={handleAddReaction}
+              onRemoveReaction={handleRemoveReaction}
+              onReplyToMessage={handleReplyToMessage}
             />
           </div>
         )}
@@ -238,6 +274,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
           isLoading={isSending}
           placeholder={`Escribe un mensaje en ${chatName}...`}
           disabled={isLoading || !!error}
+          replyingTo={replyingTo}
+          onCancelReply={handleCancelReply}
         />
       </div>
     </div>
