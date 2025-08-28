@@ -91,16 +91,24 @@ const MessageOptionsButton: React.FC<{
            ref={buttonRef}
            className="absolute bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-2 flex items-center space-x-1 animate-scale-in z-50"
            style={{
-             // Posicionamiento siempre arriba del mensaje
+             // Posicionamiento inteligente que se adapta al espacio disponible
              bottom: '100%',
              left: '50%',
              transform: 'translateX(-50%)',
-             marginBottom: '8px'
+             marginBottom: '8px',
+             // Asegurar que no se salga de la pantalla
+             maxWidth: 'calc(100vw - 40px)',
+             width: 'max-content'
            }}
          >
                      {/* Botón de respuesta */}
            <button
-             onClick={(e) => handleOptionClick(e, () => onReplyToMessage?.(message))}
+             onClick={(e) => handleOptionClick(e, () => {
+               console.log('💬 Iniciando respuesta al mensaje:', message.id);
+               console.log('📝 Contenido del mensaje:', message.content);
+               console.log('👤 Remitente:', message.senderName);
+               onReplyToMessage?.(message);
+             })}
              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
              title="Responder"
            >
@@ -114,10 +122,16 @@ const MessageOptionsButton: React.FC<{
              <button
                key={emoji}
                onClick={(e) => handleOptionClick(e, () => {
+                 console.log('🎯 Reaccionando con emoji:', emoji);
+                 console.log('📝 Mensaje actual:', message);
+                 console.log('🔍 Reacciones existentes:', message.reactions);
+                 
                  const existingReaction = message.reactions?.find(r => r.emoji === emoji);
                  if (existingReaction?.users.includes(currentUserId)) {
+                   console.log('❌ Removiendo reacción existente');
                    onRemoveReaction?.(message.id, emoji);
                  } else {
+                   console.log('✅ Agregando nueva reacción');
                    onAddReaction?.(message.id, emoji);
                  }
                })}
@@ -363,10 +377,27 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
            WebkitOverflowScrolling: 'touch'
          }}
        >
-        {messages.map((message, index) => {
-          const isOwnMessage = message.senderId === currentUserId;
-          const showAvatar = index === 0 || messages[index - 1].senderId !== message.senderId;
-          const showTimestamp = shouldShowTimestamp(message, index);
+                 {messages.map((message, index) => {
+           const isOwnMessage = message.senderId === currentUserId;
+           const showAvatar = index === 0 || messages[index - 1].senderId !== message.senderId;
+           const showTimestamp = shouldShowTimestamp(message, index);
+           
+           // Debugging para reacciones y respuestas
+           if (message.reactions && message.reactions.length > 0) {
+             console.log('🎯 Mensaje con reacciones:', {
+               messageId: message.id,
+               reactions: message.reactions,
+               content: message.content?.substring(0, 50)
+             });
+           }
+           
+           if (message.replyTo) {
+             console.log('💬 Mensaje con respuesta:', {
+               messageId: message.id,
+               replyTo: message.replyTo,
+               content: message.content?.substring(0, 50)
+             });
+           }
           
           return (
             <div key={message.id} className="animate-fade-in">
@@ -421,17 +452,22 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
                         style={isOwnMessage ? { borderBottomRightRadius: '8px' } : { borderBottomLeftRadius: '8px' }}
                         onClick={() => onMessageClick?.(message)}
                       >
-                        {/* Respuesta al mensaje original */}
-                        {message.replyTo && (
-                          <div className="mb-3 p-2 bg-black/10 dark:bg-white/10 rounded-lg border-l-2 border-blue-500">
-                            <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">
-                              Respondiendo a {message.replyTo.senderName}
-                            </p>
-                            <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
-                              {message.replyTo.content || `${message.replyTo.type === 'image' ? '📷' : message.replyTo.type === 'video' ? '🎥' : '📄'} Archivo multimedia`}
-                            </p>
-                          </div>
-                        )}
+                                                 {/* Respuesta al mensaje original */}
+                         {message.replyTo && (
+                           <div className="mb-3 p-3 bg-black/10 dark:bg-white/10 rounded-lg border-l-4 border-blue-500 hover:bg-black/20 dark:hover:bg-white/20 transition-colors duration-200">
+                             <div className="flex items-center space-x-2 mb-2">
+                               <svg className="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                               </svg>
+                               <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                                 Respondiendo a {message.replyTo.senderName}
+                               </p>
+                             </div>
+                             <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                               {message.replyTo.content || `${message.replyTo.type === 'image' ? '📷' : message.replyTo.type === 'video' ? '🎥' : '📄'} Archivo multimedia`}
+                             </p>
+                           </div>
+                         )}
 
                         <MediaContent message={message} />
                         
@@ -446,33 +482,35 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
                         </div>
                       </div>
 
-                      {/* Reacciones del mensaje */}
-                      {message.reactions && message.reactions.length > 0 && (
-                        <div className="flex items-center space-x-1 mt-2 ml-4">
-                          {message.reactions.map((reaction, index) => (
-                            <button
-                              key={index}
-                              onClick={() => {
-                                if (reaction.users.includes(currentUserId)) {
-                                  onRemoveReaction?.(message.id, reaction.emoji);
-                                } else {
-                                  onAddReaction?.(message.id, reaction.emoji);
-                                }
-                              }}
-                              className={`
-                                flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-110
-                                ${reaction.users.includes(currentUserId) 
-                                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 ring-1 ring-blue-300 dark:ring-blue-600' 
-                                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                                }
-                              `}
-                            >
-                              <span>{reaction.emoji}</span>
-                              <span>{reaction.count}</span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                                             {/* Reacciones del mensaje */}
+                       {message.reactions && message.reactions.length > 0 && (
+                         <div className="flex items-center space-x-1 mt-2 ml-4">
+                           {message.reactions.map((reaction, index) => (
+                             <button
+                               key={index}
+                               onClick={() => {
+                                 console.log('🎯 Click en reacción existente:', reaction.emoji);
+                                 if (reaction.users.includes(currentUserId)) {
+                                   onRemoveReaction?.(message.id, reaction.emoji);
+                                 } else {
+                                   onAddReaction?.(message.id, reaction.emoji);
+                                 }
+                               }}
+                               className={`
+                                 flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-110
+                                 ${reaction.users.includes(currentUserId) 
+                                   ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 ring-1 ring-blue-300 dark:ring-blue-600' 
+                                   : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                 }
+                               `}
+                               title={`${reaction.emoji} - ${reaction.count} reacciones`}
+                             >
+                               <span>{reaction.emoji}</span>
+                               <span className="ml-1">{reaction.count}</span>
+                             </button>
+                           ))}
+                         </div>
+                       )}
 
                       {/* Botón de opciones de mensaje */}
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
