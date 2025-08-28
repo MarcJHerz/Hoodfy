@@ -382,18 +382,12 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
            const showAvatar = index === 0 || messages[index - 1].senderId !== message.senderId;
            const showTimestamp = shouldShowTimestamp(message, index);
            
-           // Debugging para reacciones y respuestas
+           // Debugging solo para mensajes con reacciones o respuestas
            if (message.reactions && message.reactions.length > 0) {
              console.log('🎯 Mensaje con reacciones:', {
                messageId: message.id,
                reactions: message.reactions,
                content: message.content?.substring(0, 50)
-             });
-           } else {
-             console.log('📝 Mensaje sin reacciones:', {
-               messageId: message.id,
-               content: message.content?.substring(0, 50),
-               reactions: message.reactions
              });
            }
            
