@@ -34,61 +34,52 @@ const MessageOptionsButton: React.FC<{
   currentUserId: string;
 }> = ({ message, onReplyToMessage, onAddReaction, onRemoveReaction, currentUserId }) => {
   const [showOptions, setShowOptions] = useState(false);
-  const [isLongPress, setIsLongPress] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const buttonRef = useRef<HTMLDivElement>(null);
 
-  // Detectar si es dispositivo móvil
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-  const handleInteractionStart = (e: React.MouseEvent | React.TouchEvent) => {
+  const handleButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    // En ambos casos: click directo para mejor experiencia
     setShowOptions(!showOptions);
   };
 
-  const handleInteractionEnd = (e: React.MouseEvent | React.TouchEvent) => {
+  const handleOptionClick = (e: React.MouseEvent | React.TouchEvent, action: () => void) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+    action();
+    setShowOptions(false);
   };
 
   // Cerrar opciones cuando se toca fuera
   React.useEffect(() => {
-    const handleClickOutside = () => {
-      setShowOptions(false);
+    const handleClickOutside = (e: Event) => {
+      if (buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
+        setShowOptions(false);
+      }
     };
 
     if (showOptions) {
-      document.addEventListener('click', handleClickOutside, { passive: false });
-      document.addEventListener('touchstart', handleClickOutside, { passive: false });
+      // Usar setTimeout para evitar que se cierre inmediatamente
+      const timer = setTimeout(() => {
+        document.addEventListener('click', handleClickOutside);
+        document.addEventListener('touchstart', handleClickOutside);
+      }, 100);
+      
+      return () => {
+        clearTimeout(timer);
+        document.removeEventListener('click', handleClickOutside);
+        document.removeEventListener('touchstart', handleClickOutside);
+      };
     }
-
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
   }, [showOptions]);
 
   return (
     <div className="relative">
-      {/* Botón principal */}
-      <button
-        onMouseDown={handleInteractionStart}
-        onMouseUp={handleInteractionEnd}
-        onTouchStart={handleInteractionStart}
-        onTouchEnd={handleInteractionEnd}
-        className="p-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hover:scale-110 transition-all duration-150"
-                 title="Opciones del mensaje"
-      >
+             {/* Botón principal */}
+       <button
+         onClick={handleButtonClick}
+         className="p-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hover:scale-110 transition-all duration-150"
+         title="Opciones del mensaje"
+       >
         <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
         </svg>
@@ -97,23 +88,19 @@ const MessageOptionsButton: React.FC<{
              {/* Menú de opciones con posicionamiento inteligente */}
        {showOptions && (
          <div 
+           ref={buttonRef}
            className="absolute bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-2 flex items-center space-x-1 animate-scale-in z-50"
            style={{
-             // Posicionamiento relativo al botón, no fijo
-             top: '-10px',
-             right: message.senderId === currentUserId ? '0' : 'auto',
-             left: message.senderId !== currentUserId ? '0' : 'auto',
-             transform: 'translateY(-100%)'
+             // Posicionamiento siempre arriba del mensaje
+             bottom: '100%',
+             left: '50%',
+             transform: 'translateX(-50%)',
+             marginBottom: '8px'
            }}
          >
                      {/* Botón de respuesta */}
            <button
-             onClick={(e) => {
-               e.preventDefault();
-               e.stopPropagation();
-               onReplyToMessage?.(message);
-               setShowOptions(false);
-             }}
+             onClick={(e) => handleOptionClick(e, () => onReplyToMessage?.(message))}
              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
              title="Responder"
            >
@@ -126,17 +113,14 @@ const MessageOptionsButton: React.FC<{
            {['❤️', '👍', '😂', '😮', '😢', '🔥'].map((emoji) => (
              <button
                key={emoji}
-               onClick={(e) => {
-                 e.preventDefault();
-                 e.stopPropagation();
+               onClick={(e) => handleOptionClick(e, () => {
                  const existingReaction = message.reactions?.find(r => r.emoji === emoji);
                  if (existingReaction?.users.includes(currentUserId)) {
                    onRemoveReaction?.(message.id, emoji);
                  } else {
                    onAddReaction?.(message.id, emoji);
                  }
-                 setShowOptions(false);
-               }}
+               })}
                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-150 hover:scale-110"
                title={`Reaccionar con ${emoji}`}
              >
@@ -146,11 +130,7 @@ const MessageOptionsButton: React.FC<{
 
                      {/* Botón para cerrar */}
            <button
-             onClick={(e) => {
-               e.preventDefault();
-               e.stopPropagation();
-               setShowOptions(false);
-             }}
+             onClick={(e) => handleOptionClick(e, () => {})}
              className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 ml-2"
              title="Cerrar"
            >
@@ -250,32 +230,38 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
     const { url: imageUrl, loading: imageLoading } = useImageUrl(needsMedia ? message.mediaUrl : undefined);
     
     switch (message.type) {
-      case 'image':
-        return (
-          <div className="relative group">
-            <div className="relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800">
-              {imageLoading ? (
-                <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl flex items-center justify-center">
-                  <PhotoIcon className="w-12 h-12 text-gray-400" />
-                </div>
-              ) : (
-                <Image
-                  src={imageUrl || '/default-image.png'}
-                  alt="Imagen compartida"
-                  width={300}
-                  height={200}
-                  className="object-cover w-full h-auto max-w-sm rounded-2xl cursor-pointer transition-transform duration-300 hover:scale-105"
-                  onClick={() => onMessageClick?.(message)}
-                />
-              )}
-            </div>
-            {message.content && (
-              <p className="mt-3 text-current text-sm leading-relaxed">
-                {message.content}
-              </p>
-            )}
-          </div>
-        );
+             case 'image':
+         return (
+           <div className="relative group">
+             <div className="relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800">
+               {imageLoading ? (
+                 <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl flex items-center justify-center">
+                   <PhotoIcon className="w-12 h-12 text-gray-400" />
+                 </div>
+               ) : (
+                 <Image
+                   src={imageUrl || '/default-image.png'}
+                   alt="Imagen compartida"
+                   width={300}
+                   height={200}
+                   className="object-cover w-full h-auto max-w-sm rounded-2xl cursor-pointer transition-transform duration-300 hover:scale-105"
+                   onClick={() => onMessageClick?.(message)}
+                   style={{
+                     contain: 'layout style paint',
+                     willChange: 'auto'
+                   }}
+                   priority={false}
+                   loading="lazy"
+                 />
+               )}
+             </div>
+             {message.content && (
+               <p className="mt-3 text-current text-sm leading-relaxed">
+                 {message.content}
+               </p>
+             )}
+           </div>
+         );
 
       case 'video':
         return (
@@ -367,11 +353,16 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
 
   return (
     <div className="relative flex-1 h-full overflow-hidden">
-      <div 
-        ref={containerRef}
-        onScroll={handleScroll}
-        className="h-full overflow-y-auto overflow-x-hidden px-4 py-6 space-y-6 scroll-smooth bg-gray-50 dark:bg-gray-900 chat-scroll" 
-      >
+             <div 
+         ref={containerRef}
+         onScroll={handleScroll}
+         className="h-full overflow-y-auto overflow-x-hidden px-4 py-6 space-y-6 scroll-smooth bg-gray-50 dark:bg-gray-900 chat-scroll" 
+         style={{
+           scrollBehavior: 'smooth',
+           overscrollBehavior: 'contain',
+           WebkitOverflowScrolling: 'touch'
+         }}
+       >
         {messages.map((message, index) => {
           const isOwnMessage = message.senderId === currentUserId;
           const showAvatar = index === 0 || messages[index - 1].senderId !== message.senderId;
