@@ -41,41 +41,23 @@ const MessageOptionsButton: React.FC<{
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
   const handleInteractionStart = (e: React.MouseEvent | React.TouchEvent) => {
-    // Solo prevenir comportamiento por defecto en touch
-    if (e.type === 'touchstart') {
-      e.preventDefault();
-    }
+    e.preventDefault();
     e.stopPropagation();
     
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
 
-    if (isMobile) {
-      // En mobile: solo long press
-      timeoutRef.current = setTimeout(() => {
-        setIsLongPress(true);
-        setShowOptions(true);
-      }, 600); // 600ms para mobile
-    } else {
-      // En desktop: click directo
-      setShowOptions(!showOptions);
-    }
+    // En ambos casos: click directo para mejor experiencia
+    setShowOptions(!showOptions);
   };
 
   const handleInteractionEnd = (e: React.MouseEvent | React.TouchEvent) => {
-    // Solo prevenir comportamiento por defecto en touch
-    if (e.type === 'touchend') {
-      e.preventDefault();
-    }
+    e.preventDefault();
     e.stopPropagation();
     
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
-    }
-    
-    if (isMobile && isLongPress) {
-      setIsLongPress(false);
     }
   };
 
@@ -105,64 +87,73 @@ const MessageOptionsButton: React.FC<{
         onTouchStart={handleInteractionStart}
         onTouchEnd={handleInteractionEnd}
         className="p-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hover:scale-110 transition-all duration-150"
-        title={isMobile ? "Mantén presionado para opciones" : "Opciones del mensaje"}
+                 title="Opciones del mensaje"
       >
         <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
         </svg>
       </button>
 
-      {/* Menú de opciones con posicionamiento inteligente */}
-      {showOptions && (
-        <div 
-          className="fixed bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-2 flex items-center space-x-1 animate-scale-in z-50"
-          style={{
-            // Posicionamiento inteligente para evitar salirse de pantalla
-            top: '10px',
-            right: message.senderId === currentUserId ? '10px' : 'auto',
-            left: message.senderId !== currentUserId ? '10px' : 'auto',
-          }}
-        >
-          {/* Botón de respuesta */}
-          <button
-            onClick={() => {
-              onReplyToMessage?.(message);
-              setShowOptions(false);
-            }}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
-            title="Responder"
-          >
+             {/* Menú de opciones con posicionamiento inteligente */}
+       {showOptions && (
+         <div 
+           className="absolute bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-2 flex items-center space-x-1 animate-scale-in z-50"
+           style={{
+             // Posicionamiento relativo al botón, no fijo
+             top: '-10px',
+             right: message.senderId === currentUserId ? '0' : 'auto',
+             left: message.senderId !== currentUserId ? '0' : 'auto',
+             transform: 'translateY(-100%)'
+           }}
+         >
+                     {/* Botón de respuesta */}
+           <button
+             onClick={(e) => {
+               e.preventDefault();
+               e.stopPropagation();
+               onReplyToMessage?.(message);
+               setShowOptions(false);
+             }}
+             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
+             title="Responder"
+           >
             <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
             </svg>
           </button>
           
-          {/* Emojis de reacción */}
-          {['❤️', '👍', '😂', '😮', '😢', '🔥'].map((emoji) => (
-            <button
-              key={emoji}
-              onClick={() => {
-                const existingReaction = message.reactions?.find(r => r.emoji === emoji);
-                if (existingReaction?.users.includes(currentUserId)) {
-                  onRemoveReaction?.(message.id, emoji);
-                } else {
-                  onAddReaction?.(message.id, emoji);
-                }
-                setShowOptions(false);
-              }}
-              className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-150 hover:scale-110"
-              title={`Reaccionar con ${emoji}`}
-            >
-              <span className="text-lg">{emoji}</span>
-            </button>
-          ))}
+                     {/* Emojis de reacción */}
+           {['❤️', '👍', '😂', '😮', '😢', '🔥'].map((emoji) => (
+             <button
+               key={emoji}
+               onClick={(e) => {
+                 e.preventDefault();
+                 e.stopPropagation();
+                 const existingReaction = message.reactions?.find(r => r.emoji === emoji);
+                 if (existingReaction?.users.includes(currentUserId)) {
+                   onRemoveReaction?.(message.id, emoji);
+                 } else {
+                   onAddReaction?.(message.id, emoji);
+                 }
+                 setShowOptions(false);
+               }}
+               className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-150 hover:scale-110"
+               title={`Reaccionar con ${emoji}`}
+             >
+               <span className="text-lg">{emoji}</span>
+             </button>
+           ))}
 
-          {/* Botón para cerrar */}
-          <button
-            onClick={() => setShowOptions(false)}
-            className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 ml-2"
-            title="Cerrar"
-          >
+                     {/* Botón para cerrar */}
+           <button
+             onClick={(e) => {
+               e.preventDefault();
+               e.stopPropagation();
+               setShowOptions(false);
+             }}
+             className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 ml-2"
+             title="Cerrar"
+           >
             <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
