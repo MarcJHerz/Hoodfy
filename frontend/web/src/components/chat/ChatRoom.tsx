@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { useChatStore } from '@/stores/chatStore';
 import { useAuthStore } from '@/stores/authStore';
-import MessageList from './MessageList';
-import MessageInput from './MessageInput';
+import SimplifiedMessageList from './SimplifiedMessageList';
+import ImprovedMessageInput from './ImprovedMessageInput';
 import { chatService } from '@/services/chatService';
 import { Message } from '@/types/chat';
 import { XMarkIcon, UserGroupIcon, UserIcon, SignalIcon } from '@heroicons/react/24/outline';
@@ -222,7 +222,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
           </div>
         ) : (
           <div className="h-full bg-gray-50 dark:bg-gray-900">
-            <MessageList
+            <SimplifiedMessageList
               messages={messages}
               isLoading={isLoading}
               currentUserId={user._id}
@@ -233,10 +233,10 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
 
       {/* Input to send messages */}
       <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-        <MessageInput
+        <ImprovedMessageInput
           onSendMessage={handleSendMessage}
           isLoading={isSending}
-          placeholder={`Write a message in ${chatName}...`}
+          placeholder={`Escribe un mensaje en ${chatName}...`}
           disabled={isLoading || !!error}
         />
       </div>
