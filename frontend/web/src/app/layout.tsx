@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import "../styles/chat-enhancements.css";
 import { Toaster } from 'react-hot-toast';
 import dynamic from 'next/dynamic';
 import AppShell from './AppShell';
