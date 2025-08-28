@@ -69,20 +69,18 @@ import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 
 // Por estas:
-import ImprovedMessageList from './ImprovedMessageList';
+import SimplifiedMessageList from './SimplifiedMessageList';
 import ImprovedMessageInput from './ImprovedMessageInput';
 
 // Añadir las nuevas props:
 const [replyingTo, setReplyingTo] = useState<Message | null>(null);
 
 // En el JSX:
-<ImprovedMessageList
+<SimplifiedMessageList
   messages={messages}
   isLoading={isLoading}
   currentUserId={user._id}
-  onReply={setReplyingTo}
-  onAddReaction={handleAddReaction}
-  onRemoveReaction={handleRemoveReaction}
+  onMessageClick={onMessageClick}
 />
 
 <ImprovedMessageInput
