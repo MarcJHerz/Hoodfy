@@ -389,6 +389,12 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
                reactions: message.reactions,
                content: message.content?.substring(0, 50)
              });
+           } else {
+             console.log('📝 Mensaje sin reacciones:', {
+               messageId: message.id,
+               content: message.content?.substring(0, 50),
+               reactions: message.reactions
+             });
            }
            
            if (message.replyTo) {

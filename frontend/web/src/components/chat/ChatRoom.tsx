@@ -110,7 +110,13 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         } : undefined,
       };
 
-      await sendMessage(messageData);
+      console.log('📤 Enviando mensaje con datos:', messageData);
+      const messageId = await sendMessage(messageData);
+      
+      // Limpiar estado de respuesta después de enviar
+      setReplyingTo(null);
+      
+      console.log('✅ Mensaje enviado exitosamente con ID:', messageId);
     } catch (error) {
       console.error('Error sending message:', error);
       // Here you could show an error toast
@@ -125,6 +131,39 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     try {
       console.log('Adding reaction:', { messageId, emoji, userId: user._id });
       await chatService.addReaction(messageId, emoji, user._id);
+      
+      // Forzar actualización local del estado
+      console.log('🔄 Forzando actualización local después de agregar reacción');
+      const updatedMessages = messages.map(msg => {
+        if (msg.id === messageId) {
+          const existingReactions = msg.reactions || [];
+          const existingReactionIndex = existingReactions.findIndex(r => r.emoji === emoji);
+          
+          if (existingReactionIndex >= 0) {
+            // Actualizar reacción existente
+            const updatedReactions = [...existingReactions];
+            if (!updatedReactions[existingReactionIndex].users.includes(user._id)) {
+              updatedReactions[existingReactionIndex].users.push(user._id);
+              updatedReactions[existingReactionIndex].count = updatedReactions[existingReactionIndex].users.length;
+            }
+            return { ...msg, reactions: updatedReactions };
+          } else {
+            // Agregar nueva reacción
+            const newReaction = {
+              emoji,
+              users: [user._id],
+              count: 1
+            };
+            return { ...msg, reactions: [...existingReactions, newReaction] };
+          }
+        }
+        return msg;
+      });
+      
+      // Actualizar el estado local
+      useChatStore.getState().setMessages(updatedMessages);
+      console.log('✅ Estado local actualizado con nueva reacción');
+      
     } catch (error) {
       console.error('Error adding reaction:', error);
     }
@@ -135,6 +174,33 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     try {
       console.log('Removing reaction:', { messageId, emoji, userId: user._id });
       await chatService.removeReaction(messageId, emoji, user._id);
+      
+      // Forzar actualización local del estado
+      console.log('🔄 Forzando actualización local después de remover reacción');
+      const updatedMessages = messages.map(msg => {
+        if (msg.id === messageId) {
+          const existingReactions = msg.reactions || [];
+          const updatedReactions = existingReactions.map(reaction => {
+            if (reaction.emoji === emoji) {
+              const filteredUsers = reaction.users.filter(id => id !== user._id);
+              return {
+                ...reaction,
+                users: filteredUsers,
+                count: filteredUsers.length
+              };
+            }
+            return reaction;
+          }).filter(reaction => reaction.count > 0); // Remover reacciones vacías
+          
+          return { ...msg, reactions: updatedReactions };
+        }
+        return msg;
+      });
+      
+      // Actualizar el estado local
+      useChatStore.getState().setMessages(updatedMessages);
+      console.log('✅ Estado local actualizado después de remover reacción');
+      
     } catch (error) {
       console.error('Error removing reaction:', error);
     }
