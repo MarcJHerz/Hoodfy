@@ -257,7 +257,7 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
           const isOwnMessage = message.senderId === currentUserId;
 
           return (
-            <div key={message.id} className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} space-x-3`}>
+            <div key={message.id} className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} space-x-3 group`}>
               {!isOwnMessage && (
                 <div className="flex-shrink-0">
                   <UserAvatar
@@ -281,7 +281,7 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
                 )}
 
                 <div className={`
-                  relative group rounded-2xl px-4 py-3 shadow-sm transition-all duration-200
+                  relative rounded-2xl px-4 py-3 shadow-sm transition-all duration-200
                   ${isOwnMessage 
                     ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-md' 
                     : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-bl-md'
@@ -343,8 +343,8 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
                   </div>
                 )}
 
-                {/* Botón de opciones de mensaje */}
-                <div className={`flex items-center space-x-2 mt-2 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
+                {/* Botón de opciones de mensaje - Solo visible en hover/touch */}
+                <div className={`flex items-center space-x-2 mt-2 ${isOwnMessage ? 'justify-end' : 'justify-start'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
                   <MessageOptionsButton
                     message={message}
                     onReplyToMessage={onReplyToMessage}

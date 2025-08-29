@@ -1291,3 +1291,45 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Estilos para el chat */
+@layer components {
+  /* Soporte para touch en mobile - botones de opciones */
+  @media (hover: none) and (pointer: coarse) {
+    .chat-container .group:active .opacity-0 {
+      opacity: 1;
+    }
+  }
+  
+  /* Animación de escala para botones */
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  /* Animación de fade in */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
