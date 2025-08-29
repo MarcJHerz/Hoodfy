@@ -10,11 +10,11 @@ const TypingIndicator: React.FC = () => {
 
   const getTypingText = () => {
     if (typingUsers.length === 1) {
-      return `${typingUsers[0]} está escribiendo...`;
+      return `${typingUsers[0]} is writing...`;
     } else if (typingUsers.length === 2) {
-      return `${typingUsers[0]} y ${typingUsers[1]} están escribiendo...`;
+      return `${typingUsers[0]} and ${typingUsers[1]} are writing...`;
     } else {
-      return `${typingUsers[0]} y ${typingUsers.length - 1} más están escribiendo...`;
+      return `${typingUsers[0]} and ${typingUsers.length - 1} more are writing...`;
     }
   };
 

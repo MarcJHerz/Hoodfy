@@ -185,7 +185,7 @@ const ImprovedMessageInput: React.FC<ImprovedMessageInputProps> = ({
               <div className="w-1 h-8 bg-blue-500 rounded-full" />
               <div>
                 <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                  Respondiendo a {replyingTo.senderName}
+                  Responding to {replyingTo.senderName}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-xs">
                   {replyingTo.content}
@@ -209,7 +209,7 @@ const ImprovedMessageInput: React.FC<ImprovedMessageInputProps> = ({
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center space-x-2">
                 <PaperClipIcon className="w-4 h-4" />
-                <span>Adjuntar archivo</span>
+                <span>Attach file</span>
               </h4>
               <button
                 onClick={() => setShowAttachmentMenu(false)}
@@ -253,7 +253,7 @@ const ImprovedMessageInput: React.FC<ImprovedMessageInputProps> = ({
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center space-x-2">
                 <FaceSmileIcon className="w-4 h-4" />
-                <span>Emojis frecuentes</span>
+                <span>Frequent emojis</span>
               </h4>
               <button
                 onClick={() => setShowEmojiPicker(false)}
@@ -349,7 +349,7 @@ const ImprovedMessageInput: React.FC<ImprovedMessageInputProps> = ({
             <button
               type="button"
               className="btn-secondary p-3 rounded-xl hover:scale-105 hover:bg-red-100 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
-              title="Grabar mensaje de voz"
+              title="Record voice message"
             >
               <MicrophoneIcon className="w-5 h-5" />
             </button>

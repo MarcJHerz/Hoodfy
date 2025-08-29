@@ -43,8 +43,8 @@ const CommunityChatRoom: React.FC<CommunityChatRoomProps> = ({
           setCommunityChat(chat);
         }
       } catch (error) {
-        console.error('Error al inicializar el chat:', error);
-        toast.error('Error al cargar el chat de la comunidad');
+        console.error('Error initializing chat:', error);
+        toast.error('Error loading community chat');
       } finally {
         setIsLoading(false);
       }
@@ -60,7 +60,7 @@ const CommunityChatRoom: React.FC<CommunityChatRoomProps> = ({
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-gray-500">Debes iniciar sesión para acceder al chat</p>
+          <p className="text-gray-500">You need to login to access the chat</p>
         </div>
       </div>
     );
@@ -71,7 +71,7 @@ const CommunityChatRoom: React.FC<CommunityChatRoomProps> = ({
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-          <p className="text-gray-500">Cargando chat...</p>
+          <p className="text-gray-500">Loading chat...</p>
         </div>
       </div>
     );
@@ -87,10 +87,10 @@ const CommunityChatRoom: React.FC<CommunityChatRoomProps> = ({
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Acceso restringido
+            Restricted access
           </h3>
           <p className="text-gray-500">
-            Debes estar suscrito a esta comunidad para acceder al chat
+            You need to be subscribed to this community to access the chat
           </p>
         </div>
       </div>
@@ -101,7 +101,7 @@ const CommunityChatRoom: React.FC<CommunityChatRoomProps> = ({
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-red-500">Error al cargar el chat</p>
+          <p className="text-red-500">Error loading chat</p>
         </div>
       </div>
     );
@@ -117,13 +117,13 @@ const CommunityChatRoom: React.FC<CommunityChatRoomProps> = ({
               <ChatBubbleLeftRightIcon className="h-8 w-8 text-blue-600" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Chat de {communityName}
+              Chat of {communityName}
             </h3>
             <button
               onClick={() => setIsModalOpen(true)}
               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
-              Abrir Chat
+              Open Chat
             </button>
           </div>
         </div>

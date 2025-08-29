@@ -288,7 +288,7 @@ const ImprovedMessageList: React.FC<ImprovedMessageListProps> = ({
                 {message.mediaName || 'Archivo'}
               </p>
               <p className="text-white/70 text-sm">
-                Toca para descargar
+                Touch to download
               </p>
             </div>
           </div>
@@ -311,7 +311,7 @@ const ImprovedMessageList: React.FC<ImprovedMessageListProps> = ({
             <div className="w-8 h-8 bg-white rounded-full animate-bounce" />
           </div>
           <p className="text-gray-600 dark:text-gray-400 font-medium">
-            Cargando mensajes...
+            Loading messages...
           </p>
         </div>
       </div>
@@ -326,14 +326,14 @@ const ImprovedMessageList: React.FC<ImprovedMessageListProps> = ({
             <ChatBubbleLeftIcon className="w-12 h-12 text-white" />
           </div>
           <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-            ¡Comienza la conversación!
+            Let's start the conversation!
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-            Sé el primero en enviar un mensaje y rompe el hielo. Las mejores amistades comienzan con una simple conversación.
+            Be the first to send a message and break the ice. The best friendships start with a simple conversation.
           </p>
           <div className="flex items-center justify-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
             <div className="w-2 h-2 bg-current rounded-full animate-pulse" />
-            <span>Esperando tu primer mensaje...</span>
+            <span>Waiting for your first message...</span>
           </div>
         </div>
       </div>
@@ -429,7 +429,7 @@ const ImprovedMessageList: React.FC<ImprovedMessageListProps> = ({
                             opacity-0 group-hover/message:opacity-100 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:scale-110
                             focus:outline-none focus:ring-2 focus:ring-blue-500/50 z-10
                           `}
-                          title="Responder a este mensaje"
+                          title="Respond to this message"
                         >
                           <ArrowUturnLeftIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                         </button>

@@ -38,7 +38,7 @@ export default function PrivateChatModal({ isOpen, onClose, otherUser }: Private
       try {
         // Prevenir chat con uno mismo
         if (user._id === otherUser._id) {
-          setError('No puedes crear un chat contigo mismo');
+          setError('You cannot create a chat with yourself');
           setIsLoading(false);
           return;
         }
@@ -65,7 +65,7 @@ export default function PrivateChatModal({ isOpen, onClose, otherUser }: Private
         }
       } catch (error: any) {
         console.error('Error initializing private chat:', error);
-        setError(error.message || 'Error al iniciar el chat. Inténtalo de nuevo.');
+        setError(error.message || 'Error initializing chat. Try again.');
       } finally {
         setIsLoading(false);
       }
@@ -131,7 +131,7 @@ export default function PrivateChatModal({ isOpen, onClose, otherUser }: Private
                   </motion.div>
                   <div>
                     <Dialog.Title className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                      Chat con {otherUser.name}
+                      Chat with {otherUser.name}
                     </Dialog.Title>
                     <motion.p 
                       className="text-sm text-gray-600 dark:text-gray-400 font-medium flex items-center"
@@ -144,7 +144,7 @@ export default function PrivateChatModal({ isOpen, onClose, otherUser }: Private
                         animate={{ scale: [1, 1.3, 1] }}
                         transition={{ duration: 2, repeat: Infinity }}
                       />
-                      Conversación privada
+                      Private conversation
                     </motion.p>
                   </div>
                 </div>
@@ -202,7 +202,7 @@ export default function PrivateChatModal({ isOpen, onClose, otherUser }: Private
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.3 }}
                         >
-                          Iniciando chat
+                          Initializing chat
                         </motion.h3>
                         <motion.p 
                           className="text-gray-600 dark:text-gray-400 max-w-sm mx-auto leading-relaxed"
@@ -210,7 +210,7 @@ export default function PrivateChatModal({ isOpen, onClose, otherUser }: Private
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.4 }}
                         >
-                          Configurando la conversación con {otherUser.name}...
+                          Configuring the conversation with {otherUser.name}...
                         </motion.p>
                         <motion.div 
                           className="mt-6 flex justify-center space-x-2"
@@ -268,7 +268,7 @@ export default function PrivateChatModal({ isOpen, onClose, otherUser }: Private
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.2 }}
                         >
-                          Necesitas ser aliados
+                          You need to be allies
                         </motion.h3>
                         <motion.p 
                           className="text-gray-700 dark:text-gray-300 mb-8 leading-relaxed"
@@ -344,7 +344,7 @@ export default function PrivateChatModal({ isOpen, onClose, otherUser }: Private
                           <UserIcon className="w-10 h-10 text-gray-500 dark:text-gray-400" />
                         </motion.div>
                         <p className="text-gray-600 dark:text-gray-400 font-medium">
-                          No se pudo cargar el chat
+                          Could not load chat
                         </p>
                       </div>
                     </motion.div>
