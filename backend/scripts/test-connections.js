@@ -68,20 +68,38 @@ async function testRedis() {
 async function testOpenSearch() {
   try {
     console.log('🔍 Probando conexión a OpenSearch...');
+    
+    // Configuración mejorada basada en documentación oficial
     const client = new Client({
       node: process.env.OPENSEARCH_URL,
       auth: {
         username: process.env.OPENSEARCH_USERNAME,
         password: process.env.OPENSEARCH_PASSWORD
       },
-      ssl: { rejectUnauthorized: false },
-      requestTimeout: 10000, // 10 segundos
-      maxRetries: 1
+      ssl: { 
+        rejectUnauthorized: false,
+        ca: undefined,
+        checkServerIdentity: () => undefined
+      },
+      requestTimeout: 15000, // 15 segundos
+      maxRetries: 2,
+      // Configuración específica para OpenSearch
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
     });
     
-    console.log('   Conectando a OpenSearch... (timeout: 10s)');
+    console.log('   Conectando a OpenSearch... (timeout: 15s)');
+    console.log('   URL:', process.env.OPENSEARCH_URL);
+    
+    // Probar conexión básica primero
     const info = await client.info();
+    console.log('   ✅ Info obtenida');
+    
+    // Probar health del cluster
     const clusterInfo = await client.cluster.health();
+    console.log('   ✅ Health del cluster obtenido');
     
     console.log('✅ OpenSearch: Conectado correctamente');
     console.log('   Versión:', info.body.version.number);
@@ -89,6 +107,7 @@ async function testOpenSearch() {
     console.log('   Nodos activos:', clusterInfo.body.number_of_nodes);
   } catch (error) {
     console.log('❌ OpenSearch Error:', error.message);
+    console.log('   Detalles del error:', error);
   }
 }
 
