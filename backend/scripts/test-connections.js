@@ -41,7 +41,10 @@ async function testRedis() {
       lazyConnect: true,
       connectTimeout: 10000, // 10 segundos máximo
       commandTimeout: 5000,  // 5 segundos para comandos
-      keyPrefix: 'hoodfy:test:'
+      keyPrefix: 'hoodfy:test:',
+      tls: {
+        rejectUnauthorized: false
+      }
     });
     
     console.log('   Conectando a Redis... (timeout: 10s)');
