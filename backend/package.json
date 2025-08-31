@@ -14,7 +14,15 @@
     "stripe:diagnose": "node scripts/fixStripePrices.js diagnose",
     "stripe:sync": "node scripts/fixStripePrices.js sync",
     "stripe:fix": "node scripts/fixStripePrices.js fix",
-    "stripe:create": "node scripts/fixStripePrices.js create"
+    "stripe:create": "node scripts/fixStripePrices.js create",
+    "setup:enterprise": "node scripts/setup-enterprise.js",
+    "test:connections": "node scripts/test-connections.js",
+    "migrate:chat": "node scripts/migrateFirebaseToPostgres.js",
+    "start:cluster": "pm2 start ecosystem.config.js --env production",
+    "monitor": "pm2 monit",
+    "logs": "pm2 logs",
+    "restart": "pm2 restart all",
+    "stop": "pm2 stop all"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.842.0",
