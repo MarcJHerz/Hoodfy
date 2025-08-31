@@ -392,7 +392,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         <ImprovedMessageInput
           onSendMessage={handleSendMessage}
           isLoading={isSending}
-          placeholder={`Escribe un mensaje en ${chatName}...`}
+          placeholder={`Write a message in ${chatName}...`}
           disabled={isLoading || !!error}
           replyingTo={replyingTo}
           onCancelReply={handleCancelReply}

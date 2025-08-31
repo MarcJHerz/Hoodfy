@@ -32,7 +32,7 @@ const QUICK_EMOJIS = [
 const ImprovedMessageInput: React.FC<ImprovedMessageInputProps> = ({
   onSendMessage,
   isLoading = false,
-  placeholder = "Escribe un mensaje...",
+  placeholder = "Write a message...",
   disabled = false,
   replyingTo,
   onCancelReply,

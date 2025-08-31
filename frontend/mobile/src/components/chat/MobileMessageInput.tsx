@@ -29,7 +29,7 @@ const { width: screenWidth } = Dimensions.get('window');
 const MobileMessageInput: React.FC<MobileMessageInputProps> = ({
   onSendMessage,
   isLoading = false,
-  placeholder = "Escribe un mensaje...",
+  placeholder = "Write a message...",
   disabled = false,
   theme = 'light'
 }) => {
@@ -139,7 +139,7 @@ const MobileMessageInput: React.FC<MobileMessageInputProps> = ({
     try {
       const { status } = await Audio.requestPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permiso requerido', 'Necesitamos permiso para acceder al micrófono');
+        Alert.alert('Permission required', 'We need permission to access the microphone');
         return;
       }
 
@@ -159,13 +159,17 @@ const MobileMessageInput: React.FC<MobileMessageInputProps> = ({
       Vibration.vibrate(100);
 
       // Timer para el tiempo de grabación
-      timerRef.current = setInterval(() => {
+      timerRef.current = setTimeout(() => {
         setRecordingTime(prev => prev + 1);
+        // Continuar el timer
+        if (isRecording) {
+          startRecording();
+        }
       }, 1000);
 
     } catch (err) {
       console.error('Failed to start recording', err);
-      Alert.alert('Error', 'No se pudo iniciar la grabación');
+      Alert.alert('Error', 'Could not start recording');
     }
   };
 
@@ -346,7 +350,7 @@ const MobileMessageInput: React.FC<MobileMessageInputProps> = ({
             ]}
           />
           <Text style={[styles.recordingText, { color: currentColors.text }]}>
-            Grabando... {formatTime(recordingTime)}
+            Recording... {formatTime(recordingTime)}
           </Text>
           <TouchableOpacity onPress={cancelRecording} style={styles.cancelButton}>
             <Text style={styles.cancelButtonText}>✕</Text>
