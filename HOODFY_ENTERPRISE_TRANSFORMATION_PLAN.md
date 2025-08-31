@@ -374,24 +374,24 @@ const connectWithSharding = async () => {
 ### **Variables de Entorno Requeridas**
 ```env
 # Base de Datos
-DATABASE_URL=postgresql://user:pass@host:5432/hoodfy
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/hoodfy
-REDIS_URL=redis://user:pass@host:6379
+DATABASE_URL=postgresql://[USERNAME]:[PASSWORD]@[HOST]:[PORT]/[DATABASE]
+MONGODB_URI=mongodb+srv://[USERNAME]:[PASSWORD]@[CLUSTER].mongodb.net/[DATABASE]
+REDIS_URL=redis://[USERNAME]:[PASSWORD]@[HOST]:[PORT]
 
 # AWS
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=your_key
-AWS_SECRET_ACCESS_KEY=your_secret
-S3_BUCKET_NAME=hoodfy-media
+AWS_REGION=[REGION]
+AWS_ACCESS_KEY_ID=[YOUR_ACCESS_KEY]
+AWS_SECRET_ACCESS_KEY=[YOUR_SECRET_KEY]
+S3_BUCKET_NAME=[BUCKET_NAME]
 
 # Monitoreo
-NEW_RELIC_LICENSE_KEY=your_key
-ELASTICSEARCH_URL=https://your-es-cluster.com
-ELASTICSEARCH_USER=elastic
-ELASTICSEARCH_PASS=your_password
+NEW_RELIC_LICENSE_KEY=[YOUR_LICENSE_KEY]
+ELASTICSEARCH_URL=https://[YOUR_ES_CLUSTER].com
+ELASTICSEARCH_USER=[USERNAME]
+ELASTICSEARCH_PASS=[PASSWORD]
 
 # Socket.io
-SOCKET_CORS_ORIGIN=https://hoodfy.com
+SOCKET_CORS_ORIGIN=https://[YOUR_DOMAIN].com
 SOCKET_MAX_HTTP_BUFFER_SIZE=1e8
 ```
 
