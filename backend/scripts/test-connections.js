@@ -35,9 +35,17 @@ async function testRedis() {
     const redis = new Redis({
       host: process.env.REDIS_HOST,
       port: process.env.REDIS_PORT,
+      password: process.env.REDIS_PASSWORD,
       retryDelayOnFailover: 100,
-      maxRetriesPerRequest: 3
+      maxRetriesPerRequest: 1,
+      lazyConnect: true,
+      connectTimeout: 10000, // 10 segundos máximo
+      commandTimeout: 5000,  // 5 segundos para comandos
+      keyPrefix: 'hoodfy:test:'
     });
+    
+    console.log('   Conectando a Redis... (timeout: 10s)');
+    await redis.connect();
     
     await redis.set('hoodfy_test', 'Hoodfy Redis Test - ' + new Date().toISOString());
     const value = await redis.get('hoodfy_test');
@@ -63,9 +71,12 @@ async function testOpenSearch() {
         username: process.env.OPENSEARCH_USERNAME,
         password: process.env.OPENSEARCH_PASSWORD
       },
-      ssl: { rejectUnauthorized: false }
+      ssl: { rejectUnauthorized: false },
+      requestTimeout: 10000, // 10 segundos
+      maxRetries: 1
     });
     
+    console.log('   Conectando a OpenSearch... (timeout: 10s)');
     const info = await client.info();
     const clusterInfo = await client.cluster.health();
     
@@ -115,17 +126,29 @@ async function runTests() {
   
   console.log('🚀 Iniciando pruebas de conexión...\n');
   
-  await testPostgreSQL();
-  console.log('');
-  await testRedis();
-  console.log('');
-  await testOpenSearch();
+  // Timeout global de 30 segundos para todo el script
+  const globalTimeout = setTimeout(() => {
+    console.log('⏰ Timeout global alcanzado (30s). Cerrando...');
+    process.exit(1);
+  }, 30000);
   
-  console.log('\n🎉 Pruebas completadas!');
-  console.log('\n📋 Resumen:');
-  console.log('   - Si ves ✅, la conexión está funcionando');
-  console.log('   - Si ves ❌, hay un problema que resolver');
-  console.log('   - Si ves ⚠️, revisa la configuración');
+  try {
+    await testPostgreSQL();
+    console.log('');
+    await testRedis();
+    console.log('');
+    await testOpenSearch();
+    
+    clearTimeout(globalTimeout);
+    console.log('\n🎉 Pruebas completadas!');
+    console.log('\n📋 Resumen:');
+    console.log('   - Si ves ✅, la conexión está funcionando');
+    console.log('   - Si ves ❌, hay un problema que resolver');
+    console.log('   - Si ves ⚠️, revisa la configuración');
+  } catch (error) {
+    clearTimeout(globalTimeout);
+    console.log('❌ Error durante las pruebas:', error.message);
+  }
 }
 
 // Manejar errores no capturados
