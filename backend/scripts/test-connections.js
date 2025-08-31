@@ -69,34 +69,66 @@ async function testOpenSearch() {
   try {
     console.log('🔍 Probando conexión a OpenSearch...');
     
-    // Configuración para autenticación IAM de AWS
-    const client = new Client({
-      node: process.env.OPENSEARCH_URL,
-      // Usar autenticación IAM en lugar de credenciales básicas
-      auth: {
-        credentials: {
-          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        },
-        region: process.env.AWS_REGION || 'us-east-1'
-      },
-      ssl: { 
-        rejectUnauthorized: false,
-        ca: undefined,
-        checkServerIdentity: () => undefined
-      },
-      requestTimeout: 15000, // 15 segundos
-      maxRetries: 2,
-      // Configuración específica para OpenSearch con IAM
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    });
+    let client;
     
-    console.log('   Conectando a OpenSearch con IAM... (timeout: 15s)');
-    console.log('   URL:', process.env.OPENSEARCH_URL);
-    console.log('   Región AWS:', process.env.AWS_REGION || 'us-east-1');
+    // Verificar si usar IAM o autenticación básica
+    if (process.env.OPENSEARCH_USE_IAM === 'true') {
+      console.log('   Configurando OpenSearch con autenticación IAM...');
+      
+      // Configuración para autenticación IAM de AWS
+      client = new Client({
+        node: process.env.OPENSEARCH_URL,
+        auth: {
+          credentials: {
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+          },
+          region: process.env.OPENSEARCH_REGION || process.env.AWS_REGION || 'us-east-1'
+        },
+        ssl: { 
+          rejectUnauthorized: false,
+          ca: undefined,
+          checkServerIdentity: () => undefined
+        },
+        requestTimeout: 15000, // 15 segundos
+        maxRetries: 2,
+        // Configuración específica para OpenSearch con IAM
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+      
+      console.log('   Conectando a OpenSearch con IAM... (timeout: 15s)');
+      console.log('   URL:', process.env.OPENSEARCH_URL);
+      console.log('   Región AWS:', process.env.OPENSEARCH_REGION || process.env.AWS_REGION || 'us-east-1');
+    } else {
+      console.log('   Configurando OpenSearch con autenticación básica...');
+      
+      // Configuración para autenticación básica
+      client = new Client({
+        node: process.env.OPENSEARCH_URL,
+        auth: {
+          username: process.env.OPENSEARCH_USERNAME,
+          password: process.env.OPENSEARCH_PASSWORD
+        },
+        ssl: { 
+          rejectUnauthorized: false,
+          ca: undefined,
+          checkServerIdentity: () => undefined
+        },
+        requestTimeout: 15000, // 15 segundos
+        maxRetries: 2,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+      
+      console.log('   Conectando a OpenSearch con autenticación básica... (timeout: 15s)');
+      console.log('   URL:', process.env.OPENSEARCH_URL);
+      console.log('   Usuario:', process.env.OPENSEARCH_USERNAME);
+    }
     
     // Probar conexión básica primero
     const info = await client.info();
@@ -106,7 +138,8 @@ async function testOpenSearch() {
     const clusterInfo = await client.cluster.health();
     console.log('   ✅ Health del cluster obtenido');
     
-    console.log('✅ OpenSearch: Conectado correctamente con IAM');
+    const authMethod = process.env.OPENSEARCH_USE_IAM === 'true' ? 'IAM' : 'básica';
+    console.log(`✅ OpenSearch: Conectado correctamente con autenticación ${authMethod}`);
     console.log('   Versión:', info.body.version.number);
     console.log('   Estado del clúster:', clusterInfo.body.status);
     console.log('   Nodos activos:', clusterInfo.body.number_of_nodes);
@@ -114,13 +147,21 @@ async function testOpenSearch() {
     console.log('❌ OpenSearch Error:', error.message);
     console.log('   Detalles del error:', error);
     
-    // Sugerencias de troubleshooting
+    // Sugerencias de troubleshooting específicas
     if (error.message.includes('timeout')) {
       console.log('   💡 Sugerencia: Verificar VPC Endpoint y Security Groups');
     } else if (error.message.includes('Unauthorized')) {
-      console.log('   💡 Sugerencia: Verificar rol IAM y permisos de OpenSearch');
+      if (process.env.OPENSEARCH_USE_IAM === 'true') {
+        console.log('   💡 Sugerencia: Verificar rol IAM y permisos de OpenSearch');
+        console.log('   💡 Sugerencia: Verificar que AWS_ACCESS_KEY_ID y AWS_SECRET_ACCESS_KEY estén configurados');
+      } else {
+        console.log('   💡 Sugerencia: Verificar OPENSEARCH_USERNAME y OPENSEARCH_PASSWORD');
+      }
     } else if (error.message.includes('ENOTFOUND')) {
       console.log('   💡 Sugerencia: Verificar DNS y conectividad de red');
+    } else if (error.message.includes('ERR_INVALID_ARG_TYPE')) {
+      console.log('   💡 Sugerencia: Error de configuración del cliente OpenSearch');
+      console.log('   💡 Sugerencia: Verificar que OPENSEARCH_USE_IAM esté configurado correctamente');
     }
   }
 }
@@ -132,7 +173,7 @@ function checkEnvironmentVariables() {
   const requiredVars = {
     'PostgreSQL': ['POSTGRES_HOST', 'POSTGRES_PORT', 'POSTGRES_DB', 'POSTGRES_USER', 'POSTGRES_PASSWORD'],
     'Redis': ['REDIS_HOST', 'REDIS_PORT'],
-    'OpenSearch': ['OPENSEARCH_URL'],
+    'OpenSearch': ['OPENSEARCH_URL', 'OPENSEARCH_USE_IAM'],
     'AWS IAM': ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_REGION']
   };
   
@@ -151,13 +192,33 @@ function checkEnvironmentVariables() {
   // Verificar variables opcionales pero recomendadas
   const optionalVars = {
     'Redis Password': 'REDIS_PASSWORD',
-    'OpenSearch Username/Password': 'OPENSEARCH_USERNAME, OPENSEARCH_PASSWORD (obsoletas con IAM)'
+    'OpenSearch Username/Password': 'OPENSEARCH_USERNAME, OPENSEARCH_PASSWORD (solo si OPENSEARCH_USE_IAM=false)',
+    'OpenSearch Region': 'OPENSEARCH_REGION (solo si OPENSEARCH_USE_IAM=true)'
   };
   
   console.log('\n📝 Variables opcionales:');
   Object.entries(optionalVars).forEach(([desc, vars]) => {
     console.log(`   ${desc}: ${vars}`);
   });
+  
+  // Verificar configuración específica de OpenSearch
+  if (process.env.OPENSEARCH_USE_IAM === 'true') {
+    console.log('\n🔍 Configuración OpenSearch IAM detectada:');
+    if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+      console.log('   ✅ Credenciales AWS configuradas para IAM');
+    } else {
+      console.log('   ❌ Credenciales AWS faltantes para IAM');
+      allVarsPresent = false;
+    }
+  } else {
+    console.log('\n🔍 Configuración OpenSearch básica detectada:');
+    if (process.env.OPENSEARCH_USERNAME && process.env.OPENSEARCH_PASSWORD) {
+      console.log('   ✅ Usuario y contraseña configurados');
+    } else {
+      console.log('   ❌ Usuario o contraseña faltantes');
+      allVarsPresent = false;
+    }
+  }
   
   console.log('');
   return allVarsPresent;

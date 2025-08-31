@@ -65,7 +65,7 @@ const criticalVars = {
   'Redis': ['REDIS_HOST', 'REDIS_PORT'],
   'AWS': ['AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'],
   'Stripe': ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'],
-  'OpenSearch': ['OPENSEARCH_URL']
+  'OpenSearch': ['OPENSEARCH_URL', 'OPENSEARCH_USE_IAM']
 };
 
 let allCriticalVarsPresent = true;
@@ -79,6 +79,27 @@ Object.entries(criticalVars).forEach(([service, vars]) => {
     logSuccess(`${service}: Todas las variables configuradas`);
   }
 });
+
+// Verificación específica de OpenSearch
+if (process.env.OPENSEARCH_USE_IAM === 'true') {
+  logInfo('OpenSearch configurado para usar IAM');
+  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+    logError('OpenSearch IAM: Credenciales AWS faltantes');
+    allCriticalVarsPresent = false;
+  } else {
+    logSuccess('OpenSearch IAM: Credenciales AWS configuradas');
+  }
+} else if (process.env.OPENSEARCH_USE_IAM === 'false') {
+  logInfo('OpenSearch configurado para usar autenticación básica');
+  if (!process.env.OPENSEARCH_USERNAME || !process.env.OPENSEARCH_PASSWORD) {
+    logError('OpenSearch básico: Usuario o contraseña faltantes');
+    allCriticalVarsPresent = false;
+  } else {
+    logSuccess('OpenSearch básico: Usuario y contraseña configurados');
+  }
+} else {
+  logWarning('OPENSEARCH_USE_IAM no está configurado, usando IAM por defecto');
+}
 
 if (!allCriticalVarsPresent) {
   logWarning('Algunas variables críticas están faltando');

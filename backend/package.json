@@ -17,6 +17,7 @@
     "stripe:create": "node scripts/fixStripePrices.js create",
     "setup:enterprise": "node scripts/setup-enterprise.js",
     "test:connections": "node scripts/test-connections.js",
+    "troubleshoot:opensearch": "node scripts/troubleshoot-opensearch.js",
     "migrate:chat": "node scripts/migrateFirebaseToPostgres.js",
     "start:cluster": "pm2 start ecosystem.config.js --env production",
     "monitor": "pm2 monit",
