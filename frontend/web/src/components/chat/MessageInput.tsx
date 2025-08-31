@@ -229,7 +229,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
           {/* Typing indicator */}
           {isTyping && (
             <div className="absolute -top-2 left-4 bg-blue-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
-              Escribiendo...
+              Writing...
             </div>
           )}
         </div>
@@ -239,7 +239,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
           type="submit"
           disabled={!message.trim() || isLoading || disabled}
           className="flex-shrink-0 p-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-2xl transition-all duration-300 hover:scale-110 hover:shadow-xl disabled:scale-100 disabled:shadow-none disabled:cursor-not-allowed group"
-          title="Enviar mensaje"
+          title="Send message"
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

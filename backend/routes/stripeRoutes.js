@@ -13,7 +13,6 @@ router.post('/sync-prices', verifyToken, async (req, res) => {
   try {
     const PriceValidationService = require('../services/priceValidationService');
     
-    console.log('🔄 Iniciando sincronización de precios...');
     const result = await PriceValidationService.syncAllPrices();
     
     res.json({
@@ -21,7 +20,6 @@ router.post('/sync-prices', verifyToken, async (req, res) => {
       result
     });
   } catch (error) {
-    console.error('❌ Error en sincronización de precios:', error);
     res.status(500).json({ 
       error: 'Error sincronizando precios',
       details: error.message 
@@ -46,7 +44,6 @@ router.post('/validate-price', verifyToken, async (req, res) => {
       validation
     });
   } catch (error) {
-    console.error('❌ Error validando precio:', error);
     res.status(500).json({ 
       error: 'Error validando precio',
       details: error.message 

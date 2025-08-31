@@ -26,10 +26,14 @@ const logger = winston.createLogger({
 
 // Agregar OpenSearch transport si está configurado
 if (process.env.OPENSEARCH_URL) {
-  // Crear transport personalizado para OpenSearch
-  const OpenSearchTransport = winston.transports.Console.extend({
-    name: 'opensearch',
-    log: async function(info, callback) {
+  // Crear transport personalizado para OpenSearch usando winston.transports.Console
+  class OpenSearchTransport extends winston.transports.Console {
+    constructor(options) {
+      super(options);
+      this.name = 'opensearch';
+    }
+
+    async log(info, callback) {
       try {
         if (process.env.OPENSEARCH_URL) {
           const client = new Client({
@@ -67,7 +71,7 @@ if (process.env.OPENSEARCH_URL) {
       
       callback();
     }
-  });
+  }
 
   logger.add(new OpenSearchTransport({
     level: 'info'

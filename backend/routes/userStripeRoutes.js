@@ -151,7 +151,6 @@ router.get('/stripe-connect/status', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error obteniendo estado de cuenta:', error);
     res.status(500).json({ 
       error: 'Error obteniendo estado de cuenta',
       details: error.message 
@@ -162,7 +161,6 @@ router.get('/stripe-connect/status', async (req, res) => {
 // Crear link de onboarding para una cuenta existente
 router.post('/stripe-connect/onboarding', async (req, res) => {
   try {
-    console.log('🔗 Creando link de onboarding para usuario...');
     
     if (!stripe) {
       return res.status(503).json({ error: 'Stripe no está configurado' });
