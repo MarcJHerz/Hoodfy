@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useCommunitiesStore } from '@/stores/communitiesStore';
 import ChatRoom from './ChatRoom';
-import { chatService } from '@/services/chatService';
+import { postgresChatService } from '@/services/postgresChatService';
 import { CommunityChat } from '@/types/chat';
 import { toast } from 'react-hot-toast';
 import { useIsMobileOrTablet } from '@/hooks/useMediaQuery';
@@ -38,9 +38,9 @@ const CommunityChatRoom: React.FC<CommunityChatRoomProps> = ({
         setIsSubscribed(subscribed);
 
         if (subscribed) {
-          // Crear o obtener el chat de la comunidad
-          const chat = await chatService.createOrGetCommunityChat(communityId, communityName);
-          setCommunityChat(chat);
+          // Crear u obtener el chat de la comunidad en Postgres
+          const chat = await postgresChatService.getOrCreateCommunityChat(communityId, communityName);
+          if (chat) setCommunityChat(chat as any);
         }
       } catch (error) {
         console.error('Error initializing chat:', error);

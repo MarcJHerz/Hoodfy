@@ -5,7 +5,7 @@ import { useChatStore } from '@/stores/chatStore';
 import { useAuthStore } from '@/stores/authStore';
 import SimplifiedMessageList from './SimplifiedMessageList';
 import ImprovedMessageInput from './ImprovedMessageInput';
-import { chatService } from '@/services/chatService';
+import { postgresChatService } from '@/services/postgresChatService';
 import { Message } from '@/types/chat';
 import { XMarkIcon, UserGroupIcon, UserIcon, SignalIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
@@ -68,18 +68,21 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
 
   useEffect(() => {
     if (!user?._id || !chatId) return;
+    console.log('🔄 Cargando y suscribiendo al chat:', chatId);
+    
+    (async () => {
+      try {
+        const chatMessages = await postgresChatService.getChatMessages(chatId);
+        useChatStore.getState().setMessages(chatMessages);
+        await postgresChatService.markMessagesAsRead(chatId, user._id);
+        postgresChatService.connectToSocket(user._id);
+      } catch (err) {
+        console.error('❌ Error inicializando chat:', err);
+      }
+    })();
 
-    console.log('🔄 Suscribiendo a mensajes del chat:', chatId);
-    
-    // Suscribirse a los mensajes del chat
-    const unsubscribe = subscribeToMessages(chatId);
-    
-    // Marcar mensajes como leídos cuando se abre el chat
-    chatService.markMessagesAsRead(chatId, user._id);
-    
     return () => {
-      console.log('🔌 Unsubscribing from chat messages:', chatId);
-      unsubscribe();
+      console.log('🔌 Fin de sesión de chat:', chatId);
     };
   }, [chatId, user?._id, subscribeToMessages]);
 
@@ -172,7 +175,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     if (!user?._id) return;
     try {
       console.log('Adding reaction:', { messageId, emoji, userId: user._id });
-      await chatService.addReaction(messageId, emoji, user._id);
+      await postgresChatService.addReaction(chatId, messageId, emoji);
       
       // Firebase se encargará de sincronizar las reacciones automáticamente
       console.log('🔄 Reacción enviada a Firebase, esperando sincronización...');
@@ -217,7 +220,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     if (!user?._id) return;
     try {
       console.log('Removing reaction:', { messageId, emoji, userId: user._id });
-      await chatService.removeReaction(messageId, emoji, user._id);
+      await postgresChatService.removeReaction(chatId, messageId, emoji);
       
       // Firebase se encargará de sincronizar las reacciones automáticamente
       console.log('🔄 Reacción removida de Firebase, esperando sincronización...');

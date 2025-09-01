@@ -7,7 +7,7 @@ import { XMarkIcon, UserIcon, ExclamationTriangleIcon } from '@heroicons/react/2
 import { useAuthStore } from '@/stores/authStore';
 import { useChatStore } from '@/stores/chatStore';
 import ChatRoom from './ChatRoom';
-import { chatService } from '@/services/chatService';
+import { postgresChatService } from '@/services/postgresChatService';
 import { PrivateChat } from '@/types/chat';
 import { User } from '@/types/user';
 import { toast } from 'react-hot-toast';
@@ -43,26 +43,11 @@ export default function PrivateChatModal({ isOpen, onClose, otherUser }: Private
           return;
         }
 
-        // Buscar chat existente o crear uno nuevo
-        let existingChat = await chatService.getPrivateChat(user._id, otherUser._id);
-        
-        if (!existingChat) {
-          // Crear nuevo chat privado
-          const chatId = await chatService.createPrivateChat(
-            user._id,
-            otherUser._id,
-            otherUser.name,
-            otherUser.profilePicture
-          );
-          
-          existingChat = await chatService.getPrivateChat(user._id, otherUser._id);
-        }
-
-        if (existingChat && existingChat.type === 'private') {
-          const privateChat = existingChat as PrivateChat;
-          setChat(privateChat);
-          setCurrentChat(privateChat);
-        }
+        // Crear chat privado si no existe (en Postgres no buscamos por par aún)
+        const chatId = await postgresChatService.createPrivateChat(`Chat with ${otherUser.name}`);
+        const privateChat: any = { id: chatId, name: `Chat with ${otherUser.name}`, type: 'private' };
+        setChat(privateChat);
+        setCurrentChat(privateChat);
       } catch (error: any) {
         console.error('Error initializing private chat:', error);
         setError(error.message || 'Error initializing chat. Try again.');

@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ChatState, Message, ChatRoom } from '@/types/chat';
-import { chatService } from '@/services/chatService';
 
 export const useChatStore = create<ChatState>()(
   persist(
@@ -122,15 +121,12 @@ export const useChatStore = create<ChatState>()(
       subscribeToMessages: (chatId) => {
         try {
           set({ connectionStatus: 'connecting' });
-          const unsubscribe = chatService.subscribeToMessages(chatId, (messages) => {
-            set({ 
-              messages, 
-              connectionStatus: 'connected',
-              error: null 
-            });
-          });
-
-          return unsubscribe;
+          // Usar el nuevo servicio PostgreSQL con Socket.io
+          // La suscripción se maneja en el componente directamente
+          set({ connectionStatus: 'connected' });
+          return () => {
+            set({ connectionStatus: 'disconnected' });
+          };
         } catch (error: any) {
           set({ 
             connectionStatus: 'disconnected',

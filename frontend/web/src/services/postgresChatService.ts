@@ -13,6 +13,8 @@ class PostgresChatService {
   constructor() {
     // Inicializar el store cuando esté disponible
     this.initializeStore();
+    // Limpiar datos antiguos del sistema Firebase
+    this.clearOldChatData();
   }
 
   private initializeStore() {
@@ -21,6 +23,25 @@ class PostgresChatService {
       import('@/stores/chatStore').then(({ useChatStore }) => {
         this.chatStore = useChatStore;
       });
+    }
+  }
+
+  private clearOldChatData() {
+    // Limpiar datos del sistema Firebase anterior
+    if (typeof window !== 'undefined') {
+      try {
+        // Limpiar localStorage de datos antiguos
+        const keysToRemove = ['firebase-chat-data', 'chat-storage'];
+        keysToRemove.forEach(key => {
+          const item = localStorage.getItem(key);
+          if (item) {
+            console.log(`🧹 Limpiando datos antiguos: ${key}`);
+            localStorage.removeItem(key);
+          }
+        });
+      } catch (error) {
+        console.warn('Error limpiando datos antiguos:', error);
+      }
     }
   }
 
@@ -36,7 +57,7 @@ class PostgresChatService {
   // Obtener chats del usuario
   async getUserChats(userId: string): Promise<ChatRoom[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/chats/user/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/chats/`, {
         headers: this.getAuthHeaders(),
       });
 
@@ -101,14 +122,14 @@ class PostgresChatService {
     }
   }
 
-  // Crear chat privado
-  async createPrivateChat(userId1: string, userId2: string): Promise<string> {
+  // Crear chat privado (el creador queda como participante). El otro usuario se unirá al abrirlo.
+  async createPrivateChat(name: string = 'Private chat'): Promise<string> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/chats/private`, {
+      const response = await fetch(`${API_BASE_URL}/api/chats/`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
         body: JSON.stringify({
-          participant_ids: [userId1, userId2],
+          name,
           type: 'private'
         }),
       });
@@ -118,7 +139,7 @@ class PostgresChatService {
       }
 
       const data = await response.json();
-      return data.chatId;
+      return data.chat?.id?.toString() ?? data.chatId?.toString();
     } catch (error) {
       console.error('❌ Error creando chat privado:', error);
       throw error;
@@ -128,13 +149,12 @@ class PostgresChatService {
   // Crear chat de comunidad
   async createCommunityChat(communityId: string, name: string, participantIds: string[]): Promise<string> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/chats/community`, {
+      const response = await fetch(`${API_BASE_URL}/api/chats/`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
         body: JSON.stringify({
           community_id: communityId,
           name,
-          participant_ids: participantIds,
           type: 'community'
         }),
       });
@@ -144,10 +164,26 @@ class PostgresChatService {
       }
 
       const data = await response.json();
-      return data.chatId;
+      return data.chat?.id?.toString() ?? data.chatId?.toString();
     } catch (error) {
       console.error('❌ Error creando chat de comunidad:', error);
       throw error;
+    }
+  }
+
+  // Obtener o crear chat de comunidad para el usuario actual
+  async getOrCreateCommunityChat(communityId: string, communityName: string): Promise<{ id: string; name: string; type: 'community' } | null> {
+    try {
+      const chats = await this.getUserChats('self');
+      const existing = chats.find((c: any) => c.type === 'community' && c.communityId === communityId);
+      if (existing) {
+        return { id: existing.id, name: existing.name || communityName, type: 'community' };
+      }
+      const chatId = await this.createCommunityChat(communityId, communityName, []);
+      return { id: chatId, name: communityName, type: 'community' };
+    } catch (error) {
+      console.error('❌ Error obteniendo/creando chat de comunidad:', error);
+      return null;
     }
   }
 
@@ -165,15 +201,12 @@ class PostgresChatService {
   }
 
   // Añadir reacción a mensaje
-  async addReaction(messageId: string, emoji: string, userId: string): Promise<void> {
+  async addReaction(chatId: string, messageId: string, reactionType: string): Promise<void> {
     try {
-      await fetch(`${API_BASE_URL}/api/messages/${messageId}/reactions`, {
+      await fetch(`${API_BASE_URL}/api/chats/${chatId}/messages/${messageId}/reactions`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify({
-          emoji,
-          user_id: userId
-        }),
+        body: JSON.stringify({ reaction_type: reactionType }),
       });
     } catch (error) {
       console.error('❌ Error añadiendo reacción:', error);
@@ -181,15 +214,11 @@ class PostgresChatService {
   }
 
   // Remover reacción de mensaje
-  async removeReaction(messageId: string, emoji: string, userId: string): Promise<void> {
+  async removeReaction(chatId: string, messageId: string, reactionType: string): Promise<void> {
     try {
-      await fetch(`${API_BASE_URL}/api/messages/${messageId}/reactions`, {
+      await fetch(`${API_BASE_URL}/api/chats/${chatId}/messages/${messageId}/reactions/${encodeURIComponent(reactionType)}`, {
         method: 'DELETE',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify({
-          emoji,
-          user_id: userId
-        }),
       });
     } catch (error) {
       console.error('❌ Error removiendo reacción:', error);

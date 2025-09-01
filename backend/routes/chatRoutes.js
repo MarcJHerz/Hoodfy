@@ -627,7 +627,7 @@ router.post('/:chatId/read', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Error marcando mensajes como leídos', { error: error.message, chatId: req.params.chatId });
+    console.error('Error marcando mensajes como leídos', { error: error.message, chatId: req.params.chatId });
     res.status(500).json({ error: 'Error marcando mensajes como leídos', details: error.message });
   }
 });
