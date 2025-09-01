@@ -24,9 +24,7 @@ app.use(cors({
     'https://www.hoodfy.com',
     /^https:\/\/.*\.qahood\.com$/, // Cualquier subdominio de qahood.com
     /^https:\/\/.*\.hoodfy\.com$/, // Cualquier subdominio de hoodfy.com
-    /^https:\/\/.*\.amplifyapp\.com$/, // Para Amplify previews
-    /^https:\/\/.*\.vercel\.app$/, // Para Vercel deployments
-    /^https:\/\/.*\.ngrok\.io$/ // Para túneles ngrok
+    /^https:\/\/.*\.amplifyapp\.com$/ // Para Amplify previews
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],

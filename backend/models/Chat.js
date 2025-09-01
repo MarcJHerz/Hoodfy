@@ -1,4 +1,3 @@
-const { DataTypes } = require('sequelize');
 const { Pool } = require('pg');
 
 class Chat {
