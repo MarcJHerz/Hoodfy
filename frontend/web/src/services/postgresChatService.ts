@@ -1,12 +1,13 @@
 import { Message, ChatRoom, CommunityChat, PrivateChat } from '@/types/chat';
 import { User } from '@/types/user';
 import { useChatStore } from '@/stores/chatStore';
+import { Socket } from 'socket.io-client';
 
 // Configuración de la API
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
 
 class PostgresChatService {
-  private socket: any = null;
+  private socket: Socket | null = null;
   private chatStore: any = null;
 
   constructor() {
@@ -208,7 +209,9 @@ class PostgresChatService {
 
         this.socket.on('connect', () => {
           console.log('✅ Conectado a Socket.io');
-          this.socket.emit('join', { userId });
+          if (this.socket) {
+            this.socket.emit('join', { userId });
+          }
           
           if (this.chatStore) {
             this.chatStore.getState().setConnectionStatus('connected');
@@ -229,7 +232,7 @@ class PostgresChatService {
           }
         });
 
-        this.socket.on('typing_start', (data: any) => {
+        this.socket.on('typing_start', (data: { userId: string }) => {
           if (this.chatStore) {
             const { typingUsers } = this.chatStore.getState();
             if (!typingUsers.includes(data.userId)) {
@@ -238,19 +241,19 @@ class PostgresChatService {
           }
         });
 
-        this.socket.on('typing_stop', (data: any) => {
+        this.socket.on('typing_stop', (data: { userId: string }) => {
           if (this.chatStore) {
             const { typingUsers } = this.chatStore.getState();
             this.chatStore.getState().setTypingUsers(
-              typingUsers.filter(id => id !== data.userId)
+              typingUsers.filter((id: string) => id !== data.userId)
             );
           }
         });
 
-        this.socket.on('message_reaction', (data: any) => {
+        this.socket.on('message_reaction', (data: { messageId: string; reactions: any[] }) => {
           if (this.chatStore) {
             const { messages } = this.chatStore.getState();
-            const updatedMessages = messages.map(msg => 
+            const updatedMessages = messages.map((msg: Message) => 
               msg.id === data.messageId 
                 ? { ...msg, reactions: data.reactions }
                 : msg
