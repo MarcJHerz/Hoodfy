@@ -138,37 +138,35 @@ class Message {
     }
   }
 
-  async getChatMessages(chatId, limit = 50, offset = 0, beforeMessageId = null) {
+  async getChatMessages(chatId, limit = 50, offset = 0) {
     const client = await this.pool.connect();
     try {
-      let query = `
-        SELECT m.*, 
-               u.name as sender_name,
-               u.profile_picture as sender_profile_picture,
-               (SELECT COUNT(*) FROM message_reactions WHERE message_id = m.id) as reaction_count,
-               (SELECT COUNT(*) FROM message_reads WHERE message_id = m.id) as read_count
-        FROM messages m
-        LEFT JOIN users u ON m.sender_id = u.id
-        WHERE m.chat_id = $1 AND m.is_deleted = false
-      `;
+      const result = await client.query(`
+        SELECT * FROM messages 
+        WHERE chat_id = $1 AND is_deleted = false
+        ORDER BY created_at DESC
+        LIMIT $2 OFFSET $3
+      `, [chatId, limit, offset]);
 
-      const params = [chatId];
-      let paramIndex = 2;
-
-      if (beforeMessageId) {
-        query += ` AND m.id < $${paramIndex}`;
-        params.push(beforeMessageId);
-        paramIndex++;
-      }
-
-      query += ` ORDER BY m.created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
-      params.push(limit, offset);
-
-      const result = await client.query(query, params);
-      return result.rows.reverse(); // Ordenar por fecha ascendente (más antiguo primero)
+      return result.rows.reverse(); // Ordenar cronológicamente
     } catch (error) {
       console.error('❌ Error obteniendo mensajes del chat:', error);
       throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async getMessageCount() {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(`
+        SELECT COUNT(*) FROM messages WHERE is_deleted = false
+      `);
+      return parseInt(result.rows[0].count);
+    } catch (error) {
+      console.error('❌ Error obteniendo conteo de mensajes:', error);
+      return 0;
     } finally {
       client.release();
     }

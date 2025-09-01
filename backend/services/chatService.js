@@ -37,7 +37,7 @@ class ChatService {
 
     this.setupSocketHandlers();
     this.setupRedisSubscriptions();
-    this.initializeDatabase();
+    // this.initializeDatabase(); // Comentado para evitar conflictos con el script manual
   }
 
   async initializeDatabase() {

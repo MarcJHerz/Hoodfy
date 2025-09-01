@@ -101,33 +101,39 @@ class ChatParticipant {
     }
   }
 
-  async getChatParticipants(chatId, includeBanned = false) {
+  async getChatParticipants(chatId) {
     const client = await this.pool.connect();
     try {
-      let query = `
+      const result = await client.query(`
         SELECT cp.*, 
                u.name,
                u.profile_picture,
-               u.email,
-               u.created_at as user_created_at
+               u.email
         FROM chat_participants cp
         LEFT JOIN users u ON cp.user_id = u.id
-        WHERE cp.chat_id = $1
-      `;
+        WHERE cp.chat_id = $1 AND cp.is_banned = false
+        ORDER BY cp.joined_at ASC
+      `, [chatId]);
 
-      const params = [chatId];
-
-      if (!includeBanned) {
-        query += ` AND cp.is_banned = false`;
-      }
-
-      query += ` ORDER BY cp.role DESC, cp.joined_at ASC`;
-
-      const result = await client.query(query, params);
       return result.rows;
     } catch (error) {
       console.error('❌ Error obteniendo participantes del chat:', error);
       throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async getParticipantCount() {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(`
+        SELECT COUNT(*) FROM chat_participants WHERE is_banned = false
+      `);
+      return parseInt(result.rows[0].count);
+    } catch (error) {
+      console.error('❌ Error obteniendo conteo de participantes:', error);
+      return 0;
     } finally {
       client.release();
     }

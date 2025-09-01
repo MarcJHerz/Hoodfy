@@ -101,18 +101,28 @@ class Chat {
     const client = await this.pool.connect();
     try {
       const result = await client.query(`
-        SELECT c.*, 
-               COUNT(cp.user_id) as participant_count
-        FROM chats c
-        LEFT JOIN chat_participants cp ON c.id = cp.chat_id
-        WHERE c.id = $1 AND c.is_active = true
-        GROUP BY c.id
+        SELECT * FROM chats WHERE id = $1 AND is_active = true
       `, [chatId]);
 
       return result.rows[0] || null;
     } catch (error) {
-      console.error('❌ Error obteniendo chat:', error);
+      console.error('❌ Error obteniendo chat por ID:', error);
       throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async getChatCount() {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(`
+        SELECT COUNT(*) FROM chats WHERE is_active = true
+      `);
+      return parseInt(result.rows[0].count);
+    } catch (error) {
+      console.error('❌ Error obteniendo conteo de chats:', error);
+      return 0;
     } finally {
       client.release();
     }
