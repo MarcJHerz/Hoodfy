@@ -47,7 +47,7 @@ router.post('/', verifyToken, async (req, res) => {
 
     const chat = await chatModel.createChat(chatData);
     
-    logger.info('Chat creado exitosamente', { chatId: chat.id, type, created_by });
+    console.log('Chat creado exitosamente', { chatId: chat.id, type, created_by });
 
     res.status(201).json({
       success: true,
@@ -131,7 +131,7 @@ router.post('/:chatId/join', verifyToken, async (req, res) => {
     // Agregar participante
     const participant = await participantModel.addParticipant(chatId, userId, role);
 
-    logger.info('Usuario se unió al chat', { chatId, userId, role });
+    console.log('Usuario se unió al chat', { chatId, userId, role });
 
     res.json({
       success: true,
@@ -160,7 +160,7 @@ router.post('/:chatId/leave', verifyToken, async (req, res) => {
     // Remover participante
     await participantModel.removeParticipant(chatId, userId);
 
-    logger.info('Usuario salió del chat', { chatId, userId });
+    console.log('Usuario salió del chat', { chatId, userId });
 
     res.json({
       success: true,
@@ -221,7 +221,7 @@ router.put('/:chatId/participants/:participantId/role', verifyToken, async (req,
     // Actualizar rol
     const updatedParticipant = await participantModel.updateParticipantRole(chatId, participantId, role);
 
-    logger.info('Rol de participante actualizado', { chatId, participantId, newRole: role, updatedBy: userId });
+    console.log('Rol de participante actualizado', { chatId, participantId, newRole: role, updatedBy: userId });
 
     res.json({
       success: true,
@@ -251,7 +251,7 @@ router.put('/:chatId/participants/:participantId/mute', verifyToken, async (req,
     // Mutear/desmutear participante
     const updatedParticipant = await participantModel.muteParticipant(chatId, participantId, muted);
 
-    logger.info('Participante mutado/desmutado', { chatId, participantId, muted, updatedBy: userId });
+    console.log('Participante mutado/desmutado', { chatId, participantId, muted, updatedBy: userId });
 
     res.json({
       success: true,
@@ -281,7 +281,7 @@ router.put('/:chatId/participants/:participantId/ban', verifyToken, async (req, 
     // Banear/desbanear participante
     const updatedParticipant = await participantModel.banParticipant(chatId, participantId, banned);
 
-    logger.info('Participante baneado/desbaneado', { chatId, participantId, banned, updatedBy: userId });
+    console.log('Participante baneado/desbaneado', { chatId, participantId, banned, updatedBy: userId });
 
     res.json({
       success: true,
@@ -335,7 +335,7 @@ router.post('/:chatId/messages', verifyToken, async (req, res) => {
 
     const message = await messageModel.createMessage(messageData);
 
-    logger.info('Mensaje enviado exitosamente', { messageId: message.id, chatId, sender_id });
+    console.log('Mensaje enviado exitosamente', { messageId: message.id, chatId, sender_id });
 
     res.status(201).json({
       success: true,
@@ -430,7 +430,7 @@ router.put('/:chatId/messages/:messageId', verifyToken, async (req, res) => {
       return res.status(404).json({ error: 'Mensaje no encontrado o no tienes permisos para editarlo' });
     }
 
-    logger.info('Mensaje actualizado exitosamente', { messageId, chatId, userId });
+    console.log('Mensaje actualizado exitosamente', { messageId, chatId, userId });
 
     res.json({
       success: true,
@@ -467,7 +467,7 @@ router.delete('/:chatId/messages/:messageId', verifyToken, async (req, res) => {
       return res.status(404).json({ error: 'Mensaje no encontrado o no tienes permisos para eliminarlo' });
     }
 
-    logger.info('Mensaje eliminado exitosamente', { messageId, chatId, userId, isAdmin });
+    console.log('Mensaje eliminado exitosamente', { messageId, chatId, userId, isAdmin });
 
     res.json({
       success: true,
@@ -500,7 +500,7 @@ router.post('/:chatId/messages/:messageId/reactions', verifyToken, async (req, r
     // Agregar reacción
     const reaction = await messageModel.addReaction(parseInt(messageId), userId, reaction_type);
 
-    logger.info('Reacción agregada exitosamente', { messageId, reaction_type, userId });
+    console.log('Reacción agregada exitosamente', { messageId, reaction_type, userId });
 
     res.json({
       success: true,
@@ -533,7 +533,7 @@ router.delete('/:chatId/messages/:messageId/reactions/:reactionType', verifyToke
       return res.status(404).json({ error: 'Reacción no encontrada' });
     }
 
-    logger.info('Reacción removida exitosamente', { messageId, reactionType, userId });
+    console.log('Reacción removida exitosamente', { messageId, reactionType, userId });
 
     res.json({
       success: true,
@@ -591,7 +591,7 @@ router.post('/:chatId/messages/:messageId/read', verifyToken, async (req, res) =
     // Marcar como leído
     await messageModel.markMessageAsRead(parseInt(messageId), userId);
 
-    logger.info('Mensaje marcado como leído', { messageId, chatId, userId });
+    console.log('Mensaje marcado como leído', { messageId, chatId, userId });
 
     res.json({
       success: true,
@@ -619,7 +619,7 @@ router.post('/:chatId/read', verifyToken, async (req, res) => {
     // Marcar todos como leídos
     await participantModel.markMessagesAsRead(parseInt(chatId), userId);
 
-    logger.info('Todos los mensajes marcados como leídos', { chatId, userId });
+    console.log('Todos los mensajes marcados como leídos', { chatId, userId });
 
     res.json({
       success: true,
