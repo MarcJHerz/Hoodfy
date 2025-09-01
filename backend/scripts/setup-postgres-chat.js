@@ -89,7 +89,7 @@ class PostgresChatSetup {
           sender_id VARCHAR(255) NOT NULL,
           content TEXT NOT NULL,
           content_type VARCHAR(50) DEFAULT 'text' CHECK (content_type IN ('text', 'image', 'video', 'file', 'audio', 'system')),
-          reply_to_id INTEGER REFERENCES messages(id),
+          reply_to_id INTEGER,
           is_edited BOOLEAN DEFAULT false,
           edited_at TIMESTAMP,
           is_deleted BOOLEAN DEFAULT false,
@@ -99,6 +99,13 @@ class PostgresChatSetup {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+      `);
+      
+      // Agregar la referencia después de crear la tabla
+      await this.client.query(`
+        ALTER TABLE messages 
+        ADD CONSTRAINT fk_messages_reply_to 
+        FOREIGN KEY (reply_to_id) REFERENCES messages(id) ON DELETE SET NULL;
       `);
       
       // Índices para messages
