@@ -45,9 +45,9 @@ class ChatService {
       await this.chatModel.init();
       await this.messageModel.init();
       await this.participantModel.init();
-      logger.info('✅ Base de datos de chat inicializada correctamente');
+      console.log('✅ Base de datos de chat inicializada correctamente');
     } catch (error) {
-      logger.error('❌ Error inicializando base de datos de chat:', error);
+      console.error('❌ Error inicializando base de datos de chat:', error);
     }
   }
 
@@ -66,13 +66,13 @@ class ChatService {
         socket.userProfilePicture = decoded.profilePicture;
         next();
       } catch (error) {
-        logger.error('Error de autenticación Socket.io:', error);
+        console.error('Error de autenticación Socket.io:', error);
         next(new Error('Error de autenticación'));
       }
     });
 
     this.io.on('connection', (socket) => {
-      logger.info(`🔌 Usuario conectado: ${socket.userId} (${socket.userName})`);
+      console.log(`🔌 Usuario conectado: ${socket.userId} (${socket.userName})`);
 
       // Unirse a chats del usuario
       socket.on('join_chats', async (chatIds) => {
@@ -81,7 +81,7 @@ class ChatService {
             await this.joinChat(socket, chatId);
           }
         } catch (error) {
-          logger.error('Error uniéndose a chats:', error);
+          console.error('Error uniéndose a chats:', error);
           socket.emit('error', { message: 'Error uniéndose a chats' });
         }
       });
@@ -92,7 +92,7 @@ class ChatService {
           const message = await this.sendMessage(socket.userId, messageData);
           socket.emit('message_sent', { messageId: message.id, success: true });
         } catch (error) {
-          logger.error('Error enviando mensaje:', error);
+          console.error('Error enviando mensaje:', error);
           socket.emit('message_error', { error: error.message });
         }
       });
@@ -124,7 +124,7 @@ class ChatService {
           }
           socket.emit('messages_marked_read', { chatId, messageId });
         } catch (error) {
-          logger.error('Error marcando mensajes como leídos:', error);
+          console.error('Error marcando mensajes como leídos:', error);
           socket.emit('error', { message: 'Error marcando mensajes como leídos' });
         }
       });
@@ -136,7 +136,7 @@ class ChatService {
           const messages = await this.messageModel.getChatMessages(chatId, limit, offset);
           socket.emit('chat_history', { chatId, messages });
         } catch (error) {
-          logger.error('Error obteniendo historial:', error);
+          console.error('Error obteniendo historial:', error);
           socket.emit('error', { message: 'Error obteniendo historial' });
         }
       });
@@ -147,14 +147,14 @@ class ChatService {
           const participants = await this.participantModel.getChatParticipants(chatId);
           socket.emit('chat_participants', { chatId, participants });
         } catch (error) {
-          logger.error('Error obteniendo participantes:', error);
+          console.error('Error obteniendo participantes:', error);
           socket.emit('error', { message: 'Error obteniendo participantes' });
         }
       });
 
       // Desconexión
       socket.on('disconnect', () => {
-        logger.info(`🔌 Usuario desconectado: ${socket.userId}`);
+        console.log(`🔌 Usuario desconectado: ${socket.userId}`);
         this.handleUserDisconnect(socket);
       });
     });
@@ -186,9 +186,9 @@ class ChatService {
         chatId
       });
 
-      logger.info(`✅ Usuario ${socket.userId} se unió al chat ${chatId}`);
+      console.log(`✅ Usuario ${socket.userId} se unió al chat ${chatId}`);
     } catch (error) {
-      logger.error(`❌ Error uniéndose al chat ${chatId}:`, error);
+      console.error(`❌ Error uniéndose al chat ${chatId}:`, error);
       throw error;
     }
   }
@@ -238,11 +238,11 @@ class ChatService {
       // Enviar notificaciones push
       await this.sendPushNotifications(chatId, messageWithUserInfo, senderId);
 
-      logger.info(`✅ Mensaje enviado: ${message.id} en chat ${chatId}`);
+      console.log(`✅ Mensaje enviado: ${message.id} en chat ${chatId}`);
       return message;
 
     } catch (error) {
-      logger.error('❌ Error enviando mensaje:', error);
+      console.error('❌ Error enviando mensaje:', error);
       throw error;
     }
   }
@@ -267,7 +267,7 @@ class ChatService {
         JSON.stringify(message)
       );
     } catch (error) {
-      logger.error('Error cacheando mensaje:', error);
+      console.error('Error cacheando mensaje:', error);
     }
   }
 
@@ -292,7 +292,7 @@ class ChatService {
       
       return userInfo;
     } catch (error) {
-      logger.error('Error obteniendo información del usuario:', error);
+      console.error('Error obteniendo información del usuario:', error);
       return {
         id: userId,
         name: 'Usuario',
@@ -308,7 +308,7 @@ class ChatService {
       const otherParticipants = participants.filter(p => p.user_id !== excludeUserId);
 
       // Por ahora solo log, implementar notificaciones push después
-      logger.info(`📱 Notificaciones push para ${otherParticipants.length} usuarios en chat ${chatId}`);
+      console.log(`📱 Notificaciones push para ${otherParticipants.length} usuarios en chat ${chatId}`);
 
       // TODO: Implementar notificaciones push reales
       // - Obtener tokens FCM de usuarios
@@ -316,7 +316,7 @@ class ChatService {
       // - Usar servicio de notificaciones existente
 
     } catch (error) {
-      logger.error('Error enviando notificaciones push:', error);
+      console.error('Error enviando notificaciones push:', error);
     }
   }
 
@@ -339,9 +339,9 @@ class ChatService {
       // Limpiar estado del usuario en Redis
       this.redis.hdel(`user:${socket.userId}:online`);
       
-      logger.info(`👋 Usuario ${socket.userId} desconectado de ${rooms.length - 1} chats`);
+      console.log(`👋 Usuario ${socket.userId} desconectado de ${rooms.length - 1} chats`);
     } catch (error) {
-      logger.error('Error manejando desconexión:', error);
+      console.error('Error manejando desconexión:', error);
     }
   }
 
@@ -371,12 +371,12 @@ class ChatService {
             break;
         }
       } catch (error) {
-        logger.error('Error procesando mensaje Redis:', error);
+        console.error('Error procesando mensaje Redis:', error);
       }
     });
 
     this.redis.on('error', (error) => {
-      logger.error('Error en Redis:', error);
+      console.error('Error en Redis:', error);
     });
 
     this.redis.on('connect', () => {
@@ -405,11 +405,11 @@ class ChatService {
       };
 
       const chat = await this.chatModel.createChat(chatData);
-      logger.info(`✅ Chat de comunidad creado: ${chat.id} para comunidad ${communityId}`);
+      console.log(`✅ Chat de comunidad creado: ${chat.id} para comunidad ${communityId}`);
       
       return chat;
     } catch (error) {
-      logger.error('❌ Error creando chat de comunidad:', error);
+      console.error('❌ Error creando chat de comunidad:', error);
       throw error;
     }
   }
@@ -436,11 +436,11 @@ class ChatService {
       await this.participantModel.addParticipant(chat.id, user1Id, 'member');
       await this.participantModel.addParticipant(chat.id, user2Id, 'member');
 
-      logger.info(`✅ Chat privado creado: ${chat.id} entre ${user1Id} y ${user2Id}`);
+      console.log(`✅ Chat privado creado: ${chat.id} entre ${user1Id} y ${user2Id}`);
       
       return chat;
     } catch (error) {
-      logger.error('❌ Error creando chat privado:', error);
+      console.error('❌ Error creando chat privado:', error);
       throw error;
     }
   }
@@ -468,7 +468,7 @@ class ChatService {
 
       return enrichedChats.filter(chat => chat !== null);
     } catch (error) {
-      logger.error('❌ Error obteniendo chats del usuario:', error);
+      console.error('❌ Error obteniendo chats del usuario:', error);
       throw error;
     }
   }
@@ -486,7 +486,7 @@ class ChatService {
         last_message: chat.last_message_at
       };
     } catch (error) {
-      logger.error('❌ Error obteniendo estadísticas del chat:', error);
+      console.error('❌ Error obteniendo estadísticas del chat:', error);
       throw error;
     }
   }
@@ -509,9 +509,9 @@ class ChatService {
   async cleanup() {
     try {
       await this.redis.quit();
-      logger.info('✅ Chat service cleanup completado');
+      console.log('✅ Chat service cleanup completado');
     } catch (error) {
-      logger.error('❌ Error en cleanup del chat service:', error);
+      console.error('❌ Error en cleanup del chat service:', error);
     }
   }
 }
