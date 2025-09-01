@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useChatStore } from '@/stores/chatStore';
-import { chatService } from '@/services/chatService';
+import { postgresChatService } from '@/services/postgresChatService';
 import { ChatRoom } from '@/types/chat';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -56,13 +56,23 @@ export default function MessagesPage() {
       setIsLoading(true);
       setError(null);
 
-      // Usar getUserChats para obtener actualizaciones en tiempo real
-      chatService.getUserChats(user._id);
+      // Usar el nuevo servicio PostgreSQL
+      const loadChats = async () => {
+        try {
+          const chats = await postgresChatService.getUserChats(user._id);
+          setChatRooms(chats);
+          
+          // Conectar a Socket.io para tiempo real
+          postgresChatService.connectToSocket(user._id);
+        } catch (error) {
+          console.error('❌ Error cargando chats:', error);
+          setError('Error loading chats. Try again.');
+        } finally {
+          setIsLoading(false);
+        }
+      };
       
-      // Marcar como no cargando después de un breve delay
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1000);
+      loadChats();
       
     } catch (error) {
       console.error('❌ Error loading chats:', error);
@@ -72,45 +82,18 @@ export default function MessagesPage() {
     
     // Limpiar suscripción cuando el componente se desmonte
     return () => {
-      chatService.unsubscribeFromChats();
+      postgresChatService.disconnectFromSocket();
     };
   }, [user?._id]);
 
   const handleChatClick = (chat: ChatRoom) => {
     // Marcar el chat como leído cuando se hace clic
     if (user?._id) {
-      chatService.markMessagesAsRead(chat.id, user._id);
+      postgresChatService.markMessagesAsRead(chat.id, user._id);
     }
 
-    if (chat.type === 'private') {
-      const privateChat = chat as any;
-      // Identificar correctamente al otro usuario
-      const otherUserId = (privateChat.participants || []).find((id: string) => id !== user?._id);
-      
-      if (!otherUserId) {
-        console.error('❌ Error: Could not identify the other user in the chat:', chat.id);
-        return;
-      }
-      
-      const userData: User = {
-        _id: otherUserId,
-        name: privateChat.otherUserName || 'Unknown user',
-        username: privateChat.otherUserName?.toLowerCase().replace(/\s+/g, '') || 'user',
-        email: '',
-        profilePicture: privateChat.otherUserProfilePicture || '',
-        bio: '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      setSelectedUserForChat(userData);
-    } else {
-      const communityChat = chat as any;
-      if (communityChat.communityId) {
-        window.open(`/communities/${communityChat.communityId}`, '_blank');
-      } else {
-        console.error('❌ Error: communityId is undefined for the chat:', chat.id);
-      }
-    }
+    // Navegar al chat individual
+    window.location.href = `/chats/${chat.id}`;
   };
 
   const handleClosePrivateChat = () => {

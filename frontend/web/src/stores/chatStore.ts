@@ -105,7 +105,9 @@ export const useChatStore = create<ChatState>()(
       sendMessage: async (messageData) => {
         try {
           set({ isLoading: true, error: null });
-          const messageId = await chatService.sendMessage(messageData);
+          // Usar el nuevo servicio PostgreSQL
+          const { postgresChatService } = await import('@/services/postgresChatService');
+          const messageId = await postgresChatService.sendMessage(messageData);
           set({ isLoading: false });
           return messageId;
         } catch (error: any) {
