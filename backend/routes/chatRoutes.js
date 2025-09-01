@@ -56,7 +56,7 @@ router.post('/', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Error creando chat', { error: error.message, userId: req.userId });
+    console.error('Error creando chat', { error: error.message, userId: req.userId });
     res.status(500).json({ error: 'Error creando chat', details: error.message });
   }
 });
@@ -84,7 +84,7 @@ router.get('/:chatId', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Error obteniendo chat', { error: error.message, chatId: req.params.chatId });
+    console.error('Error obteniendo chat', { error: error.message, chatId: req.params.chatId });
     res.status(500).json({ error: 'Error obteniendo chat', details: error.message });
   }
 });
@@ -104,7 +104,7 @@ router.get('/', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Error obteniendo chats del usuario', { error: error.message, userId: req.userId });
+    console.error('Error obteniendo chats del usuario', { error: error.message, userId: req.userId });
     res.status(500).json({ error: 'Error obteniendo chats', details: error.message });
   }
 });
@@ -140,7 +140,7 @@ router.post('/:chatId/join', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Error uniéndose al chat', { error: error.message, chatId: req.params.chatId });
+    console.error('Error uniéndose al chat', { error: error.message, chatId: req.params.chatId });
     res.status(500).json({ error: 'Error uniéndose al chat', details: error.message });
   }
 });
@@ -168,7 +168,7 @@ router.post('/:chatId/leave', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Error saliendo del chat', { error: error.message, chatId: req.params.chatId });
+    console.error('Error saliendo del chat', { error: error.message, chatId: req.params.chatId });
     res.status(500).json({ error: 'Error saliendo del chat', details: error.message });
   }
 });
@@ -195,7 +195,7 @@ router.get('/:chatId/participants', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Error obteniendo participantes', { error: error.message, chatId: req.params.chatId });
+    console.error('Error obteniendo participantes', { error: error.message, chatId: req.params.chatId });
     res.status(500).json({ error: 'Error obteniendo participantes', details: error.message });
   }
 });
@@ -230,7 +230,7 @@ router.put('/:chatId/participants/:participantId/role', verifyToken, async (req,
     });
 
   } catch (error) {
-    logger.error('Error actualizando rol', { error: error.message, chatId: req.params.chatId });
+    console.error('Error actualizando rol', { error: error.message, chatId: req.params.chatId });
     res.status(500).json({ error: 'Error actualizando rol', details: error.message });
   }
 });
@@ -260,7 +260,7 @@ router.put('/:chatId/participants/:participantId/mute', verifyToken, async (req,
     });
 
   } catch (error) {
-    logger.error('Error mutando participante', { error: error.message, chatId: req.params.chatId });
+    console.error('Error mutando participante', { error: error.message, chatId: req.params.chatId });
     res.status(500).json({ error: 'Error mutando participante', details: error.message });
   }
 });
@@ -290,7 +290,7 @@ router.put('/:chatId/participants/:participantId/ban', verifyToken, async (req, 
     });
 
   } catch (error) {
-    logger.error('Error baneando participante', { error: error.message, chatId: req.params.chatId });
+    console.error('Error baneando participante', { error: error.message, chatId: req.params.chatId });
     res.status(500).json({ error: 'Error baneando participante', details: error.message });
   }
 });
@@ -344,7 +344,7 @@ router.post('/:chatId/messages', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Error enviando mensaje', { error: error.message, chatId: req.params.chatId });
+    console.error('Error enviando mensaje', { error: error.message, chatId: req.params.chatId });
     res.status(500).json({ error: 'Error enviando mensaje', details: error.message });
   }
 });
@@ -377,7 +377,7 @@ router.get('/:chatId/messages', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Error obteniendo mensajes', { error: error.message, chatId: req.params.chatId });
+    console.error('Error obteniendo mensajes', { error: error.message, chatId: req.params.chatId });
     res.status(500).json({ error: 'Error obteniendo mensajes', details: error.message });
   }
 });
@@ -405,7 +405,7 @@ router.get('/:chatId/messages/:messageId', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Error obteniendo mensaje', { error: error.message, messageId: req.params.messageId });
+    console.error('Error obteniendo mensaje', { error: error.message, messageId: req.params.messageId });
     res.status(500).json({ error: 'Error obteniendo mensaje', details: error.message });
   }
 });
@@ -439,7 +439,7 @@ router.put('/:chatId/messages/:messageId', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Error actualizando mensaje', { error: error.message, messageId: req.params.messageId });
+    console.error('Error actualizando mensaje', { error: error.message, messageId: req.params.messageId });
     res.status(500).json({ error: 'Error actualizando mensaje', details: error.message });
   }
 });
@@ -475,7 +475,7 @@ router.delete('/:chatId/messages/:messageId', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Error eliminando mensaje', { error: error.message, messageId: req.params.messageId });
+    console.error('Error eliminando mensaje', { error: error.message, messageId: req.params.messageId });
     res.status(500).json({ error: 'Error eliminando mensaje', details: error.message });
   }
 });
@@ -509,7 +509,7 @@ router.post('/:chatId/messages/:messageId/reactions', verifyToken, async (req, r
     });
 
   } catch (error) {
-    logger.error('Error agregando reacción', { error: error.message, messageId: req.params.messageId });
+    console.error('Error agregando reacción', { error: error.message, messageId: req.params.messageId });
     res.status(500).json({ error: 'Error agregando reacción', details: error.message });
   }
 });
@@ -541,7 +541,7 @@ router.delete('/:chatId/messages/:messageId/reactions/:reactionType', verifyToke
     });
 
   } catch (error) {
-    logger.error('Error removiendo reacción', { error: error.message, messageId: req.params.messageId });
+    console.error('Error removiendo reacción', { error: error.message, messageId: req.params.messageId });
     res.status(500).json({ error: 'Error removiendo reacción', details: error.message });
   }
 });
@@ -567,7 +567,7 @@ router.get('/:chatId/messages/:messageId/reactions', verifyToken, async (req, re
     });
 
   } catch (error) {
-    logger.error('Error obteniendo reacciones', { error: error.message, messageId: req.params.messageId });
+    console.error('Error obteniendo reacciones', { error: error.message, messageId: req.params.messageId });
     res.status(500).json({ error: 'Error obteniendo reacciones', details: error.message });
   }
 });
@@ -599,7 +599,7 @@ router.post('/:chatId/messages/:messageId/read', verifyToken, async (req, res) =
     });
 
   } catch (error) {
-    logger.error('Error marcando mensaje como leído', { error: error.message, messageId: req.params.messageId });
+    console.error('Error marcando mensaje como leído', { error: error.message, messageId: req.params.messageId });  
     res.status(500).json({ error: 'Error marcando mensaje como leído', details: error.message });
   }
 });
@@ -663,7 +663,7 @@ router.get('/:chatId/search', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Error buscando mensajes', { error: error.message, chatId: req.params.chatId });
+    console.log('Error buscando mensajes', { error: error.message, chatId: req.params.chatId });
     res.status(500).json({ error: 'Error buscando mensajes', details: error.message });
   }
 });
@@ -692,7 +692,7 @@ router.get('/:chatId/unread-count', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Error obteniendo contador de no leídos', { error: error.message, chatId: req.params.chatId });
+    console.log('Error obteniendo contador de no leídos', { error: error.message, chatId: req.params.chatId });
     res.status(500).json({ error: 'Error obteniendo contador', details: error.message });
   }
 });
@@ -710,7 +710,7 @@ router.get('/unread-count/total', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Error obteniendo total de no leídos', { error: error.message, userId: req.userId });
+    console.log('Error obteniendo total de no leídos', { error: error.message, userId: req.userId });
     res.status(500).json({ error: 'Error obteniendo total', details: error.message });
   }
 });
