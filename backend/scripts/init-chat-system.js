@@ -45,18 +45,31 @@ class ChatSystemInitializer {
   }
 
   async setupPostgres() {
-    console.log('📊 1. Configurando PostgreSQL...');
+    console.log('📊 1. Verificando PostgreSQL...');
     
     try {
-      const success = await this.postgresSetup.run();
+      // Solo verificar que las tablas existan, no crearlas
+      const success = await this.verifyPostgresTables();
       if (!success) {
-        throw new Error('Falló la configuración de PostgreSQL');
+        throw new Error('Las tablas de PostgreSQL no están configuradas correctamente');
       }
       
-      console.log('✅ PostgreSQL configurado correctamente');
+      console.log('✅ PostgreSQL verificado correctamente');
     } catch (error) {
-      console.error('❌ Error configurando PostgreSQL:', error.message);
+      console.error('❌ Error verificando PostgreSQL:', error.message);
       throw error;
+    }
+  }
+
+  async verifyPostgresTables() {
+    try {
+      // Verificar que las tablas existan
+      const chatCount = await this.chatModel.getChatCount();
+      console.log(`   📊 Tablas verificadas - Chats existentes: ${chatCount}`);
+      return true;
+    } catch (error) {
+      console.error('❌ Error verificando tablas:', error.message);
+      return false;
     }
   }
 
