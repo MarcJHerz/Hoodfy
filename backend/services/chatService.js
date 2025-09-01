@@ -380,7 +380,7 @@ class ChatService {
     });
 
     this.redis.on('connect', () => {
-      logger.info('✅ Redis conectado para chat service');
+      console.log('✅ Redis conectado para chat service');
     });
   }
 

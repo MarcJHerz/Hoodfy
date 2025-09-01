@@ -68,9 +68,26 @@ class ChatSystemInitializer {
   }
 
   async initializeDatabase() {
-    await this.chatModel.init();
-    await this.messageModel.init();
-    await this.participantModel.init();
+    console.log('📊 1. Inicializando base de datos...');
+    
+    try {
+      // Primero crear la tabla de chats (sin dependencias)
+      await this.chatModel.init();
+      console.log('✅ Tablas de chat creadas correctamente');
+      
+      // Luego crear la tabla de mensajes (que depende de chats)
+      await this.messageModel.init();
+      console.log('✅ Tablas de mensajes creadas correctamente');
+      
+      // Finalmente crear la tabla de participantes (que depende de chats)
+      await this.participantModel.init();
+      console.log('✅ Tablas de participantes creadas correctamente');
+      
+      console.log('✅ Base de datos inicializada correctamente');
+    } catch (error) {
+      console.error('❌ Error inicializando base de datos:', error);
+      throw error;
+    }
   }
 
   async createSampleChats() {
