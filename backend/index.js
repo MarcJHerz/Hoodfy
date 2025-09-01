@@ -4,9 +4,13 @@ const mongoose = require('mongoose');
 const admin = require('./config/firebase-admin');
 require('dotenv').config();
 const path = require('path');
+const http = require('http'); // Agregar para Socket.io
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// ✅ Crear servidor HTTP para Socket.io
+const server = http.createServer(app);
 
 // ✅ Configurar trust proxy para servidor detrás de proxy/load balancer
 app.set('trust proxy', 1);
@@ -162,10 +166,27 @@ mongoose
   .then(() => console.log('✅ Conectado a MongoDB'))
   .catch((err) => console.error('❌ Error al conectar a MongoDB:', err));
 
+// ✅ INICIALIZAR CHAT SERVICE
+let chatService;
+try {
+  const ChatService = require('./services/chatService');
+  chatService = new ChatService(server);
+  console.log('✅ Chat Service inicializado correctamente');
+  console.log('🔌 Socket.io configurado para chat en tiempo real');
+} catch (error) {
+  console.error('❌ Error inicializando Chat Service:', error);
+  console.log('⚠️ El chat en tiempo real no estará disponible');
+}
+
 // ✅ Iniciar el servidor con configuración de timeout
-const server = app.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
   console.log(`🌐 Accesible desde: https://api.qahood.com y https://api.hoodfy.com`);
+  
+  if (chatService) {
+    console.log('💬 Chat en tiempo real disponible en Socket.io');
+    console.log('📊 Estadísticas del chat:', chatService.getStats());
+  }
 });
 
 // Configurar timeouts para archivos grandes
@@ -177,4 +198,27 @@ console.log('⏱️ Timeouts configurados:', {
   serverTimeout: server.timeout,
   keepAliveTimeout: server.keepAliveTimeout,
   headersTimeout: server.headersTimeout
+});
+
+// ✅ Manejo de señales para shutdown graceful
+process.on('SIGTERM', () => {
+  console.log('🔄 SIGTERM recibido, cerrando servidor...');
+  if (chatService) {
+    chatService.cleanup();
+  }
+  server.close(() => {
+    console.log('✅ Servidor cerrado');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('🔄 SIGINT recibido, cerrando servidor...');
+  if (chatService) {
+    chatService.cleanup();
+  }
+  server.close(() => {
+    console.log('✅ Servidor cerrado');
+    process.exit(0);
+  });
 }); 
