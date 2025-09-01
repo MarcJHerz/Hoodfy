@@ -189,6 +189,32 @@ class PostgresChatSetup {
       this.tablesCreated.push('chat_participants');
       console.log('   ✅ Tabla CHAT_PARTICIPANTS creada');
 
+      // Corregir esquema de chat_participants existente si es necesario
+      try {
+        await this.client.query(`
+          ALTER TABLE chat_participants 
+          ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        `);
+        console.log('   ✅ Columna created_at verificada/agregada');
+        
+        await this.client.query(`
+          ALTER TABLE chat_participants 
+          ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        `);
+        console.log('   ✅ Columna updated_at verificada/agregada');
+        
+        // Actualizar registros existentes
+        await this.client.query(`
+          UPDATE chat_participants 
+          SET created_at = COALESCE(created_at, joined_at), 
+              updated_at = COALESCE(updated_at, CURRENT_TIMESTAMP) 
+          WHERE created_at IS NULL OR updated_at IS NULL
+        `);
+        console.log('   ✅ Timestamps actualizados para registros existentes');
+      } catch (error) {
+        console.log('   ℹ️  Esquema ya está actualizado o error menor:', error.message);
+      }
+
       console.log('\n🎉 Todas las tablas de chat creadas exitosamente!');
       return true;
 
