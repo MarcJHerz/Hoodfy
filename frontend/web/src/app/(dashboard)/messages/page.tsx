@@ -63,7 +63,7 @@ export default function MessagesPage() {
           setChatRooms(chats);
           
           // Conectar a Socket.io para tiempo real
-          postgresChatService.connectToSocket(user._id);
+          await postgresChatService.connectToSocket(user._id);
         } catch (error) {
           console.error('❌ Error cargando chats:', error);
           setError('Error loading chats. Try again.');

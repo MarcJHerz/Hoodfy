@@ -2,6 +2,7 @@ import { Message, ChatRoom, CommunityChat, PrivateChat } from '@/types/chat';
 import { User } from '@/types/user';
 import { useChatStore } from '@/stores/chatStore';
 import { Socket } from 'socket.io-client';
+import { auth } from '@/config/firebase';
 
 // Configuración de la API
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
@@ -46,19 +47,27 @@ class PostgresChatService {
   }
 
   // Métodos de autenticación
-  private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': token ? `Bearer ${token}` : '',
-    };
+  private async getAuthHeaders(): Promise<HeadersInit> {
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : '',
+      };
+    } catch (error) {
+      console.error('❌ Error obteniendo token de Firebase:', error);
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': '',
+      };
+    }
   }
 
   // Obtener chats del usuario
   async getUserChats(userId: string): Promise<ChatRoom[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/chats/`, {
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -77,7 +86,7 @@ class PostgresChatService {
   async getChatMessages(chatId: string): Promise<Message[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/chats/${chatId}/messages`, {
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -97,7 +106,7 @@ class PostgresChatService {
     try {
       const response = await fetch(`${API_BASE_URL}/api/chats/${messageData.chatId}/messages`, {
         method: 'POST',
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
         body: JSON.stringify({
           content: messageData.content,
           content_type: messageData.type,
@@ -127,7 +136,7 @@ class PostgresChatService {
     try {
       const response = await fetch(`${API_BASE_URL}/api/chats/`, {
         method: 'POST',
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
         body: JSON.stringify({
           name,
           type: 'private'
@@ -151,7 +160,7 @@ class PostgresChatService {
     try {
       const response = await fetch(`${API_BASE_URL}/api/chats/`, {
         method: 'POST',
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
         body: JSON.stringify({
           community_id: communityId,
           name,
@@ -192,7 +201,7 @@ class PostgresChatService {
     try {
       await fetch(`${API_BASE_URL}/api/chats/${chatId}/read`, {
         method: 'POST',
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
         body: JSON.stringify({ user_id: userId }),
       });
     } catch (error) {
@@ -205,7 +214,7 @@ class PostgresChatService {
     try {
       await fetch(`${API_BASE_URL}/api/chats/${chatId}/messages/${messageId}/reactions`, {
         method: 'POST',
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
         body: JSON.stringify({ reaction_type: reactionType }),
       });
     } catch (error) {
@@ -218,7 +227,7 @@ class PostgresChatService {
     try {
       await fetch(`${API_BASE_URL}/api/chats/${chatId}/messages/${messageId}/reactions/${encodeURIComponent(reactionType)}`, {
         method: 'DELETE',
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
       });
     } catch (error) {
       console.error('❌ Error removiendo reacción:', error);
@@ -226,13 +235,16 @@ class PostgresChatService {
   }
 
   // Conectar a Socket.io para tiempo real
-  connectToSocket(userId: string) {
+  async connectToSocket(userId: string) {
     try {
+      // Obtener token de Firebase
+      const token = await auth.currentUser?.getIdToken();
+      
       // Importar Socket.io dinámicamente
       import('socket.io-client').then(({ io }) => {
         this.socket = io(API_BASE_URL, {
           auth: {
-            token: localStorage.getItem('authToken') || sessionStorage.getItem('authToken')
+            token: token || ''
           }
         });
 

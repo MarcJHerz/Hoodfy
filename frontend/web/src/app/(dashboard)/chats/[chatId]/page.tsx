@@ -54,7 +54,7 @@ export default function ChatPage() {
         await postgresChatService.markMessagesAsRead(chatId, user._id);
 
         // Conectar a Socket.io si no está conectado
-        postgresChatService.connectToSocket(user._id);
+        await postgresChatService.connectToSocket(user._id);
 
       } catch (error) {
         console.error('❌ Error cargando chat:', error);

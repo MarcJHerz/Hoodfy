@@ -75,7 +75,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         const chatMessages = await postgresChatService.getChatMessages(chatId);
         useChatStore.getState().setMessages(chatMessages);
         await postgresChatService.markMessagesAsRead(chatId, user._id);
-        postgresChatService.connectToSocket(user._id);
+        await postgresChatService.connectToSocket(user._id);
       } catch (err) {
         console.error('❌ Error inicializando chat:', err);
       }
