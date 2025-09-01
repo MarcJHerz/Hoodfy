@@ -94,7 +94,7 @@ class PostgresChatService {
       }
 
       const data = await response.json();
-      return this.transformMessages(data);
+      return this.transformMessages(data.messages || data);
     } catch (error) {
       console.error('❌ Error obteniendo mensajes del chat:', error);
       return [];

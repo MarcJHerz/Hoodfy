@@ -174,6 +174,8 @@ class PostgresChatSetup {
           is_muted BOOLEAN DEFAULT false,
           is_banned BOOLEAN DEFAULT false,
           settings JSONB DEFAULT '{}',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           UNIQUE(chat_id, user_id)
         );
       `);

@@ -83,12 +83,8 @@ class ChatParticipant {
     const client = await this.pool.connect();
     try {
       const result = await client.query(`
-        SELECT cp.*, 
-               u.name,
-               u.profile_picture,
-               u.email
+        SELECT cp.*
         FROM chat_participants cp
-        LEFT JOIN users u ON cp.user_id = u.id
         WHERE cp.chat_id = $1 AND cp.user_id = $2
       `, [chatId, userId]);
 
