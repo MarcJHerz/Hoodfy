@@ -396,7 +396,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
             <SimplifiedMessageList
               messages={messages}
               isLoading={isLoading}
-              currentUserId={user._id}
+              currentUserId={user.firebaseUid}
               onAddReaction={handleAddReaction}
               onRemoveReaction={handleRemoveReaction}
               onReplyToMessage={handleReplyToMessage}

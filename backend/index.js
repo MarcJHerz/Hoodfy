@@ -169,6 +169,7 @@ let chatService;
 try {
   const ChatService = require('./services/chatService');
   chatService = new ChatService(server);
+  global.chatService = chatService; // Hacer disponible globalmente
   console.log('✅ Chat Service inicializado correctamente');
   console.log('🔌 Socket.io configurado para chat en tiempo real');
 } catch (error) {

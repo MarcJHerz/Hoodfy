@@ -33,9 +33,14 @@ class ChatService {
       port: process.env.REDIS_PORT || 6379,
       password: process.env.REDIS_PASSWORD,
       retryDelayOnFailover: 100,
-      maxRetriesPerRequest: 3,
+      maxRetriesPerRequest: 1, // Reducir reintentos
       lazyConnect: true,
-      keyPrefix: 'hoodfy:chat:'
+      keyPrefix: 'hoodfy:chat:',
+      connectTimeout: 10000,
+      commandTimeout: 5000,
+      retryDelayOnClusterDown: 300,
+      enableOfflineQueue: false, // Deshabilitar cola offline para evitar acumulación
+      maxLoadingTimeout: 5000
     });
 
     // Inicializar modelos
@@ -419,6 +424,7 @@ class ChatService {
 
     this.redis.on('error', (error) => {
       console.error('Error en Redis:', error);
+      // No hacer throw para evitar que el servicio se caiga
     });
 
     this.redis.on('connect', () => {

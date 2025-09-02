@@ -14,12 +14,24 @@ const participantModel = new ChatParticipant();
 // Función para obtener información del usuario
 async function getUserInfo(userId) {
   try {
-    // Por ahora retornar información básica
-    // En el futuro esto debería consultar la base de datos de usuarios
-    return {
-      name: 'Usuario', // TODO: Obtener nombre real de la base de datos
-      profile_picture: null
-    };
+    // Importar modelo de usuario dinámicamente
+    const User = require('../models/User');
+    
+    // Buscar usuario por Firebase UID
+    const user = await User.findOne({ firebaseUid: userId });
+    
+    if (user) {
+      return {
+        name: user.name || user.username || 'Usuario',
+        profile_picture: user.profilePicture || null
+      };
+    } else {
+      console.warn(`⚠️ Usuario no encontrado: ${userId}`);
+      return {
+        name: 'Usuario',
+        profile_picture: null
+      };
+    }
   } catch (error) {
     console.error('Error obteniendo información del usuario:', error);
     return {
