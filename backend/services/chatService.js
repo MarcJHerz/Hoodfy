@@ -12,7 +12,15 @@ class ChatService {
   constructor(server) {
     this.io = io(server, {
       cors: {
-        origin: process.env.SOCKET_CORS_ORIGIN || "https://hoodfy.com",
+        origin: [
+          'https://qahood.com',
+          'https://www.qahood.com',
+          'https://hoodfy.com',
+          'https://www.hoodfy.com',
+          /^https:\/\/.*\.qahood\.com$/,
+          /^https:\/\/.*\.hoodfy\.com$/,
+          /^https:\/\/.*\.amplifyapp\.com$/
+        ],
         methods: ["GET", "POST"],
         credentials: true
       },

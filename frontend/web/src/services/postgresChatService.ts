@@ -75,7 +75,7 @@ class PostgresChatService {
       }
 
       const data = await response.json();
-      return this.transformChatRooms(data);
+      return this.transformChatRooms(data.chats || []);
     } catch (error) {
       console.error('❌ Error obteniendo chats del usuario:', error);
       return [];
@@ -94,7 +94,7 @@ class PostgresChatService {
       }
 
       const data = await response.json();
-      return this.transformMessages(data.messages || data);
+      return this.transformMessages(data.messages || []);
     } catch (error) {
       console.error('❌ Error obteniendo mensajes del chat:', error);
       return [];
