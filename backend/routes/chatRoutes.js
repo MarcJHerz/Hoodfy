@@ -11,6 +11,24 @@ const chatModel = new Chat();
 const messageModel = new Message();
 const participantModel = new ChatParticipant();
 
+// Función para obtener información del usuario
+async function getUserInfo(userId) {
+  try {
+    // Por ahora retornar información básica
+    // En el futuro esto debería consultar la base de datos de usuarios
+    return {
+      name: 'Usuario', // TODO: Obtener nombre real de la base de datos
+      profile_picture: null
+    };
+  } catch (error) {
+    console.error('Error obteniendo información del usuario:', error);
+    return {
+      name: 'Usuario',
+      profile_picture: null
+    };
+  }
+}
+
 // ============================================================================
 // RUTAS DE CHAT
 // ============================================================================
@@ -360,29 +378,41 @@ router.post('/:chatId/messages', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'Contenido del mensaje es requerido' });
     }
 
-    // Verificar si el usuario es participante
-    const isParticipant = await participantModel.isParticipant(chatId, sender_id);
-    if (!isParticipant) {
-      return res.status(403).json({ error: 'No puedes enviar mensajes a este chat' });
-    }
-
-    // Verificar si está mutado
-    const participant = await participantModel.getParticipant(chatId, sender_id);
-    if (participant && participant.is_muted) {
-      return res.status(403).json({ error: 'Estás mutado en este chat' });
-    }
-
-    // Crear mensaje
+    // Usar chatService para enviar mensaje (incluye Socket.io)
     const messageData = {
-      chat_id: parseInt(chatId),
-      sender_id,
+      chatId,
       content,
       content_type: content_type || 'text',
       reply_to_id,
       metadata: metadata || {}
     };
 
-    const message = await messageModel.createMessage(messageData);
+    // Crear mensaje
+    const message = await messageModel.createMessage({
+      chat_id: parseInt(chatId),
+      sender_id,
+      content,
+      content_type: content_type || 'text',
+      reply_to_id,
+      metadata: metadata || {}
+    });
+
+    // Obtener información del usuario para el mensaje
+    const userInfo = await getUserInfo(sender_id);
+    const messageWithUserInfo = {
+      ...message,
+      sender_name: userInfo.name,
+      sender_profile_picture: userInfo.profile_picture
+    };
+
+    // Emitir via Socket.io usando la instancia global
+    if (global.chatService && global.chatService.io) {
+      console.log(`📡 Emitiendo new_message a chat ${chatId}:`, messageWithUserInfo);
+      global.chatService.io.to(chatId).emit('new_message', messageWithUserInfo);
+      console.log(`📡 Evento new_message emitido a ${global.chatService.io.sockets.adapter.rooms.get(chatId)?.size || 0} usuarios en chat ${chatId}`);
+    } else {
+      console.warn('⚠️ ChatService no disponible para emitir mensaje');
+    }
 
     console.log('Mensaje enviado exitosamente', { messageId: message.id, chatId, sender_id });
 
