@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useCommunitiesStore } from '@/stores/communitiesStore';
 import ChatRoom from './ChatRoom';
-import { postgresChatService } from '@/services/postgresChatService';
+// import { postgresChatService } from '@/services/postgresChatService'; // Usar store en su lugar
 import { CommunityChat } from '@/types/chat';
 import { toast } from 'react-hot-toast';
 import { XMarkIcon, UserGroupIcon, LockClosedIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
@@ -76,6 +76,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
         if (hasAccess) {
           console.log('✅ Usuario tiene acceso, creando chat...');
           // Crear o obtener el chat de la comunidad en Postgres
+          const { postgresChatService } = await import('@/services/postgresChatService');
           const chat = await postgresChatService.getOrCreateCommunityChat(communityId, communityName);
           if (chat) setCommunityChat(chat as any);
         } else {

@@ -22,7 +22,7 @@ class PostgresChatService {
     // Importar dinámicamente para evitar problemas de SSR
     if (typeof window !== 'undefined') {
       import('@/stores/chatStore').then(({ useChatStore }) => {
-        this.chatStore = useChatStore;
+        this.chatStore = useChatStore.getState();
       });
     }
   }
@@ -255,37 +255,37 @@ class PostgresChatService {
           }
           
           if (this.chatStore) {
-            this.chatStore.getState().setConnectionStatus('connected');
+            this.chatStore.setConnectionStatus('connected');
           }
         });
 
         this.socket.on('disconnect', () => {
           console.log('❌ Desconectado de Socket.io');
           if (this.chatStore) {
-            this.chatStore.getState().setConnectionStatus('disconnected');
+            this.chatStore.setConnectionStatus('disconnected');
           }
         });
 
         this.socket.on('new_message', (message: any) => {
           const transformedMessage = this.transformMessage(message);
           if (this.chatStore) {
-            this.chatStore.getState().addMessage(transformedMessage);
+            this.chatStore.addMessage(transformedMessage);
           }
         });
 
         this.socket.on('typing_start', (data: { userId: string }) => {
           if (this.chatStore) {
-            const { typingUsers } = this.chatStore.getState();
+            const { typingUsers } = this.chatStore;
             if (!typingUsers.includes(data.userId)) {
-              this.chatStore.getState().setTypingUsers([...typingUsers, data.userId]);
+              this.chatStore.setTypingUsers([...typingUsers, data.userId]);
             }
           }
         });
 
         this.socket.on('typing_stop', (data: { userId: string }) => {
           if (this.chatStore) {
-            const { typingUsers } = this.chatStore.getState();
-            this.chatStore.getState().setTypingUsers(
+            const { typingUsers } = this.chatStore;
+            this.chatStore.setTypingUsers(
               typingUsers.filter((id: string) => id !== data.userId)
             );
           }
@@ -293,13 +293,13 @@ class PostgresChatService {
 
         this.socket.on('message_reaction', (data: { messageId: string; reactions: any[] }) => {
           if (this.chatStore) {
-            const { messages } = this.chatStore.getState();
+            const { messages } = this.chatStore;
             const updatedMessages = messages.map((msg: Message) => 
               msg.id === data.messageId 
                 ? { ...msg, reactions: data.reactions }
                 : msg
             );
-            this.chatStore.getState().setMessages(updatedMessages);
+            this.chatStore.setMessages(updatedMessages);
           }
         });
       });

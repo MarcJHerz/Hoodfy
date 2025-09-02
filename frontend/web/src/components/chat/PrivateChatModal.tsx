@@ -7,7 +7,7 @@ import { XMarkIcon, UserIcon, ExclamationTriangleIcon } from '@heroicons/react/2
 import { useAuthStore } from '@/stores/authStore';
 import { useChatStore } from '@/stores/chatStore';
 import ChatRoom from './ChatRoom';
-import { postgresChatService } from '@/services/postgresChatService';
+// import { postgresChatService } from '@/services/postgresChatService'; // Usar store en su lugar
 import { PrivateChat } from '@/types/chat';
 import { User } from '@/types/user';
 import { toast } from 'react-hot-toast';
@@ -44,6 +44,7 @@ export default function PrivateChatModal({ isOpen, onClose, otherUser }: Private
         }
 
         // Crear chat privado si no existe (en Postgres no buscamos por par aún)
+        const { postgresChatService } = await import('@/services/postgresChatService');
         const chatId = await postgresChatService.createPrivateChat(`Chat with ${otherUser.name}`);
         const privateChat: any = { id: chatId, name: `Chat with ${otherUser.name}`, type: 'private' };
         setChat(privateChat);

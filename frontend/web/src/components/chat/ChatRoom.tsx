@@ -5,7 +5,7 @@ import { useChatStore } from '@/stores/chatStore';
 import { useAuthStore } from '@/stores/authStore';
 import SimplifiedMessageList from './SimplifiedMessageList';
 import ImprovedMessageInput from './ImprovedMessageInput';
-import { postgresChatService } from '@/services/postgresChatService';
+// import { postgresChatService } from '@/services/postgresChatService'; // Usar store en su lugar
 import { Message } from '@/types/chat';
 import { XMarkIcon, UserGroupIcon, UserIcon, SignalIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
@@ -37,7 +37,9 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     error,
     sendMessage,
     subscribeToMessages,
-    unsubscribeFromMessages
+    unsubscribeFromMessages,
+    setMessages,
+    addMessage
   } = useChatStore();
 
   const [isSending, setIsSending] = useState(false);
@@ -72,9 +74,17 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     
     (async () => {
       try {
+        // Importar postgresChatService dinámicamente
+        const { postgresChatService } = await import('@/services/postgresChatService');
+        
+        // Cargar mensajes del chat
         const chatMessages = await postgresChatService.getChatMessages(chatId);
-        useChatStore.getState().setMessages(chatMessages);
+        setMessages(chatMessages);
+        
+        // Marcar mensajes como leídos
         await postgresChatService.markMessagesAsRead(chatId, user._id);
+        
+        // Conectar a Socket.io
         await postgresChatService.connectToSocket(user._id);
       } catch (err) {
         console.error('❌ Error inicializando chat:', err);
@@ -84,30 +94,30 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     return () => {
       console.log('🔌 Fin de sesión de chat:', chatId);
     };
-  }, [chatId, user?._id, subscribeToMessages]);
+  }, [chatId, user?._id, setMessages]);
 
-  // Efecto para sincronizar reacciones entre Firebase y estado local
+  // Efecto para sincronizar reacciones entre PostgreSQL y estado local
   useEffect(() => {
     if (messages.length > 0) {
-      console.log('📊 Mensajes recibidos de Firebase:', messages.length);
+      console.log('📊 Mensajes recibidos de PostgreSQL:', messages.length);
       
-      // Verificar si hay mensajes con reacciones de Firebase
-      const messagesWithFirebaseReactions = messages.filter(msg => 
+      // Verificar si hay mensajes con reacciones
+      const messagesWithReactions = messages.filter(msg => 
         msg.reactions && msg.reactions.length > 0
       );
       
-      if (messagesWithFirebaseReactions.length > 0) {
-        console.log('🎯 Mensajes con reacciones de Firebase:', messagesWithFirebaseReactions.length);
+      if (messagesWithReactions.length > 0) {
+        console.log('🎯 Mensajes con reacciones:', messagesWithReactions.length);
         
-        // Actualizar localStorage con las reacciones de Firebase
+        // Actualizar localStorage con las reacciones
         const reactionsKey = `chat_reactions_${chatId}`;
-        const reactionsData = messagesWithFirebaseReactions.map(msg => ({
+        const reactionsData = messagesWithReactions.map(msg => ({
           id: msg.id,
           reactions: msg.reactions
         }));
         
         localStorage.setItem(reactionsKey, JSON.stringify(reactionsData));
-        console.log('💾 Reacciones de Firebase guardadas en localStorage');
+        console.log('💾 Reacciones guardadas en localStorage');
       }
       
       // Verificar si hay mensajes con respuestas
@@ -175,10 +185,11 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     if (!user?._id) return;
     try {
       console.log('Adding reaction:', { messageId, emoji, userId: user._id });
+      const { postgresChatService } = await import('@/services/postgresChatService');
       await postgresChatService.addReaction(chatId, messageId, emoji);
       
-      // Firebase se encargará de sincronizar las reacciones automáticamente
-      console.log('🔄 Reacción enviada a Firebase, esperando sincronización...');
+      // PostgreSQL se encargará de sincronizar las reacciones automáticamente
+      console.log('🔄 Reacción enviada a PostgreSQL, esperando sincronización...');
       
       // Opcional: Actualización optimista local para mejor UX
       const updatedMessages = messages.map(msg => {
@@ -220,10 +231,11 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     if (!user?._id) return;
     try {
       console.log('Removing reaction:', { messageId, emoji, userId: user._id });
+      const { postgresChatService } = await import('@/services/postgresChatService');
       await postgresChatService.removeReaction(chatId, messageId, emoji);
       
-      // Firebase se encargará de sincronizar las reacciones automáticamente
-      console.log('🔄 Reacción removida de Firebase, esperando sincronización...');
+      // PostgreSQL se encargará de sincronizar las reacciones automáticamente
+      console.log('🔄 Reacción removida de PostgreSQL, esperando sincronización...');
       
       // Opcional: Actualización optimista local para mejor UX
       const updatedMessages = messages.map(msg => {

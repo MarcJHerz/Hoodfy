@@ -13,7 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuthStore } from '@/stores/authStore';
 import { Message } from '@/types/chat';
-import { auth } from '@/config/firebase';
+// import { auth } from '@/config/firebase'; // Ya no se usa Firebase directamente
 
 interface ImprovedMessageInputProps {
   onSendMessage: (content: string, type: 'text' | 'image' | 'video' | 'file', file?: File, replyTo?: Message, s3Key?: string, s3Url?: string) => void;
@@ -119,6 +119,8 @@ const ImprovedMessageInput: React.FC<ImprovedMessageInputProps> = ({
       formData.append('file', file);
       formData.append('chatId', chatId || 'unknown-chat');
       
+      // Obtener token de Firebase a través del store de autenticación
+      const { auth } = await import('@/config/firebase');
       const token = await auth.currentUser?.getIdToken();
       console.log('🔑 Token obtenido:', token ? '✅' : '❌');
       
@@ -126,8 +128,8 @@ const ImprovedMessageInput: React.FC<ImprovedMessageInputProps> = ({
       const API_URL = typeof window !== 'undefined' ? 
         (window.location.hostname === 'hoodfy.com' || window.location.hostname === 'www.hoodfy.com' 
           ? 'https://api.hoodfy.com' 
-          : 'https://api.qahood.com') 
-        : 'https://api.qahood.com';
+          : 'https://api.hoodfy.com') 
+        : 'https://api.hoodfy.com';
 
       console.log('🌐 API URL:', API_URL);
       console.log('📤 FormData entries:', Array.from(formData.entries()));
