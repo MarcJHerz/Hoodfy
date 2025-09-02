@@ -271,6 +271,9 @@ class ChatService {
 
       // Broadcast via Socket.io
       console.log(`📡 Emitiendo new_message a chat ${chatId}:`, messageWithUserInfo);
+      console.log(`📡 Rooms disponibles:`, Array.from(this.io.sockets.adapter.rooms.keys()));
+      console.log(`📡 Usuarios en room ${chatId}:`, this.io.sockets.adapter.rooms.get(chatId)?.size || 0);
+      
       this.io.to(chatId).emit('new_message', messageWithUserInfo);
       console.log(`📡 Evento new_message emitido a ${this.io.sockets.adapter.rooms.get(chatId)?.size || 0} usuarios en chat ${chatId}`);
 

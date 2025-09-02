@@ -265,7 +265,19 @@ class PostgresChatService {
       console.log(`🔌 Uniéndose al chat ${chatId} via Socket.io`);
       this.socket.emit('join_chat', { chatId });
     } else {
-      console.warn('⚠️ Socket no conectado, no se puede unir al chat');
+      console.warn('⚠️ Socket no conectado, esperando conexión...');
+      // Esperar a que se conecte
+      return new Promise((resolve) => {
+        if (this.socket) {
+          this.socket.once('connect', () => {
+            console.log(`🔌 Socket conectado, uniéndose al chat ${chatId}`);
+            this.socket!.emit('join_chat', { chatId });
+            resolve(undefined);
+          });
+        } else {
+          resolve(undefined);
+        }
+      });
     }
   }
 
