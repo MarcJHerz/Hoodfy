@@ -95,6 +95,18 @@ class ChatService {
         }
       });
 
+      // Unirse a un chat específico
+      socket.on('join_chat', async (data) => {
+        try {
+          const { chatId } = data;
+          console.log(`🔌 Usuario ${socket.userId} solicitando unirse al chat ${chatId}`);
+          await this.joinChat(socket, chatId);
+        } catch (error) {
+          console.error('Error uniéndose al chat:', error);
+          socket.emit('error', { message: 'Error uniéndose al chat' });
+        }
+      });
+
       // Enviar mensaje
       socket.on('send_message', async (messageData) => {
         try {

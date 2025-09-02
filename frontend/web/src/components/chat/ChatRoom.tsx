@@ -86,6 +86,9 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         
         // Conectar a Socket.io
         await postgresChatService.connectToSocket(user._id);
+        
+        // Unirse al chat específico
+        await postgresChatService.joinChat(chatId);
       } catch (err) {
         console.error('❌ Error inicializando chat:', err);
       }

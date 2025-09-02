@@ -238,6 +238,16 @@ class PostgresChatService {
     }
   }
 
+  // Unirse a un chat específico via Socket.io
+  async joinChat(chatId: string) {
+    if (this.socket && this.socket.connected) {
+      console.log(`🔌 Uniéndose al chat ${chatId} via Socket.io`);
+      this.socket.emit('join_chat', { chatId });
+    } else {
+      console.warn('⚠️ Socket no conectado, no se puede unir al chat');
+    }
+  }
+
   // Conectar a Socket.io para tiempo real
   async connectToSocket(userId: string) {
     try {

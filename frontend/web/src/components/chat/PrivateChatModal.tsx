@@ -49,6 +49,10 @@ export default function PrivateChatModal({ isOpen, onClose, otherUser }: Private
         const privateChat: any = { id: chatId, name: `Chat with ${otherUser.name}`, type: 'private' };
         setChat(privateChat);
         setCurrentChat(privateChat);
+        
+        // Conectar a Socket.io y unirse al chat
+        await postgresChatService.connectToSocket(user._id);
+        await postgresChatService.joinChat(chatId);
       } catch (error: any) {
         console.error('Error initializing private chat:', error);
         setError(error.message || 'Error initializing chat. Try again.');

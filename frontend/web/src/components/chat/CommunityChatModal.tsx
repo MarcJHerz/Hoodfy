@@ -78,7 +78,13 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
           // Crear o obtener el chat de la comunidad en Postgres
           const { postgresChatService } = await import('@/services/postgresChatService');
           const chat = await postgresChatService.getOrCreateCommunityChat(communityId, communityName);
-          if (chat) setCommunityChat(chat as any);
+          if (chat) {
+            setCommunityChat(chat as any);
+            
+            // Conectar a Socket.io y unirse al chat
+            await postgresChatService.connectToSocket(user._id);
+            await postgresChatService.joinChat(chat.id);
+          }
         } else {
           console.log('❌ Usuario no tiene acceso');
         }
