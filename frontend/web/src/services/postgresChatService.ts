@@ -18,12 +18,16 @@ class PostgresChatService {
     this.clearOldChatData();
   }
 
-  private initializeStore() {
+  private async initializeStore() {
     // Importar dinámicamente para evitar problemas de SSR
     if (typeof window !== 'undefined') {
-      import('@/stores/chatStore').then(({ useChatStore }) => {
+      try {
+        const { useChatStore } = await import('@/stores/chatStore');
         this.chatStore = useChatStore.getState();
-      });
+        console.log('✅ Chat store inicializado correctamente');
+      } catch (error) {
+        console.error('❌ Error inicializando chat store:', error);
+      }
     }
   }
 
@@ -237,6 +241,11 @@ class PostgresChatService {
   // Conectar a Socket.io para tiempo real
   async connectToSocket(userId: string) {
     try {
+      // Asegurar que el store esté inicializado
+      if (!this.chatStore) {
+        await this.initializeStore();
+      }
+      
       // Obtener token de Firebase
       const token = await auth.currentUser?.getIdToken();
       
@@ -267,9 +276,14 @@ class PostgresChatService {
         });
 
         this.socket.on('new_message', (message: any) => {
+          console.log('📨 Nuevo mensaje recibido via Socket.io:', message);
           const transformedMessage = this.transformMessage(message);
+          console.log('🔄 Mensaje transformado:', transformedMessage);
           if (this.chatStore) {
+            console.log('✅ Agregando mensaje al store');
             this.chatStore.addMessage(transformedMessage);
+          } else {
+            console.error('❌ Chat store no disponible');
           }
         });
 
