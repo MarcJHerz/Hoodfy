@@ -179,6 +179,8 @@ class ChatService {
 
       // Unirse al room de Socket.io
       socket.join(chatId);
+      console.log(`🔌 Usuario ${socket.userId} se unió al room ${chatId}`);
+      console.log(`👥 Usuarios en room ${chatId}: ${this.io.sockets.adapter.rooms.get(chatId)?.size || 0}`);
       
       // Obtener últimos mensajes
       const messages = await this.messageModel.getChatMessages(chatId, 50);
@@ -242,7 +244,9 @@ class ChatService {
       await this.cacheMessage(chatId, messageWithUserInfo);
 
       // Broadcast via Socket.io
+      console.log(`📡 Emitiendo new_message a chat ${chatId}:`, messageWithUserInfo);
       this.io.to(chatId).emit('new_message', messageWithUserInfo);
+      console.log(`📡 Evento new_message emitido a ${this.io.sockets.adapter.rooms.get(chatId)?.size || 0} usuarios en chat ${chatId}`);
 
       // Enviar notificaciones push
       await this.sendPushNotifications(chatId, messageWithUserInfo, senderId);
