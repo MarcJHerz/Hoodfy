@@ -1,6 +1,6 @@
 const io = require('socket.io');
 const Redis = require('ioredis');
-const jwt = require('jsonwebtoken');
+const admin = require('../config/firebase-admin');
 const logger = require('../utils/logger');
 
 // Importar nuestros nuevos modelos
@@ -68,10 +68,11 @@ class ChatService {
           return next(new Error('Token de autenticación requerido'));
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        socket.userId = decoded.userId;
-        socket.userName = decoded.name || 'Usuario';
-        socket.userProfilePicture = decoded.profilePicture;
+        // Verificar token con Firebase Admin SDK
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        socket.userId = decodedToken.uid;
+        socket.userName = decodedToken.name || decodedToken.email || 'Usuario';
+        socket.userProfilePicture = decodedToken.picture;
         next();
       } catch (error) {
         console.error('Error de autenticación Socket.io:', error);

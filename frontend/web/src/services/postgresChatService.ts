@@ -5,7 +5,7 @@ import { Socket } from 'socket.io-client';
 import { auth } from '@/config/firebase';
 
 // Configuración de la API
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.hoodfy.com';
 
 class PostgresChatService {
   private socket: Socket | null = null;
@@ -124,7 +124,7 @@ class PostgresChatService {
       }
 
       const data = await response.json();
-      return data.messageId;
+      return data.message?.id?.toString() || '';
     } catch (error) {
       console.error('❌ Error enviando mensaje:', error);
       throw error;
