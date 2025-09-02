@@ -135,7 +135,28 @@ class PostgresChatService {
     }
   }
 
-  // Crear chat privado (el creador queda como participante). El otro usuario se unirá al abrirlo.
+  // Obtener o crear chat privado entre dos usuarios (como las grandes empresas)
+  async getOrCreatePrivateChat(otherUserId: string): Promise<string> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/chats/private/${otherUserId}`, {
+        method: 'POST',
+        headers: await this.getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ Chat privado ${data.isNew ? 'creado' : 'encontrado'}:`, data.chat.id);
+      return data.chat.id.toString();
+    } catch (error) {
+      console.error('❌ Error obteniendo/creando chat privado:', error);
+      throw error;
+    }
+  }
+
+  // Crear chat privado (método legacy - mantener para compatibilidad)
   async createPrivateChat(name: string = 'Private chat'): Promise<string> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/chats/`, {

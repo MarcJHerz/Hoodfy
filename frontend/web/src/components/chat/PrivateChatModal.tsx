@@ -43,9 +43,9 @@ export default function PrivateChatModal({ isOpen, onClose, otherUser }: Private
           return;
         }
 
-        // Crear chat privado si no existe (en Postgres no buscamos por par aún)
+        // Obtener o crear chat privado (como las grandes empresas)
         const { postgresChatService } = await import('@/services/postgresChatService');
-        const chatId = await postgresChatService.createPrivateChat(`Chat with ${otherUser.name}`);
+        const chatId = await postgresChatService.getOrCreatePrivateChat(otherUser._id);
         const privateChat: any = { id: chatId, name: `Chat with ${otherUser.name}`, type: 'private' };
         setChat(privateChat);
         setCurrentChat(privateChat);

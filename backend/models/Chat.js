@@ -128,6 +128,30 @@ class Chat {
     }
   }
 
+  // Buscar chat privado existente entre dos usuarios
+  async findPrivateChatBetweenUsers(userId1, userId2) {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(`
+        SELECT c.* FROM chats c
+        INNER JOIN chat_participants cp1 ON c.id = cp1.chat_id
+        INNER JOIN chat_participants cp2 ON c.id = cp2.chat_id
+        WHERE c.type = 'private' 
+        AND c.is_active = true
+        AND cp1.user_id = $1 AND cp2.user_id = $2
+        AND cp1.is_banned = false AND cp2.is_banned = false
+        LIMIT 1
+      `, [userId1, userId2]);
+
+      return result.rows[0] || null;
+    } catch (error) {
+      console.error('❌ Error buscando chat privado entre usuarios:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   async getUserChats(userId) {
     const client = await this.pool.connect();
     try {

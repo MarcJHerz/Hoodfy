@@ -15,6 +15,55 @@ const participantModel = new ChatParticipant();
 // RUTAS DE CHAT
 // ============================================================================
 
+// Obtener o crear chat privado entre dos usuarios
+router.post('/private/:otherUserId', verifyToken, async (req, res) => {
+  try {
+    const { otherUserId } = req.params;
+    const currentUserId = req.userId;
+
+    // Prevenir chat con uno mismo
+    if (currentUserId === otherUserId) {
+      return res.status(400).json({ error: 'No puedes crear un chat contigo mismo' });
+    }
+
+    // Buscar chat existente entre los dos usuarios
+    const existingChat = await chatModel.findPrivateChatBetweenUsers(currentUserId, otherUserId);
+    
+    if (existingChat) {
+      console.log('✅ Chat privado existente encontrado:', existingChat.id);
+      return res.json({
+        success: true,
+        chat: existingChat,
+        isNew: false
+      });
+    }
+
+    // Crear nuevo chat privado
+    const chatData = {
+      name: `Private chat`,
+      type: 'private',
+      created_by: currentUserId
+    };
+
+    const chat = await chatModel.createChat(chatData);
+    
+    // Agregar al otro usuario como participante
+    await participantModel.addParticipant(chat.id, otherUserId, 'member');
+    
+    console.log('✅ Nuevo chat privado creado:', chat.id);
+    
+    res.json({
+      success: true,
+      chat,
+      isNew: true
+    });
+
+  } catch (error) {
+    console.error('Error obteniendo/creando chat privado:', error);
+    res.status(500).json({ error: 'Error obteniendo/creando chat privado', details: error.message });
+  }
+});
+
 // Crear nuevo chat (comunidad o privado)
 router.post('/', verifyToken, async (req, res) => {
   try {

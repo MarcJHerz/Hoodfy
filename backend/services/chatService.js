@@ -183,10 +183,24 @@ class ChatService {
 
   async joinChat(socket, chatId) {
     try {
+      console.log(`🔍 Verificando acceso al chat ${chatId} para usuario ${socket.userId}`);
+      
       // Verificar si el usuario es participante del chat
       const isParticipant = await this.participantModel.isParticipant(chatId, socket.userId);
+      console.log(`🔍 Resultado de verificación de participante: ${isParticipant}`);
+      
       if (!isParticipant) {
-        throw new Error('No tienes acceso a este chat');
+        console.log(`❌ Usuario ${socket.userId} no es participante del chat ${chatId}`);
+        console.log(`🔧 Intentando agregar usuario como participante...`);
+        
+        // Intentar agregar al usuario como participante
+        try {
+          await this.participantModel.addParticipant(chatId, socket.userId, 'member');
+          console.log(`✅ Usuario ${socket.userId} agregado como participante del chat ${chatId}`);
+        } catch (addError) {
+          console.error(`❌ Error agregando participante:`, addError);
+          throw new Error('No tienes acceso a este chat');
+        }
       }
 
       // Unirse al room de Socket.io
