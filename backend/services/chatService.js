@@ -27,19 +27,14 @@ class ChatService {
       maxHttpBufferSize: parseInt(process.env.SOCKET_MAX_HTTP_BUFFER_SIZE) || 1e8
     });
 
-    // Configurar Redis Cluster
-    try {
-      this.redisManager = getRedisManager();
-      this.redis = null; // Inicializar como null, se conectará después
-      
-      // Conectar de forma asíncrona
-      this.initializeRedis();
-
-    } catch (error) {
-      console.error('❌ Error inicializando Redis Manager:', error);
-      this.redis = null;
-      this.redisManager = null;
-    }
+        // 🚫 REDIS TEMPORALMENTE DESHABILITADO - CAUSANDO LOOPS INFINITOS
+    console.warn('⚠️ Redis deshabilitado temporalmente por problemas de estabilidad');
+    this.redis = null;
+    this.redisManager = null;
+    
+    // TODO: Re-habilitar Redis una vez solucionado el problema de timeouts
+    // this.redisManager = getRedisManager();
+    // this.initializeRedis();
 
     // Inicializar modelos
     this.chatModel = new Chat();

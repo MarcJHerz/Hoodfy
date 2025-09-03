@@ -15,17 +15,27 @@ const ensureAbsoluteUrl = (url) => {
 // 🔹 Obtener mis aliados
 router.get('/my-allies', verifyToken, async (req, res) => {
   try {
+    // 🔧 CRÍTICO: req.userId es ahora firebaseUid, necesitamos MongoDB ObjectId
+    const mongoUserId = req.mongoUserId; // Viene del middleware
+    
+    if (!mongoUserId) {
+      return res.status(400).json({ 
+        error: 'Error de autenticación',
+        message: 'No se pudo obtener el ID de MongoDB del usuario'
+      });
+    }
+    
     const allies = await Ally.find({
       $or: [
-        { user1: req.userId },
-        { user2: req.userId }
+        { user1: mongoUserId },
+        { user2: mongoUserId }
       ]
     })
     .populate('user1', 'name username profilePicture bio category')
     .populate('user2', 'name username profilePicture bio category');
     
     const formattedAllies = allies.map(a => {
-      const allyUser = a.user1._id.toString() === req.userId.toString() ? a.user2 : a.user1;
+      const allyUser = a.user1._id.toString() === mongoUserId.toString() ? a.user2 : a.user1;
       return {
         _id: allyUser._id,
         name: allyUser.name,
@@ -69,8 +79,18 @@ router.post('/add-ally', verifyToken, async (req, res) => {
       });
     }
 
+    // 🔧 CRÍTICO: req.userId es ahora firebaseUid, necesitamos MongoDB ObjectId
+    const mongoUserId = req.mongoUserId;
+    
+    if (!mongoUserId) {
+      return res.status(400).json({ 
+        error: 'Error de autenticación',
+        message: 'No se pudo obtener el ID de MongoDB del usuario'
+      });
+    }
+
     // Verificar que no sea el mismo usuario
-    if (userId === req.userId) {
+    if (userId === mongoUserId.toString()) {
       return res.status(400).json({ 
         error: 'Operación inválida',
         details: { userId: 'No puedes agregarte a ti mismo como aliado' }
@@ -80,8 +100,8 @@ router.post('/add-ally', verifyToken, async (req, res) => {
     // Verificar que no sean ya aliados
     const existingAlly = await Ally.findOne({
       $or: [
-        { user1: req.userId, user2: userId },
-        { user1: userId, user2: req.userId }
+        { user1: mongoUserId, user2: userId },
+        { user1: userId, user2: mongoUserId }
       ]
     });
 
@@ -94,7 +114,7 @@ router.post('/add-ally', verifyToken, async (req, res) => {
 
     // Crear la relación de aliados
     const newAlly = new Ally({
-      user1: req.userId,
+      user1: mongoUserId,
       user2: userId
     });
 
@@ -137,10 +157,20 @@ router.delete('/remove-ally/:userId', verifyToken, async (req, res) => {
       });
     }
 
+    // 🔧 CRÍTICO: req.userId es ahora firebaseUid, necesitamos MongoDB ObjectId
+    const mongoUserId = req.mongoUserId;
+    
+    if (!mongoUserId) {
+      return res.status(400).json({ 
+        error: 'Error de autenticación',
+        message: 'No se pudo obtener el ID de MongoDB del usuario'
+      });
+    }
+
     const result = await Ally.findOneAndDelete({
       $or: [
-        { user1: req.userId, user2: userId },
-        { user1: userId, user2: req.userId }
+        { user1: mongoUserId, user2: userId },
+        { user1: userId, user2: mongoUserId }
       ]
     });
 
@@ -169,10 +199,20 @@ router.get('/check/:targetUserId', verifyToken, async (req, res) => {
 
     console.log(`🔍 Verificando alianza: ${req.userId} con ${targetUserId}`);
 
+    // 🔧 CRÍTICO: req.userId es ahora firebaseUid, necesitamos MongoDB ObjectId
+    const mongoUserId = req.mongoUserId;
+    
+    if (!mongoUserId) {
+      return res.status(400).json({ 
+        error: 'Error de autenticación',
+        message: 'No se pudo obtener el ID de MongoDB del usuario'
+      });
+    }
+
     const ally = await Ally.findOne({
       $or: [
-        { user1: req.userId, user2: targetUserId },
-        { user1: targetUserId, user2: req.userId }
+        { user1: mongoUserId, user2: targetUserId },
+        { user1: targetUserId, user2: mongoUserId }
       ]
     });
 
