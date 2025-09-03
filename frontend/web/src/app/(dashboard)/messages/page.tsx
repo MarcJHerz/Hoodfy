@@ -52,44 +52,38 @@ export default function MessagesPage() {
   useEffect(() => {
     if (!user?._id) return;
 
-    try {
-      setIsLoading(true);
-      setError(null);
+    const loadChats = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-      // Usar el nuevo servicio PostgreSQL
-      const loadChats = async () => {
-        try {
-          const chats = await postgresChatService.getUserChats(user._id);
-          setChatRooms(chats);
-          
-          // Conectar a Socket.io para tiempo real
-          await postgresChatService.connectToSocket(user._id);
-        } catch (error) {
-          console.error('❌ Error cargando chats:', error);
-          setError('Error loading chats. Try again.');
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      
-      loadChats();
-      
-    } catch (error) {
-      console.error('❌ Error loading chats:', error);
-      setError('Error loading chats. Try again.');
-      setIsLoading(false);
-    }
+        // Usar el store para cargar chats
+        const { loadUserChats, connectToSocket } = useChatStore.getState();
+        await loadUserChats(user._id);
+        await connectToSocket(user._id);
+        
+      } catch (error) {
+        console.error('❌ Error cargando chats:', error);
+        setError('Error loading chats. Try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadChats();
     
     // Limpiar suscripción cuando el componente se desmonte
     return () => {
-      postgresChatService.disconnectFromSocket();
+      const { disconnectFromSocket } = useChatStore.getState();
+      disconnectFromSocket();
     };
   }, [user?._id]);
 
   const handleChatClick = (chat: ChatRoom) => {
     // Marcar el chat como leído cuando se hace clic
     if (user?._id) {
-      postgresChatService.markMessagesAsRead(chat.id, user._id);
+      const { markMessagesAsRead } = useChatStore.getState();
+      markMessagesAsRead(chat.id, user._id);
     }
 
     // Navegar al chat individual

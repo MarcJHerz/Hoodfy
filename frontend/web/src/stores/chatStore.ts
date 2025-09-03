@@ -101,6 +101,56 @@ export const useChatStore = create<ChatState>()(
       clearError: () => set({ error: null }),
 
       // Funciones de chat service
+      loadUserChats: async (userId: string) => {
+        try {
+          set({ chatRoomsLoading: true, error: null });
+          const { postgresChatService } = await import('@/services/postgresChatService');
+          const chats = await postgresChatService.getUserChats(userId);
+          set({ chatRooms: chats, chatRoomsLoading: false });
+          return chats;
+        } catch (error: any) {
+          set({ 
+            chatRoomsLoading: false, 
+            error: error.message || 'Error al cargar chats' 
+          });
+          throw error;
+        }
+      },
+
+      connectToSocket: async (userId: string) => {
+        try {
+          set({ connectionStatus: 'connecting' });
+          const { postgresChatService } = await import('@/services/postgresChatService');
+          await postgresChatService.connectToSocket(userId);
+          set({ connectionStatus: 'connected' });
+        } catch (error: any) {
+          set({ 
+            connectionStatus: 'disconnected',
+            error: error.message || 'Error al conectar con Socket.io' 
+          });
+          throw error;
+        }
+      },
+
+      disconnectFromSocket: () => {
+        try {
+          const { postgresChatService } = require('@/services/postgresChatService');
+          postgresChatService.disconnectFromSocket();
+          set({ connectionStatus: 'disconnected' });
+        } catch (error) {
+          console.error('Error desconectando Socket.io:', error);
+        }
+      },
+
+      markMessagesAsRead: async (chatId: string, userId: string) => {
+        try {
+          const { postgresChatService } = await import('@/services/postgresChatService');
+          await postgresChatService.markMessagesAsRead(chatId, userId);
+        } catch (error: any) {
+          console.error('Error marcando mensajes como leídos:', error);
+        }
+      },
+
       sendMessage: async (messageData) => {
         try {
           set({ isLoading: true, error: null });

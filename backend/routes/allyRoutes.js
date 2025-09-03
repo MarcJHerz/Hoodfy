@@ -166,6 +166,7 @@ router.delete('/remove-ally/:userId', verifyToken, async (req, res) => {
 router.get('/check/:targetUserId', verifyToken, async (req, res) => {
   try {
     const { targetUserId } = req.params;
+
     console.log(`🔍 Verificando alianza: ${req.userId} con ${targetUserId}`);
 
     const ally = await Ally.findOne({

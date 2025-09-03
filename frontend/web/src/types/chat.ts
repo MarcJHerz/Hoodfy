@@ -87,6 +87,13 @@ export interface ChatState {
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
+  
+  // Funciones de chat service
+  loadUserChats: (userId: string) => Promise<ChatRoom[]>;
+  connectToSocket: (userId: string) => Promise<void>;
+  disconnectFromSocket: () => void;
+  markMessagesAsRead: (chatId: string, userId: string) => Promise<void>;
+  
   sendMessage: (messageData: Omit<Message, 'id' | 'timestamp'>) => Promise<string>;
   subscribeToMessages: (chatId: string) => () => void;
   unsubscribeFromMessages: () => void;

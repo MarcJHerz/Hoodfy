@@ -27,35 +27,50 @@ class ChatService {
       maxHttpBufferSize: parseInt(process.env.SOCKET_MAX_HTTP_BUFFER_SIZE) || 1e8
     });
 
-    // Configurar Redis para caching y pub/sub (TEMPORALMENTE DESHABILITADO)
-    this.redis = null; // Deshabilitar Redis temporalmente para debugging
-    console.log('⚠️ Redis temporalmente deshabilitado para debugging');
-    
-    // Configuración Redis comentada temporalmente
-    /*
-    this.redis = new Redis({
-      host: process.env.REDIS_HOST || 'redis-localhost',
-      port: process.env.REDIS_PORT || 6379,
-      password: process.env.REDIS_PASSWORD,
-      retryDelayOnFailover: 1000,
-      maxRetriesPerRequest: 3,
-      lazyConnect: true,
-      keyPrefix: 'hoodfy:chat:',
-      connectTimeout: 10000,
-      commandTimeout: 5000,
-      retryDelayOnClusterDown: 1000,
-      enableOfflineQueue: false,
-      maxLoadingTimeout: 5000,
-      keepAlive: 30000,
-      family: 4,
-      db: 0,
-      pingInterval: 30000,
-      reconnectOnError: (err) => {
+    // Configurar Redis para caching y pub/sub
+    try {
+      this.redis = new Redis({
+        host: process.env.REDIS_HOST || 'redis-localhost',
+        port: process.env.REDIS_PORT || 6379,
+        password: process.env.REDIS_PASSWORD,
+        retryDelayOnFailover: 1000,
+        maxRetriesPerRequest: 3,
+        lazyConnect: true,
+        keyPrefix: 'hoodfy:chat:',
+        connectTimeout: 10000,
+        commandTimeout: 5000,
+        retryDelayOnClusterDown: 1000,
+        enableOfflineQueue: false,
+        maxLoadingTimeout: 5000,
+        keepAlive: 30000,
+        family: 4,
+        db: 0,
+        pingInterval: 30000,
+        reconnectOnError: (err) => {
+          console.log('🔄 Redis reconectando por error:', err.message);
+          return err.message.includes('READONLY') || err.message.includes('ECONNRESET');
+        }
+      });
+
+      this.redis.on('connect', () => {
+        console.log('✅ Redis conectado para chat service');
+      });
+
+      this.redis.on('error', (err) => {
         console.log('🔄 Redis reconectando por error:', err.message);
-        return err.message.includes('READONLY') || err.message.includes('ECONNRESET');
-      }
-    });
-    */
+      });
+
+      this.redis.on('close', () => {
+        console.log('⚠️ Redis desconectado para chat service');
+      });
+
+      this.redis.on('reconnecting', () => {
+        console.log('🔄 Redis reconectando para chat service');
+      });
+    } catch (error) {
+      console.error('❌ Error inicializando Redis:', error);
+      this.redis = null;
+    }
 
     // Inicializar modelos
     this.chatModel = new Chat();
@@ -476,7 +491,13 @@ class ChatService {
 
   setupRedisSubscriptions() {
     // Suscribirse a eventos de Redis para sincronización entre instancias
-    this.redis.subscribe('chat:message', 'chat:typing', 'chat:read', 'chat:join', 'chat:leave');
+    if (!this.redis) {
+      console.warn('Redis no disponible para suscripciones');
+      return;
+    }
+
+    try {
+      this.redis.subscribe('chat:message', 'chat:typing', 'chat:read', 'chat:join', 'chat:leave');
     
     this.redis.on('message', (channel, message) => {
       try {
@@ -524,6 +545,9 @@ class ChatService {
     this.redis.on('reconnecting', () => {
       console.log('🔄 Redis reconectando para chat service');
     });
+    } catch (error) {
+      console.error('❌ Error configurando suscripciones Redis:', error);
+    }
   }
 
   // ============================================================================
