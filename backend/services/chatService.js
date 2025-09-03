@@ -662,7 +662,8 @@ class ChatService {
     return {
       connectedUsers: this.io.engine.clientsCount,
       activeRooms: Object.keys(this.io.sockets.adapter.rooms).length,
-      redisConnected: this.redis.status === 'ready',
+      redisConnected: this.redis && this.redis.status === 'ready',
+      redisManager: this.redisManager && this.redisManager.isHealthy(),
       modelsInitialized: {
         chat: !!this.chatModel,
         message: !!this.messageModel,
