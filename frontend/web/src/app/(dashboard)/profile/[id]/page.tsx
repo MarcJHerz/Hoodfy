@@ -923,6 +923,7 @@ export default function ProfilePage() {
           onClose={() => setSelectedAlly(null)}
           otherUser={{
             _id: selectedAlly._id,
+            firebaseUid: selectedAlly._id, // Usar _id como firebaseUid temporalmente
             name: selectedAlly.name,
             username: selectedAlly.username,
             email: '', // No disponible en UserProfile, pero requerido por User

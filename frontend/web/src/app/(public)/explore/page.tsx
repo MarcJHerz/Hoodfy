@@ -59,9 +59,7 @@ export default function ExplorePage() {
     const loadPublicCommunities = async () => {
       try {
         setLoading(true);
-        const apiUrl = process.env.NODE_ENV === 'production' 
-          ? 'https://api.hoodfy.com' 
-          : 'http://localhost:5000';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.hoodfy.com';
         const response = await fetch(`${apiUrl}/api/communities/public`);
         
         if (!response.ok) {
