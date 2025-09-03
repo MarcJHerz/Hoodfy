@@ -27,29 +27,37 @@ class ChatService {
       maxHttpBufferSize: parseInt(process.env.SOCKET_MAX_HTTP_BUFFER_SIZE) || 1e8
     });
 
-    // Configurar Redis para caching y pub/sub
+    // Configurar Redis para ElastiCache Serverless
     try {
       this.redis = new Redis({
         host: process.env.REDIS_HOST || 'redis-localhost',
         port: process.env.REDIS_PORT || 6379,
-        password: process.env.REDIS_PASSWORD,
-        retryDelayOnFailover: 1000,
-        maxRetriesPerRequest: 3,
+        password: process.env.REDIS_PASSWORD || undefined, // Serverless no necesita password
+        retryDelayOnFailover: 2000, // Aumentar delay
+        maxRetriesPerRequest: 2, // Reducir reintentos
         lazyConnect: true,
         keyPrefix: 'hoodfy:chat:',
-        connectTimeout: 10000,
-        commandTimeout: 5000,
-        retryDelayOnClusterDown: 1000,
+        connectTimeout: 30000, // Aumentar timeout para Serverless
+        commandTimeout: 15000, // Aumentar timeout para Serverless
+        retryDelayOnClusterDown: 2000,
         enableOfflineQueue: false,
-        maxLoadingTimeout: 5000,
-        keepAlive: 30000,
+        maxLoadingTimeout: 15000, // Aumentar timeout
+        keepAlive: 60000, // Aumentar keepAlive
         family: 4,
         db: 0,
-        pingInterval: 30000,
+        pingInterval: 60000, // Aumentar ping interval
         reconnectOnError: (err) => {
           console.log('🔄 Redis reconectando por error:', err.message);
-          return err.message.includes('READONLY') || err.message.includes('ECONNRESET');
-        }
+          // Solo reconectar en errores específicos
+          return err.message.includes('READONLY') || 
+                 err.message.includes('ECONNRESET') || 
+                 err.message.includes('ETIMEDOUT');
+        },
+        // Configuración específica para ElastiCache Serverless
+        enableReadyCheck: true,
+        maxRetriesPerRequest: 2,
+        retryDelayOnFailover: 2000,
+        showFriendlyErrorStack: true
       });
 
       this.redis.on('connect', () => {
@@ -57,7 +65,7 @@ class ChatService {
       });
 
       this.redis.on('error', (err) => {
-        console.log('🔄 Redis reconectando por error:', err.message);
+        console.log('🔄 Redis error:', err.message);
       });
 
       this.redis.on('close', () => {
@@ -67,6 +75,11 @@ class ChatService {
       this.redis.on('reconnecting', () => {
         console.log('🔄 Redis reconectando para chat service');
       });
+
+      this.redis.on('ready', () => {
+        console.log('✅ Redis listo para chat service');
+      });
+
     } catch (error) {
       console.error('❌ Error inicializando Redis:', error);
       this.redis = null;
@@ -102,43 +115,52 @@ class ChatService {
           return next(new Error('Token de autenticación requerido'));
         }
 
-        // Intentar verificar como JWT primero (lo que funciona)
+        // 🔧 ARREGLO: Intentar Firebase ID Token primero, luego JWT
         try {
-          const jwt = require('jsonwebtoken');
-          const decoded = jwt.verify(token, process.env.JWT_SECRET);
-          const user = await User.findById(decoded.userId);
+          // Primero intentar Firebase ID Token
+          const decodedToken = await admin.auth().verifyIdToken(token);
+          const firebaseUid = decodedToken.uid;
+          
+          const User = require('../models/User');
+          const user = await User.findOne({ firebaseUid });
           
           if (!user) {
             return next(new Error('Usuario no encontrado'));
           }
 
-          socket.userId = user._id.toString().replace(/['"]/g, '');
+          // 🔧 CRÍTICO: Usar firebaseUid como userId para consistencia
+          socket.userId = firebaseUid;
           socket.user = user;
           socket.userName = user.name || 'Usuario';
           socket.userProfilePicture = user.profilePicture;
           
-          console.log(`🔌 Usuario autenticado en Socket.io (JWT): ${socket.userId} (${socket.userName})`);
+          console.log(`🔌 Usuario autenticado en Socket.io (Firebase): ${socket.userId} (${socket.userName})`);
           next();
-        } catch (jwtError) {
-          // Fallback a Firebase si JWT falla
+        } catch (firebaseError) {
+          console.log('🔧 Firebase token falló, intentando JWT...');
+          
+          // Si falla Firebase, intentar JWT
           try {
-            const decodedToken = await admin.auth().verifyIdToken(token);
-            const user = await User.findOne({ firebaseUid: decodedToken.uid });
+            const jwt = require('jsonwebtoken');
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const User = require('../models/User');
+            const user = await User.findById(decoded.userId);
             
-            if (!user) {
-              return next(new Error('Usuario no encontrado en la base de datos'));
+            if (!user || !user.firebaseUid) {
+              return next(new Error('Usuario no encontrado o sin firebaseUid'));
             }
 
-            socket.userId = user._id.toString().replace(/['"]/g, '');
+            // 🔧 CRÍTICO: Usar firebaseUid como userId para consistencia
+            socket.userId = user.firebaseUid;
             socket.user = user;
-            socket.userName = user.name || decodedToken.name || 'Usuario';
-            socket.userProfilePicture = user.profilePicture || decodedToken.picture;
+            socket.userName = user.name || 'Usuario';
+            socket.userProfilePicture = user.profilePicture;
             
-            console.log(`🔌 Usuario autenticado en Socket.io (Firebase): ${socket.userId} (${socket.userName})`);
+            console.log(`🔌 Usuario autenticado en Socket.io (JWT->Firebase): ${socket.userId} (${socket.userName})`);
             next();
-          } catch (firebaseError) {
-            console.error('Error de autenticación Socket.io:', firebaseError);
-            next(new Error('Token inválido'));
+          } catch (jwtError) {
+            console.error('❌ Error de autenticación Socket.io:', jwtError);
+            next(new Error('Token inválido o expirado'));
           }
         }
       } catch (error) {
@@ -186,17 +208,22 @@ class ChatService {
       });
 
       // Indicar que está escribiendo
-      socket.on('typing_start', (chatId) => {
-        socket.to(chatId).emit('user_typing', {
+      socket.on('typing_start', (data) => {
+        const { chatId } = data;
+        console.log(`👀 ${socket.userName} está escribiendo en chat ${chatId}`);
+        socket.to(chatId).emit('user_typing_start', {
           userId: socket.userId,
           userName: socket.userName,
           chatId
         });
       });
 
-      socket.on('typing_stop', (chatId) => {
-        socket.to(chatId).emit('user_stop_typing', {
+      socket.on('typing_stop', (data) => {
+        const { chatId } = data;
+        console.log(`✋ ${socket.userName} dejó de escribir en chat ${chatId}`);
+        socket.to(chatId).emit('user_typing_stop', {
           userId: socket.userId,
+          userName: socket.userName,
           chatId
         });
       });

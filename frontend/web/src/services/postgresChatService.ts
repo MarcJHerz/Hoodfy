@@ -138,7 +138,25 @@ class PostgresChatService {
   // Obtener o crear chat privado entre dos usuarios (como las grandes empresas)
   async getOrCreatePrivateChat(otherUserId: string): Promise<string> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/chats/private/${otherUserId}`, {
+      // 🔧 ARREGLO: Obtener firebaseUid del usuario antes de crear chat
+      const userResponse = await fetch(`${API_BASE_URL}/api/users/${otherUserId}`, {
+        headers: await this.getAuthHeaders(),
+      });
+      
+      if (!userResponse.ok) {
+        throw new Error('Usuario no encontrado');
+      }
+      
+      const userData = await userResponse.json();
+      const otherUserFirebaseUid = userData.user.firebaseUid;
+      
+      if (!otherUserFirebaseUid) {
+        throw new Error('Firebase UID del usuario no encontrado');
+      }
+      
+      console.log(`🔧 Usando firebaseUid para chat: ${otherUserFirebaseUid} (MongoDB ID: ${otherUserId})`);
+      
+      const response = await fetch(`${API_BASE_URL}/api/chats/private/${otherUserFirebaseUid}`, {
         method: 'POST',
         headers: await this.getAuthHeaders(),
       });
@@ -289,15 +307,20 @@ class PostgresChatService {
         await this.initializeStore();
       }
       
-      // Usar JWT token en lugar de Firebase token
-      const token = localStorage.getItem('token') || 
-                   document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
+      // 🔧 ARREGLO: Usar Firebase ID Token para Socket.io
+      const firebaseIdToken = await auth.currentUser?.getIdToken();
+      
+      if (!firebaseIdToken) {
+        throw new Error('No se pudo obtener Firebase ID Token');
+      }
+      
+      console.log('🔧 Conectando Socket.io con Firebase ID Token');
       
       // Importar Socket.io dinámicamente
       import('socket.io-client').then(({ io }) => {
         this.socket = io(API_BASE_URL, {
           auth: {
-            token: token || ''
+            token: firebaseIdToken
           }
         });
 
@@ -331,20 +354,22 @@ class PostgresChatService {
           }
         });
 
-        this.socket.on('typing_start', (data: { userId: string }) => {
-          if (this.chatStore) {
+        this.socket.on('user_typing_start', (data: { userId: string, userName: string }) => {
+          console.log('👀 Usuario escribiendo:', data);
+          if (this.chatStore && data.userId !== userId) {
             const { typingUsers } = this.chatStore;
-            if (!typingUsers.includes(data.userId)) {
-              this.chatStore.setTypingUsers([...typingUsers, data.userId]);
+            if (!typingUsers.includes(data.userName)) {
+              this.chatStore.setTypingUsers([...typingUsers, data.userName]);
             }
           }
         });
 
-        this.socket.on('typing_stop', (data: { userId: string }) => {
-          if (this.chatStore) {
+        this.socket.on('user_typing_stop', (data: { userId: string, userName?: string }) => {
+          console.log('✋ Usuario dejó de escribir:', data);
+          if (this.chatStore && data.userName) {
             const { typingUsers } = this.chatStore;
             this.chatStore.setTypingUsers(
-              typingUsers.filter((id: string) => id !== data.userId)
+              typingUsers.filter((name: string) => name !== data.userName)
             );
           }
         });

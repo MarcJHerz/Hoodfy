@@ -151,7 +151,46 @@ router.get('/profile', verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Ruta para obtener el perfil de cualquier usuario
+// 🔧 Ruta específica para obtener usuario por ID (para chat service)
+router.get('/:userId', verifyToken, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) {
+      return res.status(400).json({ error: 'Falta el userId en la solicitud.' });
+    }
+
+    // Intentar buscar por MongoDB ID primero, luego por Firebase UID
+    let user = await User.findById(userId).catch(() => null);
+    if (!user) {
+      user = await User.findOne({ firebaseUid: userId });
+    }
+    
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json({
+      success: true,
+      user: {
+        _id: user._id,
+        firebaseUid: user.firebaseUid,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        profilePicture: user.profilePicture
+      }
+    });
+
+  } catch (error) {
+    console.error('Error obteniendo usuario:', error);
+    res.status(500).json({ 
+      error: 'Error interno del servidor',
+      message: error.message 
+    });
+  }
+});
+
+// ✅ Ruta para obtener el perfil de cualquier usuario (por MongoDB ID o Firebase UID)
 router.get('/profile/:userId', verifyToken, async (req, res) => {
   try {
     const { userId } = req.params;
@@ -159,7 +198,12 @@ router.get('/profile/:userId', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'Falta el userId en la solicitud.' });
     }
 
-    const user = await User.findById(userId);
+    // Intentar buscar por MongoDB ID primero, luego por Firebase UID
+    let user = await User.findById(userId).catch(() => null);
+    if (!user) {
+      user = await User.findOne({ firebaseUid: userId });
+    }
+    
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }

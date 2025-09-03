@@ -46,18 +46,27 @@ async function getUserInfo(userId) {
 // ============================================================================
 
 // Obtener o crear chat privado entre dos usuarios
-router.post('/private/:otherUserId', verifyToken, async (req, res) => {
+router.post('/private/:otherUserFirebaseUid', verifyToken, async (req, res) => {
   try {
-    const { otherUserId } = req.params;
-    const currentUserId = req.userId;
+    const { otherUserFirebaseUid } = req.params;
+    const currentUserId = req.userId; // Este es el firebaseUid del usuario actual
+
+    console.log(`🔧 Creando chat privado entre ${currentUserId} y ${otherUserFirebaseUid}`);
 
     // Prevenir chat con uno mismo
-    if (currentUserId === otherUserId) {
+    if (currentUserId === otherUserFirebaseUid) {
       return res.status(400).json({ error: 'No puedes crear un chat contigo mismo' });
     }
 
-    // Buscar chat existente entre los dos usuarios
-    const existingChat = await chatModel.findPrivateChatBetweenUsers(currentUserId, otherUserId);
+    // Verificar que el otro usuario existe
+    const User = require('../models/User');
+    const otherUser = await User.findOne({ firebaseUid: otherUserFirebaseUid });
+    if (!otherUser) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Buscar chat existente entre los dos usuarios (usando firebaseUid)
+    const existingChat = await chatModel.findPrivateChatBetweenUsers(currentUserId, otherUserFirebaseUid);
     
     if (existingChat) {
       console.log('✅ Chat privado existente encontrado:', existingChat.id);

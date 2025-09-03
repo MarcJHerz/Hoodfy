@@ -18,42 +18,57 @@ const verifyToken = async (req, res, next) => {
 
     let userId;
 
+    let firebaseUid;
+    let user;
+
     try {
       // Primero intentamos verificar como token de Firebase
       const decodedToken = await admin.auth().verifyIdToken(token);
-      const user = await User.findOne({ firebaseUid: decodedToken.uid });
-      if (user) {
-        userId = user._id;
+      firebaseUid = decodedToken.uid;
+      user = await User.findOne({ firebaseUid });
+      
+      console.log(`🔧 Token Firebase verificado: ${firebaseUid}`);
+      
+      if (!user) {
+        return res.status(404).json({ 
+          error: 'Usuario no encontrado',
+          details: { user: 'El usuario asociado al Firebase UID no existe en la base de datos' }
+        });
       }
     } catch (firebaseError) {
+      console.log('🔧 Token Firebase falló, intentando JWT...');
+      
       // Si falla Firebase, intentamos como JWT
       try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        userId = decoded.userId;
+        const mongoUserId = decoded.userId;
+        
+        // Buscar usuario por MongoDB ID para obtener firebaseUid
+        user = await User.findById(mongoUserId);
+        if (!user || !user.firebaseUid) {
+          throw new Error('Usuario no encontrado o sin firebaseUid');
+        }
+        
+        firebaseUid = user.firebaseUid;
+        console.log(`🔧 Token JWT verificado: ${mongoUserId} -> ${firebaseUid}`);
+        
       } catch (jwtError) {
+        console.error('❌ Error verificando JWT:', jwtError);
         throw new Error('Token inválido');
       }
     }
 
-    if (!userId) {
+    if (!firebaseUid || !user) {
       return res.status(404).json({ 
         error: 'Usuario no encontrado',
         details: { user: 'El usuario asociado al token no existe en la base de datos' }
       });
     }
 
-    // Obtener el usuario completo de la base de datos
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ 
-        error: 'Usuario no encontrado',
-        details: { user: 'El usuario no existe en la base de datos' }
-      });
-    }
-
-    // Asignar tanto el ID como el usuario completo
-    req.userId = userId;
+    // 🔧 CRÍTICO: Asignar firebaseUid como userId para consistencia
+    req.userId = firebaseUid;
     req.user = user;
+    req.mongoUserId = user._id; // Por si se necesita el MongoDB ID
     next();
   } catch (error) {
     
