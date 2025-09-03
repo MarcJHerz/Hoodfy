@@ -19,6 +19,7 @@
     "test:connections": "node scripts/test-connections.js",
     "troubleshoot:opensearch": "node scripts/troubleshoot-opensearch.js",
     "cleanup:duplicate-chats": "node scripts/cleanup-duplicate-chats.js",
+    "cleanup:aggressive": "node scripts/aggressive-chat-cleanup.js",
     "migrate:chat": "node scripts/migrateFirebaseToPostgres.js",
     "start:cluster": "pm2 start ecosystem.config.js --env production",
     "monitor": "pm2 monit",

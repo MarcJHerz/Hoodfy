@@ -138,7 +138,23 @@ class PostgresChatService {
   // Obtener o crear chat privado entre dos usuarios (como las grandes empresas)
   async getOrCreatePrivateChat(otherUserId: string): Promise<string> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/chats/private/${otherUserId}`, {
+      // Obtener el firebaseUid del otro usuario desde el backend
+      const userResponse = await fetch(`${API_BASE_URL}/api/users/profile/${otherUserId}`, {
+        headers: await this.getAuthHeaders(),
+      });
+
+      if (!userResponse.ok) {
+        throw new Error(`HTTP error! status: ${userResponse.status}`);
+      }
+
+      const userData = await userResponse.json();
+      const otherUserFirebaseUid = userData.firebaseUid;
+
+      if (!otherUserFirebaseUid) {
+        throw new Error('Usuario no encontrado o sin firebaseUid');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/chats/private/${otherUserFirebaseUid}`, {
         method: 'POST',
         headers: await this.getAuthHeaders(),
       });

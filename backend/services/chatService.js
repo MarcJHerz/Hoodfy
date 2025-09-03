@@ -27,36 +27,35 @@ class ChatService {
       maxHttpBufferSize: parseInt(process.env.SOCKET_MAX_HTTP_BUFFER_SIZE) || 1e8
     });
 
-    // Configurar Redis para caching y pub/sub
+    // Configurar Redis para caching y pub/sub (TEMPORALMENTE DESHABILITADO)
+    this.redis = null; // Deshabilitar Redis temporalmente para debugging
+    console.log('⚠️ Redis temporalmente deshabilitado para debugging');
+    
+    // Configuración Redis comentada temporalmente
+    /*
     this.redis = new Redis({
       host: process.env.REDIS_HOST || 'redis-localhost',
       port: process.env.REDIS_PORT || 6379,
       password: process.env.REDIS_PASSWORD,
       retryDelayOnFailover: 1000,
-      maxRetriesPerRequest: 3, // Permitir algunos reintentos
+      maxRetriesPerRequest: 3,
       lazyConnect: true,
       keyPrefix: 'hoodfy:chat:',
-      connectTimeout: 10000, // Aumentar timeout de conexión
-      commandTimeout: 5000, // Aumentar timeout de comandos
+      connectTimeout: 10000,
+      commandTimeout: 5000,
       retryDelayOnClusterDown: 1000,
-      enableOfflineQueue: false, // Deshabilitar cola offline para evitar acumulación
+      enableOfflineQueue: false,
       maxLoadingTimeout: 5000,
-      // Configuraciones adicionales para resiliencia
       keepAlive: 30000,
       family: 4,
       db: 0,
-      // Configuraciones adicionales para estabilidad
-      retryDelayOnFailover: 1000,
-      maxRetriesPerRequest: 3,
-      retryDelayOnClusterDown: 1000,
-      // Configuraciones de heartbeat
       pingInterval: 30000,
-      // Configuraciones de reconexión
       reconnectOnError: (err) => {
         console.log('🔄 Redis reconectando por error:', err.message);
         return err.message.includes('READONLY') || err.message.includes('ECONNRESET');
       }
     });
+    */
 
     // Inicializar modelos
     this.chatModel = new Chat();
@@ -90,9 +89,21 @@ class ChatService {
 
         // Verificar token con Firebase Admin SDK
         const decodedToken = await admin.auth().verifyIdToken(token);
-        socket.userId = decodedToken.uid;
-        socket.userName = decodedToken.name || decodedToken.email || 'Usuario';
-        socket.userProfilePicture = decodedToken.picture;
+        
+        // Buscar usuario en MongoDB por firebaseUid
+        const user = await User.findOne({ firebaseUid: decodedToken.uid });
+        if (!user) {
+          return next(new Error('Usuario no encontrado en la base de datos'));
+        }
+
+        // Asegurar que userId sea un string limpio
+        socket.userId = user._id.toString().replace(/['"]/g, '');
+        socket.user = user;
+        socket.firebaseUid = decodedToken.uid;
+        socket.userName = user.name || decodedToken.name || 'Usuario';
+        socket.userProfilePicture = user.profilePicture || decodedToken.picture;
+        
+        console.log(`🔌 Usuario autenticado en Socket.io: ${socket.userId} (${socket.userName})`);
         next();
       } catch (error) {
         console.error('Error de autenticación Socket.io:', error);
