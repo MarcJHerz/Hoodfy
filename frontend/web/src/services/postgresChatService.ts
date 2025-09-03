@@ -138,23 +138,7 @@ class PostgresChatService {
   // Obtener o crear chat privado entre dos usuarios (como las grandes empresas)
   async getOrCreatePrivateChat(otherUserId: string): Promise<string> {
     try {
-      // Obtener el firebaseUid del otro usuario desde el backend
-      const userResponse = await fetch(`${API_BASE_URL}/api/users/profile/${otherUserId}`, {
-        headers: await this.getAuthHeaders(),
-      });
-
-      if (!userResponse.ok) {
-        throw new Error(`HTTP error! status: ${userResponse.status}`);
-      }
-
-      const userData = await userResponse.json();
-      const otherUserFirebaseUid = userData.firebaseUid;
-
-      if (!otherUserFirebaseUid) {
-        throw new Error('Usuario no encontrado o sin firebaseUid');
-      }
-
-      const response = await fetch(`${API_BASE_URL}/api/chats/private/${otherUserFirebaseUid}`, {
+      const response = await fetch(`${API_BASE_URL}/api/chats/private/${otherUserId}`, {
         method: 'POST',
         headers: await this.getAuthHeaders(),
       });
@@ -305,8 +289,9 @@ class PostgresChatService {
         await this.initializeStore();
       }
       
-      // Obtener token de Firebase
-      const token = await auth.currentUser?.getIdToken();
+      // Usar JWT token en lugar de Firebase token
+      const token = localStorage.getItem('token') || 
+                   document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
       
       // Importar Socket.io dinámicamente
       import('socket.io-client').then(({ io }) => {

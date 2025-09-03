@@ -87,24 +87,45 @@ class ChatService {
           return next(new Error('Token de autenticación requerido'));
         }
 
-        // Verificar token con Firebase Admin SDK
-        const decodedToken = await admin.auth().verifyIdToken(token);
-        
-        // Buscar usuario en MongoDB por firebaseUid
-        const user = await User.findOne({ firebaseUid: decodedToken.uid });
-        if (!user) {
-          return next(new Error('Usuario no encontrado en la base de datos'));
-        }
+        // Intentar verificar como JWT primero (lo que funciona)
+        try {
+          const jwt = require('jsonwebtoken');
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          const user = await User.findById(decoded.userId);
+          
+          if (!user) {
+            return next(new Error('Usuario no encontrado'));
+          }
 
-        // Asegurar que userId sea un string limpio
-        socket.userId = user._id.toString().replace(/['"]/g, '');
-        socket.user = user;
-        socket.firebaseUid = decodedToken.uid;
-        socket.userName = user.name || decodedToken.name || 'Usuario';
-        socket.userProfilePicture = user.profilePicture || decodedToken.picture;
-        
-        console.log(`🔌 Usuario autenticado en Socket.io: ${socket.userId} (${socket.userName})`);
-        next();
+          socket.userId = user._id.toString().replace(/['"]/g, '');
+          socket.user = user;
+          socket.userName = user.name || 'Usuario';
+          socket.userProfilePicture = user.profilePicture;
+          
+          console.log(`🔌 Usuario autenticado en Socket.io (JWT): ${socket.userId} (${socket.userName})`);
+          next();
+        } catch (jwtError) {
+          // Fallback a Firebase si JWT falla
+          try {
+            const decodedToken = await admin.auth().verifyIdToken(token);
+            const user = await User.findOne({ firebaseUid: decodedToken.uid });
+            
+            if (!user) {
+              return next(new Error('Usuario no encontrado en la base de datos'));
+            }
+
+            socket.userId = user._id.toString().replace(/['"]/g, '');
+            socket.user = user;
+            socket.userName = user.name || decodedToken.name || 'Usuario';
+            socket.userProfilePicture = user.profilePicture || decodedToken.picture;
+            
+            console.log(`🔌 Usuario autenticado en Socket.io (Firebase): ${socket.userId} (${socket.userName})`);
+            next();
+          } catch (firebaseError) {
+            console.error('Error de autenticación Socket.io:', firebaseError);
+            next(new Error('Token inválido'));
+          }
+        }
       } catch (error) {
         console.error('Error de autenticación Socket.io:', error);
         next(new Error('Error de autenticación'));

@@ -166,6 +166,7 @@ router.delete('/remove-ally/:userId', verifyToken, async (req, res) => {
 router.get('/check/:targetUserId', verifyToken, async (req, res) => {
   try {
     const { targetUserId } = req.params;
+    console.log(`🔍 Verificando alianza: ${req.userId} con ${targetUserId}`);
 
     const ally = await Ally.findOne({
       $or: [
@@ -174,10 +175,13 @@ router.get('/check/:targetUserId', verifyToken, async (req, res) => {
       ]
     });
 
+    console.log(`✅ Resultado de verificación de alianza:`, ally ? 'Son aliados' : 'No son aliados');
+
     res.json({
       isAlly: !!ally
     });
   } catch (error) {
+    console.error('❌ Error verificando alianza:', error);
     res.status(500).json({ 
       error: 'Error al verificar aliado',
       message: error.message 
