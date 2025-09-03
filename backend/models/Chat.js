@@ -74,11 +74,16 @@ class Chat {
     try {
       const { name, description, type, community_id, created_by, max_participants, settings } = chatData;
       
+      // Limpiar created_by de comillas extra
+      const cleanCreatedBy = created_by.toString().replace(/['"]/g, '');
+      
+      console.log(`🔨 Creando chat: ${name} (tipo: ${type}) por usuario: ${cleanCreatedBy}`);
+      
       const result = await client.query(`
         INSERT INTO chats (name, description, type, community_id, created_by, max_participants, settings)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *
-      `, [name, description, type, community_id, created_by, max_participants || 1000, settings || {}]);
+      `, [name, description, type, community_id, cleanCreatedBy, max_participants || 1000, settings || {}]);
 
       const chat = result.rows[0];
 
@@ -86,8 +91,9 @@ class Chat {
       await client.query(`
         INSERT INTO chat_participants (chat_id, user_id, role)
         VALUES ($1, $2, $3)
-      `, [chat.id, created_by, 'admin']);
+      `, [chat.id, cleanCreatedBy, 'admin']);
 
+      console.log(`✅ Chat creado exitosamente: ${chat.id}`);
       return chat;
     } catch (error) {
       console.error('❌ Error creando chat:', error);
@@ -132,6 +138,12 @@ class Chat {
   async findPrivateChatBetweenUsers(userId1, userId2) {
     const client = await this.pool.connect();
     try {
+      // Limpiar IDs de comillas extra
+      const cleanUserId1 = userId1.toString().replace(/['"]/g, '');
+      const cleanUserId2 = userId2.toString().replace(/['"]/g, '');
+      
+      console.log(`🔍 Buscando chat privado entre usuarios: ${cleanUserId1} y ${cleanUserId2}`);
+      
       const result = await client.query(`
         SELECT c.* FROM chats c
         INNER JOIN chat_participants cp1 ON c.id = cp1.chat_id
@@ -141,7 +153,13 @@ class Chat {
         AND cp1.user_id = $1 AND cp2.user_id = $2
         AND cp1.is_banned = false AND cp2.is_banned = false
         LIMIT 1
-      `, [userId1, userId2]);
+      `, [cleanUserId1, cleanUserId2]);
+
+      if (result.rows[0]) {
+        console.log(`✅ Chat privado existente encontrado: ${result.rows[0].id}`);
+      } else {
+        console.log(`❌ No se encontró chat privado existente entre ${cleanUserId1} y ${cleanUserId2}`);
+      }
 
       return result.rows[0] || null;
     } catch (error) {
@@ -180,14 +198,20 @@ class Chat {
   async addParticipant(chatId, userId, role = 'member') {
     const client = await this.pool.connect();
     try {
+      // Limpiar userId de comillas extra
+      const cleanUserId = userId.toString().replace(/['"]/g, '');
+      
+      console.log(`👥 Agregando participante: ${cleanUserId} al chat ${chatId} con rol: ${role}`);
+      
       const result = await client.query(`
         INSERT INTO chat_participants (chat_id, user_id, role)
         VALUES ($1, $2, $3)
         ON CONFLICT (chat_id, user_id) 
         DO UPDATE SET role = $3, joined_at = CURRENT_TIMESTAMP
         RETURNING *
-      `, [chatId, userId, role]);
+      `, [chatId, cleanUserId, role]);
 
+      console.log(`✅ Participante agregado exitosamente: ${cleanUserId} al chat ${chatId}`);
       return result.rows[0];
     } catch (error) {
       console.error('❌ Error agregando participante:', error);

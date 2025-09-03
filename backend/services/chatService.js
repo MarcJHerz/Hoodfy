@@ -29,22 +29,33 @@ class ChatService {
 
     // Configurar Redis para caching y pub/sub
     this.redis = new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
+      host: process.env.REDIS_HOST || 'redis-localhost',
       port: process.env.REDIS_PORT || 6379,
       password: process.env.REDIS_PASSWORD,
-      retryDelayOnFailover: 100,
-      maxRetriesPerRequest: 0, // Sin reintentos para evitar timeouts
+      retryDelayOnFailover: 1000,
+      maxRetriesPerRequest: 3, // Permitir algunos reintentos
       lazyConnect: true,
       keyPrefix: 'hoodfy:chat:',
-      connectTimeout: 5000,
-      commandTimeout: 2000, // Reducir timeout de comandos
-      retryDelayOnClusterDown: 300,
+      connectTimeout: 10000, // Aumentar timeout de conexión
+      commandTimeout: 5000, // Aumentar timeout de comandos
+      retryDelayOnClusterDown: 1000,
       enableOfflineQueue: false, // Deshabilitar cola offline para evitar acumulación
-      maxLoadingTimeout: 2000,
+      maxLoadingTimeout: 5000,
       // Configuraciones adicionales para resiliencia
       keepAlive: 30000,
       family: 4,
-      db: 0
+      db: 0,
+      // Configuraciones adicionales para estabilidad
+      retryDelayOnFailover: 1000,
+      maxRetriesPerRequest: 3,
+      retryDelayOnClusterDown: 1000,
+      // Configuraciones de heartbeat
+      pingInterval: 30000,
+      // Configuraciones de reconexión
+      reconnectOnError: (err) => {
+        console.log('🔄 Redis reconectando por error:', err.message);
+        return err.message.includes('READONLY') || err.message.includes('ECONNRESET');
+      }
     });
 
     // Inicializar modelos
@@ -324,10 +335,15 @@ class ChatService {
 
   async getUserInfo(userId) {
     try {
+      // Limpiar userId de comillas extra si las tiene
+      const cleanUserId = userId.toString().replace(/['"]/g, '');
+      console.log(`🔍 Buscando usuario con ID limpio: ${cleanUserId} (original: ${userId})`);
+      
       // Intentar obtener del cache (con manejo de errores)
       try {
-        const cached = await this.redis.get(`user:${userId}:profile`);
+        const cached = await this.redis.get(`user:${cleanUserId}:profile`);
         if (cached) {
+          console.log(`✅ Usuario encontrado en cache: ${cleanUserId}`);
           return JSON.parse(cached);
         }
       } catch (redisError) {
@@ -336,34 +352,36 @@ class ChatService {
 
       // Obtener de MongoDB
       const User = require('../models/User');
-      const user = await User.findById(userId);
+      const user = await User.findById(cleanUserId);
       
       if (user) {
         const userInfo = {
-          id: userId,
+          id: cleanUserId,
           name: user.name || user.username || 'Usuario',
           profile_picture: user.profilePicture || null
         };
         
+        console.log(`✅ Usuario encontrado en MongoDB: ${userInfo.name} (${cleanUserId})`);
+        
         // Cache por 1 hora (con manejo de errores)
         try {
-          await this.redis.setex(`user:${userId}:profile`, 3600, JSON.stringify(userInfo));
+          await this.redis.setex(`user:${cleanUserId}:profile`, 3600, JSON.stringify(userInfo));
         } catch (redisError) {
           console.warn('Redis no disponible para cachear getUserInfo');
         }
         
         return userInfo;
       } else {
-        console.warn(`⚠️ Usuario no encontrado: ${userId}`);
+        console.warn(`⚠️ Usuario no encontrado en MongoDB: ${cleanUserId}`);
         const userInfo = {
-          id: userId,
+          id: cleanUserId,
           name: 'Usuario',
           profile_picture: null
         };
         
         // Cache por 5 minutos para usuarios no encontrados (con manejo de errores)
         try {
-          await this.redis.setex(`user:${userId}:profile`, 300, JSON.stringify(userInfo));
+          await this.redis.setex(`user:${cleanUserId}:profile`, 300, JSON.stringify(userInfo));
         } catch (redisError) {
           console.warn('Redis no disponible para cachear getUserInfo');
         }
