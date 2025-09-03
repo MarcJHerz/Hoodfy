@@ -195,7 +195,7 @@ export const usePostsStore = create<PostsState>()(
           const updatedPost: Post = {
             _id: postId,
             content: '',
-            author: { _id: '', name: '', username: '', email: '', createdAt: '', updatedAt: '' },
+            author: { _id: '', firebaseUid: '', name: '', username: '', email: '', createdAt: '', updatedAt: '' },
             likes: [userId],
             commentsCount: 0,
             postType: 'general',
@@ -216,7 +216,7 @@ export const usePostsStore = create<PostsState>()(
           const updatedPost: Post = {
             _id: postId,
             content: '',
-            author: { _id: '', name: '', username: '', email: '', createdAt: '', updatedAt: '' },
+            author: { _id: '', firebaseUid: '', name: '', username: '', email: '', createdAt: '', updatedAt: '' },
             likes: [],
             commentsCount: 0,
             postType: 'general',
@@ -237,7 +237,7 @@ export const usePostsStore = create<PostsState>()(
           const updatedPost: Post = {
             _id: postId,
             content: '',
-            author: { _id: '', name: '', username: '', email: '', createdAt: '', updatedAt: '' },
+            author: { _id: '', firebaseUid: '', name: '', username: '', email: '', createdAt: '', updatedAt: '' },
             likes: [],
             commentsCount: 0,
             postType: 'general',
@@ -258,7 +258,7 @@ export const usePostsStore = create<PostsState>()(
           const updatedPost: Post = {
             _id: postId,
             content: '',
-            author: { _id: '', name: '', username: '', email: '', createdAt: '', updatedAt: '' },
+            author: { _id: '', firebaseUid: '', name: '', username: '', email: '', createdAt: '', updatedAt: '' },
             likes: [],
             commentsCount: 0,
             postType: 'general',
