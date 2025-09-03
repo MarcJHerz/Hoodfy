@@ -16,8 +16,6 @@ const verifyToken = async (req, res, next) => {
       });
     }
 
-    let userId;
-
     let firebaseUid;
     let user;
 
@@ -71,6 +69,7 @@ const verifyToken = async (req, res, next) => {
     req.mongoUserId = user._id; // Por si se necesita el MongoDB ID
     next();
   } catch (error) {
+    console.error('❌ Error en middleware de autenticación:', error);
     
     if (error.code === 'auth/id-token-expired' || error.name === 'TokenExpiredError') {
       return res.status(401).json({ 

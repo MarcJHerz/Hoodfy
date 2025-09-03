@@ -1,7 +1,7 @@
 const io = require('socket.io');
-const Redis = require('ioredis');
 const admin = require('../config/firebase-admin');
 const logger = require('../utils/logger');
+const { getRedisManager } = require('../config/redis-cluster');
 
 // Importar nuestros nuevos modelos
 const Chat = require('../models/Chat');
@@ -27,62 +27,18 @@ class ChatService {
       maxHttpBufferSize: parseInt(process.env.SOCKET_MAX_HTTP_BUFFER_SIZE) || 1e8
     });
 
-    // Configurar Redis para ElastiCache Serverless
+    // Configurar Redis Cluster
     try {
-      this.redis = new Redis({
-        host: process.env.REDIS_HOST || 'redis-localhost',
-        port: process.env.REDIS_PORT || 6379,
-        password: process.env.REDIS_PASSWORD || undefined, // Serverless no necesita password
-        retryDelayOnFailover: 2000, // Aumentar delay
-        maxRetriesPerRequest: 2, // Reducir reintentos
-        lazyConnect: true,
-        keyPrefix: 'hoodfy:chat:',
-        connectTimeout: 30000, // Aumentar timeout para Serverless
-        commandTimeout: 15000, // Aumentar timeout para Serverless
-        retryDelayOnClusterDown: 2000,
-        enableOfflineQueue: false,
-        maxLoadingTimeout: 15000, // Aumentar timeout
-        keepAlive: 60000, // Aumentar keepAlive
-        family: 4,
-        db: 0,
-        pingInterval: 60000, // Aumentar ping interval
-        reconnectOnError: (err) => {
-          console.log('🔄 Redis reconectando por error:', err.message);
-          // Solo reconectar en errores específicos
-          return err.message.includes('READONLY') || 
-                 err.message.includes('ECONNRESET') || 
-                 err.message.includes('ETIMEDOUT');
-        },
-        // Configuración específica para ElastiCache Serverless
-        enableReadyCheck: true,
-        maxRetriesPerRequest: 2,
-        retryDelayOnFailover: 2000,
-        showFriendlyErrorStack: true
-      });
-
-      this.redis.on('connect', () => {
-        console.log('✅ Redis conectado para chat service');
-      });
-
-      this.redis.on('error', (err) => {
-        console.log('🔄 Redis error:', err.message);
-      });
-
-      this.redis.on('close', () => {
-        console.log('⚠️ Redis desconectado para chat service');
-      });
-
-      this.redis.on('reconnecting', () => {
-        console.log('🔄 Redis reconectando para chat service');
-      });
-
-      this.redis.on('ready', () => {
-        console.log('✅ Redis listo para chat service');
-      });
+      this.redisManager = getRedisManager();
+      this.redis = null; // Inicializar como null, se conectará después
+      
+      // Conectar de forma asíncrona
+      this.initializeRedis();
 
     } catch (error) {
-      console.error('❌ Error inicializando Redis:', error);
+      console.error('❌ Error inicializando Redis Manager:', error);
       this.redis = null;
+      this.redisManager = null;
     }
 
     // Inicializar modelos
@@ -91,8 +47,26 @@ class ChatService {
     this.participantModel = new ChatParticipant();
 
     this.setupSocketHandlers();
-    this.setupRedisSubscriptions();
+    // Redis subscriptions se configurarán después de conectar
     // this.initializeDatabase(); // Comentado para evitar conflictos con el script manual
+  }
+
+  async initializeRedis() {
+    try {
+      console.log('🔄 Inicializando Redis Cluster para Chat Service...');
+      this.redis = await this.redisManager.connect();
+      
+      if (this.redis) {
+        console.log('✅ Redis Cluster conectado para Chat Service');
+        this.setupRedisSubscriptions();
+      } else {
+        console.warn('⚠️ Redis no disponible, Chat Service funcionará sin cache');
+      }
+    } catch (error) {
+      console.error('❌ Error conectando Redis para Chat Service:', error);
+      console.warn('⚠️ Chat Service funcionará sin Redis');
+      this.redis = null;
+    }
   }
 
   async initializeDatabase() {
@@ -157,8 +131,8 @@ class ChatService {
             socket.userProfilePicture = user.profilePicture;
             
             console.log(`🔌 Usuario autenticado en Socket.io (JWT->Firebase): ${socket.userId} (${socket.userName})`);
-            next();
-          } catch (jwtError) {
+          next();
+        } catch (jwtError) {
             console.error('❌ Error de autenticación Socket.io:', jwtError);
             next(new Error('Token inválido o expirado'));
           }
@@ -384,26 +358,36 @@ class ChatService {
   }
 
   async cacheMessage(chatId, message) {
+    if (!this.redisManager || !this.redisManager.isHealthy()) {
+      console.warn('⚠️ Redis no disponible para cachear mensaje, continuando sin cache');
+      return;
+    }
+
     try {
       // Cache del mensaje individual
-      await this.redis.setex(
+      await this.redisManager.safeSet(
         `message:${message.id}`,
-        3600, // 1 hora
-        JSON.stringify(message)
+        JSON.stringify(message),
+        'EX',
+        3600 // 1 hora
       );
 
       // Cache de últimos mensajes del chat
-      await this.redis.lpush(`chat:${chatId}:recent_messages`, JSON.stringify(message));
-      await this.redis.ltrim(`chat:${chatId}:recent_messages`, 0, 99); // Mantener solo 100
+      const redis = this.redisManager.getClient();
+      if (redis) {
+        await redis.lpush(`chat:${chatId}:recent_messages`, JSON.stringify(message));
+        await redis.ltrim(`chat:${chatId}:recent_messages`, 0, 99); // Mantener solo 100
+      }
 
       // Cache del último mensaje del chat
-      await this.redis.setex(
+      await this.redisManager.safeSet(
         `chat:${chatId}:last_message`,
-        3600,
-        JSON.stringify(message)
+        JSON.stringify(message),
+        'EX',
+        3600
       );
     } catch (error) {
-      console.warn('Redis no disponible para cachear mensaje, continuando sin cache');
+      console.warn('⚠️ Error cacheando mensaje, continuando sin cache:', error.message);
     }
   }
 
@@ -414,14 +398,16 @@ class ChatService {
       console.log(`🔍 Buscando usuario con ID limpio: ${cleanUserId} (original: ${userId})`);
       
       // Intentar obtener del cache (con manejo de errores)
+      if (this.redisManager && this.redisManager.isHealthy()) {
       try {
-        const cached = await this.redis.get(`user:${cleanUserId}:profile`);
+          const cached = await this.redisManager.safeGet(`user:${cleanUserId}:profile`);
         if (cached) {
           console.log(`✅ Usuario encontrado en cache: ${cleanUserId}`);
           return JSON.parse(cached);
         }
       } catch (redisError) {
-        console.warn('Redis no disponible para getUserInfo, continuando sin cache');
+          console.warn('⚠️ Error accediendo cache para getUserInfo:', redisError.message);
+        }
       }
 
       // Obtener de MongoDB
@@ -438,10 +424,8 @@ class ChatService {
         console.log(`✅ Usuario encontrado en MongoDB: ${userInfo.name} (${cleanUserId})`);
         
         // Cache por 1 hora (con manejo de errores)
-        try {
-          await this.redis.setex(`user:${cleanUserId}:profile`, 3600, JSON.stringify(userInfo));
-        } catch (redisError) {
-          console.warn('Redis no disponible para cachear getUserInfo');
+        if (this.redisManager && this.redisManager.isHealthy()) {
+          await this.redisManager.safeSet(`user:${cleanUserId}:profile`, JSON.stringify(userInfo), 'EX', 3600);
         }
         
         return userInfo;
@@ -454,10 +438,8 @@ class ChatService {
         };
         
         // Cache por 5 minutos para usuarios no encontrados (con manejo de errores)
-        try {
-          await this.redis.setex(`user:${cleanUserId}:profile`, 300, JSON.stringify(userInfo));
-        } catch (redisError) {
-          console.warn('Redis no disponible para cachear getUserInfo');
+        if (this.redisManager && this.redisManager.isHealthy()) {
+          await this.redisManager.safeSet(`user:${cleanUserId}:profile`, JSON.stringify(userInfo), 'EX', 300);
         }
         
         return userInfo;
@@ -518,15 +500,16 @@ class ChatService {
 
   setupRedisSubscriptions() {
     // Suscribirse a eventos de Redis para sincronización entre instancias
-    if (!this.redis) {
-      console.warn('Redis no disponible para suscripciones');
+    if (!this.redis || !this.redisManager || !this.redisManager.isHealthy()) {
+      console.warn('⚠️ Redis no disponible para suscripciones, funcionando sin pub/sub');
       return;
     }
 
     try {
-      this.redis.subscribe('chat:message', 'chat:typing', 'chat:read', 'chat:join', 'chat:leave');
+      console.log('🔄 Configurando suscripciones Redis...');
     
-    this.redis.on('message', (channel, message) => {
+      // Configurar suscripciones usando Redis Manager
+      this.redisManager.safeSubscribe('chat:message', (channel, message) => {
       try {
         const data = JSON.parse(message);
         
@@ -548,32 +531,22 @@ class ChatService {
             break;
         }
       } catch (error) {
-        console.error('Error procesando mensaje Redis:', error);
+          console.error('❌ Error procesando mensaje Redis:', error);
+        }
+      });
+
+      // Suscribirse a múltiples canales
+      const channels = ['chat:message', 'chat:typing', 'chat:read', 'chat:join', 'chat:leave'];
+      const redis = this.redisManager.getClient();
+      
+      if (redis) {
+        redis.subscribe(...channels);
+        console.log('✅ Suscripciones Redis configuradas para:', channels.join(', '));
       }
-    });
 
-    this.redis.on('error', (error) => {
-      console.error('Error en Redis:', error);
-      // No hacer throw para evitar que el servicio se caiga
-    });
-
-    this.redis.on('connect', () => {
-      console.log('✅ Redis conectado para chat service');
-    });
-
-    this.redis.on('ready', () => {
-      console.log('✅ Redis listo para chat service');
-    });
-
-    this.redis.on('close', () => {
-      console.log('⚠️ Redis desconectado para chat service');
-    });
-
-    this.redis.on('reconnecting', () => {
-      console.log('🔄 Redis reconectando para chat service');
-    });
     } catch (error) {
       console.error('❌ Error configurando suscripciones Redis:', error);
+      console.warn('⚠️ Funcionando sin pub/sub Redis');
     }
   }
 
@@ -701,7 +674,9 @@ class ChatService {
   // Método para limpiar recursos
   async cleanup() {
     try {
-      await this.redis.quit();
+      if (this.redisManager) {
+        await this.redisManager.disconnect();
+      }
       console.log('✅ Chat service cleanup completado');
     } catch (error) {
       console.error('❌ Error en cleanup del chat service:', error);
