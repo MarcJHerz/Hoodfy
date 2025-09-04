@@ -303,8 +303,24 @@ router.get('/recommended', async (req, res) => {
   }
 });
 
+// 📌 Ruta para obtener usuarios recomendados
+router.get('/recommended', verifyToken, async (req, res) => {
+  try {
+    // Por ahora, devolver usuarios aleatorios más activos
+    const users = await User.find({})
+      .select('_id name username profilePicture bio verified')
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    res.json(users);
+  } catch (error) {
+    console.error('Error obteniendo usuarios recomendados:', error);
+    res.status(500).json({ error: 'Error obteniendo usuarios recomendados' });
+  }
+});
+
 // 📌 Ruta para buscar usuarios por nombre o username
-router.get('/search', async (req, res) => {
+router.get('/search', verifyToken, async (req, res) => {
   const { query } = req.query;
   if (!query || query.trim() === '') {
     return res.status(400).json({ error: 'La consulta de búsqueda no puede estar vacía.' });
@@ -316,10 +332,11 @@ router.get('/search', async (req, res) => {
         { name: { $regex: query, $options: 'i' } },
         { username: { $regex: query, $options: 'i' } }
       ]
-    }).select('_id name username profilePicture');
+    }).select('_id name username profilePicture bio verified');
 
     res.json(users);
   } catch (error) {
+    console.error('Error en la búsqueda de usuarios:', error);
     res.status(500).json({ error: 'Error en la búsqueda de usuarios' });
   }
 });
@@ -352,7 +369,8 @@ router.put('/profile/blocks', verifyToken, async (req, res) => {
 router.post('/fcm-token', verifyToken, async (req, res) => {
   try {
     const { fcmToken } = req.body;
-    const userId = req.userId;
+    // 🔧 CRÍTICO: Usar mongoUserId para consultas MongoDB
+    const userId = req.mongoUserId;
     
     // Actualizar el usuario con el token FCM
     await User.findByIdAndUpdate(userId, {

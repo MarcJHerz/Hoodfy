@@ -12,7 +12,7 @@ const User = require('../models/User');
 router.post('/subscribe', verifyToken, async (req, res) => {
   try {
     const { communityId, amount, paymentMethod } = req.body;
-    const userId = req.userId;
+    const userId = req.mongoUserId;
 
     // Validar communityId
     if (!mongoose.Types.ObjectId.isValid(communityId)) {
@@ -68,7 +68,7 @@ router.post('/subscribe', verifyToken, async (req, res) => {
 router.post('/cancel', verifyToken, async (req, res) => {
   try {
     const { subscriptionId, communityId } = req.body;
-    const userId = req.userId;
+    const userId = req.mongoUserId;
 
     let subscription;
     
@@ -115,14 +115,15 @@ router.post('/cancel', verifyToken, async (req, res) => {
 // 📌 Obtener suscripciones del usuario (todas, activas e inactivas)
 router.get('/my-subscriptions', verifyToken, async (req, res) => {
   try {
+    // 🔧 CRÍTICO: Usar mongoUserId para consultas MongoDB
     // Verificar que el usuario existe
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.mongoUserId);
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
     
     const subscriptions = await Subscription.find({ 
-      user: req.userId
+      user: req.mongoUserId
       // Removed status filter to show all subscriptions (active, canceled, etc.)
     }).populate('community', 'name description coverImage members creator');
 
@@ -131,6 +132,7 @@ router.get('/my-subscriptions', verifyToken, async (req, res) => {
     
     res.json(filtered);
   } catch (err) {
+    console.error('Error en /my-subscriptions:', err);
     res.status(500).json({ error: 'Error al obtener suscripciones' });
   }
 });
@@ -140,7 +142,7 @@ router.get('/by-user', verifyToken, async (req, res) => {
   try {
     // Obtener todas las suscripciones activas
     const subscriptions = await Subscription.find({
-      user: req.userId,
+      user: req.mongoUserId,
       status: 'active'
     });
     
@@ -177,7 +179,7 @@ router.get('/by-user', verifyToken, async (req, res) => {
 router.post('/:id/join', verifyToken, async (req, res) => {
   try {
     const communityId = req.params.id;
-    const userId = req.userId;
+    const userId = req.mongoUserId;
     
     // Verificar si la comunidad existe
     const community = await Community.findById(communityId);
@@ -228,7 +230,7 @@ router.post('/:id/join', verifyToken, async (req, res) => {
 router.get('/check/:communityId', verifyToken, async (req, res) => {
   try {
     const { communityId } = req.params;
-    const userId = req.userId;
+    const userId = req.mongoUserId;
     
     const subscription = await Subscription.findOne({
       user: userId,
@@ -249,7 +251,7 @@ router.get('/check/:communityId', verifyToken, async (req, res) => {
 router.get('/debug-subscriptions', verifyToken, async (req, res) => {
   try {
     // Obtener suscripciones con toda la información
-    const subscriptions = await Subscription.find({ user: req.userId })
+    const subscriptions = await Subscription.find({ user: req.mongoUserId })
       .populate('community')
       .populate('user', 'name email');
     
@@ -274,7 +276,7 @@ router.get('/debug-subscriptions', verifyToken, async (req, res) => {
     }));
     
     res.json({
-      userId: req.userId,
+      userId: req.mongoUserId,
       totalSubscriptions: subscriptions.length,
       activeSubscriptions: subscriptions.filter(s => s.status === 'active').length,
       subscriptions: detailedInfo
@@ -319,20 +321,20 @@ router.get('/community/:communityId/subscribers', async (req, res) => {
 router.get('/diagnostic', verifyToken, async (req, res) => {
   try {
     // Obtener todas las suscripciones del usuario
-    const allSubscriptions = await Subscription.find({ user: req.userId });
+    const allSubscriptions = await Subscription.find({ user: req.mongoUserId });
     const activeSubscriptions = await Subscription.find({ 
-      user: req.userId, 
+      user: req.mongoUserId, 
       status: 'active' 
     });
     
     // Obtener información del usuario
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.mongoUserId);
     
     // Obtener todas las comunidades
     const allCommunities = await Community.find({});
     
     const diagnostic = {
-      userId: req.userId,
+      userId: req.mongoUserId,
       userInfo: user ? { name: user.name, email: user.email } : 'No encontrado',
       totalSubscriptions: allSubscriptions.length,
       activeSubscriptions: activeSubscriptions.length,

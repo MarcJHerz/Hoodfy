@@ -217,7 +217,8 @@ router.post('/logout', (req, res) => {
 // Endpoint para verificar si un usuario es admin
 router.get('/verify-admin', verifyToken, async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
+    // 🔧 CRÍTICO: Usar mongoUserId para consultas MongoDB
+    const user = await User.findById(req.mongoUserId);
     
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado' });
