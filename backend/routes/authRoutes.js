@@ -185,7 +185,17 @@ router.post('/refresh-token', async (req, res) => {
 // Obtener perfil del usuario
 router.get('/me', verifyToken, async (req, res) => {
   try {
-    const user = await User.findById(req.userId)
+    // 🔧 CRÍTICO: req.userId es ahora firebaseUid, necesitamos MongoDB ObjectId o buscar por firebaseUid
+    const mongoUserId = req.mongoUserId;
+    
+    if (!mongoUserId) {
+      return res.status(400).json({ 
+        error: 'Error de autenticación',
+        message: 'No se pudo obtener el ID de MongoDB del usuario'
+      });
+    }
+    
+    const user = await User.findById(mongoUserId)
       .select('-firebaseUid');
     
     if (!user) {
@@ -194,6 +204,7 @@ router.get('/me', verifyToken, async (req, res) => {
 
     res.json(user);
   } catch (error) {
+    console.error('❌ Error en /auth/me:', error);
     res.status(500).json({ error: 'Error al obtener el perfil' });
   }
 });

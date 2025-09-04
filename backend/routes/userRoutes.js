@@ -113,15 +113,25 @@ router.put('/profile/photo', verifyToken, upload.single('profilePicture'), handl
 // ✅ Ruta para obtener el perfil del usuario autenticado
 router.get('/profile', verifyToken, async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select('-password');
+    // 🔧 CRÍTICO: req.userId es ahora firebaseUid, necesitamos MongoDB ObjectId
+    const mongoUserId = req.mongoUserId;
+    
+    if (!mongoUserId) {
+      return res.status(400).json({ 
+        error: 'Error de autenticación',
+        message: 'No se pudo obtener el ID de MongoDB del usuario'
+      });
+    }
+    
+    const user = await User.findById(mongoUserId).select('-password');
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
     // Buscar si el usuario es fundador de alguna comunidad
-    const isFounder = await Community.exists({ creator: user._id });
+    const isFounder = await Community.exists({ creator: mongoUserId });
     // Buscar si el usuario es miembro de alguna comunidad
-    const isMember = await Community.exists({ members: user._id });
+    const isMember = await Community.exists({ members: mongoUserId });
 
     let mainBadgeIcon = null;
     if (isFounder) mainBadgeIcon = 'founder';

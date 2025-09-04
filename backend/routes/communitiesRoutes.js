@@ -330,9 +330,19 @@ router.get('/created-by/:userId', async (req, res) => {
 // 🧠 Obtener comunidades creadas por el usuario autenticado
 router.get('/user-created', verifyToken, async (req, res) => {
   try {
-    console.log('🔍 Buscando comunidades creadas por usuario:', req.userId);
+    // 🔧 CRÍTICO: req.userId es ahora firebaseUid, necesitamos MongoDB ObjectId
+    const mongoUserId = req.mongoUserId;
     
-    const communities = await Community.find({ creator: req.userId })
+    if (!mongoUserId) {
+      return res.status(400).json({ 
+        error: 'Error de autenticación',
+        message: 'No se pudo obtener el ID de MongoDB del usuario'
+      });
+    }
+    
+    console.log('🔍 Buscando comunidades creadas por usuario:', mongoUserId);
+    
+    const communities = await Community.find({ creator: mongoUserId })
       .populate('creator', 'name profilePicture')
       .populate('members', 'name profilePicture')
       .select('name description profilePicture memberCount postCount stripeConnectStatus stripeConnectAccountId createdAt');
@@ -356,10 +366,20 @@ router.get('/:id', verifyToken, async (req, res) => {
       return res.status(404).json({ error: 'Comunidad no encontrada' });
     }
 
+    // 🔧 CRÍTICO: req.userId es ahora firebaseUid, necesitamos MongoDB ObjectId
+    const mongoUserId = req.mongoUserId;
+    
+    if (!mongoUserId) {
+      return res.status(400).json({ 
+        error: 'Error de autenticación',
+        message: 'No se pudo obtener el ID de MongoDB del usuario'
+      });
+    }
+    
     // Verificar si el usuario es miembro
-    const isMember = community.members.some(member => member._id.toString() === req.userId.toString());
+    const isMember = community.members.some(member => member._id.toString() === mongoUserId.toString());
     // Verificar si el usuario es el creador
-    const isCreator = community.creator._id.toString() === req.userId.toString();
+    const isCreator = community.creator._id.toString() === mongoUserId.toString();
     
     // Convertir a objeto plano para poder modificarlo
     const communityObj = community.toObject();

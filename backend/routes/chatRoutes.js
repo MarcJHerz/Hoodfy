@@ -87,7 +87,7 @@ router.post('/private/:otherUserFirebaseUid', verifyToken, async (req, res) => {
     const chat = await chatModel.createChat(chatData);
     
     // Agregar al otro usuario como participante
-    await participantModel.addParticipant(chat.id, otherUserId, 'member');
+    await participantModel.addParticipant(chat.id, otherUserFirebaseUid, 'member');
     
     console.log('✅ Nuevo chat privado creado:', chat.id);
     
