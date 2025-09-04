@@ -484,8 +484,20 @@ class ChatService {
         }
       });
 
-      // Limpiar estado del usuario en Redis
-      this.redis.hdel(`user:${socket.userId}:online`);
+      // Limpiar estado del usuario en Redis (solo si Redis está disponible)
+      if (this.redisManager && this.redisManager.isHealthy()) {
+        try {
+          const redis = this.redisManager.getClient();
+          if (redis) {
+            // No usar await para no bloquear la desconexión
+            redis.hdel(`user:${socket.userId}:online`).catch(redisError => {
+              console.warn('⚠️ Error limpiando estado Redis al desconectar:', redisError.message);
+            });
+          }
+        } catch (redisError) {
+          console.warn('⚠️ Error limpiando estado Redis al desconectar:', redisError.message);
+        }
+      }
       
       console.log(`👋 Usuario ${socket.userId} desconectado de ${rooms.length - 1} chats`);
     } catch (error) {

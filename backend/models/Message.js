@@ -141,10 +141,15 @@ class Message {
   async getChatMessages(chatId, limit = 50, offset = 0) {
     const client = await this.pool.connect();
     try {
+      // 🔧 CRÍTICO: Agregar JOIN con tabla users para obtener sender_name y sender_profile_picture
       const result = await client.query(`
-        SELECT * FROM messages 
-        WHERE chat_id = $1 AND is_deleted = false
-        ORDER BY created_at DESC
+        SELECT m.*, 
+               u.name as sender_name,
+               u.profile_picture as sender_profile_picture
+        FROM messages m
+        LEFT JOIN users u ON m.sender_id = u.firebase_uid
+        WHERE m.chat_id = $1 AND m.is_deleted = false
+        ORDER BY m.created_at DESC
         LIMIT $2 OFFSET $3
       `, [chatId, limit, offset]);
 
