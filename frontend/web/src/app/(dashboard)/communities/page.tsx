@@ -8,9 +8,6 @@ import {
   StarIcon, 
   MagnifyingGlassIcon,
   FunnelIcon,
-  SparklesIcon,
-  TrophyIcon,
-  FireIcon,
   GlobeAltIcon
 } from '@heroicons/react/24/outline';
 import { communities, users } from '@/services/api';
@@ -200,17 +197,6 @@ export default function CommunitiesPage() {
     );
   };
 
-  const getStats = () => {
-    return {
-      totalCommunities: userCommunities.length + subscribedCommunities.length,
-      totalMembers: userCommunities.reduce((acc, c) => acc + (c.members?.length || 0), 0) +
-                    subscribedCommunities.reduce((acc, c) => acc + (c.members?.length || 0), 0),
-      createdCommunities: userCommunities.length,
-      subscriptions: subscribedCommunities.length
-    };
-  };
-
-  const stats = getStats();
 
   if (isLoadingCommunities || isLoadingSubscriptions) {
     return (
@@ -251,37 +237,6 @@ export default function CommunitiesPage() {
               Connect, learn and grow with people who share your interests
             </p>
             
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-              <div className="bg-white/10 dark:bg-black/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                <div className="flex items-center justify-center mb-2">
-                  <SparklesIcon className="w-6 h-6 text-white mr-2" />
-                  <span className="text-2xl font-bold text-white">{stats.totalCommunities}</span>
-                </div>
-                <p className="text-white/80 text-sm">Total communities</p>
-              </div>
-              <div className="bg-white/10 dark:bg-black/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                <div className="flex items-center justify-center mb-2">
-                  <TrophyIcon className="w-6 h-6 text-white mr-2" />
-                  <span className="text-2xl font-bold text-white">{stats.createdCommunities}</span>
-                </div>
-                <p className="text-white/80 text-sm">Created by you</p>
-              </div>
-              <div className="bg-white/10 dark:bg-black/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                <div className="flex items-center justify-center mb-2">
-                  <StarIcon className="w-6 h-6 text-white mr-2" />
-                  <span className="text-2xl font-bold text-white">{stats.subscriptions}</span>
-                </div>
-                <p className="text-white/80 text-sm">Subscriptions</p>
-              </div>
-              <div className="bg-white/10 dark:bg-black/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                <div className="flex items-center justify-center mb-2">
-                  <FireIcon className="w-6 h-6 text-white mr-2" />
-                  <span className="text-2xl font-bold text-white">{stats.totalMembers}</span>
-                </div>
-                <p className="text-white/80 text-sm">Total members</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

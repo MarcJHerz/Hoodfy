@@ -185,7 +185,7 @@ export const communities = {
   getCreatedCommunities: (userId: string) => api.get(`/api/communities/created-by/${userId}`),
   getSubscribedCommunities: () => api.get('/api/subscriptions/my-subscriptions'),
   search: async (query: string) => {
-    return api.get(`/api/communities/search?q=${encodeURIComponent(query)}`);
+    return api.get(`/api/communities/search?query=${encodeURIComponent(query)}`);
   },
   subscribeToCommunity: async (communityId: string, amount: number, paymentMethod: string) => {
     return api.post('/api/subscriptions/subscribe', { communityId, amount, paymentMethod });

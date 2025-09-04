@@ -312,7 +312,11 @@ router.get('/recommended', verifyToken, async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(10);
 
-    res.json(users);
+    res.json({
+      success: true,
+      data: users,
+      total: users.length
+    });
   } catch (error) {
     console.error('Error obteniendo usuarios recomendados:', error);
     res.status(500).json({ error: 'Error obteniendo usuarios recomendados' });
@@ -334,7 +338,11 @@ router.get('/search', verifyToken, async (req, res) => {
       ]
     }).select('_id name username profilePicture bio verified');
 
-    res.json(users);
+    res.json({
+      success: true,
+      data: users,
+      total: users.length
+    });
   } catch (error) {
     console.error('Error en la búsqueda de usuarios:', error);
     res.status(500).json({ error: 'Error en la búsqueda de usuarios' });

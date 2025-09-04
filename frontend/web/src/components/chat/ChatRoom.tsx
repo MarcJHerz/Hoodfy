@@ -42,6 +42,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     addMessage
   } = useChatStore();
 
+
   const [isSending, setIsSending] = useState(false);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
 
@@ -396,7 +397,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
             <SimplifiedMessageList
               messages={messages}
               isLoading={isLoading}
-              currentUserId={user.firebaseUid}
+              currentUserId={user.firebaseUid || user._id || ''}
               onAddReaction={handleAddReaction}
               onRemoveReaction={handleRemoveReaction}
               onReplyToMessage={handleReplyToMessage}

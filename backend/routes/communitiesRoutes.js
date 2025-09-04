@@ -171,22 +171,30 @@ const makeAllies = async (userId, communityId) => {
 };
 
 // 🔍 Buscar comunidades por palabra clave (nombre o descripción)
-router.get('/search', async (req, res) => {
+router.get('/search', verifyToken, async (req, res) => {
   try {
-    const { q } = req.query;
-    if (!q || typeof q !== 'string' || q.trim() === '') {
+    const { query } = req.query;
+    if (!query || typeof query !== 'string' || query.trim() === '') {
       return res.status(400).json({ error: 'Debes proporcionar una palabra clave para buscar.' });
     }
-    const regex = new RegExp(q, 'i');
+    const regex = new RegExp(query, 'i');
     const communities = await Community.find({
       $or: [
         { name: { $regex: regex } },
-        { description: { $regex: regex } }
+        { description: { $regex: regex } },
+        { category: { $regex: regex } }
       ]
     })
-      .populate('creator', 'name email')
-      .sort({ createdAt: -1 });
-    res.json(communities);
+      .populate('creator', 'name email profilePicture')
+      .select('_id name description image coverImage members createdAt category creator')
+      .sort({ members: -1, createdAt: -1 })
+      .limit(20);
+    
+    res.json({
+      success: true,
+      data: communities,
+      total: communities.length
+    });
   } catch (error) {
     console.error('Error al buscar comunidades:', error);
     res.status(500).json({ error: 'Error al buscar comunidades' });
