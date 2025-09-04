@@ -141,19 +141,45 @@ class Message {
   async getChatMessages(chatId, limit = 50, offset = 0) {
     const client = await this.pool.connect();
     try {
-      // 🔧 CRÍTICO: Agregar JOIN con tabla users para obtener sender_name y sender_profile_picture
+      // 🔧 CRÍTICO: Obtener solo mensajes de PostgreSQL (sin JOIN con users)
       const result = await client.query(`
-        SELECT m.*, 
-               u.name as sender_name,
-               u.profile_picture as sender_profile_picture
-        FROM messages m
-        LEFT JOIN users u ON m.sender_id = u.firebase_uid
-        WHERE m.chat_id = $1 AND m.is_deleted = false
-        ORDER BY m.created_at DESC
+        SELECT * FROM messages 
+        WHERE chat_id = $1 AND is_deleted = false
+        ORDER BY created_at DESC
         LIMIT $2 OFFSET $3
       `, [chatId, limit, offset]);
 
-      return result.rows.reverse(); // Ordenar cronológicamente
+      const messages = result.rows.reverse(); // Ordenar cronológicamente
+
+      // 🔧 CRÍTICO: Obtener información de usuarios de MongoDB
+      if (messages.length > 0) {
+        const User = require('../models/User');
+        const userIds = [...new Set(messages.map(msg => msg.sender_id))]; // IDs únicos
+        
+        // Obtener usuarios de MongoDB usando firebaseUid
+        const users = await User.find({ firebaseUid: { $in: userIds } }).select('firebaseUid name profilePicture');
+        const userMap = {};
+        users.forEach(user => {
+          userMap[user.firebaseUid] = {
+            name: user.name,
+            profile_picture: user.profilePicture
+          };
+        });
+
+        // Agregar información de usuario a cada mensaje
+        messages.forEach(message => {
+          const userInfo = userMap[message.sender_id];
+          if (userInfo) {
+            message.sender_name = userInfo.name;
+            message.sender_profile_picture = userInfo.profile_picture;
+          } else {
+            message.sender_name = 'Usuario';
+            message.sender_profile_picture = null;
+          }
+        });
+      }
+
+      return messages;
     } catch (error) {
       console.error('❌ Error obteniendo mensajes del chat:', error);
       throw error;
