@@ -140,7 +140,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
       const messageData: Omit<Message, 'id' | 'timestamp'> = {
         chatId,
         content,
-        senderId: user._id,
+        senderId: user.firebaseUid || user._id,
         senderName: user.name,
         senderProfilePicture: user.profilePicture,
         type,
@@ -397,7 +397,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
             <SimplifiedMessageList
               messages={messages}
               isLoading={isLoading}
-              currentUserId={user.firebaseUid || user._id || ''}
+              currentUserId={user.firebaseUid || ''}
               onAddReaction={handleAddReaction}
               onRemoveReaction={handleRemoveReaction}
               onReplyToMessage={handleReplyToMessage}

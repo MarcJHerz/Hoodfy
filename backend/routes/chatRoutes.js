@@ -45,6 +45,154 @@ async function getUserInfo(userId) {
 // RUTAS DE CHAT
 // ============================================================================
 
+// Obtener o crear chat de comunidad
+router.get('/community/:communityId', verifyToken, async (req, res) => {
+  try {
+    const { communityId } = req.params;
+    const userId = req.userId; // Firebase UID del usuario actual
+
+    console.log(`🏘️ Obteniendo/creando chat para comunidad ${communityId} por usuario ${userId}`);
+
+    // Verificar que la comunidad existe y el usuario tiene acceso
+    const Community = require('../models/Community');
+    const community = await Community.findById(communityId);
+    if (!community) {
+      return res.status(404).json({ error: 'Comunidad no encontrada' });
+    }
+
+    // Verificar que el usuario está suscrito a la comunidad
+    const Subscription = require('../models/Subscription');
+    const User = require('../models/User');
+    
+    // Obtener el MongoDB ID del usuario
+    const user = await User.findOne({ firebaseUid: userId });
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    const subscription = await Subscription.findOne({
+      user: user._id,
+      community: communityId,
+      status: 'active'
+    });
+
+    // También verificar si es el creador de la comunidad
+    const isCreator = community.creator.toString() === user._id.toString();
+
+    if (!subscription && !isCreator) {
+      return res.status(403).json({ error: 'Debes estar suscrito a esta comunidad para acceder al chat' });
+    }
+
+    // Buscar chat existente para esta comunidad
+    const existingChat = await chatModel.pool.connect().then(async (client) => {
+      try {
+        const result = await client.query(`
+          SELECT * FROM chats 
+          WHERE community_id = $1 AND type = 'community' AND is_active = true
+          LIMIT 1
+        `, [communityId]);
+        return result.rows[0];
+      } finally {
+        client.release();
+      }
+    });
+
+    let chat;
+    let isNew = false;
+
+    if (existingChat) {
+      chat = existingChat;
+      console.log('✅ Chat de comunidad existente encontrado:', chat.id);
+    } else {
+      // Crear nuevo chat de comunidad
+      const chatData = {
+        name: `💬 ${community.name}`,
+        description: `Chat grupal de la comunidad ${community.name}`,
+        type: 'community',
+        community_id: communityId,
+        created_by: userId,
+        max_participants: 10000,
+        settings: {
+          allowFileUploads: true,
+          allowImageUploads: true,
+          allowVideoUploads: true,
+          moderationEnabled: true
+        }
+      };
+
+      chat = await chatModel.createChat(chatData);
+      isNew = true;
+      console.log('✅ Nuevo chat de comunidad creado:', chat.id);
+
+      // Agregar automáticamente a todos los suscriptores activos
+      try {
+        const activeSubscriptions = await Subscription.find({
+          community: communityId,
+          status: 'active'
+        }).populate('user', 'firebaseUid');
+
+        console.log(`👥 Agregando ${activeSubscriptions.length} suscriptores al chat ${chat.id}`);
+
+        for (const subscription of activeSubscriptions) {
+          if (subscription.user && subscription.user.firebaseUid) {
+            try {
+              const userFirebaseUid = subscription.user.firebaseUid;
+              const userRole = userFirebaseUid === userId ? 'admin' : 'member';
+              await participantModel.addParticipant(chat.id, userFirebaseUid, userRole);
+              console.log(`✅ Suscriptor ${userFirebaseUid} agregado como ${userRole}`);
+            } catch (participantError) {
+              console.error(`❌ Error agregando suscriptor ${subscription.user.firebaseUid}:`, participantError);
+            }
+          }
+        }
+
+        // Agregar al creador de la comunidad si no está ya incluido
+        const creatorUser = await User.findById(community.creator);
+        if (creatorUser && creatorUser.firebaseUid !== userId) {
+          try {
+            await participantModel.addParticipant(chat.id, creatorUser.firebaseUid, 'admin');
+            console.log(`✅ Creador ${creatorUser.firebaseUid} agregado como admin`);
+          } catch (creatorError) {
+            console.error(`❌ Error agregando creador:`, creatorError);
+          }
+        }
+      } catch (participantsError) {
+        console.error('❌ Error agregando participantes automáticamente:', participantsError);
+      }
+    }
+
+    // Verificar si el usuario ya es participante
+    const isParticipant = await participantModel.isParticipant(chat.id, userId);
+    
+    if (!isParticipant) {
+      // Agregar usuario como participante
+      const role = isCreator ? 'admin' : 'member';
+      await participantModel.addParticipant(chat.id, userId, role);
+      console.log(`✅ Usuario ${userId} agregado como ${role} al chat ${chat.id}`);
+    }
+
+    res.json({
+      success: true,
+      chat: {
+        id: chat.id,
+        name: chat.name,
+        description: chat.description,
+        type: chat.type,
+        community_id: chat.community_id,
+        created_at: chat.created_at,
+        updated_at: chat.updated_at,
+        settings: chat.settings
+      },
+      isNew,
+      userRole: isCreator ? 'admin' : 'member'
+    });
+
+  } catch (error) {
+    console.error('Error obteniendo/creando chat de comunidad:', error);
+    res.status(500).json({ error: 'Error obteniendo chat de comunidad', details: error.message });
+  }
+});
+
 // Obtener o crear chat privado entre dos usuarios
 router.post('/private/:otherUserFirebaseUid', verifyToken, async (req, res) => {
   try {

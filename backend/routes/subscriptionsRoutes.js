@@ -217,6 +217,41 @@ router.post('/:id/join', verifyToken, async (req, res) => {
       await makeAllies(userId, community._id);
     }
 
+    // Agregar automáticamente al chat de la comunidad si existe
+    try {
+      const { Pool } = require('pg');
+      const pool = new Pool({
+        connectionString: process.env.DATABASE_URL
+      });
+
+      // Buscar si existe un chat para esta comunidad
+      const chatResult = await pool.query(`
+        SELECT id FROM chats 
+        WHERE community_id = $1 AND type = 'community' AND is_active = true
+        LIMIT 1
+      `, [communityId]);
+
+      if (chatResult.rows.length > 0) {
+        const chatId = chatResult.rows[0].id;
+        const userFirebaseUid = user.firebaseUid;
+
+        // Agregar como participante del chat
+        await pool.query(`
+          INSERT INTO chat_participants (chat_id, user_id, role)
+          VALUES ($1, $2, 'member')
+          ON CONFLICT (chat_id, user_id) 
+          DO UPDATE SET role = 'member', joined_at = CURRENT_TIMESTAMP
+        `, [chatId, userFirebaseUid]);
+
+        console.log(`✅ Usuario ${userFirebaseUid} agregado al chat ${chatId} de la comunidad ${communityId}`);
+      }
+      
+      pool.end();
+    } catch (chatError) {
+      console.error('❌ Error agregando usuario al chat de comunidad:', chatError);
+      // No fallar la suscripción por esto
+    }
+
     res.status(201).json({
       message: 'Te has unido exitosamente a la comunidad',
       subscription

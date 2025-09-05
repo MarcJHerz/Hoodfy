@@ -76,7 +76,7 @@ export default function ChatPage() {
       const messageData = {
         chatId: chat.id,
         content: newMessage.trim(),
-        senderId: user._id,
+        senderId: user.firebaseUid || user._id,
         senderName: user.name || 'Usuario',
         senderProfilePicture: user.profilePicture || '',
         type: 'text' as const,
@@ -225,16 +225,16 @@ export default function ChatPage() {
           messages.map((message) => (
             <div
               key={message.id}
-              className={`flex ${message.senderId === user._id ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${message.senderId === (user.firebaseUid || user._id) ? 'justify-end' : 'justify-start'}`}
             >
               <div
                 className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                  message.senderId === user._id
+                  message.senderId === (user.firebaseUid || user._id)
                     ? 'bg-blue-600 text-white'
                     : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                 }`}
               >
-                {message.senderId !== user._id && (
+                {message.senderId !== (user.firebaseUid || user._id) && (
                   <div className="flex items-center space-x-2 mb-1">
                     <UserAvatar
                       source={message.senderProfilePicture}

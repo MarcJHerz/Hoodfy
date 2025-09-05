@@ -82,7 +82,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
             setCommunityChat(chat as any);
             
             // Conectar a Socket.io y unirse al chat
-            await postgresChatService.connectToSocket(user._id);
+            await postgresChatService.connectToSocket(user.firebaseUid || user._id);
             await postgresChatService.joinChat(chat.id);
           }
         } else {

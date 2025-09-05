@@ -226,13 +226,29 @@ class PostgresChatService {
   // Obtener o crear chat de comunidad para el usuario actual
   async getOrCreateCommunityChat(communityId: string, communityName: string): Promise<{ id: string; name: string; type: 'community' } | null> {
     try {
-      const chats = await this.getUserChats('self');
-      const existing = chats.find((c: any) => c.type === 'community' && c.communityId === communityId);
-      if (existing) {
-        return { id: existing.id, name: existing.name || communityName, type: 'community' };
+      console.log(`🏘️ Obteniendo chat de comunidad: ${communityId}`);
+      
+      const response = await fetch(`${API_BASE_URL}/api/chats/community/${communityId}`, {
+        method: 'GET',
+        headers: await this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const chatId = await this.createCommunityChat(communityId, communityName, []);
-      return { id: chatId, name: communityName, type: 'community' };
+
+      const data = await response.json();
+      
+      if (data.success && data.chat) {
+        console.log(`✅ Chat de comunidad obtenido/creado: ${data.chat.id}`);
+        return {
+          id: data.chat.id.toString(),
+          name: data.chat.name,
+          type: 'community'
+        };
+      }
+      
+      throw new Error('No se pudo obtener el chat de la comunidad');
     } catch (error) {
       console.error('❌ Error obteniendo/creando chat de comunidad:', error);
       return null;
