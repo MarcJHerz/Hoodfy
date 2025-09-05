@@ -930,7 +930,7 @@ export default function ProfilePage() {
             profilePicture: selectedAlly.profilePicture,
             bio: selectedAlly.bio,
             createdAt: selectedAlly.createdAt,
-            updatedAt: selectedAlly.lastLogin // Usar lastLogin como updatedAt
+            updatedAt: selectedAlly.updatedAt
           }}
         />
       )}
