@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useCommunitiesStore } from '@/stores/communitiesStore';
+import { useChatStore } from '@/stores/chatStore';
 import ChatRoom from './ChatRoom';
 // import { postgresChatService } from '@/services/postgresChatService'; // Usar store en su lugar
 import { CommunityChat } from '@/types/chat';
@@ -25,6 +26,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
 }) => {
   const { user } = useAuthStore();
   const { checkSubscription, loadSubscribedCommunities, isLoadingSubscriptions } = useCommunitiesStore();
+  const { setCurrentChat, reset } = useChatStore();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [communityChat, setCommunityChat] = useState<CommunityChat | null>(null);
@@ -81,6 +83,20 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
           if (chat) {
             setCommunityChat(chat as any);
             
+            // Crear objeto ChatRoom completo para el store
+            const chatRoom: CommunityChat = {
+              id: chat.id,
+              name: chat.name,
+              type: 'community',
+              communityId,
+              communityName,
+              participants: [], // Se llenará automáticamente por el backend
+              updatedAt: new Date(),
+              createdAt: new Date()
+            };
+            
+            setCurrentChat(chatRoom); // ✅ CRÍTICO: Establecer chat actual en el store
+            
             // Conectar a Socket.io y unirse al chat
             await postgresChatService.connectToSocket(user.firebaseUid || user._id);
             await postgresChatService.joinChat(chat.id);
@@ -100,6 +116,7 @@ const CommunityChatModal: React.FC<CommunityChatModalProps> = ({
   }, [isOpen, communityId, communityName, user?._id, checkSubscription, loadSubscribedCommunities]);
 
   const handleClose = () => {
+    reset(); // ✅ Limpiar store de chat
     setCommunityChat(null);
     setIsSubscribed(false);
     setIsLoading(true);

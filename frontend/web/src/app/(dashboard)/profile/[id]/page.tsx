@@ -30,9 +30,9 @@ import {
   BookmarkIcon as BookmarkSolidIcon 
 } from '@heroicons/react/24/solid';
 import { toast } from 'react-hot-toast';
-import type { UserProfile, Community } from '@/types';
+import type { Community } from '@/types';
 import { Post } from '@/types/post';
-import { User } from '@/types/user';
+import { User, UserProfile } from '@/types/user';
 import { users, posts, communities } from '@/services/api';
 import api from '@/services/api';
 import CommentsModal from '@/components/CommentsModal';
@@ -923,7 +923,7 @@ export default function ProfilePage() {
           onClose={() => setSelectedAlly(null)}
           otherUser={{
             _id: selectedAlly._id,
-            firebaseUid: selectedAlly._id, // Usar _id como firebaseUid temporalmente
+            firebaseUid: selectedAlly.firebaseUid || selectedAlly._id, // Usar firebaseUid real si está disponible
             name: selectedAlly.name,
             username: selectedAlly.username,
             email: '', // No disponible en UserProfile, pero requerido por User
