@@ -51,7 +51,7 @@ export default function PrivateChatModal({ isOpen, onClose, otherUser }: Private
         setCurrentChat(privateChat);
         
         // Conectar a Socket.io y unirse al chat
-        await postgresChatService.connectToSocket(user._id);
+        await postgresChatService.connectToSocket(user.firebaseUid || user._id);
         await postgresChatService.joinChat(chatId);
       } catch (error: any) {
         console.error('Error initializing private chat:', error);

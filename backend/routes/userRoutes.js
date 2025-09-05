@@ -323,6 +323,34 @@ router.get('/recommended', verifyToken, async (req, res) => {
   }
 });
 
+// 📌 Ruta para obtener usuarios recomendados
+router.get('/recommended', verifyToken, async (req, res) => {
+  try {
+    const { limit = 10 } = req.query;
+    
+    // Por ahora, devolver usuarios aleatorios con más actividad
+    const recommendedUsers = await User.find({
+      isActive: { $ne: false }
+    })
+    .select('name username profilePicture bio verified')
+    .sort({ createdAt: -1 })
+    .limit(parseInt(limit));
+
+    res.json({
+      success: true,
+      data: recommendedUsers,
+      total: recommendedUsers.length
+    });
+  } catch (error) {
+    console.error('Error obteniendo usuarios recomendados:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error interno del servidor',
+      details: error.message 
+    });
+  }
+});
+
 // 📌 Ruta para buscar usuarios por nombre o username
 router.get('/search', verifyToken, async (req, res) => {
   const { query } = req.query;

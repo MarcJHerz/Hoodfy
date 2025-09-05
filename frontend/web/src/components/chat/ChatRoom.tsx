@@ -83,10 +83,10 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         setMessages(chatMessages);
         
         // Marcar mensajes como leídos
-        await postgresChatService.markMessagesAsRead(chatId, user._id);
+        await postgresChatService.markMessagesAsRead(chatId, user.firebaseUid || user._id);
         
         // Conectar a Socket.io
-        await postgresChatService.connectToSocket(user._id);
+        await postgresChatService.connectToSocket(user.firebaseUid || user._id);
         
         // Unirse al chat específico
         await postgresChatService.joinChat(chatId);
