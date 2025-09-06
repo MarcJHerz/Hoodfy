@@ -303,7 +303,7 @@ router.get('/recommended', verifyToken, async (req, res) => {
     const recommendedUsers = await User.find({
       isActive: { $ne: false }
     })
-    .select('name username profilePicture bio verified')
+    .select('_id name username profilePicture bio verified')
     .sort({ createdAt: -1 })
     .limit(parseInt(limit));
 

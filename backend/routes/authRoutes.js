@@ -195,8 +195,7 @@ router.get('/me', verifyToken, async (req, res) => {
       });
     }
     
-    const user = await User.findById(mongoUserId)
-      .select('-firebaseUid');
+    const user = await User.findById(mongoUserId);
     
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
