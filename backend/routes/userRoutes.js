@@ -293,35 +293,6 @@ router.put('/profile/update', verifyToken, upload.none(), async (req, res) => {
   }
 });
 
-// 📌 Ruta para obtener usuarios recomendados
-router.get('/recommended', async (req, res) => {
-  try {
-    const users = await User.find().limit(10).select('_id name profilePicture bio');
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener usuarios recomendados' });
-  }
-});
-
-// 📌 Ruta para obtener usuarios recomendados
-router.get('/recommended', verifyToken, async (req, res) => {
-  try {
-    // Por ahora, devolver usuarios aleatorios más activos
-    const users = await User.find({})
-      .select('_id name username profilePicture bio verified')
-      .sort({ createdAt: -1 })
-      .limit(10);
-
-    res.json({
-      success: true,
-      data: users,
-      total: users.length
-    });
-  } catch (error) {
-    console.error('Error obteniendo usuarios recomendados:', error);
-    res.status(500).json({ error: 'Error obteniendo usuarios recomendados' });
-  }
-});
 
 // 📌 Ruta para obtener usuarios recomendados
 router.get('/recommended', verifyToken, async (req, res) => {

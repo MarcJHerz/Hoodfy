@@ -82,6 +82,15 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         const chatMessages = await postgresChatService.getChatMessages(chatId);
         setMessages(chatMessages);
         
+        // Debug: verificar alineación de mensajes
+        console.log('🔍 Debug alineación:');
+        console.log('- currentUserId:', user.firebaseUid || user._id);
+        console.log('- user.firebaseUid:', user.firebaseUid);
+        console.log('- user._id:', user._id);
+        chatMessages.forEach((msg, index) => {
+          console.log(`- Mensaje ${index}: senderId=${msg.senderId}, isOwn=${msg.senderId === (user.firebaseUid || user._id)}`);
+        });
+        
         // Marcar mensajes como leídos
         await postgresChatService.markMessagesAsRead(chatId, user.firebaseUid || user._id);
         
@@ -397,7 +406,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
             <SimplifiedMessageList
               messages={messages}
               isLoading={isLoading}
-              currentUserId={user.firebaseUid || ''}
+              currentUserId={user.firebaseUid || user._id}
               onAddReaction={handleAddReaction}
               onRemoveReaction={handleRemoveReaction}
               onReplyToMessage={handleReplyToMessage}

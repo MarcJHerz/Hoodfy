@@ -178,6 +178,10 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
   const performSearch = useCallback(async (searchQuery: string) => {
     setLoading(true);
     try {
+      // Debug: verificar token antes de hacer la búsqueda
+      const token = localStorage.getItem('token');
+      console.log('🔍 Realizando búsqueda con token:', token ? 'Token presente' : 'Sin token');
+      
       const promises = [];
       
       // Buscar comunidades
