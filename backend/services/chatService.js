@@ -27,14 +27,11 @@ class ChatService {
       maxHttpBufferSize: parseInt(process.env.SOCKET_MAX_HTTP_BUFFER_SIZE) || 1e8
     });
 
-        // 🚫 REDIS TEMPORALMENTE DESHABILITADO - CAUSANDO LOOPS INFINITOS
-    console.warn('⚠️ Redis deshabilitado temporalmente por problemas de estabilidad');
-    this.redis = null;
-    this.redisManager = null;
-    
-    // TODO: Re-habilitar Redis una vez solucionado el problema de timeouts
-    // this.redisManager = getRedisManager();
-    // this.initializeRedis();
+        // ✅ VALKEY CLUSTER HABILITADO - PROBLEMA DE TIMEOUTS SOLUCIONADO
+    console.log('🚀 Inicializando Valkey Cluster para Chat Service...');
+    this.redisManager = getRedisManager();
+    this.redis = null; // Se inicializará en initializeRedis()
+    this.initializeRedis();
 
     // Inicializar modelos
     this.chatModel = new Chat();

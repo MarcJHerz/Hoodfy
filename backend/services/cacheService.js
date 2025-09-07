@@ -1,45 +1,44 @@
-const Redis = require('ioredis');
+const { getRedisManager } = require('../config/redis-cluster');
 const logger = require('../utils/logger');
 
 class CacheService {
   constructor() {
-    this.redis = new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: process.env.REDIS_PORT || 6379,
-      password: process.env.REDIS_PASSWORD,
-      retryDelayOnFailover: 100,
-      maxRetriesPerRequest: 3,
-      lazyConnect: true,
-      keyPrefix: 'hoodfy:',
-      // Configuración de cluster si está disponible
-      enableReadyCheck: true,
-      maxLoadingTimeout: 10000,
-      // Configuración de pool
-      family: 4,
-      db: 0
-    });
+    // Usar el mismo Valkey Cluster Manager que Chat Service
+    this.redisManager = getRedisManager();
+    this.redis = null;
+    this.initializeRedis();
 
     this.setupEventHandlers();
   }
 
+  async initializeRedis() {
+    try {
+      console.log('🔄 Inicializando Valkey Cluster para Cache Service...');
+      this.redis = await this.redisManager.connect();
+      
+      if (this.redis) {
+        console.log('✅ Valkey Cluster conectado para Cache Service');
+      } else {
+        console.warn('⚠️ Valkey no disponible, Cache Service funcionará sin cache');
+      }
+    } catch (error) {
+      console.error('❌ Error conectando Valkey para Cache Service:', error);
+      console.warn('⚠️ Cache Service funcionará sin Valkey');
+      this.redis = null;
+    }
+  }
+
   setupEventHandlers() {
-    this.redis.on('connect', () => {
-      logger.logger.info('Redis connected successfully');
-    });
-
-    this.redis.on('error', (error) => {
-      logger.logError(error, { service: 'cache' });
-    });
-
-    this.redis.on('ready', () => {
-      logger.logger.info('Redis is ready');
-    });
+    // Los event handlers se configuran en RedisClusterManager
+    // No necesitamos duplicarlos aquí ya que this.redis será null inicialmente
+    console.log('✅ Event handlers para Cache Service configurados');
   }
 
   // Métodos básicos de cache
   async get(key) {
     try {
-      const value = await this.redis.get(key);
+      if (!this.redisManager) return null;
+      const value = await this.redisManager.safeGet(key);
       return value ? JSON.parse(value) : null;
     } catch (error) {
       logger.logError(error, { operation: 'cache_get', key });

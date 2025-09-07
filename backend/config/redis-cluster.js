@@ -12,86 +12,55 @@ class RedisClusterManager {
     try {
       console.log('🔄 Conectando a Redis Cluster...');
 
-      // Configuración para Redis Cluster real (no Serverless)
+      // Configuración para Valkey Cluster
       const clusterConfig = {
-        // Nodos del cluster (actualizar con tus endpoints reales)
+        // Usar Configuration Endpoint para cluster mode
         nodes: [
           {
-            host: process.env.REDIS_CLUSTER_HOST_1 || process.env.REDIS_HOST || 'localhost',
-            port: parseInt(process.env.REDIS_CLUSTER_PORT_1) || parseInt(process.env.REDIS_PORT) || 6379
+            host: process.env.VALKEY_CLUSTER_HOST || 'clustercfg.hoodfy-valkey-cluster.yqqefg.use1.cache.amazonaws.com',
+            port: parseInt(process.env.VALKEY_CLUSTER_PORT) || 6379
           }
-          // Agregar más nodos si tienes cluster real:
-          // {
-          //   host: process.env.REDIS_CLUSTER_HOST_2,
-          //   port: parseInt(process.env.REDIS_CLUSTER_PORT_2)
-          // },
-          // {
-          //   host: process.env.REDIS_CLUSTER_HOST_3,
-          //   port: parseInt(process.env.REDIS_CLUSTER_PORT_3)
-          // }
         ],
         
-        // Configuración optimizada para producción
+        // Configuración optimizada para Valkey Cluster
         redisOptions: {
-          password: process.env.REDIS_PASSWORD,
+          password: process.env.VALKEY_PASSWORD || process.env.REDIS_PASSWORD,
           connectTimeout: 10000,
-          commandTimeout: 5000,
+          commandTimeout: 8000,        // Aumentado para cluster
           retryDelayOnFailover: 1000,
           maxRetriesPerRequest: 3,
           lazyConnect: true,
           keepAlive: 30000,
           family: 4,
           keyPrefix: 'hoodfy:',
+          // Configuración específica para Valkey Cluster
+          tls: {
+            checkServerIdentity: false   // Para ElastiCache con TLS
+          },
+          enableReadyCheck: true,
+          maxRetriesPerRequest: 3,
         },
         
-        // Configuración del cluster
+        // Configuración del cluster Valkey
         enableReadyCheck: true,
-        redisOptions: {
-          password: process.env.REDIS_PASSWORD,
-        },
-        scaleReads: 'slave', // Leer de slaves cuando sea posible
+        scaleReads: 'slave',           // Leer de réplicas cuando sea posible
         maxRedirections: 16,
         retryDelayOnFailover: 100,
         enableOfflineQueue: false,
         readOnly: false,
+        
+        // Configuración específica para ElastiCache
+        dnsLookup: (address, callback) => callback(null, address),
+        enableAutoPipelining: true,    // Mejorar rendimiento
         
         // Configuración de salud
         healthCheckInterval: 30000,
         clusterRetryDelayOnFailover: 2000,
       };
 
-      // Si solo tenemos un nodo, usar Redis normal en lugar de cluster
-      if (clusterConfig.nodes.length === 1) {
-        console.log('🔧 Un solo nodo detectado, usando Redis normal...');
-        this.cluster = new Redis({
-          host: clusterConfig.nodes[0].host,
-          port: clusterConfig.nodes[0].port,
-          password: process.env.REDIS_PASSWORD,
-          connectTimeout: 10000,
-          commandTimeout: 5000,
-          retryDelayOnFailover: 1000,
-          maxRetriesPerRequest: 3,
-          lazyConnect: true,
-          keepAlive: 30000,
-          family: 4,
-          keyPrefix: 'hoodfy:',
-          // Configuración de reconexión
-          retryDelayOnClusterDown: 300,
-          retryDelayOnFailover: 100,
-          maxRetriesPerRequest: 3,
-          reconnectOnError: (err) => {
-            console.log('🔄 Redis reconectando por error:', err.message);
-            const targetError = err.message.includes('READONLY') || 
-                               err.message.includes('ECONNRESET') || 
-                               err.message.includes('ETIMEDOUT') ||
-                               err.message.includes('ENOTFOUND');
-            return targetError;
-          }
-        });
-      } else {
-        console.log('🔧 Múltiples nodos detectados, usando Redis Cluster...');
-        this.cluster = new Redis.Cluster(clusterConfig.nodes, clusterConfig);
-      }
+      // Siempre usar cluster mode para Valkey
+      console.log('🔧 Conectando a Valkey Cluster...');
+      this.cluster = new Redis.Cluster(clusterConfig.nodes, clusterConfig);
 
       // Event handlers
       this.setupEventHandlers();
@@ -101,17 +70,17 @@ class RedisClusterManager {
       this.isConnected = true;
       this.reconnectAttempts = 0;
       
-      console.log('✅ Redis Cluster conectado exitosamente');
+      console.log('✅ Valkey Cluster conectado exitosamente');
       
       // Test de conexión
       await this.cluster.set('health:check', Date.now(), 'EX', 30);
       const healthCheck = await this.cluster.get('health:check');
-      console.log('✅ Test de conexión Redis exitoso:', healthCheck);
+      console.log('✅ Test de conexión Valkey exitoso:', healthCheck);
 
       return this.cluster;
 
     } catch (error) {
-      console.error('❌ Error conectando a Redis Cluster:', error);
+      console.error('❌ Error conectando a Valkey Cluster:', error);
       this.isConnected = false;
       
       // Intentar reconexión si no hemos superado el límite
