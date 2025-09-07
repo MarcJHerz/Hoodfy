@@ -161,6 +161,64 @@ router.get('/profile', verifyToken, async (req, res) => {
   }
 });
 
+// 📌 Ruta para obtener usuarios recomendados (MOVER ANTES DE /:userId)
+router.get('/recommended', verifyToken, async (req, res) => {
+  try {
+    const { limit = 10 } = req.query;
+    
+    // Por ahora, devolver usuarios aleatorios con más actividad
+    const recommendedUsers = await User.find({
+      isActive: { $ne: false }
+    })
+    .select('_id name username profilePicture bio verified')
+    .sort({ createdAt: -1 })
+    .limit(parseInt(limit));
+
+    res.json({
+      success: true,
+      data: recommendedUsers,
+      total: recommendedUsers.length
+    });
+  } catch (error) {
+    console.error('Error obteniendo usuarios recomendados:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error interno del servidor',
+      details: error.message 
+    });
+  }
+});
+
+// 📌 Ruta para buscar usuarios por nombre o username (MOVER ANTES DE /:userId)
+router.get('/search', verifyToken, async (req, res) => {
+  const { query } = req.query;
+  if (!query || query.trim() === '') {
+    return res.status(400).json({ error: 'La consulta de búsqueda no puede estar vacía.' });
+  }
+
+  try {
+    const users = await User.find({
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { username: { $regex: query, $options: 'i' } }
+      ]
+    }).select('_id name username profilePicture bio verified');
+
+    res.json({
+      success: true,
+      data: users,
+      total: users.length
+    });
+  } catch (error) {
+    console.error('Error buscando usuarios:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error interno del servidor',
+      details: error.message 
+    });
+  }
+});
+
 // 🔧 Ruta específica para obtener usuario por ID (para chat service)
 router.get('/:userId', verifyToken, async (req, res) => {
   try {
@@ -290,61 +348,6 @@ router.put('/profile/update', verifyToken, upload.none(), async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: 'Error al actualizar perfil' });
-  }
-});
-
-
-// 📌 Ruta para obtener usuarios recomendados
-router.get('/recommended', verifyToken, async (req, res) => {
-  try {
-    const { limit = 10 } = req.query;
-    
-    // Por ahora, devolver usuarios aleatorios con más actividad
-    const recommendedUsers = await User.find({
-      isActive: { $ne: false }
-    })
-    .select('_id name username profilePicture bio verified')
-    .sort({ createdAt: -1 })
-    .limit(parseInt(limit));
-
-    res.json({
-      success: true,
-      data: recommendedUsers,
-      total: recommendedUsers.length
-    });
-  } catch (error) {
-    console.error('Error obteniendo usuarios recomendados:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Error interno del servidor',
-      details: error.message 
-    });
-  }
-});
-
-// 📌 Ruta para buscar usuarios por nombre o username
-router.get('/search', verifyToken, async (req, res) => {
-  const { query } = req.query;
-  if (!query || query.trim() === '') {
-    return res.status(400).json({ error: 'La consulta de búsqueda no puede estar vacía.' });
-  }
-
-  try {
-    const users = await User.find({
-      $or: [
-        { name: { $regex: query, $options: 'i' } },
-        { username: { $regex: query, $options: 'i' } }
-      ]
-    }).select('_id name username profilePicture bio verified');
-
-    res.json({
-      success: true,
-      data: users,
-      total: users.length
-    });
-  } catch (error) {
-    console.error('Error en la búsqueda de usuarios:', error);
-    res.status(500).json({ error: 'Error en la búsqueda de usuarios' });
   }
 });
 

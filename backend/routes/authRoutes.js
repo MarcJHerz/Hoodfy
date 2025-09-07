@@ -133,9 +133,13 @@ router.post('/login', async (req, res) => {
       token: jwtToken,
       user: {
         _id: user._id,
+        firebaseUid: user.firebaseUid,  // ✅ AGREGAR firebaseUid
         name: user.name,
         email: user.email,
-        profilePicture: user.profilePicture
+        profilePicture: user.profilePicture,
+        username: user.username,
+        bio: user.bio,
+        category: user.category
       }
     });
   } catch (error) {
