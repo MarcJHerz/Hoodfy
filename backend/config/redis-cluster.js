@@ -116,8 +116,16 @@ class RedisClusterManager {
   }
 
   setupEventHandlers() {
+    // Controlar frecuencia de logs para evitar spam
+    this.lastLogTime = 0;
+    this.logCooldown = 30000; // 30 segundos entre logs similares
+    
     this.cluster.on('connect', () => {
-      console.log('✅ Redis conectado');
+      const now = Date.now();
+      if (now - this.lastLogTime > this.logCooldown) {
+        console.log('✅ Redis conectado');
+        this.lastLogTime = now;
+      }
       this.isConnected = true;
       this.reconnectAttempts = 0;
     });
@@ -128,20 +136,30 @@ class RedisClusterManager {
     });
 
     this.cluster.on('error', (err) => {
-      console.error('🔄 Redis error:', err.message);
+      // Solo loguear errores críticos, ignorar timeouts rutinarios
+      if (!err.message.includes('Command timed out') && 
+          !err.message.includes('Connection is closed') &&
+          !err.message.includes('Failed to refresh slots cache')) {
+        console.error('🔄 Redis error crítico:', err.message);
+      }
       this.isConnected = false;
-      
-      // No hacer throw para evitar que el servicio se caiga
-      // El sistema continuará funcionando sin Redis
     });
 
     this.cluster.on('close', () => {
-      console.log('⚠️ Redis desconectado');
+      const now = Date.now();
+      if (now - this.lastLogTime > this.logCooldown) {
+        console.log('⚠️ Redis desconectado');
+        this.lastLogTime = now;
+      }
       this.isConnected = false;
     });
 
     this.cluster.on('reconnecting', () => {
-      console.log('🔄 Redis reconectando...');
+      const now = Date.now();
+      if (now - this.lastLogTime > this.logCooldown) {
+        console.log('🔄 Redis reconectando...');
+        this.lastLogTime = now;
+      }
       this.isConnected = false;
     });
 
