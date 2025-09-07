@@ -58,9 +58,26 @@ class RedisClusterManager {
         clusterRetryDelayOnFailover: 2000,
       };
 
-      // Siempre usar cluster mode para Valkey
-      console.log('🔧 Conectando a Valkey Cluster...');
-      this.cluster = new Redis.Cluster(clusterConfig.nodes, clusterConfig);
+      // FALLBACK: Usar Redis Serverless mientras solucionamos Valkey Cluster
+      if (process.env.USE_VALKEY_CLUSTER === 'true') {
+        console.log('🔧 Conectando a Valkey Cluster...');
+        this.cluster = new Redis.Cluster(clusterConfig.nodes, clusterConfig);
+      } else {
+        console.log('🔧 Conectando a Redis Serverless (fallback)...');
+        this.cluster = new Redis({
+          host: process.env.REDIS_HOST,
+          port: process.env.REDIS_PORT,
+          password: process.env.REDIS_PASSWORD,
+          connectTimeout: 30000,
+          commandTimeout: 15000,
+          retryDelayOnFailover: 2000,
+          maxRetriesPerRequest: 3,
+          lazyConnect: true,
+          keepAlive: 60000,
+          family: 4,
+          keyPrefix: 'hoodfy:',
+        });
+      }
 
       // Event handlers
       this.setupEventHandlers();
