@@ -25,27 +25,28 @@ class RedisClusterManager {
         // Configuración optimizada para Valkey Cluster
         redisOptions: {
           password: process.env.VALKEY_PASSWORD || process.env.REDIS_PASSWORD,
-          connectTimeout: 10000,
-          commandTimeout: 8000,        // Aumentado para cluster
-          retryDelayOnFailover: 1000,
-          maxRetriesPerRequest: 3,
+          connectTimeout: 15000,        // Aumentado para cluster
+          commandTimeout: 10000,        // Aumentado para cluster
+          retryDelayOnFailover: 2000,   // Aumentado para cluster
+          maxRetriesPerRequest: 5,      // Aumentado para cluster
           lazyConnect: true,
-          keepAlive: 30000,
+          keepAlive: 60000,             // Aumentado para cluster
           family: 4,
           keyPrefix: 'hoodfy:',
-          // Configuración específica para Valkey Cluster
+          // Configuración específica para Valkey Cluster con TLS
           tls: {
-            checkServerIdentity: false   // Para ElastiCache con TLS
+            checkServerIdentity: false,  // Para ElastiCache con TLS
+            rejectUnauthorized: false   // Para ElastiCache con TLS
           },
           enableReadyCheck: true,
-          maxRetriesPerRequest: 3,
+          maxRetriesPerRequest: 5,
         },
         
         // Configuración del cluster Valkey
         enableReadyCheck: true,
         scaleReads: 'slave',           // Leer de réplicas cuando sea posible
         maxRedirections: 16,
-        retryDelayOnFailover: 100,
+        retryDelayOnFailover: 2000,    // Aumentado para cluster
         enableOfflineQueue: false,
         readOnly: false,
         
@@ -55,7 +56,7 @@ class RedisClusterManager {
         
         // Configuración de salud
         healthCheckInterval: 30000,
-        clusterRetryDelayOnFailover: 2000,
+        clusterRetryDelayOnFailover: 3000,  // Aumentado para cluster
       };
 
       // FALLBACK: Usar Redis Serverless mientras solucionamos Valkey Cluster
