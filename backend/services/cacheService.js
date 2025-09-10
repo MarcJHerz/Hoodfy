@@ -1,10 +1,10 @@
-const { getRedisManager } = require('../config/redis-cluster');
+const { getValkeyManager } = require('../config/valkey-cluster');
 const logger = require('../utils/logger');
 
 class CacheService {
   constructor() {
     // Usar el mismo Valkey Cluster Manager que Chat Service
-    this.redisManager = getRedisManager();
+    this.redisManager = getValkeyManager();
     this.redis = null;
     this.initializeRedis();
 

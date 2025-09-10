@@ -1,7 +1,7 @@
 const io = require('socket.io');
 const admin = require('../config/firebase-admin');
 const logger = require('../utils/logger');
-const { getRedisManager } = require('../config/redis-cluster');
+const { getValkeyManager } = require('../config/valkey-cluster');
 
 // Importar nuestros nuevos modelos
 const Chat = require('../models/Chat');
@@ -29,7 +29,7 @@ class ChatService {
 
         // ✅ VALKEY CLUSTER HABILITADO - PROBLEMA DE TIMEOUTS SOLUCIONADO
     console.log('🚀 Inicializando Valkey Cluster para Chat Service...');
-    this.redisManager = getRedisManager();
+    this.redisManager = getValkeyManager();
     this.redis = null; // Se inicializará en initializeRedis()
     this.initializeRedis();
 

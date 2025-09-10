@@ -10,7 +10,23 @@ class ValkeyClusterManager {
 
   async connect() {
     try {
+      // ✅ DESTRUIR INSTANCIA ANTERIOR SI EXISTE
+      if (this.cluster) {
+        console.log('🧹 Limpiando instancia anterior de Valkey Cluster...');
+        try {
+          this.cluster.disconnect();
+          await this.cluster.quit();
+        } catch (cleanupError) {
+          console.warn('⚠️ Error limpiando instancia anterior:', cleanupError.message);
+        }
+        this.cluster = null;
+        this.isConnected = false;
+      }
+
       console.log('🔄 Conectando a Valkey Cluster...');
+      
+      // ✅ ESPERAR UN MOMENTO PARA ASEGURAR LIMPIEZA COMPLETA
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Configuración específica para Valkey Cluster
       const clusterConfig = {
@@ -196,7 +212,16 @@ function getValkeyManager() {
   return valkeyManager;
 }
 
+// ✅ FUNCIÓN PARA RESET COMPLETO DEL SINGLETON
+function resetValkeyManager() {
+  if (valkeyManager) {
+    valkeyManager.disconnect();
+    valkeyManager = null;
+  }
+}
+
 module.exports = {
   ValkeyClusterManager,
-  getValkeyManager
+  getValkeyManager,
+  resetValkeyManager
 };
