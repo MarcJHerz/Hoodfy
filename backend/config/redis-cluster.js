@@ -39,6 +39,8 @@ class RedisClusterManager {
       if (this.cluster) {
         console.log('🧹 Limpiando instancia anterior de Redis Cluster...');
         try {
+          // Forzar desconexión inmediata
+          this.cluster.disconnect();
           await this.cluster.quit();
         } catch (cleanupError) {
           console.warn('⚠️ Error limpiando instancia anterior:', cleanupError.message);
@@ -48,6 +50,9 @@ class RedisClusterManager {
       }
 
       console.log('🔄 Conectando a Redis Cluster...');
+
+      // ✅ ESPERAR UN MOMENTO PARA ASEGURAR LIMPIEZA COMPLETA
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Configuración para Valkey Cluster
       const clusterConfig = {
@@ -157,8 +162,17 @@ class RedisClusterManager {
         // ✅ RESET COMPLETO ANTES DE RECONECTAR
         await this.reset();
         
-        // Esperar antes de reconectar
-        await new Promise(resolve => setTimeout(resolve, 2000 * this.reconnectAttempts));
+        // Esperar antes de reconectar (tiempo exponencial)
+        const waitTime = Math.min(2000 * Math.pow(2, this.reconnectAttempts - 1), 30000);
+        console.log(`⏳ Esperando ${waitTime}ms antes de reconectar...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        
+        // ✅ VERIFICAR QUE NO HAY INSTANCIA ACTIVA
+        if (this.cluster && this.cluster.status === 'connecting') {
+          console.log('⚠️ Instancia aún conectando, esperando más tiempo...');
+          await new Promise(resolve => setTimeout(resolve, 5000));
+        }
+        
         return this._doConnect();
       }
       
@@ -245,6 +259,23 @@ class RedisClusterManager {
     this.isConnected = false;
     this.connectingPromise = null;
     this.reconnectAttempts = 0;
+  }
+
+  // ✅ MÉTODO DE EMERGENCIA PARA DETENER BUCLE
+  async emergencyStop() {
+    console.log('🚨 DETENIENDO BUCLE DE RECONEXIÓN DE EMERGENCIA...');
+    this.reconnectAttempts = this.maxReconnectAttempts + 1; // Forzar parada
+    if (this.cluster) {
+      try {
+        this.cluster.disconnect();
+        await this.cluster.quit();
+      } catch (error) {
+        console.warn('⚠️ Error en parada de emergencia:', error.message);
+      }
+    }
+    this.cluster = null;
+    this.isConnected = false;
+    this.connectingPromise = null;
   }
 
   getClient() {
