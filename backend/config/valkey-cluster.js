@@ -215,9 +215,21 @@ function getValkeyManager() {
 // ✅ FUNCIÓN PARA RESET COMPLETO DEL SINGLETON
 function resetValkeyManager() {
   if (valkeyManager) {
-    valkeyManager.disconnect();
+    console.log('🧹 Reseteando Valkey Manager completamente...');
+    try {
+      valkeyManager.disconnect();
+    } catch (error) {
+      console.warn('⚠️ Error desconectando:', error.message);
+    }
     valkeyManager = null;
+    
+    // ✅ FORZAR LIMPIEZA DE MÓDULOS
+    delete require.cache[require.resolve('./valkey-cluster.js')];
+    
+    // ✅ ESPERAR UN MOMENTO PARA ASEGURAR LIMPIEZA
+    return new Promise(resolve => setTimeout(resolve, 2000));
   }
+  return Promise.resolve();
 }
 
 module.exports = {

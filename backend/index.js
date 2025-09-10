@@ -164,18 +164,21 @@ mongoose
   .then(() => console.log('✅ Conectado a MongoDB'))
   .catch((err) => console.error('❌ Error al conectar a MongoDB:', err));
 
-// ✅ INICIALIZAR CHAT SERVICE
+// ✅ INICIALIZAR CHAT SERVICE (DIFERIDO)
 let chatService;
-try {
-  const ChatService = require('./services/chatService');
-  chatService = new ChatService(server);
-  global.chatService = chatService; // Hacer disponible globalmente
-  console.log('✅ Chat Service inicializado correctamente');
-  console.log('🔌 Socket.io configurado para chat en tiempo real');
-} catch (error) {
-  console.error('❌ Error inicializando Chat Service:', error);
-  console.log('⚠️ El chat en tiempo real no estará disponible');
-}
+setTimeout(async () => {
+  try {
+    console.log('🔄 Inicializando Chat Service después de limpieza...');
+    const ChatService = require('./services/chatService');
+    chatService = new ChatService(server);
+    global.chatService = chatService; // Hacer disponible globalmente
+    console.log('✅ Chat Service inicializado correctamente');
+    console.log('🔌 Socket.io configurado para chat en tiempo real');
+  } catch (error) {
+    console.error('❌ Error inicializando Chat Service:', error);
+    console.log('⚠️ El chat en tiempo real no estará disponible');
+  }
+}, 5000); // Esperar 5 segundos para limpieza completa
 
 // ✅ Iniciar el servidor con configuración de timeout
 server.listen(PORT, '0.0.0.0', () => {

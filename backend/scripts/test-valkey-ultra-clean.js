@@ -3,11 +3,9 @@
 // Cargar variables de entorno
 require('dotenv').config();
 
-const { getValkeyManager, resetValkeyManager } = require('../config/valkey-cluster');
-
-async function testValkeyFinal() {
-  console.log('🧪 PRUEBA FINAL DE VALKEY CLUSTER');
-  console.log('==================================');
+async function testValkeyUltraClean() {
+  console.log('🧪 PRUEBA ULTRA LIMPIA DE VALKEY CLUSTER');
+  console.log('==========================================');
   
   // Mostrar variables de entorno
   console.log('🔧 Variables de entorno:');
@@ -18,27 +16,41 @@ async function testValkeyFinal() {
   console.log('');
 
   try {
-    // 1. Reset completo del singleton
-    console.log('1️⃣ Reseteando singleton de Valkey Manager...');
+    // 1. Limpiar cache de módulos
+    console.log('1️⃣ Limpiando cache de módulos...');
+    delete require.cache[require.resolve('../config/valkey-cluster.js')];
+    console.log('✅ Cache limpiado');
+
+    // 2. Esperar un momento
+    console.log('2️⃣ Esperando 3 segundos...');
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // 3. Importar módulos frescos
+    console.log('3️⃣ Importando módulos frescos...');
+    const { getValkeyManager, resetValkeyManager } = require('../config/valkey-cluster');
+    console.log('✅ Módulos importados');
+
+    // 4. Reset completo
+    console.log('4️⃣ Reseteando singleton...');
     await resetValkeyManager();
     console.log('✅ Singleton reseteado');
 
-    // 2. Esperar un momento adicional
-    console.log('2️⃣ Esperando 2 segundos adicionales para limpieza completa...');
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // 5. Esperar más tiempo
+    console.log('5️⃣ Esperando 5 segundos para limpieza completa...');
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
-    // 3. Obtener manager limpio
-    console.log('3️⃣ Obteniendo Valkey Manager limpio...');
+    // 6. Obtener manager limpio
+    console.log('6️⃣ Obteniendo Valkey Manager limpio...');
     const valkeyManager = getValkeyManager();
     console.log('✅ Valkey Manager obtenido');
 
-    // 4. Conectar
-    console.log('4️⃣ Conectando a Valkey Cluster...');
+    // 7. Conectar
+    console.log('7️⃣ Conectando a Valkey Cluster...');
     const cluster = await valkeyManager.connect();
     console.log('✅ Conexión exitosa');
 
-    // 5. Probar operaciones básicas
-    console.log('5️⃣ Probando operaciones básicas...');
+    // 8. Probar operaciones básicas
+    console.log('8️⃣ Probando operaciones básicas...');
     
     // Test SET
     const setResult = await valkeyManager.safeSet('test:valkey', 'Hello Valkey!', 60);
@@ -52,24 +64,24 @@ async function testValkeyFinal() {
     const pubResult = await valkeyManager.safePublish('test:channel', { message: 'Hello from Valkey!' });
     console.log('PUBLISH test:channel:', pubResult ? '✅ OK' : '❌ FAIL');
 
-    // 6. Verificar estado
-    console.log('6️⃣ Verificando estado del cluster...');
+    // 9. Verificar estado
+    console.log('9️⃣ Verificando estado del cluster...');
     console.log('Estado:', cluster.status);
     console.log('Conectado:', valkeyManager.isHealthy());
     console.log('Nodos:', cluster.nodes().length);
 
-    // 7. Limpiar
-    console.log('7️⃣ Limpiando datos de prueba...');
+    // 10. Limpiar
+    console.log('🔟 Limpiando datos de prueba...');
     await valkeyManager.safeDel('test:valkey');
     console.log('✅ Datos limpiados');
 
-    // 8. Desconectar
-    console.log('8️⃣ Desconectando...');
+    // 11. Desconectar
+    console.log('1️⃣1️⃣ Desconectando...');
     await valkeyManager.disconnect();
     console.log('✅ Desconectado correctamente');
 
     console.log('');
-    console.log('🎉 PRUEBA COMPLETADA EXITOSAMENTE');
+    console.log('🎉 PRUEBA ULTRA LIMPIA COMPLETADA EXITOSAMENTE');
     console.log('✅ Valkey Cluster está funcionando correctamente');
     console.log('✅ Sistema unificado para usar Valkey Cluster');
 
@@ -129,4 +141,4 @@ async function testValkeyFinal() {
 }
 
 // Ejecutar prueba
-testValkeyFinal();
+testValkeyUltraClean();
