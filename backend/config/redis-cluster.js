@@ -35,6 +35,17 @@ class RedisClusterManager {
 
   async _doConnect() {
     try {
+      // ✅ DESTRUIR INSTANCIA ANTERIOR SI EXISTE
+      if (this.cluster) {
+        console.log('🧹 Limpiando instancia anterior de Redis Cluster...');
+        try {
+          await this.cluster.quit();
+        } catch (cleanupError) {
+          console.warn('⚠️ Error limpiando instancia anterior:', cleanupError.message);
+        }
+        this.cluster = null;
+        this.isConnected = false;
+      }
 
       console.log('🔄 Conectando a Redis Cluster...');
 
@@ -143,6 +154,9 @@ class RedisClusterManager {
         this.reconnectAttempts++;
         console.log(`🔄 Intentando reconexión ${this.reconnectAttempts}/${this.maxReconnectAttempts}...`);
         
+        // ✅ RESET COMPLETO ANTES DE RECONECTAR
+        await this.reset();
+        
         // Esperar antes de reconectar
         await new Promise(resolve => setTimeout(resolve, 2000 * this.reconnectAttempts));
         return this._doConnect();
@@ -216,6 +230,21 @@ class RedisClusterManager {
         console.error('❌ Error desconectando Redis:', error);
       }
     }
+    // ✅ LIMPIAR ESTADO COMPLETAMENTE
+    this.cluster = null;
+    this.isConnected = false;
+    this.connectingPromise = null;
+    this.reconnectAttempts = 0;
+  }
+
+  // ✅ MÉTODO PARA RESET COMPLETO
+  async reset() {
+    console.log('🔄 Reseteando Redis Cluster Manager...');
+    await this.disconnect();
+    this.cluster = null;
+    this.isConnected = false;
+    this.connectingPromise = null;
+    this.reconnectAttempts = 0;
   }
 
   getClient() {
