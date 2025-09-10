@@ -46,6 +46,8 @@ class ChatService {
   async initializeRedis() {
     try {
       console.log('🔄 Inicializando Redis Cluster para Chat Service...');
+      
+      // ✅ OBTENER CONEXIÓN EXISTENTE O CONECTAR
       this.redis = await this.redisManager.connect();
       
       if (this.redis) {

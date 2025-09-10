@@ -14,6 +14,8 @@ class CacheService {
   async initializeRedis() {
     try {
       console.log('🔄 Inicializando Valkey Cluster para Cache Service...');
+      
+      // ✅ OBTENER CONEXIÓN EXISTENTE O CONECTAR
       this.redis = await this.redisManager.connect();
       
       if (this.redis) {
@@ -37,7 +39,7 @@ class CacheService {
   // Métodos básicos de cache
   async get(key) {
     try {
-      if (!this.redisManager) return null;
+      if (!this.redisManager || !this.redisManager.isHealthy()) return null;
       const value = await this.redisManager.safeGet(key);
       return value ? JSON.parse(value) : null;
     } catch (error) {
@@ -48,7 +50,8 @@ class CacheService {
 
   async set(key, value, ttl = 3600) {
     try {
-      await this.redis.setex(key, ttl, JSON.stringify(value));
+      if (!this.redisManager || !this.redisManager.isHealthy()) return false;
+      await this.redisManager.safeSet(key, JSON.stringify(value), 'EX', ttl);
       return true;
     } catch (error) {
       logger.logError(error, { operation: 'cache_set', key });
@@ -58,7 +61,8 @@ class CacheService {
 
   async del(key) {
     try {
-      await this.redis.del(key);
+      if (!this.redisManager || !this.redisManager.isHealthy()) return false;
+      await this.redisManager.safeDel(key);
       return true;
     } catch (error) {
       logger.logError(error, { operation: 'cache_del', key });
@@ -68,7 +72,9 @@ class CacheService {
 
   async exists(key) {
     try {
-      return await this.redis.exists(key);
+      if (!this.redisManager || !this.redisManager.isHealthy()) return false;
+      const redis = this.redisManager.getClient();
+      return await redis.exists(key);
     } catch (error) {
       logger.logError(error, { operation: 'cache_exists', key });
       return false;
@@ -144,9 +150,11 @@ class CacheService {
 
   async invalidateCommunityPosts(communityId) {
     // Eliminar todos los posts de la comunidad
-    const keys = await this.redis.keys(`community:${communityId}:posts:*`);
+    if (!this.redisManager || !this.redisManager.isHealthy()) return;
+    const redis = this.redisManager.getClient();
+    const keys = await redis.keys(`community:${communityId}:posts:*`);
     if (keys.length > 0) {
-      await this.redis.del(...keys);
+      await redis.del(...keys);
     }
   }
 
@@ -169,9 +177,11 @@ class CacheService {
   // Cache de rate limiting
   async incrementRateLimit(key, window = 3600) {
     try {
-      const current = await this.redis.incr(key);
+      if (!this.redisManager || !this.redisManager.isHealthy()) return 0;
+      const redis = this.redisManager.getClient();
+      const current = await redis.incr(key);
       if (current === 1) {
-        await this.redis.expire(key, window);
+        await redis.expire(key, window);
       }
       return current;
     } catch (error) {
@@ -182,7 +192,9 @@ class CacheService {
 
   async getRateLimit(key) {
     try {
-      return await this.redis.get(key);
+      if (!this.redisManager || !this.redisManager.isHealthy()) return 0;
+      const redis = this.redisManager.getClient();
+      return await redis.get(key);
     } catch (error) {
       logger.logError(error, { operation: 'rate_limit_get', key });
       return 0;
@@ -225,7 +237,9 @@ class CacheService {
   async incrementUnreadNotifications(userId) {
     const cacheKey = `notifications:${userId}:unread`;
     try {
-      return await this.redis.incr(cacheKey);
+      if (!this.redisManager || !this.redisManager.isHealthy()) return 0;
+      const redis = this.redisManager.getClient();
+      return await redis.incr(cacheKey);
     } catch (error) {
       logger.logError(error, { operation: 'increment_unread_notifications', userId });
       return 0;
@@ -251,7 +265,9 @@ class CacheService {
 
   async flushAll() {
     try {
-      await this.redis.flushall();
+      if (!this.redisManager || !this.redisManager.isHealthy()) return false;
+      const redis = this.redisManager.getClient();
+      await redis.flushall();
       logger.logger.info('Cache flushed successfully');
       return true;
     } catch (error) {
@@ -262,13 +278,17 @@ class CacheService {
 
   async getStats() {
     try {
-      const info = await this.redis.info();
-      const memory = await this.redis.memory('usage');
+      if (!this.redisManager || !this.redisManager.isHealthy()) {
+        return { connected: false };
+      }
+      const redis = this.redisManager.getClient();
+      const info = await redis.info();
+      const memory = await redis.memory('usage');
       
       return {
-        connected: this.redis.status === 'ready',
+        connected: redis.status === 'ready',
         memoryUsage: memory,
-        totalKeys: await this.redis.dbsize(),
+        totalKeys: await redis.dbsize(),
         uptime: info.match(/uptime_in_seconds:(\d+)/)?.[1] || 0
       };
     } catch (error) {
@@ -280,7 +300,9 @@ class CacheService {
   // Métodos para cache distribuido
   async publish(channel, message) {
     try {
-      await this.redis.publish(channel, JSON.stringify(message));
+      if (!this.redisManager || !this.redisManager.isHealthy()) return false;
+      const redis = this.redisManager.getClient();
+      await redis.publish(channel, JSON.stringify(message));
       return true;
     } catch (error) {
       logger.logError(error, { operation: 'cache_publish', channel });
@@ -290,18 +312,24 @@ class CacheService {
 
   async subscribe(channel, callback) {
     try {
-      const subscriber = new Redis({
-        host: process.env.REDIS_HOST || 'localhost',
-        port: process.env.REDIS_PORT || 6379,
-        password: process.env.REDIS_PASSWORD
-      });
+      // ✅ USAR LA MISMA CONEXIÓN DEL REDIS MANAGER
+      if (!this.redisManager || !this.redisManager.isHealthy()) {
+        console.warn('⚠️ Redis no disponible para subscribe');
+        return null;
+      }
 
-      await subscriber.subscribe(channel);
-      subscriber.on('message', (chan, message) => {
+      const redis = this.redisManager.getClient();
+      if (!redis) {
+        console.warn('⚠️ Cliente Redis no disponible para subscribe');
+        return null;
+      }
+
+      await redis.subscribe(channel);
+      redis.on('message', (chan, message) => {
         callback(JSON.parse(message));
       });
 
-      return subscriber;
+      return redis;
     } catch (error) {
       logger.logError(error, { operation: 'cache_subscribe', channel });
       return null;
@@ -333,9 +361,11 @@ class CacheService {
   // Método para limpiar cache por patrón
   async clearPattern(pattern) {
     try {
-      const keys = await this.redis.keys(pattern);
+      if (!this.redisManager || !this.redisManager.isHealthy()) return 0;
+      const redis = this.redisManager.getClient();
+      const keys = await redis.keys(pattern);
       if (keys.length > 0) {
-        await this.redis.del(...keys);
+        await redis.del(...keys);
         logger.logger.info(`Cleared ${keys.length} keys matching pattern: ${pattern}`);
       }
       return keys.length;

@@ -10,6 +10,30 @@ class RedisClusterManager {
 
   async connect() {
     try {
+      // ✅ VERIFICAR SI YA ESTÁ CONECTADO
+      if (this.isConnected && this.cluster && this.cluster.status === 'ready') {
+        console.log('✅ Redis Cluster ya está conectado, reutilizando conexión existente');
+        return this.cluster;
+      }
+
+      // ✅ VERIFICAR SI YA ESTÁ CONECTANDO
+      if (this.cluster && this.cluster.status === 'connecting') {
+        console.log('⏳ Redis Cluster ya está conectando, esperando...');
+        // Esperar hasta que termine la conexión
+        return new Promise((resolve, reject) => {
+          const checkConnection = () => {
+            if (this.isConnected && this.cluster.status === 'ready') {
+              resolve(this.cluster);
+            } else if (this.cluster.status === 'error') {
+              reject(new Error('Error en conexión previa'));
+            } else {
+              setTimeout(checkConnection, 100);
+            }
+          };
+          checkConnection();
+        });
+      }
+
       console.log('🔄 Conectando a Redis Cluster...');
 
       // Configuración para Valkey Cluster
