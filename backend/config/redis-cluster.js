@@ -51,8 +51,17 @@ class RedisClusterManager {
 
       console.log('🔄 Conectando a Redis Cluster...');
 
-      // ✅ ESPERAR UN MOMENTO PARA ASEGURAR LIMPIEZA COMPLETA
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // ✅ ESPERAR MÁS TIEMPO PARA ASEGURAR LIMPIEZA COMPLETA
+      console.log('⏳ Esperando 3 segundos para limpieza completa...');
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      // ✅ VERIFICAR QUE NO HAY INSTANCIA ACTIVA
+      if (this.cluster && this.cluster.status === 'connecting') {
+        console.log('⚠️ Instancia aún conectando, esperando más tiempo...');
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        this.cluster = null;
+        this.isConnected = false;
+      }
 
       // Configuración para Valkey Cluster
       const clusterConfig = {
@@ -163,14 +172,16 @@ class RedisClusterManager {
         await this.reset();
         
         // Esperar antes de reconectar (tiempo exponencial)
-        const waitTime = Math.min(2000 * Math.pow(2, this.reconnectAttempts - 1), 30000);
+        const waitTime = Math.min(5000 * Math.pow(2, this.reconnectAttempts - 1), 60000);
         console.log(`⏳ Esperando ${waitTime}ms antes de reconectar...`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
         
         // ✅ VERIFICAR QUE NO HAY INSTANCIA ACTIVA
         if (this.cluster && this.cluster.status === 'connecting') {
           console.log('⚠️ Instancia aún conectando, esperando más tiempo...');
-          await new Promise(resolve => setTimeout(resolve, 5000));
+          await new Promise(resolve => setTimeout(resolve, 10000));
+          this.cluster = null;
+          this.isConnected = false;
         }
         
         return this._doConnect();
