@@ -48,7 +48,12 @@ class RedisClusterManager {
         
         // Configuración optimizada para Valkey Cluster
         redisOptions: {
-          password: process.env.VALKEY_PASSWORD || process.env.REDIS_PASSWORD,
+          // ✅ SOLO USAR CONTRASEÑA SI ESTÁ DEFINIDA Y NO ESTÁ VACÍA
+          password: (process.env.VALKEY_PASSWORD && process.env.VALKEY_PASSWORD.trim() !== '') 
+            ? process.env.VALKEY_PASSWORD 
+            : (process.env.REDIS_PASSWORD && process.env.REDIS_PASSWORD.trim() !== '') 
+              ? process.env.REDIS_PASSWORD 
+              : undefined,
           connectTimeout: 15000,        // Aumentado para cluster
           commandTimeout: 10000,        // Aumentado para cluster
           retryDelayOnFailover: 2000,   // Aumentado para cluster
@@ -92,7 +97,10 @@ class RedisClusterManager {
         this.cluster = new Redis({
           host: process.env.REDIS_HOST,
           port: process.env.REDIS_PORT,
-          password: process.env.REDIS_PASSWORD,
+          // ✅ SOLO USAR CONTRASEÑA SI ESTÁ DEFINIDA Y NO ESTÁ VACÍA
+          password: (process.env.REDIS_PASSWORD && process.env.REDIS_PASSWORD.trim() !== '') 
+            ? process.env.REDIS_PASSWORD 
+            : undefined,
           connectTimeout: 30000,
           commandTimeout: 15000,
           retryDelayOnFailover: 2000,
