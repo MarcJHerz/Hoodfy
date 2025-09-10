@@ -6,6 +6,7 @@ class RedisClusterManager {
     this.isConnected = false;
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
+    this.connectingPromise = null; // ✅ PROMESA DE CONEXIÓN COMPARTIDA
   }
 
   async connect() {
@@ -16,23 +17,24 @@ class RedisClusterManager {
         return this.cluster;
       }
 
-      // ✅ VERIFICAR SI YA ESTÁ CONECTANDO
-      if (this.cluster && this.cluster.status === 'connecting') {
-        console.log('⏳ Redis Cluster ya está conectando, esperando...');
-        // Esperar hasta que termine la conexión
-        return new Promise((resolve, reject) => {
-          const checkConnection = () => {
-            if (this.isConnected && this.cluster.status === 'ready') {
-              resolve(this.cluster);
-            } else if (this.cluster.status === 'error') {
-              reject(new Error('Error en conexión previa'));
-            } else {
-              setTimeout(checkConnection, 100);
-            }
-          };
-          checkConnection();
-        });
+      // ✅ VERIFICAR SI YA ESTÁ CONECTANDO - USAR PROMESA COMPARTIDA
+      if (this.connectingPromise) {
+        console.log('⏳ Redis Cluster ya está conectando, esperando promesa compartida...');
+        return this.connectingPromise;
       }
+
+      // ✅ CREAR PROMESA DE CONEXIÓN COMPARTIDA
+      this.connectingPromise = this._doConnect();
+      return this.connectingPromise;
+
+    } catch (error) {
+      this.connectingPromise = null; // Limpiar promesa en caso de error
+      throw error;
+    }
+  }
+
+  async _doConnect() {
+    try {
 
       console.log('🔄 Conectando a Redis Cluster...');
 
@@ -127,11 +129,14 @@ class RedisClusterManager {
       const healthCheck = await this.cluster.get('health:check');
       console.log('✅ Test de conexión Valkey exitoso:', healthCheck);
 
+      // ✅ LIMPIAR PROMESA DE CONEXIÓN
+      this.connectingPromise = null;
       return this.cluster;
 
     } catch (error) {
       console.error('❌ Error conectando a Valkey Cluster:', error);
       this.isConnected = false;
+      this.connectingPromise = null; // ✅ LIMPIAR PROMESA EN CASO DE ERROR
       
       // Intentar reconexión si no hemos superado el límite
       if (this.reconnectAttempts < this.maxReconnectAttempts) {
@@ -140,7 +145,7 @@ class RedisClusterManager {
         
         // Esperar antes de reconectar
         await new Promise(resolve => setTimeout(resolve, 2000 * this.reconnectAttempts));
-        return this.connect();
+        return this._doConnect();
       }
       
       console.error('❌ Máximo de intentos de reconexión alcanzado');
