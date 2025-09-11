@@ -1,4 +1,5 @@
 const io = require('socket.io');
+const { createAdapter } = require('@socket.io/redis-adapter');
 const admin = require('../config/firebase-admin');
 const logger = require('../utils/logger');
 const { getValkeyManager } = require('../config/valkey-cluster');
@@ -32,6 +33,7 @@ class ChatService {
     this.redisManager = getValkeyManager();
     this.redis = null; // Se inicializará en initializeRedis()
     this.initializeRedis();
+    // Adapter se configurará en initializeRedis() cuando tengamos pub/sub
 
     // Inicializar modelos
     this.chatModel = new Chat();
@@ -52,6 +54,14 @@ class ChatService {
       
       if (this.redis) {
         console.log('✅ Redis Cluster conectado para Chat Service');
+        // Configurar adapter de Socket.io usando Valkey (pub/sub)
+        try {
+          const { pubClient, subClient } = await this.redisManager.createPubSubClientsForAdapter();
+          this.io.adapter(createAdapter(pubClient, subClient));
+          console.log('✅ Socket.io Redis adapter configurado');
+        } catch (adapterError) {
+          console.warn('⚠️ No se pudo configurar Socket.io Redis adapter:', adapterError.message);
+        }
         this.setupRedisSubscriptions();
       } else {
         console.warn('⚠️ Redis no disponible, Chat Service funcionará sin cache');

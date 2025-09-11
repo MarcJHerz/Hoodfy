@@ -10,21 +10,19 @@ class ValkeyClusterManager {
     this.subscriber = null; // conexión separada para pub/sub
     this.nodes = null; // nodos usados para conectar
     this.options = null; // opciones usadas para conectar
+    this.connectingPromise = null; // deduplicar conexiones concurrentes
   }
 
   async connect() {
     try {
-      // ✅ DESTRUIR INSTANCIA ANTERIOR SI EXISTE
-      if (this.cluster) {
-        console.log('🧹 Limpiando instancia anterior de Valkey Cluster...');
-        try {
-          this.cluster.disconnect();
-          await this.cluster.quit();
-        } catch (cleanupError) {
-          console.warn('⚠️ Error limpiando instancia anterior:', cleanupError.message);
-        }
-        this.cluster = null;
-        this.isConnected = false;
+      // ✅ Si ya está conectado o conectando, devolver la instancia
+      if (this.cluster && (this.cluster.status === 'ready' || this.cluster.status === 'connecting')) {
+        return this.cluster;
+      }
+
+      // ✅ Evitar conexiones concurrentes
+      if (this.connectingPromise) {
+        return await this.connectingPromise;
       }
 
       console.log('🔄 Conectando a Valkey Cluster...');
@@ -89,8 +87,10 @@ class ValkeyClusterManager {
       // Configurar event listeners
       this.setupEventListeners();
 
-      // Conectar
-      await this.cluster.connect();
+      // Conectar (deduplicado)
+      this.connectingPromise = this.cluster.connect();
+      await this.connectingPromise;
+      this.connectingPromise = null;
       
       this.isConnected = true;
       console.log('✅ Valkey Cluster conectado exitosamente');
@@ -100,21 +100,13 @@ class ValkeyClusterManager {
     } catch (error) {
       console.error('❌ Error conectando a Valkey Cluster:', error);
       this.isConnected = false;
+      this.connectingPromise = null;
       
-      // Intentar reconexión si no hemos superado el límite
-      if (this.reconnectAttempts < this.maxReconnectAttempts) {
-        this.reconnectAttempts++;
-        console.log(`�� Intentando reconexión ${this.reconnectAttempts}/${this.maxReconnectAttempts}...`);
-        
-        // Esperar antes de reconectar
-        const waitTime = 2000 * this.reconnectAttempts;
-        console.log(`⏳ Esperando ${waitTime}ms antes de reconectar...`);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
-        
-        return this.connect();
+      // Si ya está conectando/conectado, devolver la instancia actual
+      if (this.cluster && (this.cluster.status === 'ready' || this.cluster.status === 'connecting')) {
+        return this.cluster;
       }
-      
-      console.error('❌ Máximo de intentos de reconexión alcanzado');
+
       throw error;
     }
   }
@@ -154,7 +146,8 @@ class ValkeyClusterManager {
   async disconnect() {
     if (this.cluster) {
       try {
-        await this.cluster.quit();
+        // Preferir QUIT; si falla, forzar disconnect
+        await this.cluster.quit().catch(() => this.cluster.disconnect());
         console.log('✅ Valkey Cluster desconectado limpiamente');
       } catch (error) {
         console.error('❌ Error desconectando Valkey Cluster:', error);
@@ -245,6 +238,29 @@ class ValkeyClusterManager {
     await subscriber.connect();
     this.subscriber = subscriber;
     return this.subscriber;
+  }
+
+  async createPubSubClientsForAdapter() {
+    if (!this.nodes || !this.options) {
+      // Asegurar que haya una conexión base para obtener nodos/opciones
+      await this.connect();
+    }
+    const pubClient = new Cluster(this.nodes, {
+      ...this.options,
+      redisOptions: {
+        ...this.options.redisOptions,
+        lazyConnect: false
+      }
+    });
+    const subClient = new Cluster(this.nodes, {
+      ...this.options,
+      redisOptions: {
+        ...this.options.redisOptions,
+        lazyConnect: false
+      }
+    });
+    await Promise.all([pubClient.connect(), subClient.connect()]);
+    return { pubClient, subClient };
   }
 
   async safeSubscribe(channels, onMessage) {
