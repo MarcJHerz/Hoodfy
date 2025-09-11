@@ -504,7 +504,7 @@ class ChatService {
     }
   }
 
-  setupRedisSubscriptions() {
+  async setupRedisSubscriptions() {
     // Suscribirse a eventos de Redis para sincronización entre instancias
     if (!this.redis || !this.redisManager || !this.redisManager.isHealthy()) {
       console.warn('⚠️ Redis no disponible para suscripciones, funcionando sin pub/sub');
