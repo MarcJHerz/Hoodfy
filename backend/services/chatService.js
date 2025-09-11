@@ -513,43 +513,36 @@ class ChatService {
 
     try {
       console.log('🔄 Configurando suscripciones Redis...');
-    
-      // Configurar suscripciones usando Redis Manager
-      this.redisManager.safeSubscribe('chat:message', (channel, message) => {
-      try {
-        const data = JSON.parse(message);
-        
-        switch (channel) {
-          case 'chat:message':
-            this.io.to(data.chatId).emit('new_message', data.message);
-            break;
-          case 'chat:typing':
-            this.io.to(data.chatId).emit('user_typing', data);
-            break;
-          case 'chat:read':
-            this.io.to(data.chatId).emit('messages_marked_read', data);
-            break;
-          case 'chat:join':
-            this.io.to(data.chatId).emit('user_joined_chat', data);
-            break;
-          case 'chat:leave':
-            this.io.to(data.chatId).emit('user_left_chat', data);
-            break;
-        }
-      } catch (error) {
+      const channels = ['chat:message', 'chat:typing', 'chat:read', 'chat:join', 'chat:leave'];
+      const ok = await this.redisManager.safeSubscribe(channels, (channel, message) => {
+        try {
+          const data = JSON.parse(message);
+          switch (channel) {
+            case 'chat:message':
+              this.io.to(data.chatId).emit('new_message', data.message);
+              break;
+            case 'chat:typing':
+              this.io.to(data.chatId).emit('user_typing', data);
+              break;
+            case 'chat:read':
+              this.io.to(data.chatId).emit('messages_marked_read', data);
+              break;
+            case 'chat:join':
+              this.io.to(data.chatId).emit('user_joined_chat', data);
+              break;
+            case 'chat:leave':
+              this.io.to(data.chatId).emit('user_left_chat', data);
+              break;
+          }
+        } catch (error) {
           console.error('❌ Error procesando mensaje Redis:', error);
         }
       });
-
-      // Suscribirse a múltiples canales
-      const channels = ['chat:message', 'chat:typing', 'chat:read', 'chat:join', 'chat:leave'];
-      const redis = this.redisManager.getClient();
-      
-      if (redis) {
-        redis.subscribe(...channels);
+      if (ok) {
         console.log('✅ Suscripciones Redis configuradas para:', channels.join(', '));
+      } else {
+        console.warn('⚠️ No se pudieron configurar suscripciones Redis');
       }
-
     } catch (error) {
       console.error('❌ Error configurando suscripciones Redis:', error);
       console.warn('⚠️ Funcionando sin pub/sub Redis');

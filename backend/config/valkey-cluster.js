@@ -1,4 +1,5 @@
 const { Cluster } = require('ioredis');
+const dns = require('dns');
 
 class ValkeyClusterManager {
   constructor() {
@@ -6,6 +7,9 @@ class ValkeyClusterManager {
     this.isConnected = false;
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 3;
+    this.subscriber = null; // conexión separada para pub/sub
+    this.nodes = null; // nodos usados para conectar
+    this.options = null; // opciones usadas para conectar
   }
 
   async connect() {
@@ -44,12 +48,18 @@ class ValkeyClusterManager {
           connectTimeout: 30000, // ✅ Aumentar timeout
           lazyConnect: true,
           retryDelayOnFailover: 1000,
-          maxRetriesPerRequest: 3,
+          // Recomendado para cluster: evitar cortar comandos por retry per request
+          maxRetriesPerRequest: null,
           retryDelayOnClusterDown: 1000,
           enableOfflineQueue: false,
           maxLoadingTimeout: 30000,
           enableReadyCheck: true,
-          scaleReads: 'slave'
+          scaleReads: 'slave',
+          // ✅ TLS para ElastiCache/Valkey con cifrado en tránsito (SNI por hostname)
+          tls: {
+            rejectUnauthorized: true
+          },
+          keepAlive: 30000
         },
         clusterRetryDelayOnFailover: 1000,
         clusterRetryDelayOnClusterDown: 1000,
@@ -58,11 +68,9 @@ class ValkeyClusterManager {
         enableOfflineQueue: false,
         maxLoadingTimeout: 30000,
         enableReadyCheck: true,
-        // ✅ CONFIGURACIÓN ESPECÍFICA PARA CLUSTER DISCOVERY
-        dnsLookup: (hostname, callback) => {
-          callback(null, hostname);
-        },
-        slotsRefreshTimeout: 10000,
+        // ✅ DNS passthrough para SNI correcto por nodo en TLS
+        dnsLookup: (hostname, callback) => callback(null, hostname),
+        slotsRefreshTimeout: 30000,
         slotsRefreshInterval: 5000
       };
 
@@ -75,6 +83,8 @@ class ValkeyClusterManager {
 
       // ✅ CREAR CLUSTER CON CONFIGURACIÓN CORRECTA
       this.cluster = new Cluster(nodes, options);
+      this.nodes = nodes;
+      this.options = options;
 
       // Configurar event listeners
       this.setupEventListeners();
@@ -150,7 +160,15 @@ class ValkeyClusterManager {
         console.error('❌ Error desconectando Valkey Cluster:', error);
       }
     }
+    if (this.subscriber) {
+      try {
+        await this.subscriber.quit();
+      } catch (error) {
+        console.error('❌ Error desconectando suscriptor Valkey:', error);
+      }
+    }
     this.cluster = null;
+    this.subscriber = null;
     this.isConnected = false;
     this.reconnectAttempts = 0;
   }
@@ -174,14 +192,16 @@ class ValkeyClusterManager {
     }
   }
 
-  async safeSet(key, value, ttl = null) {
+  async safeSet(key, value, modeOrTtl = null, ttlSeconds = null) {
     try {
       if (!this.isHealthy()) return false;
-      if (ttl) {
-        return await this.cluster.setex(key, ttl, value);
-      } else {
-        return await this.cluster.set(key, value);
+      if (typeof modeOrTtl === 'string' && ttlSeconds != null) {
+        return await this.cluster.set(key, value, modeOrTtl, ttlSeconds);
       }
+      if (typeof modeOrTtl === 'number') {
+        return await this.cluster.setex(key, modeOrTtl, value);
+      }
+      return await this.cluster.set(key, value);
     } catch (error) {
       console.error('❌ Error en safeSet:', error);
       return false;
@@ -204,6 +224,44 @@ class ValkeyClusterManager {
       return await this.cluster.publish(channel, JSON.stringify(message));
     } catch (error) {
       console.error('❌ Error en safePublish:', error);
+      return false;
+    }
+  }
+
+  async ensureSubscriber() {
+    if (this.subscriber && this.subscriber.status === 'ready') {
+      return this.subscriber;
+    }
+    if (!this.nodes || !this.options) {
+      throw new Error('Cluster no inicializado para crear suscriptor');
+    }
+    const subscriber = new Cluster(this.nodes, {
+      ...this.options,
+      redisOptions: {
+        ...this.options.redisOptions,
+        lazyConnect: false
+      }
+    });
+    await subscriber.connect();
+    this.subscriber = subscriber;
+    return this.subscriber;
+  }
+
+  async safeSubscribe(channels, onMessage) {
+    try {
+      if (!Array.isArray(channels)) channels = [channels];
+      const sub = await this.ensureSubscriber();
+      sub.removeAllListeners('message');
+      sub.on('message', (channel, message) => {
+        try {
+          onMessage(channel, message);
+        } catch (_) {
+        }
+      });
+      await sub.subscribe(...channels);
+      return true;
+    } catch (error) {
+      console.error('❌ Error en safeSubscribe:', error);
       return false;
     }
   }
