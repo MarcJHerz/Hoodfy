@@ -15,19 +15,35 @@ class CacheService {
     try {
       console.log('🔄 Inicializando Valkey Cluster para Cache Service...');
       
-      // ✅ OBTENER CONEXIÓN EXISTENTE O CONECTAR
-      this.redis = await this.redisManager.connect();
+      // ✅ OBTENER CONEXIÓN EXISTENTE (no conectar, solo usar la existente)
+      this.redis = this.redisManager.cluster;
       
-      if (this.redis) {
-        console.log('✅ Valkey Cluster conectado para Cache Service');
+      if (this.redis && this.redis.status === 'ready') {
+        console.log('✅ Valkey Cluster disponible para Cache Service');
       } else {
-        console.warn('⚠️ Valkey no disponible, Cache Service funcionará sin cache');
+        console.warn('⚠️ Valkey no disponible para Cache Service, esperando conexión...');
+        // Esperar a que ChatService conecte
+        this.redis = await this.waitForRedisConnection();
       }
     } catch (error) {
-      console.error('❌ Error conectando Valkey para Cache Service:', error);
+      console.error('❌ Error inicializando Valkey para Cache Service:', error);
       console.warn('⚠️ Cache Service funcionará sin Valkey');
       this.redis = null;
     }
+  }
+
+  async waitForRedisConnection() {
+    return new Promise((resolve) => {
+      const checkConnection = () => {
+        if (this.redisManager.cluster && this.redisManager.cluster.status === 'ready') {
+          console.log('✅ Valkey Cluster ahora disponible para Cache Service');
+          resolve(this.redisManager.cluster);
+        } else {
+          setTimeout(checkConnection, 500);
+        }
+      };
+      checkConnection();
+    });
   }
 
   setupEventHandlers() {

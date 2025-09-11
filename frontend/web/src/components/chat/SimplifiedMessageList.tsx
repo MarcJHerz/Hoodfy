@@ -246,7 +246,7 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
       <div 
         ref={containerRef}
         onScroll={handleScroll}
-        className="h-full overflow-y-auto overflow-x-hidden px-4 py-6 space-y-6 scroll-smooth bg-gray-50 dark:bg-gray-900 chat-scroll" 
+        className="h-full overflow-y-auto overflow-x-hidden px-3 py-2 space-y-2 scroll-smooth bg-gray-50 dark:bg-gray-900 chat-scroll" 
         style={{
           scrollBehavior: 'smooth',
           overscrollBehavior: 'contain',
@@ -255,23 +255,30 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
       >
         {messages.map((message, index) => {
           const isOwnMessage = message.senderId === currentUserId;
+          const isConsecutiveMessage = index > 0 && messages[index - 1].senderId === message.senderId;
+          const timeDiff = index > 0 ? new Date(message.timestamp).getTime() - new Date(messages[index - 1].timestamp).getTime() : 0;
+          const isWithin5Minutes = timeDiff < 5 * 60 * 1000; // 5 minutos
+          const shouldGroup = isConsecutiveMessage && isWithin5Minutes;
 
           return (
-            <div key={message.id} className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} space-x-3 group`}>
-              {!isOwnMessage && (
+            <div key={message.id} className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} space-x-2 group ${shouldGroup ? 'mb-0.5' : 'mb-2'}`}>
+              {!isOwnMessage && !shouldGroup && (
                 <div className="flex-shrink-0">
                   <UserAvatar
-                    size={40}
+                    size={32}
                     source={message.senderProfilePicture}
                     name={message.senderName}
                   />
                 </div>
               )}
+              {!isOwnMessage && shouldGroup && (
+                <div className="flex-shrink-0 w-8"></div>
+              )}
 
               <div className={`flex flex-col ${isOwnMessage ? 'items-end' : 'items-start'} max-w-xs sm:max-w-md lg:max-w-lg xl:max-w-2xl`}>
-                {!isOwnMessage && (
-                  <div className="flex items-center space-x-2 mb-1">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {!isOwnMessage && !shouldGroup && (
+                  <div className="flex items-center space-x-2 mb-0.5">
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
                       {message.senderName}
                     </span>
                     <span className="text-xs text-gray-500 dark:text-gray-500">
@@ -281,18 +288,18 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
                 )}
 
                 <div className={`
-                  relative rounded-2xl px-4 py-3 shadow-sm transition-all duration-200
+                  relative px-3 py-2 shadow-sm transition-all duration-200
                   ${isOwnMessage 
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-md' 
-                    : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-bl-md'
+                    ? `bg-gradient-to-r from-blue-500 to-blue-600 text-white ${shouldGroup ? 'rounded-lg' : 'rounded-xl rounded-br-md'}` 
+                    : `bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 ${shouldGroup ? 'rounded-lg' : 'rounded-xl rounded-bl-md'}`
                   }
                 `}>
-                  <p className="text-sm leading-relaxed">
+                  <p className="text-sm leading-snug">
                     {message.content}
                   </p>
 
                   {isOwnMessage && (
-                    <div className="flex items-center justify-end mt-2 space-x-1">
+                    <div className="flex items-center justify-end mt-1 space-x-1">
                       <span className="text-xs opacity-75">
                         {format(new Date(message.timestamp), 'HH:mm')}
                       </span>
@@ -303,7 +310,7 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
 
                 {/* Reacciones del mensaje */}
                 {message.reactions && message.reactions.length > 0 && (
-                  <div className="flex items-center space-x-1 mt-2 ml-4">
+                  <div className="flex items-center space-x-1 mt-1 ml-3">
                     {message.reactions.map((reaction, index) => (
                       <button
                         key={index}
@@ -344,7 +351,7 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
                 )}
 
                 {/* Botón de opciones de mensaje - Solo visible en hover/touch */}
-                <div className={`flex items-center space-x-2 mt-2 ${isOwnMessage ? 'justify-end' : 'justify-start'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
+                <div className={`flex items-center space-x-2 mt-1 ${isOwnMessage ? 'justify-end' : 'justify-start'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
                   <MessageOptionsButton
                     message={message}
                     onReplyToMessage={onReplyToMessage}
