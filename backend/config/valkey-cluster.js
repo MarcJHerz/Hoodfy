@@ -15,9 +15,30 @@ class ValkeyClusterManager {
 
   async connect() {
     try {
-      // ✅ Si ya está conectado o conectando, devolver la instancia
-      if (this.cluster && (this.cluster.status === 'ready' || this.cluster.status === 'connecting')) {
+      // ✅ Si ya está conectado, devolver la instancia
+      if (this.cluster && this.cluster.status === 'ready') {
+        console.log('✅ Valkey Cluster ya está conectado y listo');
         return this.cluster;
+      }
+
+      // ✅ Si está conectando, esperar a que termine
+      if (this.cluster && this.cluster.status === 'connecting') {
+        console.log('⏳ Valkey Cluster está conectando, esperando...');
+        return new Promise((resolve) => {
+          const checkStatus = () => {
+            if (this.cluster.status === 'ready') {
+              this.isConnected = true;
+              resolve(this.cluster);
+            } else if (this.cluster.status === 'error' || this.cluster.status === 'end') {
+              this.cluster = null;
+              this.isConnected = false;
+              resolve(null);
+            } else {
+              setTimeout(checkStatus, 100);
+            }
+          };
+          checkStatus();
+        });
       }
 
       // ✅ Evitar conexiones concurrentes
