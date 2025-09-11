@@ -2,7 +2,6 @@ const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/clien
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
-const FileType = require('file-type');
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -13,6 +12,18 @@ const s3 = new S3Client({
 });
 
 const BUCKET = process.env.S3_BUCKET_NAME;
+
+// Importación dinámica para compatibilidad con ESM de 'file-type'
+async function getMimeTypeFromBuffer(buffer, defaultMime) {
+  try {
+    const { fileTypeFromBuffer } = await import('file-type');
+    const result = await fileTypeFromBuffer(buffer);
+    if (result && result.mime) return result.mime;
+  } catch (error) {
+    console.log('⚠️ No se pudo detectar el tipo MIME, usando el original:', defaultMime);
+  }
+  return defaultMime;
+}
 
 // Función mejorada para detectar MIME types de iPhone
 function detectIphoneMimeType(originalName, mimetype) {
@@ -50,15 +61,7 @@ const uploadFileToS3 = async (buffer, originalname, mimetype) => {
     const key = `uploads/${timestamp}-${randomString}${extension}`;
 
     // Detectar MIME type real usando la API correcta de file-type
-    let realMimeType = mimetype;
-    try {
-      const fileType = await FileType.fromBuffer(buffer);
-      if (fileType) {
-        realMimeType = fileType.mime;
-      }
-    } catch (error) {
-      console.log('⚠️ No se pudo detectar el tipo MIME, usando el original:', mimetype);
-    }
+    const realMimeType = await getMimeTypeFromBuffer(buffer, mimetype);
 
     // Verificar tipo de archivo permitido
     const allowedTypes = [
@@ -97,15 +100,7 @@ const uploadPublicAvatar = async (buffer, originalname, mimetype) => {
     const key = `public/avatars/${timestamp}-${randomString}${extension}`;
 
     // Detectar MIME type real
-    let realMimeType = mimetype;
-    try {
-      const fileType = await FileType.fromBuffer(buffer);
-      if (fileType) {
-        realMimeType = fileType.mime;
-      }
-    } catch (error) {
-      console.log('⚠️ No se pudo detectar el tipo MIME, usando el original:', mimetype);
-    }
+    const realMimeType = await getMimeTypeFromBuffer(buffer, mimetype);
 
     // Verificar tipo de archivo permitido (solo imágenes)
     const allowedTypes = [
@@ -143,15 +138,7 @@ const uploadPublicBanner = async (buffer, originalname, mimetype) => {
     const key = `public/banners/${timestamp}-${randomString}${extension}`;
 
     // Detectar MIME type real
-    let realMimeType = mimetype;
-    try {
-      const fileType = await FileType.fromBuffer(buffer);
-      if (fileType) {
-        realMimeType = fileType.mime;
-      }
-    } catch (error) {
-      console.log('⚠️ No se pudo detectar el tipo MIME, usando el original:', mimetype);
-    }
+    const realMimeType = await getMimeTypeFromBuffer(buffer, mimetype);
 
     // Verificar tipo de archivo permitido (solo imágenes)
     const allowedTypes = [
@@ -204,15 +191,7 @@ const uploadChatFile = async (buffer, originalname, mimetype, chatId) => {
     const extension = path.extname(originalname);
 
     // Detectar MIME type real
-    let realMimeType = mimetype;
-    try {
-      const fileType = await FileType.fromBuffer(buffer);
-      if (fileType) {
-        realMimeType = fileType.mime;
-      }
-    } catch (error) {
-      console.log('⚠️ No se pudo detectar el tipo MIME, usando el original:', mimetype);
-    }
+    const realMimeType = await getMimeTypeFromBuffer(buffer, mimetype);
 
     // Determinar la carpeta basada en el tipo de archivo
     let folder = 'documents'; // Por defecto
