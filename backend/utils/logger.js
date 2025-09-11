@@ -1,5 +1,4 @@
 const winston = require('winston');
-const { Client } = require('@opensearch-project/opensearch');
 
 // Configuración de logging
 const logger = winston.createLogger({
@@ -36,6 +35,9 @@ if (process.env.OPENSEARCH_URL) {
     async log(info, callback) {
       try {
         if (process.env.OPENSEARCH_URL) {
+          // Importación dinámica para evitar error de módulo no encontrado
+          const { Client } = await import('@opensearch-project/opensearch');
+          
           const client = new Client({
             node: process.env.OPENSEARCH_URL,
             auth: {
