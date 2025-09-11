@@ -5,7 +5,7 @@ class ValkeyClusterManager {
     this.cluster = null;
     this.isConnected = false;
     this.reconnectAttempts = 0;
-    this.maxReconnectAttempts = 3; // Reducir intentos para pruebas
+    this.maxReconnectAttempts = 3;
   }
 
   async connect() {
@@ -28,46 +28,53 @@ class ValkeyClusterManager {
       // ✅ ESPERAR UN MOMENTO PARA ASEGURAR LIMPIEZA COMPLETA
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Configuración específica para Valkey Cluster
-      const clusterConfig = {
-        nodes: [
-          {
-            host: process.env.VALKEY_CLUSTER_HOST || 'clustercfg.hoodfy-valkey-cluster.yqqefg.use1.cache.amazonaws.com',
-            port: parseInt(process.env.VALKEY_CLUSTER_PORT) || 6379
-          }
-        ],
+      // ✅ CONFIGURACIÓN CORRECTA PARA CLUSTER
+      const nodes = [
+        {
+          host: process.env.VALKEY_CLUSTER_HOST || 'clustercfg.hoodfy-valkey-cluster.yqqefg.use1.cache.amazonaws.com',
+          port: parseInt(process.env.VALKEY_CLUSTER_PORT) || 6379
+        }
+      ];
+
+      const options = {
         redisOptions: {
           password: (process.env.VALKEY_PASSWORD && process.env.VALKEY_PASSWORD.trim() !== '')
             ? process.env.VALKEY_PASSWORD
             : undefined,
-          connectTimeout: 10000,
+          connectTimeout: 30000, // ✅ Aumentar timeout
           lazyConnect: true,
-          retryDelayOnFailover: 100,
+          retryDelayOnFailover: 1000,
           maxRetriesPerRequest: 3,
-          retryDelayOnClusterDown: 300,
+          retryDelayOnClusterDown: 1000,
           enableOfflineQueue: false,
-          maxLoadingTimeout: 10000,
+          maxLoadingTimeout: 30000,
           enableReadyCheck: true,
           scaleReads: 'slave'
         },
-        clusterRetryDelayOnFailover: 100,
-        clusterRetryDelayOnClusterDown: 300,
+        clusterRetryDelayOnFailover: 1000,
+        clusterRetryDelayOnClusterDown: 1000,
         clusterMaxRedirections: 16,
         clusterScaleReads: 'slave',
         enableOfflineQueue: false,
-        maxLoadingTimeout: 10000,
-        enableReadyCheck: true
+        maxLoadingTimeout: 30000,
+        enableReadyCheck: true,
+        // ✅ CONFIGURACIÓN ESPECÍFICA PARA CLUSTER DISCOVERY
+        dnsLookup: (hostname, callback) => {
+          callback(null, hostname);
+        },
+        slotsRefreshTimeout: 10000,
+        slotsRefreshInterval: 5000
       };
 
-      console.log('🔧 Configuración Valkey Cluster:', {
-        host: clusterConfig.nodes[0].host,
-        port: clusterConfig.nodes[0].port,
-        hasPassword: !!clusterConfig.redisOptions.password,
-        connectTimeout: clusterConfig.redisOptions.connectTimeout
+      console.log('�� Configuración Valkey Cluster:', {
+        host: nodes[0].host,
+        port: nodes[0].port,
+        hasPassword: !!options.redisOptions.password,
+        connectTimeout: options.redisOptions.connectTimeout
       });
 
-      // Crear instancia de cluster
-      this.cluster = new Cluster(clusterConfig.nodes, clusterConfig);
+      // ✅ CREAR CLUSTER CON CONFIGURACIÓN CORRECTA
+      this.cluster = new Cluster(nodes, options);
 
       // Configurar event listeners
       this.setupEventListeners();
@@ -87,7 +94,7 @@ class ValkeyClusterManager {
       // Intentar reconexión si no hemos superado el límite
       if (this.reconnectAttempts < this.maxReconnectAttempts) {
         this.reconnectAttempts++;
-        console.log(`🔄 Intentando reconexión ${this.reconnectAttempts}/${this.maxReconnectAttempts}...`);
+        console.log(`�� Intentando reconexión ${this.reconnectAttempts}/${this.maxReconnectAttempts}...`);
         
         // Esperar antes de reconectar
         const waitTime = 2000 * this.reconnectAttempts;
