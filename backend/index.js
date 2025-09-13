@@ -81,6 +81,26 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const chatRoutes = require('./routes/chatRoutes'); // Nueva ruta
 const adminRoutes = require('./routes/adminRoutes'); // Rutas de admin
 
+// ✅ Health check endpoint para ALB
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    service: 'Hoodfy Backend API'
+  });
+});
+
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    service: 'Hoodfy Backend API',
+    version: '1.0.0'
+  });
+});
+
 // ✅ Rutas
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
