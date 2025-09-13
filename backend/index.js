@@ -71,7 +71,6 @@ const {
   apiRateLimit,
   uploadRateLimit,
   chatRateLimit,
-  searchRateLimit,
   webhookRateLimit
 } = require('./middleware/rateLimiter');
 
@@ -119,7 +118,6 @@ app.use(globalRateLimit);
 app.use('/api/auth', authRateLimit, authRoutes);
 app.use('/api/upload', uploadRateLimit, uploadRoutes);
 app.use('/api/chats', chatRateLimit, chatRoutes);
-app.use('/api/search', searchRateLimit, require('./routes/searchRoutes'));
 app.use('/api/stripe/webhook', webhookRateLimit, stripeRoutes);
 
 // ✅ Rutas con rate limiting general de API

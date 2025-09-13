@@ -1,44 +1,117 @@
-const { RateLimiterRedis } = require('rate-limiter-flexible');
-const { getValkeyManager } = require('../config/valkey-cluster');
+// Rate limiting simple para Socket.io (sin Redis por ahora)
+// TODO: Implementar rate limiting distribuido con Valkey más adelante
 
-// Usar el mismo manager de Valkey que el resto de la aplicación
-const valkeyManager = getValkeyManager();
+// Rate limiter simple en memoria para mensajes de chat
+const chatMessageLimiter = {
+  limits: new Map(),
+  async consume(key) {
+    const now = Date.now();
+    const windowMs = 60 * 1000; // 1 minuto
+    const max = 60; // 60 mensajes
+    
+    const window = Math.floor(now / windowMs);
+    const redisKey = `chat_message:${key}:${window}`;
+    
+    if (!this.limits.has(redisKey)) {
+      this.limits.set(redisKey, { count: 0, resetTime: (window + 1) * windowMs });
+    }
+    
+    const limit = this.limits.get(redisKey);
+    limit.count++;
+    
+    if (limit.count > max) {
+      const error = new Error('Rate limit exceeded');
+      error.msBeforeNext = limit.resetTime - now;
+      throw error;
+    }
+    
+    return { totalHits: limit.count, remaining: max - limit.count };
+  }
+};
 
-// Rate limiter para mensajes de chat
-const chatMessageLimiter = new RateLimiterRedis({
-  storeClient: valkeyManager.cluster,
-  keyPrefix: 'chat_message',
-  points: 60, // 60 mensajes
-  duration: 60, // por minuto
-  blockDuration: 60, // bloquear por 60 segundos si excede
-});
+// Rate limiter simple para conexiones
+const connectionLimiter = {
+  limits: new Map(),
+  async consume(key) {
+    const now = Date.now();
+    const windowMs = 60 * 1000; // 1 minuto
+    const max = 10; // 10 conexiones
+    
+    const window = Math.floor(now / windowMs);
+    const redisKey = `socket_connection:${key}:${window}`;
+    
+    if (!this.limits.has(redisKey)) {
+      this.limits.set(redisKey, { count: 0, resetTime: (window + 1) * windowMs });
+    }
+    
+    const limit = this.limits.get(redisKey);
+    limit.count++;
+    
+    if (limit.count > max) {
+      const error = new Error('Rate limit exceeded');
+      error.msBeforeNext = limit.resetTime - now;
+      throw error;
+    }
+    
+    return { totalHits: limit.count, remaining: max - limit.count };
+  }
+};
 
-// Rate limiter para eventos de conexión
-const connectionLimiter = new RateLimiterRedis({
-  storeClient: valkeyManager.cluster,
-  keyPrefix: 'socket_connection',
-  points: 10, // 10 conexiones
-  duration: 60, // por minuto
-  blockDuration: 300, // bloquear por 5 minutos si excede
-});
+// Rate limiter simple para eventos de room
+const roomEventLimiter = {
+  limits: new Map(),
+  async consume(key) {
+    const now = Date.now();
+    const windowMs = 60 * 1000; // 1 minuto
+    const max = 100; // 100 eventos
+    
+    const window = Math.floor(now / windowMs);
+    const redisKey = `room_event:${key}:${window}`;
+    
+    if (!this.limits.has(redisKey)) {
+      this.limits.set(redisKey, { count: 0, resetTime: (window + 1) * windowMs });
+    }
+    
+    const limit = this.limits.get(redisKey);
+    limit.count++;
+    
+    if (limit.count > max) {
+      const error = new Error('Rate limit exceeded');
+      error.msBeforeNext = limit.resetTime - now;
+      throw error;
+    }
+    
+    return { totalHits: limit.count, remaining: max - limit.count };
+  }
+};
 
-// Rate limiter para eventos de room
-const roomEventLimiter = new RateLimiterRedis({
-  storeClient: valkeyManager.cluster,
-  keyPrefix: 'room_event',
-  points: 100, // 100 eventos de room
-  duration: 60, // por minuto
-  blockDuration: 60, // bloquear por 60 segundos si excede
-});
-
-// Rate limiter para eventos de typing
-const typingLimiter = new RateLimiterRedis({
-  storeClient: valkeyManager.cluster,
-  keyPrefix: 'typing_event',
-  points: 30, // 30 eventos de typing
-  duration: 60, // por minuto
-  blockDuration: 30, // bloquear por 30 segundos si excede
-});
+// Rate limiter simple para eventos de typing
+const typingLimiter = {
+  limits: new Map(),
+  async consume(key) {
+    const now = Date.now();
+    const windowMs = 60 * 1000; // 1 minuto
+    const max = 30; // 30 eventos
+    
+    const window = Math.floor(now / windowMs);
+    const redisKey = `typing_event:${key}:${window}`;
+    
+    if (!this.limits.has(redisKey)) {
+      this.limits.set(redisKey, { count: 0, resetTime: (window + 1) * windowMs });
+    }
+    
+    const limit = this.limits.get(redisKey);
+    limit.count++;
+    
+    if (limit.count > max) {
+      const error = new Error('Rate limit exceeded');
+      error.msBeforeNext = limit.resetTime - now;
+      throw error;
+    }
+    
+    return { totalHits: limit.count, remaining: max - limit.count };
+  }
+};
 
 // Middleware para rate limiting de Socket.io
 const socketRateLimiter = (io) => {
