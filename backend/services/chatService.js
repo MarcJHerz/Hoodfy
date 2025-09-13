@@ -3,6 +3,7 @@ const { createAdapter } = require('@socket.io/redis-adapter');
 const admin = require('../config/firebase-admin');
 const logger = require('../utils/logger');
 const { getValkeyManager } = require('../config/valkey-cluster');
+const { socketRateLimiter } = require('../middleware/socketRateLimiter');
 
 // Importar nuestros nuevos modelos
 const Chat = require('../models/Chat');
@@ -40,6 +41,9 @@ class ChatService {
     this.messageModel = new Message();
     this.participantModel = new ChatParticipant();
 
+    // ✅ Aplicar rate limiting de Socket.io
+    socketRateLimiter(this.io);
+    
     this.setupSocketHandlers();
     // Redis subscriptions se configurarán después de conectar
     // this.initializeDatabase(); // Comentado para evitar conflictos con el script manual

@@ -64,6 +64,17 @@ app.use((req, res, next) => {
 });
 app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 
+// ✅ Importar rate limiters
+const {
+  globalRateLimit,
+  authRateLimit,
+  apiRateLimit,
+  uploadRateLimit,
+  chatRateLimit,
+  searchRateLimit,
+  webhookRateLimit
+} = require('./middleware/rateLimiter');
+
 // ✅ Importar rutas
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
@@ -81,7 +92,7 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const chatRoutes = require('./routes/chatRoutes'); // Nueva ruta
 const adminRoutes = require('./routes/adminRoutes'); // Rutas de admin
 
-// ✅ Health check endpoint para ALB
+// ✅ Health check endpoint para ALB (sin rate limiting)
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
@@ -101,23 +112,30 @@ app.get('/', (req, res) => {
   });
 });
 
-// ✅ Rutas
-app.use('/api/users', userRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/posts', postRoutes);
-app.use('/api/communities', communitiesRoutes);
-app.use('/api/subscriptions', subscriptionsRoutes);
-app.use('/api/stripe', stripeRoutes);
-app.use('/api/stripe-connect', stripeConnectRoutes);
-app.use('/api/user', userStripeRoutes);
-app.use('/api/metrics', metricsRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/comments', commentRoutes);
-app.use('/api/allies', allyRoutes);
-app.use('/api/community-stats', communityStatsRoutes);
-app.use('/api/notifications', require('./routes/notificationRoutes'));
-app.use('/api/chats', chatRoutes); // Nueva ruta para chats
-app.use('/api/admin', adminRoutes); // Rutas de admin
+// ✅ Aplicar rate limiting global
+app.use(globalRateLimit);
+
+// ✅ Rutas con rate limiting específico
+app.use('/api/auth', authRateLimit, authRoutes);
+app.use('/api/upload', uploadRateLimit, uploadRoutes);
+app.use('/api/chats', chatRateLimit, chatRoutes);
+app.use('/api/search', searchRateLimit, require('./routes/searchRoutes'));
+app.use('/api/stripe/webhook', webhookRateLimit, stripeRoutes);
+
+// ✅ Rutas con rate limiting general de API
+app.use('/api/users', apiRateLimit, userRoutes);
+app.use('/api/posts', apiRateLimit, postRoutes);
+app.use('/api/communities', apiRateLimit, communitiesRoutes);
+app.use('/api/subscriptions', apiRateLimit, subscriptionsRoutes);
+app.use('/api/stripe', apiRateLimit, stripeRoutes);
+app.use('/api/stripe-connect', apiRateLimit, stripeConnectRoutes);
+app.use('/api/user', apiRateLimit, userStripeRoutes);
+app.use('/api/metrics', apiRateLimit, metricsRoutes);
+app.use('/api/comments', apiRateLimit, commentRoutes);
+app.use('/api/allies', apiRateLimit, allyRoutes);
+app.use('/api/community-stats', apiRateLimit, communityStatsRoutes);
+app.use('/api/notifications', apiRateLimit, require('./routes/notificationRoutes'));
+app.use('/api/admin', apiRateLimit, adminRoutes);
 
 // ✅ Middleware global de manejo de errores
 app.use((error, req, res, next) => {
