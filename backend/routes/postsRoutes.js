@@ -9,7 +9,7 @@ const { verifyToken } = require('../middleware/authMiddleware');
 const Ally = require('../models/Ally');
 const postController = require('../controllers/postController');
 const { postValidationRules, validatePost } = require('../validators/postValidator');
-const { apiRateLimit } = require('../middleware/apiRateLimit');
+const { apiRateLimit } = require('../middleware/rateLimiter');
 const Comment = require('../models/Comment');
 const { generateVideoThumbnail } = require('../utils/generateThumbnail');
 
