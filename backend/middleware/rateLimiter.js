@@ -20,10 +20,10 @@ const globalRateLimit = rateLimit({
   }
 });
 
-// Rate limiter para autenticación (muy restrictivo)
+// Rate limiter para autenticación (más permisivo)
 const authRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 10, // 10 intentos de login por IP por ventana
+  max: 50, // 50 intentos de login por IP por ventana (aumentado de 10)
   message: {
     error: 'Demasiados intentos de autenticación, intenta de nuevo en 15 minutos',
     retryAfter: 15 * 60
@@ -32,6 +32,10 @@ const authRateLimit = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req) => {
     return `auth:${req.ip}`;
+  },
+  skip: (req) => {
+    // Saltar rate limiting para health checks y endpoints de verificación
+    return req.path === '/health' || req.path === '/' || req.path === '/verify-admin';
   }
 });
 

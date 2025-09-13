@@ -8,15 +8,7 @@ const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
 const { DEFAULT_AVATAR_KEY } = require('../config/defaultAvatarKey');
 
-// Configuración de rate limiting
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 5, // límite de 5 intentos
-  message: {
-    error: 'Demasiados intentos',
-    details: { auth: 'Por favor intenta de nuevo más tarde' }
-  }
-});
+// Rate limiting se aplica desde index.js con authRateLimit
 
 // 🔹 Registro de usuario
 router.post('/register', validateRegistration, validateResult, async (req, res) => {

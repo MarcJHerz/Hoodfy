@@ -74,14 +74,16 @@ const verifyToken = async (req, res, next) => {
     if (error.code === 'auth/id-token-expired' || error.name === 'TokenExpiredError') {
       return res.status(401).json({ 
         error: 'Token expirado',
-        details: { token: 'El token ha expirado' }
+        details: { token: 'El token ha expirado' },
+        code: 'TOKEN_EXPIRED'
       });
     }
     
     if (error.code === 'auth/invalid-id-token' || error.name === 'JsonWebTokenError') {
       return res.status(401).json({ 
         error: 'Token inválido',
-        details: { token: 'El token proporcionado no es válido' }
+        details: { token: 'El token proporcionado no es válido' },
+        code: 'TOKEN_INVALID'
       });
     }
 
