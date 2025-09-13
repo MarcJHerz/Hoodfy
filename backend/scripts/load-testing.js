@@ -130,7 +130,7 @@ class LoadTester {
 
   createWebSocketConnection(connectionId, messageCount) {
     const startTime = performance.now();
-    let messageCount = 0;
+    let receivedMessages = 0;
     let errorCount = 0;
 
     try {
@@ -158,14 +158,14 @@ class LoadTester {
       });
 
       ws.on('message', (data) => {
-        messageCount++;
-        if (messageCount >= messageCount) {
+        receivedMessages++;
+        if (receivedMessages >= messageCount) {
           const endTime = performance.now();
           const duration = endTime - startTime;
           
           this.results.websocket.push({
             connectionId,
-            successful: messageCount,
+            successful: receivedMessages,
             failed: errorCount,
             duration
           });
