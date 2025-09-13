@@ -29,6 +29,7 @@
     "setup:monitoring": "node scripts/setup-monitoring.js",
     "load:test": "node scripts/load-testing.js",
     "clear:rate-limit": "node scripts/clear-rate-limit.js",
+    "clear:upload-limits": "node scripts/clear-upload-limits.js",
     "start:cluster": "pm2 start ecosystem.config.js --env production",
     "monitor": "pm2 monit",
     "logs": "pm2 logs",

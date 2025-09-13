@@ -124,7 +124,7 @@ class ChatService {
           // Si falla Firebase, intentar JWT
           try {
             const jwt = require('jsonwebtoken');
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
             const User = require('../models/User');
             const user = await User.findById(decoded.userId);
             

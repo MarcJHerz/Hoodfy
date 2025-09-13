@@ -56,10 +56,10 @@ const apiRateLimit = rateLimit({
   }
 });
 
-// Rate limiter para uploads (muy restrictivo)
+// Rate limiter para uploads (más permisivo para testing)
 const uploadRateLimit = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hora
-  max: 50, // 50 uploads por usuario por hora
+  max: 500, // 500 uploads por usuario por hora (aumentado de 50)
   message: {
     error: 'Límite de uploads excedido, intenta de nuevo en 1 hora',
     retryAfter: 60 * 60
