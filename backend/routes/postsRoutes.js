@@ -9,7 +9,7 @@ const { verifyToken } = require('../middleware/authMiddleware');
 const Ally = require('../models/Ally');
 const postController = require('../controllers/postController');
 const { postValidationRules, validatePost } = require('../validators/postValidator');
-const rateLimiter = require('../middleware/rateLimiter');
+const { apiRateLimit } = require('../middleware/apiRateLimit');
 const Comment = require('../models/Comment');
 const { generateVideoThumbnail } = require('../utils/generateThumbnail');
 
@@ -131,13 +131,13 @@ const validatePostFile = (req, res, next) => {
 };
 
 // Crear un nuevo post SOLO usando el controlador moderno (S3)
-router.post('/', rateLimiter, upload.any(), handleMulterError, (req, res, next) => {
+router.post('/', apiRateLimit, upload.any(), handleMulterError, (req, res, next) => {
   // Llamar al controlador
   postController.createPost(req, res, next);
 });
 
 // Obtener posts de una comunidad
-router.get('/community/:communityId', rateLimiter, async (req, res) => {
+router.get('/community/:communityId', apiRateLimit, async (req, res) => {
   try {
     const { communityId } = req.params;
     const { sort } = req.query;
@@ -161,7 +161,7 @@ router.get('/community/:communityId', rateLimiter, async (req, res) => {
 });
 
 // Dar like a un post
-router.post('/:postId/like', rateLimiter, async (req, res) => {
+router.post('/:postId/like', apiRateLimit, async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
     if (!post) {
@@ -186,7 +186,7 @@ router.post('/:postId/like', rateLimiter, async (req, res) => {
 });
 
 // Quitar like a un post
-router.post('/:postId/unlike', rateLimiter, async (req, res) => {
+router.post('/:postId/unlike', apiRateLimit, async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
     if (!post) {
@@ -211,7 +211,7 @@ router.post('/:postId/unlike', rateLimiter, async (req, res) => {
 });
 
 // Comentar en un post
-router.post('/:postId/comment', rateLimiter, async (req, res) => {
+router.post('/:postId/comment', apiRateLimit, async (req, res) => {
   try {
     const { content } = req.body;
     if (!content) {
@@ -245,7 +245,7 @@ router.post('/:postId/comment', rateLimiter, async (req, res) => {
 });
 
 // Eliminar un post
-router.delete('/:postId', rateLimiter, async (req, res) => {
+router.delete('/:postId', apiRateLimit, async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
     if (!post) {
@@ -276,25 +276,25 @@ router.delete('/:postId', rateLimiter, async (req, res) => {
 
 // Actualizar un post
 router.put('/:postId', 
-  rateLimiter,
+  apiRateLimit,
   postController.updatePost
 );
 
 // 📌 Obtener un post específico por ID
 router.get('/:postId', 
-  rateLimiter,
+  apiRateLimit,
   postController.getPostById
 );
 
 // ✅ Obtener publicaciones por usuario
 router.get('/user/:userId', 
-  rateLimiter,
+  apiRateLimit,
   postController.getUserPosts
 );
 
 // 📌 Eliminar un comentario
 router.delete('/:postId/comment/:commentId', 
-  rateLimiter,
+  apiRateLimit,
   postController.deleteComment
 );
 
@@ -383,7 +383,7 @@ router.get('/home/:userId', async (req, res) => {
 });
 
 // Agregar comentario a un post
-router.post('/:postId/comments', rateLimiter, async (req, res) => {
+router.post('/:postId/comments', apiRateLimit, async (req, res) => {
   try {
     const { content, parentCommentId } = req.body;
     const { postId } = req.params;
@@ -453,7 +453,7 @@ router.post('/:postId/comments', rateLimiter, async (req, res) => {
 });
 
 // Obtener comentarios de un post
-router.get('/:postId/comments', rateLimiter, async (req, res) => {
+router.get('/:postId/comments', apiRateLimit, async (req, res) => {
   try {
     const { postId } = req.params;
 
@@ -536,9 +536,9 @@ router.post('/create', upload.array('media', 10), async (req, res) => {
 });
 
 // Destacar o quitar destaque de un post
-router.post('/:postId/pin', rateLimiter, postController.togglePinPost);
+router.post('/:postId/pin', apiRateLimit, postController.togglePinPost);
 
 // Obtener posts filtrados por tipo (creador o comunidad)
-router.get('/community/:communityId/filtered', rateLimiter, postController.getCommunityPostsFiltered);
+router.get('/community/:communityId/filtered', apiRateLimit, postController.getCommunityPostsFiltered);
 
 module.exports = router; 
