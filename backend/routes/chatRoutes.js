@@ -84,11 +84,13 @@ router.get('/community/:communityId', verifyToken, async (req, res) => {
     }
 
     // Buscar chat existente para esta comunidad
+    // Usar ORDER BY para garantizar consistencia en la selección
     const existingChat = await chatModel.pool.connect().then(async (client) => {
       try {
         const result = await client.query(`
           SELECT * FROM chats 
           WHERE community_id = $1 AND type = 'community' AND is_active = true
+          ORDER BY created_at ASC
           LIMIT 1
         `, [communityId.toString()]);
         return result.rows[0];
