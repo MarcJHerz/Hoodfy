@@ -32,7 +32,7 @@ const QUICK_EMOJIS = [
 const ImprovedMessageInput: React.FC<ImprovedMessageInputProps> = ({
   onSendMessage,
   isLoading = false,
-  placeholder = "Write a message...",
+  placeholder = "Message",
   disabled = false,
   replyingTo,
   onCancelReply,
@@ -56,6 +56,24 @@ const ImprovedMessageInput: React.FC<ImprovedMessageInputProps> = ({
       textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
     }
   }, [message]);
+
+  // Manejar teclado móvil
+  useEffect(() => {
+    const handleResize = () => {
+      // Scroll suave al final cuando aparece el teclado
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }, 300);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,7 +196,7 @@ const ImprovedMessageInput: React.FC<ImprovedMessageInputProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+    <div className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 pb-safe">
       {/* Preview de respuesta usando el sistema existente */}
       {replyingTo && (
         <div className="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800">

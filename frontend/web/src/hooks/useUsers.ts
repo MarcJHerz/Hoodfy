@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/authStore';
 // Función para detectar automáticamente qué API usar según el dominio
 const getApiUrl = () => {
   if (typeof window === 'undefined') {
-    return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+    return process.env.NEXT_PUBLIC_API_URL || 'https://api.hoodfy.com';
   }
   
   const currentDomain = window.location.hostname;
@@ -13,7 +13,7 @@ const getApiUrl = () => {
     return process.env.NEXT_PUBLIC_API_URL_HOODFY || 'https://api.hoodfy.com';
   }
   
-  return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+  return process.env.NEXT_PUBLIC_API_URL || 'https://api.hoodfy.com';
 };
 
 export interface AdminUser {

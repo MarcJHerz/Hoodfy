@@ -174,16 +174,16 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
   // Auto-scroll optimizado para evitar saltos extraños
   useEffect(() => {
     if (shouldAutoScroll && messagesEndRef.current) {
-      const hasReactions = messages.some(msg => msg.reactions && msg.reactions.length > 0);
-      const hasReplies = messages.some(msg => msg.replyTo);
-      
-      const behavior = (hasReactions || hasReplies) ? 'auto' : 'smooth';
-      
-      messagesEndRef.current.scrollIntoView({ 
-        behavior,
-        block: 'end',
-        inline: 'nearest'
-      });
+      // Usar setTimeout para asegurar que el DOM se actualice
+      setTimeout(() => {
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'end',
+            inline: 'nearest'
+          });
+        }
+      }, 100);
     }
   }, [messages, shouldAutoScroll]);
 
@@ -261,7 +261,7 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
           const shouldGroup = isConsecutiveMessage && isWithin5Minutes;
 
           return (
-            <div key={message.id} className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} space-x-2 group ${shouldGroup ? 'mb-0.5' : 'mb-2'}`}>
+            <div key={message.id} className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} space-x-2 group ${shouldGroup ? 'mb-0.5' : 'mb-3'}`}>
               {!isOwnMessage && !shouldGroup && (
                 <div className="flex-shrink-0">
                   <UserAvatar
@@ -275,7 +275,7 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
                 <div className="flex-shrink-0 w-8"></div>
               )}
 
-              <div className={`flex flex-col ${isOwnMessage ? 'items-end' : 'items-start'} max-w-xs sm:max-w-md lg:max-w-lg xl:max-w-2xl`}>
+              <div className={`relative flex flex-col ${isOwnMessage ? 'items-end' : 'items-start'} max-w-xs sm:max-w-md lg:max-w-lg xl:max-w-2xl`}>
                 {!isOwnMessage && !shouldGroup && (
                   <div className="flex items-center space-x-2 mb-0.5">
                     <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
@@ -350,8 +350,8 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
                   </div>
                 )}
 
-                {/* Botón de opciones de mensaje - Solo visible en hover/touch */}
-                <div className={`flex items-center space-x-2 mt-1 ${isOwnMessage ? 'justify-end' : 'justify-start'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
+                {/* Botón de opciones de mensaje - Posicionado al lado del mensaje */}
+                <div className={`absolute ${isOwnMessage ? 'left-0 -translate-x-12' : 'right-0 translate-x-12'} top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10`}>
                   <MessageOptionsButton
                     message={message}
                     onReplyToMessage={onReplyToMessage}

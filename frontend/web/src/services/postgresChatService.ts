@@ -115,6 +115,7 @@ class PostgresChatService {
           content: messageData.content,
           content_type: messageData.type,
           sender_id: messageData.senderId,
+          reply_to_id: messageData.replyTo?.id,
           metadata: {
             senderName: messageData.senderName,
             senderProfilePicture: messageData.senderProfilePicture,

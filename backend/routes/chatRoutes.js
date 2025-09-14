@@ -90,7 +90,7 @@ router.get('/community/:communityId', verifyToken, async (req, res) => {
           SELECT * FROM chats 
           WHERE community_id = $1 AND type = 'community' AND is_active = true
           LIMIT 1
-        `, [communityId]);
+        `, [communityId.toString()]);
         return result.rows[0];
       } finally {
         client.release();

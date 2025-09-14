@@ -503,7 +503,7 @@ class ChatService {
           const redis = this.redisManager.getClient();
           if (redis) {
             // No usar await para no bloquear la desconexión
-            redis.hdel(`user:${socket.userId}:online`).catch(redisError => {
+            redis.hdel(`user:${socket.userId}:online`, 'status').catch(redisError => {
               console.warn('⚠️ Error limpiando estado Redis al desconectar:', redisError.message);
             });
           }

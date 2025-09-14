@@ -4,7 +4,7 @@ import axios from 'axios';
 const getApiUrl = () => {
   if (typeof window === 'undefined') {
     // Server-side: usar la variable por defecto
-    return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+    return process.env.NEXT_PUBLIC_API_URL || 'https://api.hoodfy.com';
   }
   
   // Client-side: detectar según el dominio actual

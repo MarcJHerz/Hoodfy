@@ -109,9 +109,14 @@ class ValkeyClusterManager {
       this.setupEventListeners();
 
       // Conectar (deduplicado)
-      this.connectingPromise = this.cluster.connect();
+      this.connectingPromise = this.cluster.connect().then(() => {
+        this.connectingPromise = null;
+        return this.cluster;
+      }).catch((error) => {
+        this.connectingPromise = null;
+        throw error;
+      });
       await this.connectingPromise;
-      this.connectingPromise = null;
       
       this.isConnected = true;
       console.log('✅ Valkey Cluster conectado exitosamente');

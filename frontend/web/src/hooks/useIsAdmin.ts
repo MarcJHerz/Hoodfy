@@ -18,7 +18,7 @@ export const useIsAdmin = () => {
         // Usar la URL de la API correcta según el dominio
         const apiUrl = window.location.hostname === 'hoodfy.com' || window.location.hostname === 'www.hoodfy.com'
           ? 'https://api.hoodfy.com'
-          : 'https://api.qahood.com';
+          : 'https://api.hoodfy.com';
 
         const response = await fetch(`${apiUrl}/api/auth/verify-admin`, {
           headers: {

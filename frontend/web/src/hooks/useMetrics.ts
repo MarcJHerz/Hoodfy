@@ -88,7 +88,7 @@ export const useMetrics = () => {
   // Función para obtener la URL de la API correcta
   const getApiUrl = () => {
     if (typeof window === 'undefined') {
-      return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+      return process.env.NEXT_PUBLIC_API_URL || 'https://api.hoodfy.com';
     }
     
     const currentDomain = window.location.hostname;
@@ -97,7 +97,7 @@ export const useMetrics = () => {
       return process.env.NEXT_PUBLIC_API_URL_HOODFY || 'https://api.hoodfy.com';
     }
     
-    return process.env.NEXT_PUBLIC_API_URL || 'https://api.qahood.com';
+    return process.env.NEXT_PUBLIC_API_URL || 'https://api.hoodfy.com';
   };
 
   // Obtener métricas del dashboard
