@@ -11,7 +11,8 @@ import {
   PhotoIcon, 
   VideoCameraIcon, 
   ChatBubbleLeftIcon, 
-  CheckIcon
+  CheckIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
 import { UserAvatar } from '@/components/UserAvatar';
 
@@ -187,6 +188,25 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
     }
   }, [messages, shouldAutoScroll]);
 
+  // Forzar scroll cuando se envía un mensaje propio
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.senderId === currentUserId) {
+        // Mensaje propio - forzar scroll
+        setTimeout(() => {
+          if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ 
+              behavior: 'smooth',
+              block: 'end',
+              inline: 'nearest'
+            });
+          }
+        }, 150);
+      }
+    }
+  }, [messages, currentUserId]);
+
   const handleScroll = () => {
     if (containerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
@@ -294,9 +314,68 @@ const SimplifiedMessageList: React.FC<SimplifiedMessageListProps> = ({
                     : `bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 ${shouldGroup ? 'rounded-lg' : 'rounded-xl rounded-bl-md'}`
                   }
                 `}>
-                  <p className="text-sm leading-snug">
-                    {message.content}
-                  </p>
+                  {/* Mostrar respuesta a mensaje */}
+                  {message.replyTo && (
+                    <div className={`
+                      mb-2 p-2 rounded-lg border-l-2 text-xs
+                      ${isOwnMessage 
+                        ? 'bg-blue-400/20 border-blue-300 text-blue-100' 
+                        : 'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'
+                      }
+                    `}>
+                      <div className="font-medium">
+                        Respondiendo a {message.replyTo.senderName}
+                      </div>
+                      <div className="truncate">
+                        {message.replyTo.content}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Mostrar contenido según el tipo */}
+                  {message.type === 'image' ? (
+                    <div className="space-y-2">
+                      <img 
+                        src={message.mediaUrl || message.content} 
+                        alt={message.content}
+                        className="max-w-full h-auto rounded-lg shadow-sm"
+                        style={{ maxHeight: '300px' }}
+                        onError={(e) => {
+                          // Fallback si la imagen no carga
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                      {message.content && message.content !== message.mediaUrl && (
+                        <p className="text-sm leading-snug text-gray-600 dark:text-gray-400">
+                          {message.content}
+                        </p>
+                      )}
+                    </div>
+                  ) : message.type === 'file' ? (
+                    <div className="flex items-center space-x-2 p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                      <DocumentIcon className="w-5 h-5 text-gray-500" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{message.content}</p>
+                        {message.mediaType && (
+                          <p className="text-xs text-gray-500">{message.mediaType}</p>
+                        )}
+                      </div>
+                      {message.mediaUrl && (
+                        <a 
+                          href={message.mediaUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:text-blue-700"
+                        >
+                          <ArrowDownTrayIcon className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm leading-snug">
+                      {message.content}
+                    </p>
+                  )}
 
                   {isOwnMessage && (
                     <div className="flex items-center justify-end mt-1 space-x-1">
