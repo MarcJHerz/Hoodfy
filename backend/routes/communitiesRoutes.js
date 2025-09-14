@@ -597,5 +597,71 @@ router.post('/:id/join-free', verifyToken, async (req, res) => {
 
 
 
+// 📌 Endpoints públicos para comunidades (sin autenticación)
+
+// Obtener comunidades creadas por un usuario (público)
+router.get('/public/created-by/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Buscar usuario por ID o Firebase UID
+    let user = await User.findById(userId).catch(() => null);
+    if (!user) {
+      user = await User.findOne({ firebaseUid: userId });
+    }
+    
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Obtener comunidades creadas por el usuario (solo públicas)
+    const communities = await Community.find({
+      creator: user._id,
+      isPublic: true // Solo comunidades públicas
+    })
+    .select('name description coverImage members isFree createdAt')
+    .populate('creator', 'name username profilePicture')
+    .sort({ createdAt: -1 })
+    .limit(20);
+
+    res.json(communities);
+  } catch (error) {
+    console.error('Error al obtener comunidades creadas:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// Obtener comunidades unidas por un usuario (público)
+router.get('/public/joined-by/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Buscar usuario por ID o Firebase UID
+    let user = await User.findById(userId).catch(() => null);
+    if (!user) {
+      user = await User.findOne({ firebaseUid: userId });
+    }
+    
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Obtener comunidades donde el usuario es miembro (solo públicas)
+    const communities = await Community.find({
+      members: user._id,
+      isPublic: true // Solo comunidades públicas
+    })
+    .select('name description coverImage members isFree createdAt')
+    .populate('creator', 'name username profilePicture')
+    .sort({ createdAt: -1 })
+    .limit(20);
+
+    res.json(communities);
+  } catch (error) {
+    console.error('Error al obtener comunidades unidas:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 module.exports = router;
 module.exports.makeAllies = makeAllies; 

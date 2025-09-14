@@ -12,7 +12,9 @@ export function middleware(request: NextRequest) {
     '/register', 
     '/api',
     '/communities', // ✅ Permitir acceso público a comunidades
-    '/communities/' // ✅ Permitir acceso público a comunidades específicas
+    '/communities/', // ✅ Permitir acceso público a comunidades específicas
+    '/profile/', // ✅ Permitir acceso público a perfiles
+    '/explore' // ✅ Permitir acceso público a explorar
   ];
   
   if (publicPaths.some(p => path.startsWith(p))) {

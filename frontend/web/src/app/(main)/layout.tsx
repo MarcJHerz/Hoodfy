@@ -24,7 +24,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 Inicio
               </Link>
               <Link
-                href="/dashboard/profile"
+                href="/profile"
                 className="text-gray-600 hover:text-gray-900"
               >
                 Perfil

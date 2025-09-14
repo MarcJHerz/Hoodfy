@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { useChatStore } from '@/stores/chatStore';
 import { postgresChatService } from '@/services/postgresChatService';
@@ -17,11 +18,13 @@ import { users } from '@/services/api';
 import { UsersIcon } from '@heroicons/react/24/outline';
 
 export default function MessagesPage() {
+  const router = useRouter();
   const { user } = useAuthStore();
   const { chatRooms, setChatRooms, setLoading } = useChatStore();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedUserForChat, setSelectedUserForChat] = useState<User | null>(null);
+  const [loadingUsers, setLoadingUsers] = useState<Set<string>>(new Set());
   
   // Cache local para información de usuarios
   const [userCache, setUserCache] = useState<Map<string, { name: string; profilePicture?: string }>>(new Map());
@@ -33,19 +36,38 @@ export default function MessagesPage() {
       return userCache.get(userId)!;
     }
 
+    // Evitar múltiples llamadas para el mismo usuario
+    if (loadingUsers.has(userId)) {
+      return { name: 'Cargando...', profilePicture: undefined };
+    }
+
+    setLoadingUsers(prev => new Set(prev.add(userId)));
+
     try {
       const response = await users.getProfileById(userId);
       const userInfo = {
-        name: response.data.name,
+        name: response.data.name || 'Usuario',
         profilePicture: response.data.profilePicture
       };
       
       // Actualizar cache
       setUserCache(prev => new Map(prev.set(userId, userInfo)));
+      setLoadingUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
       return userInfo;
     } catch (error) {
       console.error('Error fetching user info:', error);
-      return { name: 'Unknown user', profilePicture: undefined };
+      const fallbackInfo = { name: 'Usuario', profilePicture: undefined };
+      setUserCache(prev => new Map(prev.set(userId, fallbackInfo)));
+      setLoadingUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
+      return fallbackInfo;
     }
   };
 
@@ -57,10 +79,12 @@ export default function MessagesPage() {
         setIsLoading(true);
         setError(null);
 
-        // Usar el store para cargar chats
-        const { loadUserChats, connectToSocket } = useChatStore.getState();
-        await loadUserChats(user._id);
-        await connectToSocket(user._id);
+        // Cargar chats directamente usando el servicio
+        const chats = await postgresChatService.getUserChats(user._id);
+        setChatRooms(chats);
+        
+        // Conectar a Socket.io
+        await postgresChatService.connectToSocket(user._id);
         
       } catch (error) {
         console.error('❌ Error cargando chats:', error);
@@ -74,10 +98,9 @@ export default function MessagesPage() {
     
     // Limpiar suscripción cuando el componente se desmonte
     return () => {
-      const { disconnectFromSocket } = useChatStore.getState();
-      disconnectFromSocket();
+      postgresChatService.disconnectFromSocket();
     };
-  }, [user?._id]);
+  }, [user?._id, setChatRooms]);
 
   const handleChatClick = (chat: ChatRoom) => {
     // Marcar el chat como leído cuando se hace clic
@@ -86,8 +109,8 @@ export default function MessagesPage() {
       markMessagesAsRead(chat.id, user._id);
     }
 
-    // Navegar al chat individual
-    window.location.href = `/chats/${chat.id}`;
+    // Navegar al chat individual usando Next.js router
+    router.push(`/chats/${chat.id}`);
   };
 
   const handleClosePrivateChat = () => {
@@ -104,7 +127,7 @@ export default function MessagesPage() {
   const getChatName = (chat: ChatRoom) => {
     if (chat.type === 'community') {
       const communityChat = chat as any;
-      return communityChat.communityName || chat.name;
+      return communityChat.communityName || chat.name || 'Comunidad';
     }
     
     const privateChat = chat as any;
@@ -121,15 +144,16 @@ export default function MessagesPage() {
       return userCache.get(otherUserId)!.name;
     }
     
-    // Fallback: obtener información del usuario
+    // Fallback: obtener información del usuario de forma asíncrona
     if (otherUserId) {
       getUserInfo(otherUserId).then(userInfo => {
         // Esto causará un re-render cuando se obtenga la información
+        setChatRooms([...chatRooms]); // Forzar re-render
       });
-      return 'Loading...';
+      return 'Cargando...';
     }
     
-    return 'Unknown user';
+    return 'Usuario';
   };
 
   const getChatImage = (chat: ChatRoom) => {
@@ -152,10 +176,11 @@ export default function MessagesPage() {
       return cachedUser.profilePicture || '/images/defaults/default-avatar.png';
     }
     
-    // Fallback: obtener información del usuario
+    // Fallback: obtener información del usuario de forma asíncrona
     if (otherUserId) {
       getUserInfo(otherUserId).then(userInfo => {
         // Esto causará un re-render cuando se obtenga la información
+        setChatRooms([...chatRooms]); // Forzar re-render
       });
     }
     

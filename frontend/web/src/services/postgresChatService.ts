@@ -402,6 +402,62 @@ class PostgresChatService {
             this.chatStore.setMessages(updatedMessages);
           }
         });
+
+        // Listener para reacciones agregadas
+        this.socket.on('reaction_added', (data: { messageId: number; reaction_type: string; userId: string; reaction: any }) => {
+          console.log('📨 Reacción agregada recibida via Socket.io:', data);
+          if (this.chatStore) {
+            const { messages } = this.chatStore;
+            const updatedMessages = messages.map((msg: Message) => {
+              if (msg.id === data.messageId.toString()) {
+                const existingReaction = msg.reactions?.find(r => r.emoji === data.reaction_type);
+                if (existingReaction) {
+                  // Actualizar reacción existente
+                  const updatedReactions = msg.reactions?.map(r => 
+                    r.emoji === data.reaction_type 
+                      ? { ...r, users: [...r.users, data.userId], count: r.count + 1 }
+                      : r
+                  ) || [];
+                  return { ...msg, reactions: updatedReactions };
+                } else {
+                  // Crear nueva reacción
+                  const newReaction = {
+                    emoji: data.reaction_type,
+                    users: [data.userId],
+                    count: 1
+                  };
+                  return { ...msg, reactions: [...(msg.reactions || []), newReaction] };
+                }
+              }
+              return msg;
+            });
+            this.chatStore.setMessages(updatedMessages);
+          }
+        });
+
+        // Listener para reacciones removidas
+        this.socket.on('reaction_removed', (data: { messageId: number; reactionType: string; userId: string }) => {
+          console.log('📨 Reacción removida recibida via Socket.io:', data);
+          if (this.chatStore) {
+            const { messages } = this.chatStore;
+            const updatedMessages = messages.map((msg: Message) => {
+              if (msg.id === data.messageId.toString()) {
+                const updatedReactions = msg.reactions?.map(r => {
+                  if (r.emoji === data.reactionType) {
+                    const filteredUsers = r.users.filter(userId => userId !== data.userId);
+                    return filteredUsers.length > 0 
+                      ? { ...r, users: filteredUsers, count: filteredUsers.length }
+                      : null;
+                  }
+                  return r;
+                }).filter(Boolean) || [];
+                return { ...msg, reactions: updatedReactions };
+              }
+              return msg;
+            });
+            this.chatStore.setMessages(updatedMessages);
+          }
+        });
       });
     } catch (error) {
       console.error('❌ Error conectando a Socket.io:', error);

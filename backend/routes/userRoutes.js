@@ -480,4 +480,65 @@ router.post('/notifications/send', verifyToken, async (req, res) => {
   }
 });
 
+// 📌 Endpoint público para obtener perfil de usuario (sin autenticación)
+router.get('/public-profile/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) {
+      return res.status(400).json({ error: 'Falta el userId en la solicitud.' });
+    }
+
+    // Intentar buscar por MongoDB ID primero, luego por Firebase UID
+    let user = await User.findById(userId).catch(() => null);
+    if (!user) {
+      user = await User.findOne({ firebaseUid: userId });
+    }
+    
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Buscar si el usuario es fundador de alguna comunidad
+    const isFounder = await Community.exists({ creator: user._id });
+    // Buscar si el usuario es miembro de alguna comunidad
+    const isMember = await Community.exists({ members: user._id });
+
+    let mainBadgeIcon = null;
+    if (isFounder) mainBadgeIcon = 'founder';
+    else if (isMember) mainBadgeIcon = 'trophy';
+
+    // Para S3, el profilePicture ya es el key, no necesitamos construir URL
+    const profilePicture = user.profilePicture;
+
+    // Asegurar que la URL del banner sea absoluta (si existe)
+    let bannerUrl = null;
+    if (user.bannerImage) {
+      bannerUrl = user.bannerImage.startsWith('http') 
+        ? user.bannerImage 
+        : `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${user.bannerImage}`;
+    }
+
+    // Devolver solo información pública
+    const publicProfile = {
+      _id: user._id,
+      firebaseUid: user.firebaseUid,
+      name: user.name,
+      username: user.username,
+      email: user.email, // Solo para verificación, no se muestra en frontend
+      bio: user.bio,
+      profilePicture: profilePicture,
+      bannerImage: bannerUrl,
+      isVerified: user.isVerified || false,
+      mainBadgeIcon,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    };
+
+    res.json(publicProfile);
+  } catch (error) {
+    console.error('Error al obtener perfil público:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 module.exports = router; 

@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
-import { useChatStore } from '@/stores/chatStore';
 import { postgresChatService } from '@/services/postgresChatService';
 import { Message, ChatRoom } from '@/types/chat';
 import { formatDistanceToNow } from 'date-fns';
@@ -16,15 +15,23 @@ export default function ChatPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuthStore();
-  const { currentChat, messages, setCurrentChat, setMessages, addMessage } = useChatStore();
   
   const [chatId] = useState(params.chatId as string);
   const [chat, setChat] = useState<ChatRoom | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll a los mensajes nuevos
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   useEffect(() => {
     if (!user?._id || !chatId) return;
@@ -44,7 +51,6 @@ export default function ChatPage() {
         }
 
         setChat(foundChat);
-        setCurrentChat(foundChat);
 
         // Obtener mensajes del chat
         const chatMessages = await postgresChatService.getChatMessages(chatId);
@@ -56,6 +62,9 @@ export default function ChatPage() {
         // Conectar a Socket.io si no está conectado
         await postgresChatService.connectToSocket(user._id);
 
+        // Los mensajes se manejan automáticamente via el store
+        // No necesitamos configurar listeners adicionales aquí
+
       } catch (error) {
         console.error('❌ Error cargando chat:', error);
         setError('Error loading chat. Try again.');
@@ -65,6 +74,8 @@ export default function ChatPage() {
     };
 
     loadChat();
+
+    // Cleanup - no necesario ya que los listeners se manejan en el servicio
   }, [chatId, user?._id]);
 
   const handleSendMessage = async () => {
@@ -87,7 +98,6 @@ export default function ChatPage() {
       // Limpiar input
       setNewMessage('');
       
-      // El mensaje se añadirá automáticamente via Socket.io
       console.log('✅ Mensaje enviado:', messageId);
 
     } catch (error) {
@@ -110,10 +120,10 @@ export default function ChatPage() {
     
     // Enviar indicador de escritura
     if (user?._id && chat) {
-      const isTyping = e.target.value.length > 0;
-      if (isTyping !== isTyping) {
-        setIsTyping(isTyping);
-        postgresChatService.sendTypingIndicator(chat.id, user._id, isTyping);
+      const currentlyTyping = e.target.value.length > 0;
+      if (currentlyTyping !== isTyping) {
+        setIsTyping(currentlyTyping);
+        postgresChatService.sendTypingIndicator(chat.id, user._id, currentlyTyping);
       }
     }
   };
@@ -222,42 +232,46 @@ export default function ChatPage() {
             </p>
           </div>
         ) : (
-          messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.senderId === (user.firebaseUid || user._id) ? 'justify-end' : 'justify-start'}`}
-            >
+          <>
+            {messages.map((message) => (
               <div
-                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                  message.senderId === (user.firebaseUid || user._id)
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-                }`}
+                key={message.id}
+                className={`flex ${message.senderId === (user.firebaseUid || user._id) ? 'justify-end' : 'justify-start'}`}
               >
-                {message.senderId !== (user.firebaseUid || user._id) && (
-                  <div className="flex items-center space-x-2 mb-1">
-                    <UserAvatar
-                      source={message.senderProfilePicture}
-                      name={message.senderName}
-                      size={24}
-                    />
-                    <span className="text-xs font-medium opacity-75">
-                      {message.senderName}
-                    </span>
+                <div
+                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg shadow-sm ${
+                    message.senderId === (user.firebaseUid || user._id)
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600'
+                  }`}
+                >
+                  {message.senderId !== (user.firebaseUid || user._id) && (
+                    <div className="flex items-center space-x-2 mb-1">
+                      <UserAvatar
+                        source={message.senderProfilePicture}
+                        name={message.senderName}
+                        size={24}
+                      />
+                      <span className="text-xs font-medium opacity-75">
+                        {message.senderName}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <p className="text-sm">{message.content}</p>
+                  
+                  <div className="text-xs opacity-75 mt-1 text-right">
+                    {formatDistanceToNow(message.timestamp, { 
+                      addSuffix: true, 
+                      locale: es 
+                    })}
                   </div>
-                )}
-                
-                <p className="text-sm">{message.content}</p>
-                
-                <div className="text-xs opacity-75 mt-1 text-right">
-                  {formatDistanceToNow(message.timestamp, { 
-                    addSuffix: true, 
-                    locale: es 
-                  })}
                 </div>
               </div>
-            </div>
-          ))
+            ))}
+            {/* Referencia para auto-scroll */}
+            <div ref={messagesEndRef} />
+          </>
         )}
       </div>
 

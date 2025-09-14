@@ -114,7 +114,7 @@ export default function EditMyProfilePage() {
       });
       
       toast.success('Profile updated successfully!');
-      router.push('/dashboard/profile');
+      router.push('/profile');
     } catch (error: any) {
       console.error('Error updating profile:', error);
       toast.error(error.response?.data?.message || 'Error updating profile');

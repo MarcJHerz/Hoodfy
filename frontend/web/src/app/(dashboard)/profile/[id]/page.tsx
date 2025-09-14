@@ -183,6 +183,22 @@ export default function ProfilePage() {
     // Recargar datos si es necesario
   };
 
+  const handleShare = async () => {
+    try {
+      const publicUrl = `${window.location.origin}/profile/${id}`;
+      await navigator.share({
+        title: `Perfil de ${user?.name}`,
+        text: `Mira el perfil de ${user?.name} en Hoodfy`,
+        url: publicUrl
+      });
+    } catch (error) {
+      console.error('Error al compartir:', error);
+      const publicUrl = `${window.location.origin}/profile/${id}`;
+      navigator.clipboard.writeText(publicUrl);
+      toast.success('Enlace copiado al portapapeles');
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -190,7 +206,7 @@ export default function ProfilePage() {
         setError(null);
 
         if (!id && authUser) {
-          router.push(`/dashboard/profile/${authUser._id}`);
+          router.push(`/profile/${authUser._id}`);
           return;
         }
 
@@ -202,8 +218,15 @@ export default function ProfilePage() {
 
         const userId = Array.isArray(id) ? id[0] : id;
 
-        // Obtener datos del usuario
-        const userResponse = await users.getProfileById(userId);
+        // Obtener datos del usuario (usar endpoint público si no hay auth)
+        let userResponse;
+        if (authUser) {
+          userResponse = await users.getProfileById(userId);
+        } else {
+          // Usar endpoint público para usuarios no registrados
+          userResponse = await api.get(`/api/users/public-profile/${userId}`);
+        }
+        
         if (!userResponse.data) {
           throw new Error('No se pudo obtener la información del usuario');
         }
@@ -225,27 +248,59 @@ export default function ProfilePage() {
         }
         setAllyCheckLoading(false);
 
-        // Solo obtener posts si es el propio perfil o son aliados
-        if (isOwn || isAlly) {
-        const postsResponse = await posts.getUserPosts(userId);
-        if (postsResponse.data?.posts) {
-          setUserPosts(postsResponse.data.posts);
+        // Obtener posts según el estado del usuario
+        if (authUser) {
+          // Usuario autenticado - solo si es propio perfil o son aliados
+          if (isOwn || isAlly) {
+            const postsResponse = await posts.getUserPosts(userId);
+            if (postsResponse.data?.posts) {
+              setUserPosts(postsResponse.data.posts);
+            } else {
+              setUserPosts([]);
+            }
           } else {
             setUserPosts([]);
           }
         } else {
-          setUserPosts([]);
+          // Usuario no autenticado - obtener posts públicos limitados
+          try {
+            const postsResponse = await api.get(`/api/posts/public/user/${userId}`);
+            if (postsResponse.data?.posts) {
+              setUserPosts(postsResponse.data.posts);
+            } else {
+              setUserPosts([]);
+            }
+          } catch (error) {
+            console.log('No se pudieron cargar los posts (normal para usuarios no registrados)');
+            setUserPosts([]);
+          }
         }
 
-        // Obtener comunidades creadas
-        const createdCommunitiesResponse = await communities.getCreatedCommunities(userId);
-        const createdCommunitiesData = createdCommunitiesResponse.data || [];
-        setCreatedCommunities(createdCommunitiesData);
+        // Obtener comunidades (usar endpoints públicos si no hay auth)
+        if (authUser) {
+          // Usuario autenticado - usar endpoints normales
+          const createdCommunitiesResponse = await communities.getCreatedCommunities(userId);
+          const createdCommunitiesData = createdCommunitiesResponse.data || [];
+          setCreatedCommunities(createdCommunitiesData);
 
-        // Obtener comunidades unidas
-        const joinedCommunitiesResponse = await users.getJoinedCommunities(userId);
-        const joinedCommunitiesData = joinedCommunitiesResponse.data || [];
-        setJoinedCommunities(joinedCommunitiesData);
+          const joinedCommunitiesResponse = await users.getJoinedCommunities(userId);
+          const joinedCommunitiesData = joinedCommunitiesResponse.data || [];
+          setJoinedCommunities(joinedCommunitiesData);
+        } else {
+          // Usuario no autenticado - usar endpoints públicos
+          try {
+            const [createdResponse, joinedResponse] = await Promise.all([
+              api.get(`/api/communities/public/created-by/${userId}`),
+              api.get(`/api/communities/public/joined-by/${userId}`)
+            ]);
+            setCreatedCommunities(createdResponse.data || []);
+            setJoinedCommunities(joinedResponse.data || []);
+          } catch (error) {
+            console.log('No se pudieron cargar las comunidades (normal para usuarios no registrados)');
+            setCreatedCommunities([]);
+            setJoinedCommunities([]);
+          }
+        }
 
         // Obtener aliados
         let alliesData = [];
@@ -302,7 +357,7 @@ export default function ProfilePage() {
           <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
         {authUser && (
           <Link
-            href={`/dashboard/profile/${authUser._id}`}
+            href={`/profile/${authUser._id}`}
               className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors"
           >
             Back to my profile
@@ -328,7 +383,7 @@ export default function ProfilePage() {
           </p>
         {authUser && (
           <Link
-            href={`/dashboard/profile/${authUser._id}`}
+            href={`/profile/${authUser._id}`}
               className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors"
           >
             Back to my profile
@@ -395,7 +450,31 @@ export default function ProfilePage() {
                 
                 {/* Botones de acción - Optimizados para móvil */}
                 <div className="flex flex-wrap justify-center lg:justify-start gap-2 sm:gap-3">
-                  {isOwnProfile ? (
+                  {!authUser ? (
+                    // Usuario no registrado
+                    <>
+                      <button 
+                        onClick={handleShare}
+                        className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-secondary btn-sm sm:btn-lg shadow-soft hover:shadow-md text-sm sm:text-base"
+                      >
+                        <ShareIcon className="w-4 h-4" />
+                        Compartir
+                      </button>
+                      <button
+                        onClick={() => router.push('/register')}
+                        className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-primary btn-sm sm:btn-lg shadow-glow hover:shadow-glow-accent text-sm sm:text-base"
+                      >
+                        <UserPlusIcon className="w-4 h-4" />
+                        Registrarse
+                      </button>
+                      <button
+                        onClick={() => router.push('/login')}
+                        className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm sm:text-base"
+                      >
+                        Iniciar sesión
+                      </button>
+                    </>
+                  ) : isOwnProfile ? (
                     <>
                     <Link
                         href="/profile/edit"
@@ -404,7 +483,10 @@ export default function ProfilePage() {
                         <Cog6ToothIcon className="w-4 h-4" />
                         Edit
                     </Link>
-                      <button className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-secondary btn-sm sm:btn-lg shadow-soft hover:shadow-md text-sm sm:text-base">
+                      <button 
+                        onClick={handleShare}
+                        className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-secondary btn-sm sm:btn-lg shadow-soft hover:shadow-md text-sm sm:text-base"
+                      >
                         <ShareIcon className="w-4 h-4" />
                         Share
                       </button>
@@ -429,6 +511,13 @@ export default function ProfilePage() {
                           Add as ally
                         </button>
                       )}
+                      <button 
+                        onClick={handleShare}
+                        className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-secondary btn-sm sm:btn-lg shadow-soft hover:shadow-md text-sm sm:text-base"
+                      >
+                        <ShareIcon className="w-4 h-4" />
+                        Compartir
+                      </button>
                       {/* Menú móvil optimizado */}
                       <Menu as="div" className="relative">
                         <Menu.Button className="p-2 sm:p-2.5 btn-ghost rounded-xl">
@@ -443,10 +532,7 @@ export default function ProfilePage() {
                                     ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100' 
                                     : 'text-gray-700 dark:text-gray-300'
                                 }`}
-                                onClick={() => {
-                                  navigator.clipboard.writeText(window.location.href);
-                                  toast.success('Link copied to clipboard');
-                                }}
+                                onClick={handleShare}
                               >
                                 <ShareIcon className="w-4 h-4" />
                                 Share profile
@@ -537,23 +623,51 @@ export default function ProfilePage() {
               {/* Posts Panel */}
                 <Tab.Panel>
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                  {!isOwnProfile && !isAlly ? (
+                  {!authUser ? (
+                    // Usuario no registrado
                     <div className="text-center py-16">
                       <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
                         <LockClosedIcon className="w-8 h-8 text-gray-400" />
                       </div>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                        Private content
+                        Contenido privado
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400 mb-6">
+                        Regístrate para ver los posts de este usuario y acceder a todas las funcionalidades
+                      </p>
+                      <div className="space-x-4">
+                        <button
+                          onClick={() => router.push('/register')}
+                          className="btn-primary btn-md"
+                        >
+                          Registrarse
+                        </button>
+                        <button
+                          onClick={() => router.push('/login')}
+                          className="btn-secondary btn-md"
+                        >
+                          Iniciar sesión
+                        </button>
+                      </div>
+                    </div>
+                  ) : !isOwnProfile && !isAlly ? (
+                    // Usuario registrado pero no aliado
+                    <div className="text-center py-16">
+                      <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <LockClosedIcon className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                        Contenido privado
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400 mb-4">
-                        Only allies can see this user's posts
+                        Solo los aliados pueden ver los posts de este usuario
                       </p>
                       {!allyCheckLoading && (
                         <button
                           onClick={handleAddAlly}
                           className="btn-primary btn-md"
                         >
-                          Add as ally
+                          Agregar como aliado
                         </button>
                       )}
                     </div>
@@ -818,7 +932,7 @@ export default function ProfilePage() {
                         {allies.map((ally) => (
                         <Link
                           key={ally._id}
-                          href={`/dashboard/profile/${ally._id}`}
+                          href={`/profile/${ally._id}`}
                           className="group"
                         >
                           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 transition-all duration-200 hover-lift text-center">

@@ -120,16 +120,63 @@ class Message {
     const client = await this.pool.connect();
     try {
       const result = await client.query(`
-        SELECT m.*, 
-               u.name as sender_name,
-               u.profile_picture as sender_profile_picture,
-               (SELECT COUNT(*) FROM message_reactions WHERE message_id = m.id) as reaction_count
+        SELECT 
+          m.*,
+          r.id as reply_to_id,
+          r.content as reply_to_content,
+          r.sender_id as reply_to_sender_id,
+          r.created_at as reply_to_timestamp,
+          r.content_type as reply_to_type,
+          (SELECT COUNT(*) FROM message_reactions WHERE message_id = m.id) as reaction_count
         FROM messages m
-        LEFT JOIN users u ON m.sender_id = u.id
+        LEFT JOIN messages r ON m.reply_to_id = r.id
         WHERE m.id = $1 AND m.is_deleted = false
       `, [messageId]);
 
-      return result.rows[0] || null;
+      const message = result.rows[0];
+      if (!message) return null;
+
+      // Obtener información de usuarios de MongoDB
+      const User = require('../models/User');
+      const userIds = [message.sender_id];
+      if (message.reply_to_sender_id) {
+        userIds.push(message.reply_to_sender_id);
+      }
+
+      const users = await User.find({ firebaseUid: { $in: userIds } }).select('firebaseUid name profilePicture');
+      const userMap = {};
+      users.forEach(user => {
+        userMap[user.firebaseUid] = {
+          name: user.name,
+          profile_picture: user.profilePicture
+        };
+      });
+
+      // Agregar información de usuario
+      const userInfo = userMap[message.sender_id];
+      if (userInfo) {
+        message.sender_name = userInfo.name;
+        message.sender_profile_picture = userInfo.profile_picture;
+      } else {
+        message.sender_name = 'Usuario';
+        message.sender_profile_picture = null;
+      }
+
+      // Agregar información del mensaje al que se está respondiendo
+      if (message.reply_to_id) {
+        const replyUserInfo = userMap[message.reply_to_sender_id];
+        message.reply_to = {
+          id: message.reply_to_id,
+          content: message.reply_to_content,
+          sender_id: message.reply_to_sender_id,
+          sender_name: replyUserInfo?.name || 'Usuario',
+          sender_profile_picture: replyUserInfo?.profile_picture || null,
+          timestamp: message.reply_to_timestamp,
+          type: message.reply_to_type || 'text'
+        };
+      }
+
+      return message;
     } catch (error) {
       console.error('❌ Error obteniendo mensaje:', error);
       throw error;
@@ -141,11 +188,19 @@ class Message {
   async getChatMessages(chatId, limit = 50, offset = 0) {
     const client = await this.pool.connect();
     try {
-      // 🔧 CRÍTICO: Obtener solo mensajes de PostgreSQL (sin JOIN con users)
+      // 🔧 CRÍTICO: Obtener mensajes con información de reply_to
       const result = await client.query(`
-        SELECT * FROM messages 
-        WHERE chat_id = $1 AND is_deleted = false
-        ORDER BY created_at DESC
+        SELECT 
+          m.*,
+          r.id as reply_to_id,
+          r.content as reply_to_content,
+          r.sender_id as reply_to_sender_id,
+          r.created_at as reply_to_timestamp,
+          r.content_type as reply_to_type
+        FROM messages m
+        LEFT JOIN messages r ON m.reply_to_id = r.id
+        WHERE m.chat_id = $1 AND m.is_deleted = false
+        ORDER BY m.created_at DESC
         LIMIT $2 OFFSET $3
       `, [chatId, limit, offset]);
 
@@ -154,10 +209,14 @@ class Message {
       // 🔧 CRÍTICO: Obtener información de usuarios de MongoDB
       if (messages.length > 0) {
         const User = require('../models/User');
-        const userIds = [...new Set(messages.map(msg => msg.sender_id))]; // IDs únicos
+        // Obtener todos los IDs únicos (tanto de mensajes como de reply_to)
+        const allUserIds = [...new Set([
+          ...messages.map(msg => msg.sender_id),
+          ...messages.filter(msg => msg.reply_to_sender_id).map(msg => msg.reply_to_sender_id)
+        ])];
         
         // Obtener usuarios de MongoDB usando firebaseUid
-        const users = await User.find({ firebaseUid: { $in: userIds } }).select('firebaseUid name profilePicture');
+        const users = await User.find({ firebaseUid: { $in: allUserIds } }).select('firebaseUid name profilePicture');
         const userMap = {};
         users.forEach(user => {
           userMap[user.firebaseUid] = {
@@ -175,6 +234,20 @@ class Message {
           } else {
             message.sender_name = 'Usuario';
             message.sender_profile_picture = null;
+          }
+
+          // Agregar información del mensaje al que se está respondiendo
+          if (message.reply_to_id) {
+            const replyUserInfo = userMap[message.reply_to_sender_id];
+            message.reply_to = {
+              id: message.reply_to_id,
+              content: message.reply_to_content,
+              sender_id: message.reply_to_sender_id,
+              sender_name: replyUserInfo?.name || 'Usuario',
+              sender_profile_picture: replyUserInfo?.profile_picture || null,
+              timestamp: message.reply_to_timestamp,
+              type: message.reply_to_type || 'text'
+            };
           }
         });
       }

@@ -604,7 +604,7 @@ export default function ProfilePage() {
                     {allies.map((ally) => (
                       <Link
                         key={ally._id}
-                          href={`/dashboard/profile/${ally._id}`}
+                          href={`/profile/${ally._id}`}
                           className="group"
                       >
                           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 transition-all duration-200 hover-lift text-center">

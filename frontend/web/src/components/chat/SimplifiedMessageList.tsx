@@ -36,11 +36,62 @@ const MessageOptionsButton: React.FC<{
   isOwnMessage: boolean;
 }> = ({ message, onReplyToMessage, onAddReaction, onRemoveReaction, currentUserId, isOwnMessage }) => {
   const [showOptions, setShowOptions] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<'left' | 'right' | 'center'>('right');
   const buttonRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const calculateMenuPosition = () => {
+    if (!buttonRef.current || !menuRef.current) return;
+
+    const buttonRect = buttonRef.current.getBoundingClientRect();
+    const menuRect = menuRef.current.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const padding = 20; // Padding mínimo desde el borde
+
+    // Calcular espacio disponible en cada lado
+    const spaceLeft = buttonRect.left;
+    const spaceRight = viewportWidth - buttonRect.right;
+    const estimatedMenuWidth = 280; // Ancho estimado del menú
+
+    // Determinar posición horizontal
+    let horizontalPosition: 'left' | 'right' | 'center' = 'right';
+    
+    if (isOwnMessage) {
+      // Para mensajes propios, preferir izquierda
+      if (spaceLeft >= estimatedMenuWidth + padding) {
+        horizontalPosition = 'left';
+      } else if (spaceRight >= estimatedMenuWidth + padding) {
+        horizontalPosition = 'right';
+      } else {
+        // Si no hay espacio suficiente, centrar
+        horizontalPosition = 'center';
+      }
+    } else {
+      // Para mensajes de otros, preferir derecha
+      if (spaceRight >= estimatedMenuWidth + padding) {
+        horizontalPosition = 'right';
+      } else if (spaceLeft >= estimatedMenuWidth + padding) {
+        horizontalPosition = 'left';
+      } else {
+        // Si no hay espacio suficiente, centrar
+        horizontalPosition = 'center';
+      }
+    }
+
+    setMenuPosition(horizontalPosition);
+  };
 
   const handleButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!showOptions) {
+      // Calcular posición antes de mostrar
+      setTimeout(() => {
+        calculateMenuPosition();
+      }, 10);
+    }
+    
     setShowOptions(!showOptions);
   };
 
@@ -58,16 +109,26 @@ const MessageOptionsButton: React.FC<{
       }
     };
 
+    const handleResize = () => {
+      if (showOptions) {
+        calculateMenuPosition();
+      }
+    };
+
     if (showOptions) {
       const timer = setTimeout(() => {
         document.addEventListener('click', handleClickOutside);
         document.addEventListener('touchstart', handleClickOutside);
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', handleResize);
       }, 100);
       
       return () => {
         clearTimeout(timer);
         document.removeEventListener('click', handleClickOutside);
         document.removeEventListener('touchstart', handleClickOutside);
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('orientationchange', handleResize);
       };
     }
   }, [showOptions]);
@@ -86,27 +147,29 @@ const MessageOptionsButton: React.FC<{
 
       {showOptions && (
         <div 
-          ref={buttonRef}
-          className="absolute bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-2 flex items-center space-x-1 animate-scale-in z-50"
+          ref={menuRef}
+          className="absolute bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-2 flex items-center space-x-1 animate-scale-in z-50 overflow-hidden"
           style={{
-            // Posicionamiento inteligente basado en la posición del mensaje
+            // Posicionamiento inteligente basado en el espacio disponible
             bottom: '100%',
             marginBottom: '8px',
-            maxWidth: 'min(calc(100vw - 40px), 280px)',
             width: 'max-content',
             position: 'absolute',
             zIndex: 1000,
-            // Posicionamiento dinámico
-            ...(isOwnMessage ? {
-              // Mensaje propio (derecha) - posicionar a la izquierda
-              left: 'auto',
-              right: '0',
-              transform: 'none'
-            } : {
-              // Mensaje de otro (izquierda) - posicionar a la derecha
+            maxWidth: 'calc(100vw - 40px)',
+            // Posicionamiento dinámico basado en el cálculo
+            ...(menuPosition === 'left' ? {
               left: '0',
               right: 'auto',
-              transform: 'none'
+              transform: 'translateX(-10px)'
+            } : menuPosition === 'right' ? {
+              left: 'auto',
+              right: '0',
+              transform: 'translateX(10px)'
+            } : {
+              left: '50%',
+              right: 'auto',
+              transform: 'translateX(-50%)'
             })
           }}
         >

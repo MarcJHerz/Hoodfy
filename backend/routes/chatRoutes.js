@@ -752,6 +752,17 @@ router.post('/:chatId/messages/:messageId/reactions', verifyToken, async (req, r
 
     console.log('Reacción agregada exitosamente', { messageId, reaction_type, userId });
 
+    // Emitir evento de reacción via Socket.io
+    if (global.chatService && global.chatService.io) {
+      console.log(`📡 Emitiendo reaction_added a chat ${chatId}:`, { messageId, reaction_type, userId });
+      global.chatService.io.to(chatId).emit('reaction_added', {
+        messageId: parseInt(messageId),
+        reaction_type,
+        userId,
+        reaction
+      });
+    }
+
     res.json({
       success: true,
       message: 'Reacción agregada exitosamente',
@@ -784,6 +795,16 @@ router.delete('/:chatId/messages/:messageId/reactions/:reactionType', verifyToke
     }
 
     console.log('Reacción removida exitosamente', { messageId, reactionType, userId });
+
+    // Emitir evento de reacción removida via Socket.io
+    if (global.chatService && global.chatService.io) {
+      console.log(`📡 Emitiendo reaction_removed a chat ${chatId}:`, { messageId, reactionType, userId });
+      global.chatService.io.to(chatId).emit('reaction_removed', {
+        messageId: parseInt(messageId),
+        reactionType,
+        userId
+      });
+    }
 
     res.json({
       success: true,
