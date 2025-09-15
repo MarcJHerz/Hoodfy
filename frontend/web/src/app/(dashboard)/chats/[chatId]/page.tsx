@@ -53,7 +53,9 @@ export default function ChatPage() {
         setChat(foundChat);
 
         // Obtener mensajes del chat
+        console.log(`🔍 Obteniendo mensajes para chat ${chatId}`);
         const chatMessages = await postgresChatService.getChatMessages(chatId);
+        console.log(`📨 Mensajes obtenidos:`, chatMessages);
         setMessages(chatMessages);
 
         // Marcar mensajes como leídos

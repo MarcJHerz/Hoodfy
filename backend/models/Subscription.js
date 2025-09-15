@@ -13,7 +13,7 @@ const SubscriptionSchema = new mongoose.Schema({
   },
   status: { 
     type: String, 
-    enum: ['active', 'canceled', 'expired', 'payment_failed'], 
+    enum: ['active', 'canceled', 'expired', 'payment_failed', 'paused'], 
     default: 'active' 
   },
   startDate: { 
@@ -45,6 +45,9 @@ const SubscriptionSchema = new mongoose.Schema({
   failedPaymentCount: {
     type: Number,
     default: 0
+  },
+  currentPeriodEnd: {
+    type: Date
   }
 });
 

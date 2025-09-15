@@ -158,7 +158,62 @@ class ChatParticipant {
       query += ` ORDER BY c.last_message_at DESC NULLS LAST`;
 
       const result = await client.query(query, params);
-      return result.rows;
+      
+      // Para cada chat, obtener información de los otros participantes
+      const chatsWithParticipants = await Promise.all(
+        result.rows.map(async (chat) => {
+          try {
+            // Obtener otros participantes del chat (excluyendo al usuario actual)
+            const participantsQuery = `
+              SELECT cp2.user_id, cp2.role, cp2.joined_at
+              FROM chat_participants cp2
+              WHERE cp2.chat_id = $1 AND cp2.user_id != $2 AND cp2.is_banned = false
+              ORDER BY cp2.joined_at ASC
+            `;
+            
+            const participantsResult = await client.query(participantsQuery, [chat.chat_id, userId]);
+            
+            // Obtener información de los usuarios desde MongoDB
+            const User = require('./User');
+            const participantsInfo = await Promise.all(
+              participantsResult.rows.map(async (participant) => {
+                try {
+                  const user = await User.findOne({ firebaseUid: participant.user_id });
+                  return {
+                    user_id: participant.user_id,
+                    role: participant.role,
+                    joined_at: participant.joined_at,
+                    name: user?.name || user?.username || 'Usuario',
+                    profile_picture: user?.profilePicture || null
+                  };
+                } catch (error) {
+                  console.warn(`⚠️ Error obteniendo info del usuario ${participant.user_id}:`, error.message);
+                  return {
+                    user_id: participant.user_id,
+                    role: participant.role,
+                    joined_at: participant.joined_at,
+                    name: 'Usuario',
+                    profile_picture: null
+                  };
+                }
+              })
+            );
+            
+            return {
+              ...chat,
+              participants: participantsInfo
+            };
+          } catch (error) {
+            console.warn(`⚠️ Error obteniendo participantes para chat ${chat.chat_id}:`, error.message);
+            return {
+              ...chat,
+              participants: []
+            };
+          }
+        })
+      );
+      
+      return chatsWithParticipants;
     } catch (error) {
       console.error('❌ Error obteniendo chats del usuario:', error);
       throw error;

@@ -75,7 +75,8 @@ exports.createCheckoutSession = async (req, res) => {
     }
 
     const { priceId, communityId } = req.body;
-    const userId = req.userId;
+    const userId = req.userId; // Firebase UID para logging
+    const mongoUserId = req.mongoUserId; // MongoDB ID para base de datos
     
     console.log('🔍 Validando datos:', { priceId, communityId, userId });
     
@@ -91,10 +92,16 @@ exports.createCheckoutSession = async (req, res) => {
       return res.status(404).json({ error: 'Comunidad no encontrada.' });
     }
     
-    console.log('👤 Buscando usuario:', userId);
-    const user = await User.findById(userId);
+    console.log('👤 Buscando usuario:', mongoUserId);
+    
+    if (!mongoUserId) {
+      console.error('❌ MongoDB ID no disponible');
+      return res.status(400).json({ error: 'Error de autenticación' });
+    }
+    
+    const user = await User.findById(mongoUserId);
     if (!user) {
-      console.error('❌ Usuario no encontrado:', userId);
+      console.error('❌ Usuario no encontrado:', mongoUserId);
       return res.status(404).json({ error: 'Usuario no encontrado.' });
     }
     
@@ -143,7 +150,7 @@ exports.createCheckoutSession = async (req, res) => {
     
     // Determinar la URL del frontend basada en el origen de la request
     const origin = req.headers.origin || req.headers.referer;
-    let frontendUrl = process.env.FRONTEND_URL || 'https://www.qahood.com';
+    let frontendUrl = process.env.FRONTEND_URL || 'https://www.hoodfy.com';
     
     if (origin && origin.includes('hoodfy.com')) {
       frontendUrl = 'https://www.hoodfy.com';
@@ -155,20 +162,20 @@ exports.createCheckoutSession = async (req, res) => {
       mode: 'subscription',
       customer_email: user.email,
       line_items: [{ price: priceId, quantity: 1 }],
-      metadata: { userId: userId.toString(), communityId: communityId.toString() },
+      metadata: { userId: mongoUserId.toString(), communityId: communityId.toString() },
       success_url: frontendUrl + '/success?session_id={CHECKOUT_SESSION_ID}',
       cancel_url: frontendUrl + '/cancel',
     };
 
-    // Si la comunidad tiene Stripe Connect configurado, agregar split payments
-    if (community.stripeConnectAccountId && community.stripeConnectStatus === 'active') {
+    // Si el creador tiene Stripe Connect configurado, agregar split payments
+    if (user.stripeConnectAccountId && user.stripeConnectStatus === 'active') {
       // Calcular el split de pagos (88% creador, 12% plataforma)
       const paymentSplit = stripeConnect.calculatePaymentSplit(community.price);
       
       sessionConfig.subscription_data = {
-        application_fee_percent: community.platformFeePercentage,
+        application_fee_percent: 12, // 12% para la plataforma
         transfer_data: {
-          destination: community.stripeConnectAccountId,
+          destination: user.stripeConnectAccountId, // Usar la cuenta del creador
         },
       };
     }
@@ -256,13 +263,19 @@ exports.createPortalSession = async (req, res) => {
       return res.status(503).json({ error: 'Stripe no está configurado' });
     }
 
-    const userId = req.userId;
+    const userId = req.userId; // Firebase UID para logging
+    const mongoUserId = req.mongoUserId; // MongoDB ID para base de datos
     const { subscriptionId } = req.body; // Nuevo: subscriptionId específico opcional
     
+    if (!mongoUserId) {
+      console.error('❌ MongoDB ID no disponible');
+      return res.status(400).json({ error: 'Error de autenticación' });
+    }
+    
     // Buscar usuario
-    const user = await User.findById(userId);
+    const user = await User.findById(mongoUserId);
     if (!user) {
-      console.error('❌ Usuario no encontrado:', userId);
+      console.error('❌ Usuario no encontrado:', mongoUserId);
       return res.status(404).json({ error: 'Usuario no encontrado.' });
     }
     
@@ -273,7 +286,7 @@ exports.createPortalSession = async (req, res) => {
       console.log('🎯 Buscando suscripción específica:', subscriptionId);
       subscription = await Subscription.findOne({
         _id: subscriptionId,
-        user: userId,
+        user: mongoUserId,
         stripeCustomerId: { $exists: true, $ne: null }
       });
       
@@ -288,7 +301,7 @@ exports.createPortalSession = async (req, res) => {
       // Buscar la suscripción más reciente (comportamiento original)
       console.log('🔍 Buscando suscripción más reciente del usuario...');
       subscription = await Subscription.findOne({
-        user: userId,
+        user: mongoUserId,
         stripeCustomerId: { $exists: true, $ne: null }
       }).sort({ createdAt: -1 }); // Más reciente primero
       
@@ -306,7 +319,7 @@ exports.createPortalSession = async (req, res) => {
     
     // Determinar la URL de retorno basada en el origen
     const origin = req.headers.origin || req.headers.referer;
-    let returnUrl = process.env.FRONTEND_URL || 'https://www.qahood.com';
+    let returnUrl = process.env.FRONTEND_URL || 'https://www.hoodfy.com';
     
     if (origin && origin.includes('hoodfy.com')) {
       returnUrl = 'https://www.hoodfy.com';
@@ -388,8 +401,8 @@ async function handleCheckoutCompleted(session) {
           
           console.log('✅ Suscripción creada:', newSubscription._id);
           
-          // Si la comunidad tiene Stripe Connect activo, crear registro de Payout
-          if (community.stripeConnectAccountId && community.stripeConnectStatus === 'active') {
+          // Si el creador tiene Stripe Connect activo, crear registro de Payout
+          if (user.stripeConnectAccountId && user.stripeConnectStatus === 'active') {
             try {
               const paymentSplit = stripeConnect.calculatePaymentSplit(community.price);
               
@@ -397,13 +410,13 @@ async function handleCheckoutCompleted(session) {
                 creator: community.creator,
                 community: communityId,
                 subscription: newSubscription._id,
-                stripeConnectAccountId: community.stripeConnectAccountId,
+                stripeConnectAccountId: user.stripeConnectAccountId,
                 paymentDetails: {
                   totalAmount: paymentSplit.total,
                   platformFee: paymentSplit.platformFee,
                   creatorAmount: paymentSplit.creatorAmount,
-                  platformFeePercentage: community.platformFeePercentage,
-                  creatorFeePercentage: community.creatorFeePercentage
+                  platformFeePercentage: 12, // 12% para la plataforma
+                  creatorFeePercentage: 88   // 88% para el creador
                 },
                 status: 'pending',
                 metadata: {
@@ -465,8 +478,56 @@ async function handleSubscriptionUpdated(subscription) {
     currentPeriodEnd: subscription.current_period_end
   });
   
-  // Aquí puedes agregar lógica para manejar cambios en la suscripción
-  // Por ejemplo, actualizar el estado en tu base de datos
+  try {
+    // Buscar la suscripción en la BD
+    const dbSubscription = await Subscription.findOne({
+      stripeSubscriptionId: subscription.id
+    });
+    
+    if (dbSubscription) {
+      // Actualizar estado y fechas
+      const oldStatus = dbSubscription.status;
+      dbSubscription.status = subscription.status;
+      dbSubscription.currentPeriodEnd = new Date(subscription.current_period_end * 1000);
+      dbSubscription.updatedAt = new Date();
+      
+      await dbSubscription.save();
+      
+      console.log('✅ Suscripción actualizada en BD:', {
+        id: dbSubscription._id,
+        oldStatus,
+        newStatus: subscription.status
+      });
+      
+      // Si la suscripción se reactivó después de estar pausada
+      if (oldStatus === 'paused' && subscription.status === 'active') {
+        // Agregar usuario de vuelta a la comunidad si no está
+        const community = await Community.findById(dbSubscription.community);
+        if (community && !community.members.includes(dbSubscription.user)) {
+          community.members.push(dbSubscription.user);
+          await community.save();
+          console.log('✅ Usuario agregado de vuelta a la comunidad');
+        }
+      }
+      
+      // Si la suscripción se pausó
+      if (subscription.status === 'paused') {
+        // Remover usuario de la comunidad temporalmente
+        const community = await Community.findById(dbSubscription.community);
+        if (community) {
+          community.members = community.members.filter(
+            memberId => memberId.toString() !== dbSubscription.user.toString()
+          );
+          await community.save();
+          console.log('⏸️ Usuario removido temporalmente de la comunidad (suscripción pausada)');
+        }
+      }
+    } else {
+      console.log('⚠️ Suscripción no encontrada en BD:', subscription.id);
+    }
+  } catch (error) {
+    console.error('❌ Error actualizando suscripción:', error);
+  }
 }
 
 // Función para manejar cancelación de suscripción
@@ -532,8 +593,7 @@ async function handlePaymentFailed(invoice) {
   try {
     // Buscar la suscripción en la BD
     const subscription = await Subscription.findOne({
-      stripeSubscriptionId: invoice.subscription,
-      status: 'active'
+      stripeSubscriptionId: invoice.subscription
     });
     
     if (subscription) {

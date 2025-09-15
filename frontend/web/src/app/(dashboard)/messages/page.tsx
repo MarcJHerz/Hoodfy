@@ -131,26 +131,18 @@ export default function MessagesPage() {
     }
     
     const privateChat = chat as any;
-    // Identificar al otro usuario correctamente
-    const otherUserId = (privateChat.participants || []).find((id: string) => id !== user?._id);
     
-    // Si tenemos información del otro usuario en el chat
-    if (privateChat.otherUserName && privateChat.otherUserId === otherUserId) {
+    // Usar la nueva estructura de participantes
+    if (privateChat.participants && privateChat.participants.length > 0) {
+      const otherParticipant = privateChat.participants.find((p: any) => p.user_id !== user?._id);
+      if (otherParticipant && otherParticipant.name) {
+        return otherParticipant.name;
+      }
+    }
+    
+    // Fallback a la estructura anterior
+    if (privateChat.otherUserName) {
       return privateChat.otherUserName;
-    }
-    
-    // Si tenemos el ID pero no el nombre, intentar obtenerlo del cache
-    if (otherUserId && userCache.has(otherUserId)) {
-      return userCache.get(otherUserId)!.name;
-    }
-    
-    // Fallback: obtener información del usuario de forma asíncrona
-    if (otherUserId) {
-      getUserInfo(otherUserId).then(userInfo => {
-        // Esto causará un re-render cuando se obtenga la información
-        setChatRooms([...chatRooms]); // Forzar re-render
-      });
-      return 'Cargando...';
     }
     
     return 'Usuario';
@@ -162,26 +154,18 @@ export default function MessagesPage() {
     }
     
     const privateChat = chat as any;
-    // Identificar al otro usuario correctamente
-    const otherUserId = (privateChat.participants || []).find((id: string) => id !== user?._id);
     
-    // Si tenemos información del otro usuario en el chat
-    if (privateChat.otherUserProfilePicture && privateChat.otherUserId === otherUserId) {
+    // Usar la nueva estructura de participantes
+    if (privateChat.participants && privateChat.participants.length > 0) {
+      const otherParticipant = privateChat.participants.find((p: any) => p.user_id !== user?._id);
+      if (otherParticipant && otherParticipant.profile_picture) {
+        return otherParticipant.profile_picture;
+      }
+    }
+    
+    // Fallback a la estructura anterior
+    if (privateChat.otherUserProfilePicture) {
       return privateChat.otherUserProfilePicture;
-    }
-    
-    // Si tenemos el ID pero no la imagen, intentar obtenerlo del cache
-    if (otherUserId && userCache.has(otherUserId)) {
-      const cachedUser = userCache.get(otherUserId)!;
-      return cachedUser.profilePicture || '/images/defaults/default-avatar.png';
-    }
-    
-    // Fallback: obtener información del usuario de forma asíncrona
-    if (otherUserId) {
-      getUserInfo(otherUserId).then(userInfo => {
-        // Esto causará un re-render cuando se obtenga la información
-        setChatRooms([...chatRooms]); // Forzar re-render
-      });
     }
     
     return '/images/defaults/default-avatar.png';

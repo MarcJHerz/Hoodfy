@@ -89,16 +89,24 @@ class PostgresChatService {
   // Obtener mensajes de un chat
   async getChatMessages(chatId: string): Promise<Message[]> {
     try {
+      console.log(`🔍 [PostgresChatService] Obteniendo mensajes para chat ${chatId}`);
       const response = await fetch(`${API_BASE_URL}/api/chats/${chatId}/messages`, {
         headers: await this.getAuthHeaders(),
       });
 
+      console.log(`📡 [PostgresChatService] Response status: ${response.status}`);
+
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`❌ [PostgresChatService] Error response:`, errorText);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      return this.transformMessages(data.messages || []);
+      console.log(`📨 [PostgresChatService] Raw data received:`, data);
+      const transformedMessages = this.transformMessages(data.messages || []);
+      console.log(`🔄 [PostgresChatService] Transformed messages:`, transformedMessages);
+      return transformedMessages;
     } catch (error) {
       console.error('❌ Error obteniendo mensajes del chat:', error);
       return [];
@@ -481,25 +489,34 @@ class PostgresChatService {
 
   // Transformar datos del backend a tipos del frontend
   private transformChatRooms(data: any[]): ChatRoom[] {
-    return data.map(chat => ({
-      id: chat.id.toString(),
-      name: chat.name || 'Chat sin nombre',
-      type: chat.type || 'private',
-      participants: chat.participant_ids || [],
-      lastMessage: chat.last_message ? this.transformMessage(chat.last_message) : undefined,
-      unreadCount: chat.unread_count || 0,
-      updatedAt: new Date(chat.updated_at),
-      createdAt: new Date(chat.created_at),
-      ...(chat.type === 'community' && {
-        communityId: chat.community_id,
-        communityName: chat.community_name
-      }),
-      ...(chat.type === 'private' && {
-        otherUserId: chat.other_user_id,
-        otherUserName: chat.other_user_name,
-        otherUserProfilePicture: chat.other_user_profile_picture
-      })
-    }));
+    return data.map(chat => {
+      // Para chats privados, usar la información de participantes
+      let otherUserInfo = {};
+      if (chat.type === 'private' && chat.participants && chat.participants.length > 0) {
+        const otherParticipant = chat.participants[0]; // Primer participante (el otro usuario)
+        otherUserInfo = {
+          otherUserId: otherParticipant.user_id,
+          otherUserName: otherParticipant.name,
+          otherUserProfilePicture: otherParticipant.profile_picture
+        };
+      }
+
+      return {
+        id: chat.id.toString(),
+        name: chat.name || 'Chat sin nombre',
+        type: chat.type || 'private',
+        participants: chat.participants || [],
+        lastMessage: chat.last_message ? this.transformMessage(chat.last_message) : undefined,
+        unreadCount: chat.unread_count || 0,
+        updatedAt: new Date(chat.updated_at),
+        createdAt: new Date(chat.created_at),
+        ...(chat.type === 'community' && {
+          communityId: chat.community_id,
+          communityName: chat.community_name
+        }),
+        ...otherUserInfo
+      };
+    });
   }
 
   private transformMessages(data: any[]): Message[] {

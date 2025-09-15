@@ -351,9 +351,9 @@ router.get('/user-created', verifyToken, async (req, res) => {
     console.log('🔍 Buscando comunidades creadas por usuario:', mongoUserId);
     
     const communities = await Community.find({ creator: mongoUserId })
-      .populate('creator', 'name profilePicture')
+      .populate('creator', 'name profilePicture stripeConnectStatus stripeConnectAccountId')
       .populate('members', 'name profilePicture')
-      .select('name description profilePicture memberCount postCount stripeConnectStatus stripeConnectAccountId createdAt');
+      .select('name description profilePicture memberCount postCount createdAt');
 
     console.log('✅ Comunidades encontradas:', communities.length);
     res.json(communities);
