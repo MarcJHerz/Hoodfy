@@ -23,7 +23,8 @@ import {
   ViewColumnsIcon,
   TagIcon,
   LockClosedIcon,
-  CheckBadgeIcon
+  CheckBadgeIcon,
+  UserGroupIcon
 } from '@heroicons/react/24/outline';
 import { 
   HeartIcon as HeartSolidIcon,
@@ -152,7 +153,7 @@ export default function PublicProfilePage() {
     }
 
     try {
-      await users.addAlly(userId);
+      await api.post(`/api/users/add-ally/${userId}`);
       setIsAlly(true);
       toast.success('Ally added successfully!');
     } catch (error) {
@@ -168,7 +169,7 @@ export default function PublicProfilePage() {
     }
 
     try {
-      await users.removeAlly(userId);
+      await api.delete(`/api/users/remove-ally/${userId}`);
       setIsAlly(false);
       toast.success('Ally removed successfully!');
     } catch (error) {
@@ -662,7 +663,6 @@ export default function PublicProfilePage() {
               username: user.username,
               profilePicture: user.profilePicture
             }}
-            currentUser={authUser}
           />
         </>
       )}
