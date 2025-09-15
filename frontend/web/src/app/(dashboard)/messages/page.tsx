@@ -17,6 +17,7 @@ import ChatRoom from '@/components/chat/ChatRoom';
 import { User } from '@/types/user';
 import { users } from '@/services/api';
 import { UsersIcon } from '@heroicons/react/24/outline';
+import { clearChatCache, debugChatCache } from '@/utils/clearChatCache';
 
 export default function MessagesPage() {
   const router = useRouter();
@@ -125,6 +126,12 @@ export default function MessagesPage() {
   const handleBackToChatList = () => {
     setShowChatView(false);
     setSelectedChat(null);
+  };
+
+  const handleClearCache = () => {
+    console.log('🧹 Limpiando cache de chats...');
+    debugChatCache();
+    clearChatCache();
   };
 
   const getChatIcon = (chat: ChatRoomType) => {
@@ -253,20 +260,38 @@ export default function MessagesPage() {
       <div className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Header mejorado */}
         <div className="mb-8">
-          <div className="flex items-center space-x-4 mb-6">
-            <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-600 to-pink-500 rounded-2xl flex items-center justify-center shadow-xl rotate-3 hover:rotate-0 transition-transform duration-300">
-                <ChatBubbleLeftIcon className="w-8 h-8 text-white drop-shadow-lg" />
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-600 to-pink-500 rounded-2xl flex items-center justify-center shadow-xl rotate-3 hover:rotate-0 transition-transform duration-300">
+                  <ChatBubbleLeftIcon className="w-8 h-8 text-white drop-shadow-lg" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
               </div>
-              <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-700 dark:from-white dark:via-blue-300 dark:to-purple-400 bg-clip-text text-transparent">
+                  Messages
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 mt-2 font-medium">
+                  Your private conversations and community chats
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-700 dark:from-white dark:via-blue-300 dark:to-purple-400 bg-clip-text text-transparent">
-                Messages
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2 font-medium">
-                Your private conversations and community chats
-              </p>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={handleClearCache}
+                className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+              >
+                <ExclamationTriangleIcon className="h-4 w-4" />
+                <span>Limpiar Cache</span>
+              </button>
+              <button
+                onClick={() => setSelectedUserForChat({} as User)}
+                className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+              >
+                <UsersIcon className="h-5 w-5" />
+                <span>Nuevo Chat</span>
+              </button>
             </div>
           </div>
           
