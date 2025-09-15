@@ -120,9 +120,9 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
   const debouncedQuery = useDebounce(query, 300);
 
   const searchTabs = [
-    { key: 'all', label: 'Todo', icon: SparklesIcon },
-    { key: 'communities', label: 'Comunidades', icon: UsersIcon },
-    { key: 'people', label: 'Personas', icon: UserIcon }
+    { key: 'all', label: 'All', icon: SparklesIcon },
+    { key: 'communities', label: 'Communities', icon: UsersIcon },
+    { key: 'people', label: 'People', icon: UserIcon }
   ];
 
   // Focus al abrir y bloquear scroll del body

@@ -220,7 +220,7 @@ export default function MobileNavbar() {
                       onClick={() => handleGoTo('/profile/edit')}
                     >
                       <Cog6ToothIcon className="h-5 w-5 text-gray-400" />
-                      <span className="text-gray-700 dark:text-gray-300">Editar perfil</span>
+                      <span className="text-gray-700 dark:text-gray-300">Edit profile</span>
                     </button>
                     
                     {/* Toggle tema */}

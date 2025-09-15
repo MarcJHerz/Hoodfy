@@ -341,7 +341,7 @@ export default function MobileSidebar() {
 
 
 
-              {/* Mis Comunidades */}
+              {/* My Communities */}
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
@@ -415,7 +415,7 @@ export default function MobileSidebar() {
                 )}
               </div>
 
-              {/* Comunidades Sugeridas */}
+              {/* Suggested Communities */}
               {suggestedCommunities.length > 0 && (
                 <div>
                   <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">

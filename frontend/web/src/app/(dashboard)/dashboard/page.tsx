@@ -26,7 +26,6 @@ import {
   EyeIcon
 } from '@heroicons/react/24/outline';
 import { UserAvatar } from '@/components/UserAvatar';
-import QuickActionsBar from '@/components/QuickActionsBar';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
@@ -137,9 +136,6 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
-      {/* Enlaces rápidos mejorados */}
-      <QuickActionsBar />
-
       {/* Botón para crear post */}
       <div className="card p-6 mb-6 hover-lift">
         <div className="flex items-center space-x-4">

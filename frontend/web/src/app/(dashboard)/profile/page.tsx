@@ -130,10 +130,10 @@ export default function ProfilePage() {
   };
 
   const tabList = [
-    { key: 'posts', label: 'Publicaciones', icon: Squares2X2Icon },
-    { key: 'communities', label: 'Comunidades', icon: UsersIcon },
-    { key: 'allies', label: 'Aliados', icon: UserPlusIcon },
-    { key: 'about', label: 'Acerca de', icon: TagIcon },
+    { key: 'posts', label: 'Posts', icon: Squares2X2Icon },
+    { key: 'communities', label: 'Communities', icon: UsersIcon },
+    { key: 'allies', label: 'Allies', icon: UserPlusIcon },
+    { key: 'about', label: 'About', icon: TagIcon },
   ];
 
   useEffect(() => {
@@ -257,7 +257,7 @@ export default function ProfilePage() {
                   )}
           </div>
               {/* Estado online */}
-              <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 bg-green-500 border-2 sm:border-4 border-white dark:border-gray-800 rounded-full animate-pulse shadow-glow" title="En línea"></div>
+              <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 bg-green-500 border-2 sm:border-4 border-white dark:border-gray-800 rounded-full animate-pulse shadow-glow" title="Online"></div>
         </div>
             
             {/* Info y acciones - Optimizado para móvil */}
@@ -279,11 +279,11 @@ export default function ProfilePage() {
                     className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-secondary btn-sm sm:btn-lg shadow-soft hover:shadow-md text-sm sm:text-base"
                   >
                     <Cog6ToothIcon className="w-4 h-4" />
-                    Editar
+                    Edit
                   </Link>
                   <button className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-secondary btn-sm sm:btn-lg shadow-soft hover:shadow-md text-sm sm:text-base">
                     <ShareIcon className="w-4 h-4" />
-                    Compartir
+                    Share
                   </button>
                 </div>
               </div>
@@ -309,7 +309,7 @@ export default function ProfilePage() {
                     <UsersIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
                     <span className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{allCommunities.length}</span>
                   </div>
-                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Comunidades</div>
+                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Communities</div>
                 </div>
                 <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-lg sm:rounded-xl px-3 py-2 sm:px-6 sm:py-4 shadow-soft hover:shadow-md transition-all">
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
@@ -656,7 +656,7 @@ export default function ProfilePage() {
                               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                                 {allCommunities.length}
                               </div>
-                              <div className="text-sm text-gray-600 dark:text-gray-400">Comunidades</div>
+                              <div className="text-sm text-gray-600 dark:text-gray-400">Communities</div>
                             </div>
                             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
                               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
