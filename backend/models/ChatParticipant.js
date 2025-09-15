@@ -135,6 +135,7 @@ class ChatParticipant {
   async getUserChats(userId, includeMuted = true) {
     const client = await this.pool.connect();
     try {
+      console.log(`🔍 Obteniendo chats para usuario: ${userId}`);
       let query = `
         SELECT cp.*, 
                c.name as chat_name,
@@ -145,8 +146,8 @@ class ChatParticipant {
                c.last_message_id,
                c.settings as chat_settings
         FROM chat_participants cp
-        INNER JOIN chats c ON cp.chat_id = c.id
-        WHERE cp.user_id = $1 AND c.is_active = true
+        LEFT JOIN chats c ON cp.chat_id = c.id
+        WHERE cp.user_id = $1 AND c.is_active = true AND c.id IS NOT NULL
       `;
 
       const params = [userId];
@@ -158,6 +159,7 @@ class ChatParticipant {
       query += ` ORDER BY c.last_message_at DESC NULLS LAST`;
 
       const result = await client.query(query, params);
+      console.log(`📊 Chats encontrados para usuario ${userId}: ${result.rows.length}`);
       
       // Para cada chat, obtener información de los otros participantes
       const chatsWithParticipants = await Promise.all(
