@@ -334,10 +334,16 @@ router.get('/:chatId', verifyToken, async (req, res) => {
 // Obtener todos los chats del usuario
 router.get('/', verifyToken, async (req, res) => {
   try {
-    const userId = req.userId;
+    const firebaseUserId = req.userId; // Firebase UID
+    const mongoUserId = req.mongoUserId; // MongoDB ID
     const { includeMuted = 'true' } = req.query;
 
-    const chats = await participantModel.getUserChats(userId, includeMuted === 'true');
+    console.log(`🔍 Obteniendo chats para usuario Firebase: ${firebaseUserId}, MongoDB: ${mongoUserId}`);
+
+    // Usar el Firebase UID para obtener chats (que es lo que espera getUserChats)
+    const chats = await participantModel.getUserChats(firebaseUserId, includeMuted === 'true');
+
+    console.log(`📊 Chats encontrados: ${chats.length}`);
 
     res.json({
       success: true,
