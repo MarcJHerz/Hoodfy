@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { useChatStore } from '@/stores/chatStore';
 import { postgresChatService } from '@/services/postgresChatService';
-import { ChatRoom } from '@/types/chat';
+import { ChatRoom as ChatRoomType } from '@/types/chat';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { UserAvatar } from '@/components/UserAvatar';
@@ -13,6 +13,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ChatBubbleLeftIcon, UserGroupIcon, UserIcon, ExclamationTriangleIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import PrivateChatModal from '@/components/chat/PrivateChatModal';
+import ChatRoom from '@/components/chat/ChatRoom';
 import { User } from '@/types/user';
 import { users } from '@/services/api';
 import { UsersIcon } from '@heroicons/react/24/outline';
@@ -24,7 +25,9 @@ export default function MessagesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedUserForChat, setSelectedUserForChat] = useState<User | null>(null);
+  const [selectedChat, setSelectedChat] = useState<ChatRoomType | null>(null);
   const [loadingUsers, setLoadingUsers] = useState<Set<string>>(new Set());
+  const [showChatView, setShowChatView] = useState(false);
   
   // Cache local para información de usuarios
   const [userCache, setUserCache] = useState<Map<string, { name: string; profilePicture?: string }>>(new Map());
@@ -102,29 +105,36 @@ export default function MessagesPage() {
     };
   }, [user?._id, setChatRooms]);
 
-  const handleChatClick = (chat: ChatRoom) => {
+  const handleChatClick = (chat: ChatRoomType) => {
     // Marcar el chat como leído cuando se hace clic
     if (user?._id) {
       const { markMessagesAsRead } = useChatStore.getState();
       markMessagesAsRead(chat.id, user._id);
     }
 
-    // Navegar al chat individual usando Next.js router
-    router.push(`/chats/${chat.id}`);
+    // Mostrar el chat en la misma página
+    setSelectedChat(chat);
+    setShowChatView(true);
   };
 
   const handleClosePrivateChat = () => {
     setSelectedUserForChat(null);
   };
 
-  const getChatIcon = (chat: ChatRoom) => {
+
+  const handleBackToChatList = () => {
+    setShowChatView(false);
+    setSelectedChat(null);
+  };
+
+  const getChatIcon = (chat: ChatRoomType) => {
     if (chat.type === 'community') {
       return <UserGroupIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />;
     }
     return <UserIcon className="h-6 w-6 text-green-600 dark:text-green-400" />;
   };
 
-  const getChatName = (chat: ChatRoom) => {
+  const getChatName = (chat: ChatRoomType) => {
     if (chat.type === 'community') {
       const communityChat = chat as any;
       return communityChat.communityName || chat.name || 'Comunidad';
@@ -148,7 +158,7 @@ export default function MessagesPage() {
     return 'Usuario';
   };
 
-  const getChatImage = (chat: ChatRoom) => {
+  const getChatImage = (chat: ChatRoomType) => {
     if (chat.type === 'community') {
       return '/images/defaults/default-community.png';
     }
@@ -184,6 +194,55 @@ export default function MessagesPage() {
           <p className="text-gray-500 dark:text-gray-400">
             You must login to see your messages
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Si se está mostrando un chat, renderizar solo el chat
+  if (showChatView && selectedChat) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="h-screen flex flex-col">
+          {/* Header del chat */}
+          <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={handleBackToChatList}
+                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                  {getChatIcon(selectedChat)}
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    {getChatName(selectedChat)}
+                  </h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {selectedChat.type === 'community' ? 'Comunidad' : 'Conversación privada'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Componente ChatRoom */}
+          <div className="flex-1">
+            <ChatRoom
+              chatId={selectedChat.id}
+              chatName={getChatName(selectedChat)}
+              chatType={selectedChat.type}
+              onClose={handleBackToChatList}
+              isModal={false}
+              otherUserProfilePicture={selectedChat.type === 'private' ? (selectedChat as any).otherUserProfilePicture : undefined}
+              otherUserId={selectedChat.type === 'private' ? (selectedChat as any).otherUserId : undefined}
+            />
+          </div>
         </div>
       </div>
     );
@@ -450,7 +509,7 @@ export default function MessagesPage() {
         )}
       </div>
 
-      {/* Modal de chat privado */}
+      {/* Modal de chat privado (solo para crear nuevos chats) */}
       {selectedUserForChat && (
         <PrivateChatModal
           isOpen={!!selectedUserForChat}

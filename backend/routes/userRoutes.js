@@ -97,7 +97,7 @@ router.put('/profile/photo', verifyToken, upload.single('profilePicture'), handl
     const key = await uploadPublicAvatar(req.file.buffer, req.file.originalname, req.file.mimetype);
     
     // Actualizar usuario con el key de S3
-    const user = await User.findByIdAndUpdate(req.userId, { profilePicture: key }, { new: true });
+    const user = await User.findByIdAndUpdate(req.mongoUserId, { profilePicture: key }, { new: true });
 
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
@@ -320,7 +320,7 @@ router.put('/profile/update', verifyToken, upload.none(), async (req, res) => {
   try {
     const { name, username, bio, category, links } = req.body;
 
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.mongoUserId);
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }

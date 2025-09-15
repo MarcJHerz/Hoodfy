@@ -306,8 +306,12 @@ router.get('/:chatId', verifyToken, async (req, res) => {
     const userId = req.userId;
 
     // Verificar si el usuario es participante
+    console.log(`🔍 Verificando acceso al chat ${chatId} para usuario ${userId}`);
     const isParticipant = await participantModel.isParticipant(chatId, userId);
+    console.log(`📊 Resultado isParticipant: ${isParticipant}`);
+    
     if (!isParticipant) {
+      console.log(`❌ Usuario ${userId} no tiene acceso al chat ${chatId}`);
       return res.status(403).json({ error: 'No tienes acceso a este chat' });
     }
 
@@ -607,8 +611,12 @@ router.get('/:chatId/messages', verifyToken, async (req, res) => {
     const userId = req.userId;
 
     // Verificar si el usuario es participante
+    console.log(`🔍 Verificando acceso a mensajes del chat ${chatId} para usuario ${userId}`);
     const isParticipant = await participantModel.isParticipant(chatId, userId);
+    console.log(`📊 Resultado isParticipant para mensajes: ${isParticipant}`);
+    
     if (!isParticipant) {
+      console.log(`❌ Usuario ${userId} no tiene acceso a mensajes del chat ${chatId}`);
       return res.status(403).json({ error: 'No tienes acceso a este chat' });
     }
 

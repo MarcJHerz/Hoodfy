@@ -39,7 +39,7 @@ exports.createConnectAccount = async (req, res) => {
     }
 
     // Obtener información del usuario
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.mongoUserId);
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }

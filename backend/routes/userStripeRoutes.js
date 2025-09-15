@@ -20,7 +20,7 @@ router.post('/stripe-connect/account', async (req, res) => {
     const { accountType = 'express', country = 'US' } = req.body;
     
     // Verificar que el usuario no tenga ya una cuenta de Stripe Connect
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.mongoUserId);
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
@@ -97,7 +97,7 @@ router.get('/stripe-connect/status', async (req, res) => {
       return res.status(503).json({ error: 'Stripe no está configurado' });
     }
 
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.mongoUserId);
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
@@ -166,7 +166,7 @@ router.post('/stripe-connect/onboarding', async (req, res) => {
       return res.status(503).json({ error: 'Stripe no está configurado' });
     }
 
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.mongoUserId);
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
@@ -215,7 +215,7 @@ router.post('/stripe-connect/login', async (req, res) => {
       return res.status(503).json({ error: 'Stripe no está configurado' });
     }
 
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.mongoUserId);
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
