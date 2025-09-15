@@ -21,32 +21,32 @@ export default function Home() {
   const router = useRouter();
   const { user, isInitialized } = useAuthStore();
 
-  // Redirección automática para usuarios autenticados
+  // Automatic redirection for authenticated users
   useEffect(() => {
     if (isInitialized && user) {
-      console.log('🔄 Usuario autenticado detectado, redirigiendo al dashboard...');
+      console.log('🔄 Authenticated user detected, redirecting to dashboard...');
       router.replace('/dashboard');
     }
   }, [user, isInitialized, router]);
 
-  // Mostrar loading mientras se inicializa la autenticación
+  // Show loading while authentication is initializing
   if (!isInitialized) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-600 dark:border-primary-400 border-t-transparent mx-auto mb-6"></div>
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Cargando Hoodfy
+            Loading Hoodfy
           </h3>
           <p className="text-gray-500 dark:text-gray-400">
-            Preparando tu experiencia...
+            Preparing your experience...
           </p>
         </div>
       </div>
     );
   }
 
-  // Si el usuario está autenticado, no mostrar nada (ya se redirigió)
+  // If the user is authenticated, show nothing (already redirected)
   if (user) {
     return null;
   }

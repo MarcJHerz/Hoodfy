@@ -90,7 +90,7 @@ export default function PublicProfilePage() {
   const [isSharedCommunitiesModalOpen, setIsSharedCommunitiesModalOpen] = useState(false);
 
   // Combinamos comunidades creadas y unidas
-  const allCommunities = [...createdCommunities, ...joinedCommunities];
+  const allCommunities = [...(createdCommunities || []), ...(joinedCommunities || [])];
 
   const tabList = [
     { key: 'posts', label: 'Posts', icon: Squares2X2Icon },
@@ -449,7 +449,7 @@ export default function PublicProfilePage() {
                 <div className="bg-white/80 dark:bg-gray-800/80 glass-strong rounded-lg sm:rounded-xl px-3 py-2 sm:px-6 sm:py-4 shadow-soft hover:shadow-md transition-all">
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
                     <UsersIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
-                    <span className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{allCommunities.length}</span>
+                    <span className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{(allCommunities || []).length}</span>
                   </div>
                   <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Communities</div>
                 </div>
@@ -492,7 +492,7 @@ export default function PublicProfilePage() {
           <Tab.Panels>
             {/* Posts Tab */}
             <Tab.Panel>
-              {userPosts.length === 0 ? (
+              {(userPosts || []).length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">📝</div>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
@@ -504,7 +504,7 @@ export default function PublicProfilePage() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {userPosts.map((post) => (
+                  {(userPosts || []).map((post) => (
                     <PostCard
                       key={post._id}
                       post={post}
@@ -526,7 +526,7 @@ export default function PublicProfilePage() {
 
             {/* Communities Tab */}
             <Tab.Panel>
-              {allCommunities.length === 0 ? (
+              {(allCommunities || []).length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">🏘️</div>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
@@ -571,7 +571,7 @@ export default function PublicProfilePage() {
 
             {/* Allies Tab */}
             <Tab.Panel>
-              {allies.length === 0 ? (
+              {(allies || []).length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">👥</div>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
@@ -583,7 +583,7 @@ export default function PublicProfilePage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {allies.map((ally) => (
+                  {(allies || []).map((ally) => (
                     <div key={ally._id} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-soft hover:shadow-md transition-all duration-200">
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">

@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const Community = require('../models/Community');
+const User = require('../models/User');
 const { verifyToken } = require('../middleware/authMiddleware');
 const Ally = require('../models/Ally');
 
