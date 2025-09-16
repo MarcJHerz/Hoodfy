@@ -470,7 +470,7 @@ export default function PublicProfilePage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <Tab.Group>
           <Tab.List className="flex space-x-1 rounded-xl bg-blue-900/20 p-1 mb-6">
-            {tabList.map((tab) => (
+            {(tabList || []).map((tab) => (
               <Tab
                 key={tab.key}
                 className={({ selected }) =>
@@ -538,7 +538,7 @@ export default function PublicProfilePage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {allCommunities.map((community) => (
+                  {(allCommunities || []).map((community) => (
                     <div key={community._id} className="bg-white dark:bg-gray-800 rounded-xl shadow-soft hover:shadow-md transition-all duration-200 overflow-hidden">
                       <CommunityImage coverImage={community.coverImage} name={community.name} />
                       <div className="p-4">
