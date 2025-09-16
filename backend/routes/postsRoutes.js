@@ -72,7 +72,55 @@ const upload = multer({
   }
 });
 
-// Middleware de autenticación para todas las rutas
+// 📌 Endpoint público para obtener posts de un usuario (sin autenticación) - DEBE IR ANTES DEL MIDDLEWARE
+router.get('/public/user/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { page = 1, limit = 6 } = req.query;
+    
+    // Buscar usuario por ID o Firebase UID
+    const User = require('../models/User');
+    let user = await User.findById(userId).catch(() => null);
+    if (!user) {
+      user = await User.findOne({ firebaseUid: userId });
+    }
+    
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Obtener posts públicos del usuario (solo posts generales, no de comunidades privadas)
+    const posts = await Post.find({
+      author: user._id,
+      type: 'general', // Solo posts generales
+      isPublic: true // Solo posts públicos
+    })
+    .populate('author', 'name username profilePicture')
+    .populate('community', 'name')
+    .sort({ createdAt: -1 })
+    .limit(parseInt(limit))
+    .skip((parseInt(page) - 1) * parseInt(limit));
+
+    // Contar total de posts públicos
+    const totalPosts = await Post.countDocuments({
+      author: user._id,
+      type: 'general',
+      isPublic: true
+    });
+
+    res.json({
+      posts,
+      totalPosts,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(totalPosts / parseInt(limit))
+    });
+  } catch (error) {
+    console.error('Error al obtener posts públicos del usuario:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// Middleware de autenticación para todas las rutas protegidas
 router.use(verifyToken);
 
 // Middleware para manejar errores de multer
@@ -541,52 +589,5 @@ router.post('/:postId/pin', apiRateLimit, postController.togglePinPost);
 // Obtener posts filtrados por tipo (creador o comunidad)
 router.get('/community/:communityId/filtered', apiRateLimit, postController.getCommunityPostsFiltered);
 
-// 📌 Endpoint público para obtener posts de un usuario (sin autenticación)
-router.get('/public/user/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { page = 1, limit = 6 } = req.query;
-    
-    // Buscar usuario por ID o Firebase UID
-    const User = require('../models/User');
-    let user = await User.findById(userId).catch(() => null);
-    if (!user) {
-      user = await User.findOne({ firebaseUid: userId });
-    }
-    
-    if (!user) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
-    }
-
-    // Obtener posts públicos del usuario (solo posts generales, no de comunidades privadas)
-    const posts = await Post.find({
-      author: user._id,
-      type: 'general', // Solo posts generales
-      isPublic: true // Solo posts públicos
-    })
-    .populate('author', 'name username profilePicture')
-    .populate('community', 'name')
-    .sort({ createdAt: -1 })
-    .limit(parseInt(limit))
-    .skip((parseInt(page) - 1) * parseInt(limit));
-
-    // Contar total de posts públicos
-    const totalPosts = await Post.countDocuments({
-      author: user._id,
-      type: 'general',
-      isPublic: true
-    });
-
-    res.json({
-      posts,
-      totalPosts,
-      currentPage: parseInt(page),
-      totalPages: Math.ceil(totalPosts / parseInt(limit))
-    });
-  } catch (error) {
-    console.error('Error al obtener posts públicos del usuario:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-});
 
 module.exports = router; 

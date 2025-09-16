@@ -88,6 +88,8 @@ export default function PublicProfilePage() {
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isSharedCommunitiesModalOpen, setIsSharedCommunitiesModalOpen] = useState(false);
+  const [sharedCommunities, setSharedCommunities] = useState<Community[]>([]);
+  const [hasSharedCommunities, setHasSharedCommunities] = useState(false);
 
   // Combinamos comunidades creadas y unidas
   const allCommunities = [
@@ -261,6 +263,30 @@ export default function PublicProfilePage() {
           }
         }
         setAllies(Array.isArray(alliesData) ? alliesData : []);
+
+        // Verificar comunidades compartidas si el usuario está autenticado y no es su propio perfil
+        if (authUser && !isOwn) {
+          try {
+            // Obtener comunidades del usuario autenticado
+            const myCommunitiesResponse = await api.get('/api/communities/joined-by/me');
+            const myCommunities = Array.isArray(myCommunitiesResponse.data) ? myCommunitiesResponse.data : [];
+            
+            // Encontrar comunidades compartidas
+            const shared = allCommunities.filter(community => 
+              myCommunities.some(myCommunity => myCommunity._id === community._id)
+            );
+            
+            setSharedCommunities(shared);
+            setHasSharedCommunities(shared.length > 0);
+          } catch (error) {
+            console.error('Error checking shared communities:', error);
+            setSharedCommunities([]);
+            setHasSharedCommunities(false);
+          }
+        } else {
+          setSharedCommunities([]);
+          setHasSharedCommunities(false);
+        }
 
       } catch (error: any) {
         console.error('Error fetching profile data:', error);
@@ -508,22 +534,81 @@ export default function PublicProfilePage() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {(userPosts || []).map((post) => (
-                    <PostCard
-                      key={post._id}
-                      post={post}
-                      onCommentClick={handleCommentClick}
-                      onPostUpdate={(updatedPost) => {
-                        const index = userPosts.findIndex(p => p._id === updatedPost._id);
-                        if (index !== -1) {
-                          const newPosts = [...userPosts];
-                          newPosts[index] = updatedPost;
-                          setUserPosts(newPosts);
-                        }
-                      }}
-                      showCommunity={true}
-                    />
-                  ))}
+                  {/* Mostrar mensaje de restricción si no hay comunidades compartidas y no es el propio perfil */}
+                  {!isOwnProfile && !hasSharedCommunities && authUser && (
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 mb-6">
+                      <div className="flex items-center">
+                        <LockClosedIcon className="w-6 h-6 text-yellow-600 dark:text-yellow-400 mr-3" />
+                        <div>
+                          <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200">
+                            Contenido Restringido
+                          </h3>
+                          <p className="text-yellow-700 dark:text-yellow-300 mt-1">
+                            Para ver los posts de {user.name}, necesitas pertenecer a una comunidad en común.
+                          </p>
+                          <button
+                            onClick={() => setIsSharedCommunitiesModalOpen(true)}
+                            className="mt-3 text-yellow-800 dark:text-yellow-200 font-medium hover:underline"
+                          >
+                            Ver comunidades compartidas
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Mostrar mensaje para usuarios no autenticados */}
+                  {!authUser && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mb-6">
+                      <div className="flex items-center">
+                        <UserCircleIcon className="w-6 h-6 text-blue-600 dark:text-blue-400 mr-3" />
+                        <div>
+                          <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200">
+                            Regístrate para ver más contenido
+                          </h3>
+                          <p className="text-blue-700 dark:text-blue-300 mt-1">
+                            Únete a Hoodfy para ver los posts de {user.name} y conectar con otros usuarios.
+                          </p>
+                          <div className="mt-3 flex gap-3">
+                            <button
+                              onClick={() => router.push('/register')}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                              Registrarse
+                            </button>
+                            <button
+                              onClick={() => router.push('/login')}
+                              className="px-4 py-2 border border-blue-600 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                            >
+                              Iniciar Sesión
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Mostrar posts solo si es el propio perfil, hay comunidades compartidas, o no está autenticado (posts públicos) */}
+                  {(isOwnProfile || hasSharedCommunities || !authUser) && (
+                    <div className="space-y-6">
+                      {(userPosts || []).map((post) => (
+                        <PostCard
+                          key={post._id}
+                          post={post}
+                          onCommentClick={handleCommentClick}
+                          onPostUpdate={(updatedPost) => {
+                            const index = userPosts.findIndex(p => p._id === updatedPost._id);
+                            if (index !== -1) {
+                              const newPosts = [...userPosts];
+                              newPosts[index] = updatedPost;
+                              setUserPosts(newPosts);
+                            }
+                          }}
+                          showCommunity={true}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </Tab.Panel>
@@ -667,6 +752,7 @@ export default function PublicProfilePage() {
               username: user.username,
               profilePicture: user.profilePicture
             }}
+            sharedCommunities={sharedCommunities}
           />
         </>
       )}

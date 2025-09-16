@@ -29,6 +29,7 @@ interface SharedCommunitiesModalProps {
     profilePicture?: string;
   };
   onAllyAdded?: () => void;
+  sharedCommunities?: Community[];
 }
 
 interface CommunityCard {
@@ -41,7 +42,8 @@ export default function SharedCommunitiesModal({
   isOpen, 
   onClose, 
   targetUser,
-  onAllyAdded 
+  onAllyAdded,
+  sharedCommunities
 }: SharedCommunitiesModalProps) {
   const { user: currentUser } = useAuthStore();
   const [targetUserCommunities, setTargetUserCommunities] = useState<CommunityCard[]>([]);
@@ -51,9 +53,20 @@ export default function SharedCommunitiesModal({
   // Fetch target user's communities
   useEffect(() => {
     if (isOpen && currentUser) {
-      fetchTargetUserCommunities();
+      if (sharedCommunities && sharedCommunities.length > 0) {
+        // Usar las comunidades compartidas proporcionadas
+        const communityCards: CommunityCard[] = sharedCommunities.map(community => ({
+          community,
+          userRole: 'member', // Asumimos que es miembro por simplicidad
+          currentUserStatus: 'member' // Ya que son comunidades compartidas
+        }));
+        setTargetUserCommunities(communityCards);
+        setIsLoading(false);
+      } else {
+        fetchTargetUserCommunities();
+      }
     }
-  }, [isOpen, currentUser, targetUser._id]);
+  }, [isOpen, currentUser, targetUser._id, sharedCommunities]);
 
   const fetchTargetUserCommunities = async () => {
     try {
