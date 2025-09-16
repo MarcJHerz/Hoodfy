@@ -198,7 +198,7 @@ export default function PublicProfilePage() {
         const userId = Array.isArray(id) ? id[0] : id;
 
         // Usar endpoint público para usuarios no registrados
-        const userResponse = await api.get(`/api/users/public-profile/${userId}`);
+        const userResponse = await api.get(`/api/users/public/${userId}`);
         
         if (!userResponse.data) {
           throw new Error('Could not get user information');

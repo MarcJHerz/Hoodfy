@@ -190,8 +190,9 @@ router.get('/recommended', verifyToken, async (req, res) => {
 });
 
 // 📌 Endpoint público para obtener perfil de usuario (sin autenticación) - DEBE IR ANTES DE /:userId
-router.get('/public-profile/:userId', async (req, res) => {
+router.get('/public/:userId', async (req, res) => {
   try {
+    console.log('🔍 Ruta pública /public/:userId llamada con userId:', req.params.userId);
     const { userId } = req.params;
     if (!userId) {
       return res.status(400).json({ error: 'Falta el userId en la solicitud.' });
@@ -283,6 +284,7 @@ router.get('/search', verifyToken, async (req, res) => {
 // 🔧 Ruta específica para obtener usuario por ID (para chat service)
 router.get('/:userId', verifyToken, async (req, res) => {
   try {
+    console.log('🔍 Ruta protegida /:userId llamada con userId:', req.params.userId);
     const { userId } = req.params;
     if (!userId) {
       return res.status(400).json({ error: 'Falta el userId en la solicitud.' });

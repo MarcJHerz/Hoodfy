@@ -48,7 +48,7 @@ const getToken = () => {
 api.interceptors.request.use((config) => {
   // Lista de rutas públicas que no requieren autenticación
   const publicRoutes = [
-    '/api/users/public-profile/',
+    '/api/users/public/',
     '/api/communities/public/',
     '/api/posts/public/',
     '/api/communities/public/created-by/',
@@ -79,11 +79,44 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.log('🚨 Error en interceptor de axios:', {
+      status: error.response?.status,
+      url: error.config?.url,
+      message: error.message
+    });
+    
     if (error.response?.status === 401) {
-      // Token expirado, limpiar datos de autenticación
-      localStorage.removeItem('token');
-      document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      window.location.href = '/login';
+      // Lista de rutas públicas que NO deben redirigir a login
+      const publicRoutes = [
+        '/api/users/public/',
+        '/api/communities/public/',
+        '/api/posts/public/',
+        '/api/communities/public/created-by/',
+        '/api/communities/public/joined-by/',
+        '/api/posts/public/user/'
+      ];
+      
+      // Verificar si la URL que falló es una ruta pública
+      const isPublicRoute = publicRoutes.some(route => 
+        error.config?.url?.includes(route)
+      );
+      
+      console.log('🔍 Verificando si es ruta pública:', {
+        url: error.config?.url,
+        isPublicRoute,
+        publicRoutes
+      });
+      
+      // Solo redirigir a login si NO es una ruta pública
+      if (!isPublicRoute) {
+        console.log('🔄 Redirigiendo a login...');
+        // Token expirado, limpiar datos de autenticación
+        localStorage.removeItem('token');
+        document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        window.location.href = '/login';
+      } else {
+        console.log('✅ Es ruta pública, no redirigiendo a login');
+      }
     }
     return Promise.reject(error);
   }
