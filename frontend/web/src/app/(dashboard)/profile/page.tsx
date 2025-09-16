@@ -117,14 +117,16 @@ export default function ProfilePage() {
   };
 
   const handleShare = () => {
+    const profileUrl = `${window.location.origin}/profile/${user?._id}`;
+    
     if (navigator.share) {
       navigator.share({
         title: `${user?.name} - Hoodfy Profile`,
         text: `Check out ${user?.name}'s profile on Hoodfy`,
-        url: window.location.href,
+        url: profileUrl,
       });
     } else {
-      navigator.clipboard.writeText(window.location.href);
+      navigator.clipboard.writeText(profileUrl);
       toast.success('Profile link copied to clipboard!');
     }
   };

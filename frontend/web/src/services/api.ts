@@ -46,9 +46,25 @@ const getToken = () => {
 
 // Interceptor para agregar el token de autenticación
 api.interceptors.request.use((config) => {
-  const token = getToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  // Lista de rutas públicas que no requieren autenticación
+  const publicRoutes = [
+    '/api/users/public-profile/',
+    '/api/communities/public/',
+    '/api/posts/public/',
+    '/api/communities/public/created-by/',
+    '/api/communities/public/joined-by/',
+    '/api/posts/public/user/'
+  ];
+  
+  // Verificar si la ruta es pública
+  const isPublicRoute = publicRoutes.some(route => config.url?.includes(route));
+  
+  // Solo agregar token si no es una ruta pública
+  if (!isPublicRoute) {
+    const token = getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   
   // Si el data es FormData, eliminar el Content-Type para que el navegador lo configure automáticamente
