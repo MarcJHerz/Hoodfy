@@ -88,6 +88,7 @@ export default function PublicProfilePage() {
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isSharedCommunitiesModalOpen, setIsSharedCommunitiesModalOpen] = useState(false);
+  const [isPrivateChatModalOpen, setIsPrivateChatModalOpen] = useState(false);
   const [sharedCommunities, setSharedCommunities] = useState<Community[]>([]);
   const [hasSharedCommunities, setHasSharedCommunities] = useState(false);
 
@@ -450,6 +451,25 @@ export default function PublicProfilePage() {
                     </>
                   )}
                   
+                  {/* Botón de Message - Solo para usuarios autenticados y no es el propio perfil */}
+                  {authUser && !isOwnProfile && (
+                    <button
+                      onClick={() => {
+                        if (isAlly) {
+                          // Si son aliados, abrir chat directo
+                          setIsPrivateChatModalOpen(true);
+                        } else {
+                          // Si no son aliados, mostrar modal de comunidades compartidas
+                          setIsSharedCommunitiesModalOpen(true);
+                        }
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-secondary btn-sm sm:btn-lg shadow-soft hover:shadow-md text-sm sm:text-base"
+                    >
+                      <ChatBubbleLeftIcon className="w-4 h-4" />
+                      Message
+                    </button>
+                  )}
+                  
                   <button 
                     onClick={handleShare}
                     className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-secondary btn-sm sm:btn-lg shadow-soft hover:shadow-md text-sm sm:text-base"
@@ -743,17 +763,38 @@ export default function PublicProfilePage() {
             }}
           />
 
-          <SharedCommunitiesModal
-            isOpen={isSharedCommunitiesModalOpen}
-            onClose={() => setIsSharedCommunitiesModalOpen(false)}
-            targetUser={{
-              _id: user._id,
-              name: user.name,
-              username: user.username,
-              profilePicture: user.profilePicture
-            }}
-            sharedCommunities={sharedCommunities}
-          />
+          {user && (
+            <SharedCommunitiesModal
+              isOpen={isSharedCommunitiesModalOpen}
+              onClose={() => setIsSharedCommunitiesModalOpen(false)}
+              targetUser={{
+                _id: user._id,
+                name: user.name,
+                username: user.username,
+                profilePicture: user.profilePicture
+              }}
+              sharedCommunities={sharedCommunities}
+            />
+          )}
+
+          {user && user._id && user.name && user.username && (
+            <PrivateChatModal
+              isOpen={isPrivateChatModalOpen}
+              onClose={() => setIsPrivateChatModalOpen(false)}
+              otherUser={{
+                _id: user._id,
+                firebaseUid: user.firebaseUid || '',
+                name: user.name,
+                username: user.username,
+                email: user.email || '',
+                profilePicture: user.profilePicture,
+                bio: user.bio,
+                verified: user.verified,
+                createdAt: user.createdAt || '',
+                updatedAt: user.updatedAt || ''
+              }}
+            />
+          )}
         </>
       )}
     </div>
