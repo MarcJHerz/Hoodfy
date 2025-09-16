@@ -36,11 +36,23 @@ import { Post } from '@/types/post';
 import { User, UserProfile } from '@/types/user';
 import { users, posts, communities } from '@/services/api';
 import api from '@/services/api';
+import axios from 'axios';
 import CommentsModal from '@/components/CommentsModal';
 import PostCard from '@/components/PostCard';
 import { useImageUrl } from '@/utils/useImageUrl';
 import PrivateChatModal from '@/components/chat/PrivateChatModal';
 import SharedCommunitiesModal from '@/components/SharedCommunitiesModal';
+
+// Instancia de API sin autenticación para rutas públicas
+const publicApi = axios.create({
+  baseURL: process.env.NODE_ENV === 'production' 
+    ? 'https://api.hoodfy.com' 
+    : 'http://localhost:5000',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true
+});
 
 // Componente para manejar imágenes de comunidades individualmente
 const CommunityImage = ({ coverImage, name }: { coverImage?: string; name: string }) => {
@@ -196,7 +208,7 @@ export default function PublicProfilePage() {
         const userId = Array.isArray(id) ? id[0] : id;
 
         // Usar endpoint público para usuarios no registrados
-        const userResponse = await api.get(`/api/users/public-profile/${userId}`);
+        const userResponse = await publicApi.get(`/api/users/public-profile/${userId}`);
         
         if (!userResponse.data) {
           throw new Error('Could not get user information');
@@ -224,7 +236,7 @@ export default function PublicProfilePage() {
 
         // Obtener posts públicos del usuario
         try {
-          const postsResponse = await api.get(`/api/posts/public/user/${userId}`);
+          const postsResponse = await publicApi.get(`/api/posts/public/user/${userId}`);
           setUserPosts(Array.isArray(postsResponse.data) ? postsResponse.data : []);
         } catch (error) {
           console.error('Error fetching user posts:', error);
@@ -233,7 +245,7 @@ export default function PublicProfilePage() {
 
         // Obtener comunidades creadas por el usuario
         try {
-          const createdResponse = await api.get(`/api/communities/public/created-by/${userId}`);
+          const createdResponse = await publicApi.get(`/api/communities/public/created-by/${userId}`);
           setCreatedCommunities(Array.isArray(createdResponse.data) ? createdResponse.data : []);
         } catch (error) {
           console.error('Error fetching created communities:', error);
@@ -242,7 +254,7 @@ export default function PublicProfilePage() {
 
         // Obtener comunidades a las que se unió el usuario
         try {
-          const joinedResponse = await api.get(`/api/communities/public/joined-by/${userId}`);
+          const joinedResponse = await publicApi.get(`/api/communities/public/joined-by/${userId}`);
           setJoinedCommunities(Array.isArray(joinedResponse.data) ? joinedResponse.data : []);
         } catch (error) {
           console.error('Error fetching joined communities:', error);
@@ -388,15 +400,7 @@ export default function PublicProfilePage() {
                         </Link>
                       ) : (
                         <>
-                          {isAlly ? (
-                            <button
-                              onClick={handleRemoveAlly}
-                              className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-primary btn-sm sm:btn-lg shadow-glow hover:shadow-glow-accent text-sm sm:text-base"
-                            >
-                              <UserPlusIcon className="w-4 h-4" />
-                              Remove Ally
-                            </button>
-                          ) : (
+                          {!isAlly && (
                             <button
                               onClick={handleAddAlly}
                               className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 btn-primary btn-sm sm:btn-lg shadow-glow hover:shadow-glow-accent text-sm sm:text-base"
@@ -404,6 +408,12 @@ export default function PublicProfilePage() {
                               <UserPlusIcon className="w-4 h-4" />
                               Add as Ally
                             </button>
+                          )}
+                          {isAlly && (
+                            <div className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg text-sm sm:text-base">
+                              <UserPlusIcon className="w-4 h-4" />
+                              Ally
+                            </div>
                           )}
                         </>
                       )}

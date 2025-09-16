@@ -618,7 +618,7 @@ router.get('/public/created-by/:userId', async (req, res) => {
     // Obtener comunidades creadas por el usuario (solo públicas)
     const communities = await Community.find({
       creator: user._id,
-      isPublic: true // Solo comunidades públicas
+      isPrivate: { $ne: true } // Excluir comunidades privadas
     })
     .select('name description coverImage members isFree createdAt')
     .populate('creator', 'name username profilePicture')
@@ -650,7 +650,7 @@ router.get('/public/joined-by/:userId', async (req, res) => {
     // Obtener comunidades donde el usuario es miembro (solo públicas)
     const communities = await Community.find({
       members: user._id,
-      isPublic: true // Solo comunidades públicas
+      isPrivate: { $ne: true } // Excluir comunidades privadas
     })
     .select('name description coverImage members isFree createdAt')
     .populate('creator', 'name username profilePicture')
