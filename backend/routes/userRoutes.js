@@ -360,7 +360,7 @@ router.put('/profile/blocks', verifyToken, async (req, res) => {
     }
 
     const updatedUser = await User.findByIdAndUpdate(
-      req.userId,
+      req.mongoUserId,
       { profileBlocks: profileBlocks },
       { new: true, runValidators: false }
     );

@@ -90,7 +90,10 @@ export default function PublicProfilePage() {
   const [isSharedCommunitiesModalOpen, setIsSharedCommunitiesModalOpen] = useState(false);
 
   // Combinamos comunidades creadas y unidas
-  const allCommunities = [...(createdCommunities || []), ...(joinedCommunities || [])];
+  const allCommunities = [
+    ...(Array.isArray(createdCommunities) ? createdCommunities : []), 
+    ...(Array.isArray(joinedCommunities) ? joinedCommunities : [])
+  ];
 
   const tabList = [
     { key: 'posts', label: 'Posts', icon: Squares2X2Icon },
@@ -213,13 +216,16 @@ export default function PublicProfilePage() {
             console.error('Error checking ally status:', error);
             setIsAlly(false);
           }
+        } else {
+          // Si no está autenticado, no son aliados
+          setIsAlly(false);
         }
         setAllyCheckLoading(false);
 
         // Obtener posts públicos del usuario
         try {
           const postsResponse = await api.get(`/api/posts/public/user/${userId}`);
-          setUserPosts(postsResponse.data || []);
+          setUserPosts(Array.isArray(postsResponse.data) ? postsResponse.data : []);
         } catch (error) {
           console.error('Error fetching user posts:', error);
           setUserPosts([]);
@@ -228,7 +234,7 @@ export default function PublicProfilePage() {
         // Obtener comunidades creadas por el usuario
         try {
           const createdResponse = await api.get(`/api/communities/public/created-by/${userId}`);
-          setCreatedCommunities(createdResponse.data || []);
+          setCreatedCommunities(Array.isArray(createdResponse.data) ? createdResponse.data : []);
         } catch (error) {
           console.error('Error fetching created communities:', error);
           setCreatedCommunities([]);
@@ -237,7 +243,7 @@ export default function PublicProfilePage() {
         // Obtener comunidades a las que se unió el usuario
         try {
           const joinedResponse = await api.get(`/api/communities/public/joined-by/${userId}`);
-          setJoinedCommunities(joinedResponse.data || []);
+          setJoinedCommunities(Array.isArray(joinedResponse.data) ? joinedResponse.data : []);
         } catch (error) {
           console.error('Error fetching joined communities:', error);
           setJoinedCommunities([]);
@@ -248,13 +254,13 @@ export default function PublicProfilePage() {
         if (authUser && userId === authUser._id) {
           try {
             const response = await users.getAllies();
-            alliesData = response.data?.allies || [];
+            alliesData = Array.isArray(response.data?.allies) ? response.data.allies : [];
           } catch (error) {
             console.error('Error fetching allies:', error);
             alliesData = [];
           }
         }
-        setAllies(alliesData);
+        setAllies(Array.isArray(alliesData) ? alliesData : []);
 
       } catch (error: any) {
         console.error('Error fetching profile data:', error);

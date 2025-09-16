@@ -235,7 +235,7 @@ const handleMulterError = (error, req, res, next) => {
 router.post('/create', verifyToken, upload.single('coverImage'), handleMulterError, async (req, res) => {
   try {
     const { name, description, priceType, price, customPriceData } = req.body;
-    const userId = req.userId;
+    const userId = req.mongoUserId;
 
     // Verificar si ya existe una comunidad con el mismo nombre
     const existingCommunity = await Community.findOne({ name });
@@ -411,13 +411,13 @@ router.post('/:id/join', verifyToken, async (req, res) => {
       return res.status(404).json({ error: 'Comunidad no encontrada' });
     }
 
-    if (community.members.includes(req.userId)) {
+    if (community.members.includes(req.mongoUserId)) {
       return res.status(400).json({ error: 'Ya eres miembro de esta comunidad' });
     }
 
-    await community.addMember(req.userId);
+    await community.addMember(req.mongoUserId);
     // Crear aliados automáticamente
-    await makeAllies(req.userId, community._id);
+    await makeAllies(req.mongoUserId, community._id);
     res.json({ message: 'Te has unido a la comunidad exitosamente' });
   } catch (error) {
     console.error('Error al unirse a la comunidad:', error);
@@ -433,32 +433,32 @@ router.post('/:id/leave', verifyToken, async (req, res) => {
       return res.status(404).json({ error: 'Comunidad no encontrada' });
     }
 
-    if (community.creator.toString() === req.userId.toString()) {
+    if (community.creator.toString() === req.mongoUserId.toString()) {
       return res.status(403).json({ error: 'El creador no puede salir de la comunidad' });
     }
 
-    if (!community.members.includes(req.userId)) {
+    if (!community.members.includes(req.mongoUserId)) {
       return res.status(400).json({ error: 'No eres miembro de esta comunidad' });
     }
 
     // Guardar los miembros actuales antes de salir
-    const miembrosAntes = community.members.filter(id => id.toString() !== req.userId.toString());
+    const miembrosAntes = community.members.filter(id => id.toString() !== req.mongoUserId.toString());
 
-    await community.removeMember(req.userId);
+    await community.removeMember(req.mongoUserId);
 
     // Lógica avanzada: eliminar aliados si ya no comparten ninguna comunidad
     for (const miembroId of miembrosAntes) {
       // Buscar si ambos usuarios comparten alguna otra comunidad
       const compartenOtra = await Community.exists({
-        members: { $all: [req.userId, miembroId] },
+        members: { $all: [req.mongoUserId, miembroId] },
         _id: { $ne: community._id }
       });
       if (!compartenOtra) {
         // Eliminar la relación Ally en cualquier dirección
         await Ally.findOneAndDelete({
           $or: [
-            { user1: req.userId, user2: miembroId },
-            { user1: miembroId, user2: req.userId }
+            { user1: req.mongoUserId, user2: miembroId },
+            { user1: miembroId, user2: req.mongoUserId }
           ]
         });
       }
@@ -477,7 +477,7 @@ router.delete('/:id', verifyToken, async (req, res) => {
     const community = await Community.findById(req.params.id);
     if (!community) return res.status(404).json({ error: 'Comunidad no encontrada' });
 
-    if (!community.creator.equals(req.userId)) {
+    if (!community.creator.equals(req.mongoUserId)) {
       return res.status(403).json({ error: 'No tienes permiso para eliminar esta comunidad' });
     }
 
@@ -500,7 +500,7 @@ router.put('/:id/update', verifyToken, upload.single('coverImage'), handleMulter
     }
 
     // Verificar que el usuario sea el creador
-    if (community.creator.toString() !== req.userId.toString()) {
+    if (community.creator.toString() !== req.mongoUserId.toString()) {
       return res.status(403).json({ error: 'No tienes permiso para editar esta comunidad' });
     }
 
@@ -536,8 +536,8 @@ router.put('/:id/update', verifyToken, upload.single('coverImage'), handleMulter
 router.get('/joined-by/me', verifyToken, async (req, res) => {
   try {
     const communities = await Community.find({ 
-      members: req.userId,
-      creator: { $ne: req.userId } // Excluir comunidades donde el usuario es el creador
+      members: req.mongoUserId,
+      creator: { $ne: req.mongoUserId } // Excluir comunidades donde el usuario es el creador
     })
     .populate('creator', 'name profilePicture')
     .populate('members', 'name profilePicture');
@@ -585,10 +585,10 @@ router.post('/:id/join-free', verifyToken, async (req, res) => {
     if (!community.isFree) {
       return res.status(400).json({ error: 'Esta comunidad no es gratuita.' });
     }
-    if (community.members.includes(req.userId)) {
+    if (community.members.includes(req.mongoUserId)) {
       return res.status(400).json({ error: 'Ya eres miembro de esta comunidad' });
     }
-    await community.addMember(req.userId);
+    await community.addMember(req.mongoUserId);
     res.json({ message: 'Te has unido a la comunidad gratuita exitosamente' });
   } catch (error) {
     console.error('Error al unirse a comunidad gratuita:', error);

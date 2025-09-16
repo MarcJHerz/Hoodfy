@@ -26,7 +26,7 @@ exports.createConnectAccount = async (req, res) => {
       return res.status(404).json({ error: 'Comunidad no encontrada' });
     }
 
-    if (community.creator.toString() !== req.userId.toString()) {
+    if (community.creator.toString() !== req.mongoUserId.toString()) {
       return res.status(403).json({ error: 'Solo el creador puede configurar pagos' });
     }
 
@@ -120,7 +120,7 @@ exports.getConnectAccountStatus = async (req, res) => {
       return res.status(404).json({ error: 'Comunidad no encontrada' });
     }
 
-    if (community.creator.toString() !== req.userId.toString()) {
+    if (community.creator.toString() !== req.mongoUserId.toString()) {
       return res.status(403).json({ error: 'Solo el creador puede ver el estado de pagos' });
     }
 
@@ -159,8 +159,8 @@ exports.getConnectAccountStatus = async (req, res) => {
     }
 
     // Obtener estadísticas de ganancias
-    const earnings = await Payout.getCreatorTotalEarnings(req.userId, communityId);
-    const pendingBalance = await Payout.getCreatorPendingBalance(req.userId, communityId);
+    const earnings = await Payout.getCreatorTotalEarnings(req.mongoUserId, communityId);
+    const pendingBalance = await Payout.getCreatorPendingBalance(req.mongoUserId, communityId);
 
     res.json({
       accountId: account.id,
@@ -208,7 +208,7 @@ exports.createOnboardingLink = async (req, res) => {
       return res.status(404).json({ error: 'Comunidad no encontrada' });
     }
 
-    if (community.creator.toString() !== req.userId.toString()) {
+    if (community.creator.toString() !== req.mongoUserId.toString()) {
       return res.status(403).json({ error: 'Solo el creador puede acceder al onboarding' });
     }
 
@@ -260,7 +260,7 @@ exports.createLoginLink = async (req, res) => {
       return res.status(404).json({ error: 'Comunidad no encontrada' });
     }
 
-    if (community.creator.toString() !== req.userId.toString()) {
+    if (community.creator.toString() !== req.mongoUserId.toString()) {
       return res.status(403).json({ error: 'Solo el creador puede acceder al dashboard de Stripe' });
     }
 
@@ -300,12 +300,12 @@ exports.getCreatorPayouts = async (req, res) => {
       return res.status(404).json({ error: 'Comunidad no encontrada' });
     }
 
-    if (community.creator.toString() !== req.userId.toString()) {
+    if (community.creator.toString() !== req.mongoUserId.toString()) {
       return res.status(403).json({ error: 'Solo el creador puede ver el historial de payouts' });
     }
 
     // Construir filtros
-    const filter = { creator: req.userId, community: communityId };
+    const filter = { creator: req.mongoUserId, community: communityId };
     if (status && status !== 'all') {
       filter.status = status;
     }
@@ -323,8 +323,8 @@ exports.getCreatorPayouts = async (req, res) => {
     const total = await Payout.countDocuments(filter);
 
     // Obtener estadísticas
-    const earnings = await Payout.getCreatorTotalEarnings(req.userId, communityId);
-    const pendingBalance = await Payout.getCreatorPendingBalance(req.userId, communityId);
+    const earnings = await Payout.getCreatorTotalEarnings(req.mongoUserId, communityId);
+    const pendingBalance = await Payout.getCreatorPendingBalance(req.mongoUserId, communityId);
 
     res.json({
       payouts,
@@ -357,15 +357,15 @@ exports.getCreatorEarningsOverview = async (req, res) => {
     console.log('📊 Obteniendo resumen de ganancias...');
     
     // Obtener todas las comunidades del creador
-    const communities = await Community.find({ creator: req.userId });
+    const communities = await Community.find({ creator: req.mongoUserId });
     
     const earningsData = [];
     let totalEarnings = 0;
     let totalPending = 0;
 
     for (const community of communities) {
-      const earnings = await Payout.getCreatorTotalEarnings(req.userId, community._id);
-      const pending = await Payout.getCreatorPendingBalance(req.userId, community._id);
+      const earnings = await Payout.getCreatorTotalEarnings(req.mongoUserId, community._id);
+      const pending = await Payout.getCreatorPendingBalance(req.mongoUserId, community._id);
       
       earningsData.push({
         communityId: community._id,
