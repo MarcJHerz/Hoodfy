@@ -385,16 +385,16 @@ export default function UnifiedCommunityPage() {
                 <div className="flex flex-wrap items-center gap-4 text-white/80 text-sm">
                   <div className="flex items-center space-x-1">
                     <UserGroupIcon className="w-4 h-4" />
-                    <span>{community.members?.length || 0} miembros</span>
+                    <span>{community.members?.length || 0} members</span>
                   </div>
                   <div className="flex items-center space-x-1">
                     <EyeIcon className="w-4 h-4" />
-                    <span>{viewCount} vistas</span>
+                    <span>{viewCount} views</span>
                   </div>
                   {community.createdAt && (
                     <div className="flex items-center space-x-1">
                       <CalendarIcon className="w-4 h-4" />
-                      <span>Creada {new Date(community.createdAt).toLocaleDateString('es-ES')}</span>
+                      <span>Created {new Date(community.createdAt).toLocaleDateString('es-ES')}</span>
                     </div>
                   )}
                 </div>
@@ -409,13 +409,13 @@ export default function UnifiedCommunityPage() {
                       className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-bold rounded-xl shadow-2xl hover:shadow-3xl transition-all duration-200 hover-lift text-base sm:text-lg group"
                     >
                       <span className="flex items-center justify-center">
-                        {authUser ? 'Unirse ahora' : 'Registrarse y unirse'}
+                        {authUser ? 'Join now' : 'Register and join'}
                         <SparklesIcon className="w-4 h-4 ml-2 group-hover:animate-spin" />
                       </span>
                     </button>
                     
                     <p className="text-white/70 text-xs mt-2 font-medium">
-                      ✨ Acceso instantáneo al contenido exclusivo
+                      ✨ Instant access to new friends
                     </p>
                   </div>
                 )}
@@ -455,7 +455,7 @@ export default function UnifiedCommunityPage() {
                     href={`/profile/${community.creator._id}`}
                     className="inline-block bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 hover-lift"
                   >
-                    Ver perfil
+                    View profile
                   </Link>
                 </div>
               </div>
@@ -517,7 +517,7 @@ export default function UnifiedCommunityPage() {
               
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600 dark:text-gray-400">Miembros</span>
+                  <span className="text-gray-600 dark:text-gray-400">Members</span>
                   <span className="font-semibold text-gray-900 dark:text-gray-100">
                     {community.members?.length || 0}
                   </span>
@@ -529,7 +529,7 @@ export default function UnifiedCommunityPage() {
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600 dark:text-gray-400">Vistas</span>
+                  <span className="text-gray-600 dark:text-gray-400">Views</span>
                   <span className="font-semibold text-gray-900 dark:text-gray-100">
                     {viewCount}
                   </span>
@@ -617,16 +617,16 @@ export default function UnifiedCommunityPage() {
                         <LockClosedIcon className="w-10 h-10 text-amber-600 dark:text-amber-400" />
                       </div>
                       <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-                        Contenido exclusivo
+                        Exclusive content
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                        Únete a esta comunidad para acceder a posts exclusivos y conectar con otros miembros
+                        Join this community to access exclusive posts and connect with other members
                       </p>
                       <button
                         onClick={handleSubscribe}
                         className="px-8 py-4 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover-lift"
                       >
-                        {authUser ? 'Unirse ahora' : 'Registrarse y unirse'}
+                        {authUser ? 'Join now' : 'Register and join'}
                       </button>
                     </div>
                   </div>
@@ -653,19 +653,19 @@ export default function UnifiedCommunityPage() {
                     <div className="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-2">
                       {community.members?.length || 0}
                     </div>
-                    <p className="text-gray-600 dark:text-gray-300 font-medium">Miembros activos</p>
+                    <p className="text-gray-600 dark:text-gray-300 font-medium">Active members</p>
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
                       {community.posts?.length || 0}
                     </div>
-                    <p className="text-gray-600 dark:text-gray-300 font-medium">Posts publicados</p>
+                    <p className="text-gray-600 dark:text-gray-300 font-medium">Posts published</p>
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
                       {viewCount}
                     </div>
-                    <p className="text-gray-600 dark:text-gray-300 font-medium">Vistas totales</p>
+                    <p className="text-gray-600 dark:text-gray-300 font-medium">Total views</p>
                   </div>
                 </div>
 
@@ -701,7 +701,7 @@ export default function UnifiedCommunityPage() {
                         </p>
                         {community.createdAt && (
                           <p className="text-sm text-gray-500 dark:text-gray-500">
-                            Member since {new Date(community.createdAt).toLocaleDateString('es-ES')}</p>
+                            Member since {new Date(community.createdAt).toLocaleDateString('en-US')}</p>
                         )}
                       </div>
                     </Link>

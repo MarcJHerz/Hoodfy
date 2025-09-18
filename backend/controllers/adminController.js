@@ -342,9 +342,387 @@ const updateUserStatus = async (req, res) => {
   }
 };
 
+/**
+ * Obtener todas las comunidades para el dashboard de admin
+ */
+const getAllCommunities = async (req, res) => {
+  try {
+    // Verificar que el usuario sea admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ 
+        error: 'Acceso denegado', 
+        message: 'Solo los administradores pueden acceder a esta información' 
+      });
+    }
+
+    // Obtener todas las comunidades con información del creador
+    const communities = await Community.find({})
+      .populate('creator', 'name username email')
+      .sort({ createdAt: -1 });
+
+    // Obtener estadísticas para cada comunidad
+    const communitiesWithStats = await Promise.all(
+      communities.map(async (community) => {
+        try {
+          // Contar suscripciones activas
+          const activeSubscriptions = await Subscription.countDocuments({
+            community: community._id,
+            status: 'active'
+          });
+
+          // Contar posts
+          const postsCount = await Post.countDocuments({
+            community: community._id
+          });
+
+          // Obtener ingresos totales de la comunidad
+          const totalRevenue = await Subscription.aggregate([
+            { $match: { community: community._id, status: 'active' } },
+            { $group: { _id: null, total: { $sum: '$amount' } } }
+          ]);
+
+          return {
+            id: community._id,
+            name: community.name,
+            description: community.description,
+            status: community.status,
+            allowNewSubscriptions: community.allowNewSubscriptions,
+            allowRenewals: community.allowRenewals,
+            price: community.price,
+            isFree: community.isFree,
+            creator: community.creator,
+            membersCount: community.members?.length || 0,
+            activeSubscriptions,
+            postsCount,
+            totalRevenue: totalRevenue[0]?.total || 0,
+            createdAt: community.createdAt,
+            archivedAt: community.archivedAt,
+            deletedAt: community.deletedAt
+          };
+        } catch (error) {
+          return {
+            id: community._id,
+            name: community.name,
+            description: community.description,
+            status: community.status,
+            allowNewSubscriptions: community.allowNewSubscriptions,
+            allowRenewals: community.allowRenewals,
+            price: community.price,
+            isFree: community.isFree,
+            creator: community.creator,
+            membersCount: community.members?.length || 0,
+            activeSubscriptions: 0,
+            postsCount: 0,
+            totalRevenue: 0,
+            createdAt: community.createdAt,
+            archivedAt: community.archivedAt,
+            deletedAt: community.deletedAt,
+            error: 'Error obteniendo estadísticas'
+          };
+        }
+      })
+    );
+
+    res.json({
+      success: true,
+      communities: communitiesWithStats,
+      total: communitiesWithStats.length,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Error interno del servidor',
+      message: 'No se pudieron obtener las comunidades'
+    });
+  }
+};
+
+/**
+ * Obtener estadísticas generales de comunidades
+ */
+const getCommunityStats = async (req, res) => {
+  try {
+    // Verificar que el usuario sea admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ 
+        error: 'Acceso denegado', 
+        message: 'Solo los administradores pueden acceder a esta información' 
+      });
+    }
+
+    // Estadísticas generales
+    const totalCommunities = await Community.countDocuments({});
+    const activeCommunities = await Community.countDocuments({ status: 'active' });
+    const suspendedCommunities = await Community.countDocuments({ status: 'suspended' });
+    const archivedCommunities = await Community.countDocuments({ status: 'archived' });
+    const deletedCommunities = await Community.countDocuments({ status: 'deleted' });
+
+    // Comunidades por período
+    const now = new Date();
+    const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const newCommunitiesLast7Days = await Community.countDocuments({ 
+      createdAt: { $gte: last7Days },
+      status: { $ne: 'deleted' }
+    });
+    const newCommunitiesLast30Days = await Community.countDocuments({ 
+      createdAt: { $gte: last30Days },
+      status: { $ne: 'deleted' }
+    });
+
+    // Ingresos totales
+    const totalRevenue = await Subscription.aggregate([
+      { $match: { status: 'active' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+
+    // Suscripciones activas totales
+    const totalActiveSubscriptions = await Subscription.countDocuments({ status: 'active' });
+
+    res.json({
+      success: true,
+      stats: {
+        total: totalCommunities,
+        byStatus: {
+          active: activeCommunities,
+          suspended: suspendedCommunities,
+          archived: archivedCommunities,
+          deleted: deletedCommunities
+        },
+        byPeriod: {
+          last7Days: newCommunitiesLast7Days,
+          last30Days: newCommunitiesLast30Days
+        },
+        revenue: {
+          total: totalRevenue[0]?.total || 0
+        },
+        subscriptions: {
+          active: totalActiveSubscriptions
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Error interno del servidor',
+      message: 'No se pudieron obtener las estadísticas'
+    });
+  }
+};
+
+/**
+ * Suspender una comunidad (pausar nuevas suscripciones y renovaciones)
+ */
+const suspendCommunity = async (req, res) => {
+  try {
+    const { communityId } = req.params;
+
+    // Verificar que el usuario sea admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ 
+        error: 'Acceso denegado', 
+        message: 'Solo los administradores pueden suspender comunidades' 
+      });
+    }
+
+    const community = await Community.findById(communityId);
+    if (!community) {
+      return res.status(404).json({ 
+        error: 'Comunidad no encontrada' 
+      });
+    }
+
+    await community.suspend();
+
+    res.json({
+      success: true,
+      message: 'Comunidad suspendida exitosamente',
+      community: {
+        id: community._id,
+        name: community.name,
+        status: community.status,
+        allowNewSubscriptions: community.allowNewSubscriptions,
+        allowRenewals: community.allowRenewals
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Error interno del servidor',
+      message: 'No se pudo suspender la comunidad'
+    });
+  }
+};
+
+/**
+ * Archivar una comunidad (mantener suscripciones activas pero no permitir nuevas)
+ */
+const archiveCommunity = async (req, res) => {
+  try {
+    const { communityId } = req.params;
+
+    // Verificar que el usuario sea admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ 
+        error: 'Acceso denegado', 
+        message: 'Solo los administradores pueden archivar comunidades' 
+      });
+    }
+
+    const community = await Community.findById(communityId);
+    if (!community) {
+      return res.status(404).json({ 
+        error: 'Comunidad no encontrada' 
+      });
+    }
+
+    await community.archive();
+
+    res.json({
+      success: true,
+      message: 'Comunidad archivada exitosamente',
+      community: {
+        id: community._id,
+        name: community.name,
+        status: community.status,
+        allowNewSubscriptions: community.allowNewSubscriptions,
+        allowRenewals: community.allowRenewals,
+        archivedAt: community.archivedAt
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Error interno del servidor',
+      message: 'No se pudo archivar la comunidad'
+    });
+  }
+};
+
+/**
+ * Eliminar una comunidad de forma segura (soft delete)
+ */
+const deleteCommunity = async (req, res) => {
+  try {
+    const { communityId } = req.params;
+
+    // Verificar que el usuario sea admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ 
+        error: 'Acceso denegado', 
+        message: 'Solo los administradores pueden eliminar comunidades' 
+      });
+    }
+
+    const community = await Community.findById(communityId);
+    if (!community) {
+      return res.status(404).json({ 
+        error: 'Comunidad no encontrada' 
+      });
+    }
+
+    // Verificar si hay suscripciones activas
+    const activeSubscriptions = await Subscription.countDocuments({
+      community: communityId,
+      status: 'active'
+    });
+
+    if (activeSubscriptions > 0) {
+      return res.status(400).json({ 
+        error: 'No se puede eliminar la comunidad',
+        message: `La comunidad tiene ${activeSubscriptions} suscripciones activas. Primero archive la comunidad para detener nuevas suscripciones.`
+      });
+    }
+
+    await community.markAsDeleted();
+
+    res.json({
+      success: true,
+      message: 'Comunidad eliminada exitosamente',
+      community: {
+        id: community._id,
+        name: community.name,
+        status: community.status,
+        deletedAt: community.deletedAt
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Error interno del servidor',
+      message: 'No se pudo eliminar la comunidad'
+    });
+  }
+};
+
+/**
+ * Restaurar una comunidad eliminada
+ */
+const restoreCommunity = async (req, res) => {
+  try {
+    const { communityId } = req.params;
+
+    // Verificar que el usuario sea admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ 
+        error: 'Acceso denegado', 
+        message: 'Solo los administradores pueden restaurar comunidades' 
+      });
+    }
+
+    const community = await Community.findById(communityId);
+    if (!community) {
+      return res.status(404).json({ 
+        error: 'Comunidad no encontrada' 
+      });
+    }
+
+    if (community.status !== 'deleted') {
+      return res.status(400).json({ 
+        error: 'Operación no válida',
+        message: 'Solo se pueden restaurar comunidades eliminadas'
+      });
+    }
+
+    // Restaurar a estado activo
+    community.status = 'active';
+    community.allowNewSubscriptions = true;
+    community.allowRenewals = true;
+    community.deletedAt = null;
+    await community.save();
+
+    res.json({
+      success: true,
+      message: 'Comunidad restaurada exitosamente',
+      community: {
+        id: community._id,
+        name: community.name,
+        status: community.status,
+        allowNewSubscriptions: community.allowNewSubscriptions,
+        allowRenewals: community.allowRenewals
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Error interno del servidor',
+      message: 'No se pudo restaurar la comunidad'
+    });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserStats,
   updateUserRole,
-  updateUserStatus
+  updateUserStatus,
+  getAllCommunities,
+  getCommunityStats,
+  suspendCommunity,
+  archiveCommunity,
+  deleteCommunity,
+  restoreCommunity
 };

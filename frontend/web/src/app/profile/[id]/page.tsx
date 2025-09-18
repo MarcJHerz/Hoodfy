@@ -665,7 +665,7 @@ export default function PublicProfilePage() {
                             {community.members?.length || 0} members
                           </div>
                           <Link
-                            href={`/communities/${community._id}`}
+                            href={`/dashboard/communities/${community._id}`}
                             className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium"
                           >
                             View Community

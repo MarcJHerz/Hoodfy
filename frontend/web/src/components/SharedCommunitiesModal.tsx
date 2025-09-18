@@ -366,7 +366,7 @@ function CommunityCard({
       case 'not_member':
         return (
           <Link 
-            href={`/communities/${community._id}`}
+            href={`/dashboard/communities/${community._id}`}
             className="inline-flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs font-medium transition-colors duration-200"
           >
             <PlusIcon className="w-3 h-3" />
@@ -380,7 +380,7 @@ function CommunityCard({
     <div className="group bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 transition-all duration-200">
       <div className="flex items-center gap-4">
         {/* Community Image */}
-        <Link href={`/communities/${community._id}`} className="flex-shrink-0">
+        <Link href={`/dashboard/communities/${community._id}`} className="flex-shrink-0">
           <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700 cursor-pointer hover:scale-105 transition-transform duration-200">
             <Image
               src={coverImageUrl}
@@ -395,7 +395,7 @@ function CommunityCard({
 
         {/* Community Info */}
         <div className="flex-1 min-w-0">
-          <Link href={`/communities/${community._id}`}>
+          <Link href={`/dashboard/communities/${community._id}`}>
             <h5 className="font-semibold text-gray-900 dark:text-gray-100 truncate hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer">
               {community.name}
             </h5>

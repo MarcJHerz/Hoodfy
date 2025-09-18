@@ -230,7 +230,7 @@ export default function ExplorePage() {
             {filteredAndSortedCommunities.map((community) => (
                              <Link
                  key={community._id}
-                 href={`/communities/${community._id}`}
+                 href={`/dashboard/communities/${community._id}`}
                  className="block bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden group cursor-pointer"
                >
                 {/* Community Cover Image */}
