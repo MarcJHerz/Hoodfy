@@ -3,13 +3,20 @@ const Community = require('../models/Community');
 
 // Conectar a MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/hoodfy', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 30000, // 30 segundos
+  socketTimeoutMS: 45000, // 45 segundos
+  bufferMaxEntries: 0,
+  bufferCommands: false,
 });
 
 async function testDeletedCommunities() {
   try {
     console.log('🔍 Probando filtrado de comunidades eliminadas...\n');
+    
+    // Esperar a que la conexión esté lista
+    console.log('⏳ Conectando a MongoDB...');
+    await mongoose.connection.asPromise();
+    console.log('✅ Conectado a MongoDB\n');
 
     // 1. Obtener todas las comunidades (incluyendo eliminadas)
     const allCommunities = await Community.find({});
@@ -66,9 +73,20 @@ async function testDeletedCommunities() {
 
   } catch (error) {
     console.error('❌ Error en la prueba:', error);
+    
+    if (error.name === 'MongooseServerSelectionError') {
+      console.log('\n💡 Sugerencias:');
+      console.log('1. Verifica que MongoDB esté ejecutándose');
+      console.log('2. Verifica la URL de conexión en MONGODB_URI');
+      console.log('3. Verifica la conectividad de red');
+    }
   } finally {
-    mongoose.connection.close();
-    console.log('\n🔌 Conexión a MongoDB cerrada');
+    try {
+      await mongoose.connection.close();
+      console.log('\n🔌 Conexión a MongoDB cerrada');
+    } catch (closeError) {
+      console.log('\n⚠️ Error al cerrar la conexión:', closeError.message);
+    }
   }
 }
 
