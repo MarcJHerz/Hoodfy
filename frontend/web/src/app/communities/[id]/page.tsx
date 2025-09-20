@@ -29,6 +29,7 @@ import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import SubscriptionModal from '@/components/SubscriptionModal';
 import CancelSubscriptionModal from '@/components/CancelSubscriptionModal';
+import CommunitySubscriptionBlockedModal from '@/components/CommunitySubscriptionBlockedModal';
 import { useImageUrl } from '@/utils/useImageUrl';
 import { useAuthStore } from '@/stores/authStore';
 import CommunityChatModal from '@/components/chat/CommunityChatModal';
@@ -51,6 +52,9 @@ interface Community {
   rules?: string[];
   category?: string;
   isPrivate?: boolean;
+  status?: 'active' | 'suspended' | 'archived' | 'deleted';
+  allowNewSubscriptions?: boolean;
+  allowRenewals?: boolean;
 }
 
 export default function UnifiedCommunityPage() {
@@ -68,6 +72,7 @@ export default function UnifiedCommunityPage() {
   const [isCreator, setIsCreator] = useState(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isCancelSubscriptionModalOpen, setIsCancelSubscriptionModalOpen] = useState(false);
+  const [isSubscriptionBlockedModalOpen, setIsSubscriptionBlockedModalOpen] = useState(false);
   const [subscribers, setSubscribers] = useState<any[]>([]);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [communityChat, setCommunityChat] = useState<any | null>(null);
@@ -155,7 +160,7 @@ export default function UnifiedCommunityPage() {
       setUser(userData);
       return userData;
     } catch (err) {
-      console.error('Error al cargar usuario:', err);
+      console.error('Error loading user:', err);
       setUser(null);
       throw err;
     }
@@ -167,7 +172,7 @@ export default function UnifiedCommunityPage() {
       const response = await communities.getSubscribers(id as string);
       setSubscribers(response.data);
     } catch (error) {
-      console.error('Error al cargar suscriptores:', error);
+      console.error('Error loading subscribers:', error);
     }
   };
 
@@ -181,7 +186,7 @@ export default function UnifiedCommunityPage() {
       setIsSubscribed(isSubscribedToCommunity);
       return isSubscribedToCommunity;
     } catch (error) {
-      console.error('Error al verificar suscripción:', error);
+      console.error('Error checking subscription:', error);
       return false;
     }
   };
@@ -196,10 +201,10 @@ export default function UnifiedCommunityPage() {
         url: publicUrl
       });
     } catch (error) {
-      console.error('Error al compartir:', error);
+      console.error('Error sharing:', error);
       const publicUrl = `${window.location.origin}/communities/${id}`;
       navigator.clipboard.writeText(publicUrl);
-      toast.success('Enlace copiado al portapapeles');
+      toast.success('Link copied to clipboard');
     }
   };
 
@@ -208,6 +213,13 @@ export default function UnifiedCommunityPage() {
       router.push('/register');
       return;
     }
+
+    // Verificar si la comunidad acepta nuevas suscripciones
+    if (community && !community.allowNewSubscriptions) {
+      setIsSubscriptionBlockedModalOpen(true);
+      return;
+    }
+
     setIsSubscriptionModalOpen(true);
   };
 
@@ -217,7 +229,8 @@ export default function UnifiedCommunityPage() {
 
   const handleLike = () => {
     setIsLiked(!isLiked);
-    toast.success(isLiked ? 'Quitado de favoritos' : 'Agregado a favoritos');
+    toast.success(isLiked ? 'Removed from favorites' : 'Added to favorites');
+    toast.success(isLiked ? 'Removed from favorites' : 'Added to favorites');
   };
 
   const handleChatClick = () => {
@@ -248,10 +261,10 @@ export default function UnifiedCommunityPage() {
             </div>
           </div>
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Cargando comunidad
+            Loading community
           </h3>
           <p className="text-gray-500 dark:text-gray-400">
-            Preparando el contenido...
+            Preparing the content...
           </p>
         </div>
       </div>
@@ -267,16 +280,16 @@ export default function UnifiedCommunityPage() {
             <ExclamationTriangleIcon className="w-10 h-10 text-red-600 dark:text-red-400" />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-            Comunidad no encontrada
+            Community not found
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            {error || 'Esta comunidad no existe o ha sido eliminada'}
+            {error || 'This community does not exist or has been deleted'}
           </p>
           <Link
             href="/communities"
             className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors duration-200"
           >
-            Explorar comunidades
+            Explore communities
           </Link>
         </div>
       </div>
@@ -311,7 +324,7 @@ export default function UnifiedCommunityPage() {
                 ? 'bg-red-500 text-white' 
                 : 'bg-white/10 text-white hover:bg-white/20'
             }`}
-            title={isLiked ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+            title={isLiked ? 'Remove from favorites' : 'Add to favorites'}
           >
             {isLiked ? (
               <HeartSolidIcon className="h-5 w-5" />
@@ -322,7 +335,7 @@ export default function UnifiedCommunityPage() {
           <button
             onClick={handleShare}
             className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200 hover-lift"
-            title="Compartir comunidad"
+            title="Share community"
           >
             <ShareIcon className="h-5 w-5" />
           </button>
@@ -330,7 +343,7 @@ export default function UnifiedCommunityPage() {
             <Link
               href={`/dashboard/communities/${community._id}/edit`}
               className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200 hover-lift"
-              title="Editar comunidad"
+              title="Edit community"
             >
               <PencilIcon className="h-5 w-5" />
             </Link>
@@ -394,7 +407,7 @@ export default function UnifiedCommunityPage() {
                   {community.createdAt && (
                     <div className="flex items-center space-x-1">
                       <CalendarIcon className="w-4 h-4" />
-                      <span>Created {new Date(community.createdAt).toLocaleDateString('es-ES')}</span>
+                      <span>Created {new Date(community.createdAt).toLocaleDateString('en-US')}</span>
                     </div>
                   )}
                 </div>
@@ -404,18 +417,35 @@ export default function UnifiedCommunityPage() {
               <div className="w-full sm:w-auto sm:ml-8">
                 {!isCreator && !isSubscribed && (
                   <div className="text-center sm:text-right">
-                    <button
-                      onClick={handleSubscribe}
-                      className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-bold rounded-xl shadow-2xl hover:shadow-3xl transition-all duration-200 hover-lift text-base sm:text-lg group"
-                    >
-                      <span className="flex items-center justify-center">
-                        {authUser ? 'Join now' : 'Register and join'}
-                        <SparklesIcon className="w-4 h-4 ml-2 group-hover:animate-spin" />
-                      </span>
-                    </button>
+                    {community?.allowNewSubscriptions !== false ? (
+                      <button
+                        onClick={handleSubscribe}
+                        className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-bold rounded-xl shadow-2xl hover:shadow-3xl transition-all duration-200 hover-lift text-base sm:text-lg group"
+                      >
+                        <span className="flex items-center justify-center">
+                          {authUser ? 'Join now' : 'Register and join'}
+                          <SparklesIcon className="w-4 h-4 ml-2 group-hover:animate-spin" />
+                        </span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleSubscribe}
+                        className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-xl shadow-2xl transition-all duration-200 text-base sm:text-lg group cursor-not-allowed opacity-75"
+                      >
+                        <span className="flex items-center justify-center">
+                          {community?.status === 'suspended' ? 'Suspended' : 'Archived'}
+                          <ExclamationTriangleIcon className="w-4 h-4 ml-2" />
+                        </span>
+                      </button>
+                    )}
                     
                     <p className="text-white/70 text-xs mt-2 font-medium">
-                      ✨ Instant access to new friends
+                      {community?.allowNewSubscriptions !== false 
+                        ? '✨ Instant access to new friends'
+                        : community?.status === 'suspended' 
+                          ? '⚠️ New subscriptions paused'
+                          : '📦 Community archived'
+                      }
                     </p>
                   </div>
                 )}
@@ -860,6 +890,16 @@ export default function UnifiedCommunityPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Community Subscription Blocked Modal */}
+      {community && (
+        <CommunitySubscriptionBlockedModal
+          isOpen={isSubscriptionBlockedModalOpen}
+          onClose={() => setIsSubscriptionBlockedModalOpen(false)}
+          communityName={community.name}
+          status={community.status === 'suspended' ? 'suspended' : 'archived'}
+        />
       )}
     </div>
   );

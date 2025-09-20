@@ -63,7 +63,10 @@ const upload = multer({
 // ✅ Endpoint público para obtener todas las comunidades públicas
 router.get('/public', async (req, res) => {
   try {
-    const communities = await Community.find({ isPrivate: { $ne: true } })
+    const communities = await Community.find({ 
+      isPrivate: { $ne: true },
+      status: { $ne: 'deleted' } // Excluir comunidades eliminadas
+    })
       .select('name description coverImage price isFree isPrivate creator createdAt category')
       .populate('creator', 'name profilePicture')
       .populate('members', 'name profilePicture')
@@ -95,7 +98,10 @@ router.get('/:id/public', async (req, res) => {
   try {
     const { id } = req.params;
     
-    const community = await Community.findById(id)
+    const community = await Community.findOne({
+      _id: id,
+      status: { $ne: 'deleted' } // Excluir comunidades eliminadas
+    })
       .select('name description coverImage price isFree isPrivate creator createdAt category rules')
       .populate('creator', 'name profilePicture')
       .populate('members', 'name profilePicture')
@@ -312,7 +318,9 @@ router.post('/create', verifyToken, upload.single('coverImage'), handleMulterErr
 // ✅ Obtener todas las comunidades
 router.get('/', async (req, res) => {
   try {
-    const communities = await Community.find()
+    const communities = await Community.find({ 
+      status: { $ne: 'deleted' } // Excluir comunidades eliminadas
+    })
       .populate('creator', 'name email')
       .sort({ createdAt: -1 });
     res.json(communities);
@@ -367,7 +375,10 @@ router.get('/user-created', verifyToken, async (req, res) => {
 // ✅ Obtener una comunidad específica (DEBE IR DESPUÉS de las rutas específicas)
 router.get('/:id', verifyToken, async (req, res) => {
   try {
-    const community = await Community.findById(req.params.id)
+    const community = await Community.findOne({
+      _id: req.params.id,
+      status: { $ne: 'deleted' } // Excluir comunidades eliminadas
+    })
       .populate('creator', 'name email profilePicture')
       .populate('members', 'name email profilePicture');
     
@@ -406,7 +417,10 @@ router.get('/:id', verifyToken, async (req, res) => {
 // ✅ Unirse a una comunidad
 router.post('/:id/join', verifyToken, async (req, res) => {
   try {
-    const community = await Community.findById(req.params.id);
+    const community = await Community.findOne({
+      _id: req.params.id,
+      status: { $ne: 'deleted' } // Excluir comunidades eliminadas
+    });
     if (!community) {
       return res.status(404).json({ error: 'Comunidad no encontrada' });
     }
@@ -428,7 +442,10 @@ router.post('/:id/join', verifyToken, async (req, res) => {
 // ✅ Salir de una comunidad
 router.post('/:id/leave', verifyToken, async (req, res) => {
   try {
-    const community = await Community.findById(req.params.id);
+    const community = await Community.findOne({
+      _id: req.params.id,
+      status: { $ne: 'deleted' } // Excluir comunidades eliminadas
+    });
     if (!community) {
       return res.status(404).json({ error: 'Comunidad no encontrada' });
     }
@@ -618,7 +635,8 @@ router.get('/public/created-by/:userId', async (req, res) => {
     // Obtener comunidades creadas por el usuario (solo públicas)
     const communities = await Community.find({
       creator: user._id,
-      isPrivate: { $ne: true } // Excluir comunidades privadas
+      isPrivate: { $ne: true }, // Excluir comunidades privadas
+      status: { $ne: 'deleted' } // Excluir comunidades eliminadas
     })
     .select('name description coverImage members isFree createdAt')
     .populate('creator', 'name username profilePicture')
@@ -650,7 +668,8 @@ router.get('/public/joined-by/:userId', async (req, res) => {
     // Obtener comunidades donde el usuario es miembro (solo públicas)
     const communities = await Community.find({
       members: user._id,
-      isPrivate: { $ne: true } // Excluir comunidades privadas
+      isPrivate: { $ne: true }, // Excluir comunidades privadas
+      status: { $ne: 'deleted' } // Excluir comunidades eliminadas
     })
     .select('name description coverImage members isFree createdAt')
     .populate('creator', 'name username profilePicture')
