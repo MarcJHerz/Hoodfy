@@ -116,7 +116,8 @@ app.use(globalRateLimit);
 
 // ✅ Rutas con rate limiting específico
 app.use('/api/auth', authRateLimit, authRoutes);
-app.use('/api/upload', uploadRateLimit, uploadRoutes);
+// Aplicar rate limiting solo a las rutas de subida, no a las de obtención de URLs
+app.use('/api/upload', uploadRoutes);
 app.use('/api/chats', chatRateLimit, chatRoutes);
 app.use('/api/stripe/webhook', webhookRateLimit, stripeRoutes);
 

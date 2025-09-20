@@ -17,7 +17,19 @@ node scripts/check-mongodb.js
 - Prueba consultas simples
 - Proporciona diagnósticos de errores
 
-### 2. `test-deleted-filter.js`
+### 2. `reset-rate-limits.js`
+Resetea todos los contadores de rate limiting en Redis.
+
+```bash
+node scripts/reset-rate-limits.js
+```
+
+**Qué hace:**
+- Limpia contadores de uploads, API, auth, chat y webhooks
+- Útil cuando se exceden límites durante desarrollo
+- Requiere conexión a Redis
+
+### 3. `test-deleted-filter.js`
 Prueba el filtrado de comunidades eliminadas.
 
 ```bash
@@ -30,7 +42,7 @@ node scripts/test-deleted-filter.js
 - Verifica que las eliminadas no aparecen
 - Prueba búsqueda por ID
 
-### 3. `simple-health-check.js`
+### 4. `simple-health-check.js`
 Análisis simple de salud de comunidades.
 
 ```bash
@@ -43,7 +55,7 @@ node scripts/simple-health-check.js
 - Identifica comunidades inactivas
 - Proporciona recomendaciones
 
-### 4. `community-health-check.js`
+### 5. `community-health-check.js`
 Análisis completo de salud de comunidades (requiere más tiempo).
 
 ```bash

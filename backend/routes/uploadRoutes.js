@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const uploadController = require('../controllers/uploadController');
 const { verifyToken } = require('../middleware/authMiddleware');
+const { uploadRateLimit } = require('../middleware/rateLimiter');
 
 // Configurar multer para almacenar en memoria
 const storage = multer.memoryStorage();
@@ -135,16 +136,16 @@ const handleMulterError = (error, req, res, next) => {
   });
 };
 
-// Subir imagen a S3 (general)
-router.post('/', verifyToken, upload.single('file'), handleMulterError, uploadController.uploadImage);
+// Subir imagen a S3 (general) - CON rate limiting
+router.post('/', verifyToken, uploadRateLimit, upload.single('file'), handleMulterError, uploadController.uploadImage);
 
-// Subir archivo de chat a S3 (específico para chat)
-router.post('/chat', verifyToken, uploadChat.single('file'), handleMulterError, uploadController.uploadChatFile);
+// Subir archivo de chat a S3 (específico para chat) - CON rate limiting
+router.post('/chat', verifyToken, uploadRateLimit, uploadChat.single('file'), handleMulterError, uploadController.uploadChatFile);
 
-// Obtener URL firmada (requiere autenticación)
+// Obtener URL firmada (requiere autenticación) - SIN rate limiting
 router.get('/signed-url/:key', verifyToken, uploadController.getSignedUrl);
 
-// Obtener URL firmada de logo (público, sin autenticación)
+// Obtener URL firmada de logo (público, sin autenticación) - SIN rate limiting
 router.get('/logo/:key', uploadController.getLogoSignedUrl);
 
 module.exports = router; 
